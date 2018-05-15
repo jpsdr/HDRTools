@@ -51,21 +51,59 @@ extern "C" void JPSDR_HDRTools_Convert422_to_Planar444_8_AVX(const void *scr,voi
 extern "C" void JPSDR_HDRTools_Convert422_to_Planar444_8to16_AVX(const void *scr,void *dst,int32_t w);
 extern "C" void JPSDR_HDRTools_Convert422_to_Planar444_16_AVX(const void *scr,void *dst,int32_t w);
 
+extern "C" void JPSDR_HDRTools_Convert_YV24toRGB32_SSE2(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int16_t offset_R,int16_t offset_G,int16_t offset_B,const int16_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_YV24toRGB32_AVX(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int16_t offset_R,int16_t offset_G,int16_t offset_B,const int16_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+
+extern "C" void JPSDR_HDRTools_Convert_8_YV24toRGB64_SSE41(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_10_YV24toRGB64_SSE41(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_12_YV24toRGB64_SSE41(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_14_YV24toRGB64_SSE41(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_16_YV24toRGB64_SSE41(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+
+extern "C" void JPSDR_HDRTools_Convert_8_YV24toRGB64_AVX(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_10_YV24toRGB64_AVX(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_12_YV24toRGB64_AVX(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_14_YV24toRGB64_AVX(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_16_YV24toRGB64_AVX(const void *src_y,const void *src_u,const void *src_v,void *dst,int32_t w,
+	int32_t h,int32_t offset_R,int32_t offset_G,int32_t offset_B,const int32_t *lookup,
+	ptrdiff_t src_modulo_Y,ptrdiff_t src_modulo_U,ptrdiff_t src_modulo_V,ptrdiff_t dst_modulo);
+
+extern "C" void JPSDR_HDRTools_Convert_RGB32toYV24_SSE2(const void *src,void *dst_y,void *dst_u,void *dst_v,int32_t w,int32_t h,
+	int16_t offset_Y,int16_t offset_U,int16_t offset_V,const int16_t *lookup, ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo_Y,ptrdiff_t dst_modulo_U,ptrdiff_t dst_modulo_V,int16_t Min_Y,int16_t Max_Y,
+	int16_t Min_U,int16_t Max_U,int16_t Min_V,int16_t Max_V);
+extern "C" void JPSDR_HDRTools_Convert_RGB32toYV24_AVX(const void *src,void *dst_y,void *dst_u,void *dst_v,int32_t w,int32_t h,
+	int16_t offset_Y,int16_t offset_U,int16_t offset_V,const int16_t *lookup, ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo_Y,ptrdiff_t dst_modulo_U,ptrdiff_t dst_modulo_V,int16_t Min_Y,int16_t Max_Y,
+	int16_t Min_U,int16_t Max_U,int16_t Min_V,int16_t Max_V);
+
+
 #ifdef AVX2_BUILD_POSSIBLE
 extern "C" void JPSDR_HDRTools_Convert420_to_Planar422_8_AVX2(const void *scr_1,const void *src_2,void *dst,int32_t w);
 extern "C" void JPSDR_HDRTools_Convert420_to_Planar422_16_AVX2(const void *scr_1,const void *src_2,void *dst,int32_t w);
 #endif
-
-int __stdcall ConvertYUVtoRGBP::SetCacheHints(int cachehints,int frame_range)
-{
-  switch (cachehints)
-  {
-  case CACHE_GET_MTMODE :
-    return MT_MULTI_INSTANCE;
-  default :
-    return 0;
-  }
-}
 
 
 uint8_t CreateMTData(MT_Data_Info_HDRTools MT_Data[],uint8_t max_threads,uint8_t threads_number,int32_t size_x,int32_t size_y,
@@ -2440,9 +2478,681 @@ static void Convert_16_YV16toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
 }
 
 
-ConvertYUVtoRGBP::ConvertYUVtoRGBP(PClip _child,int _Color,bool _Output16,bool _HLGMode,bool _mpeg2c,
+static void Convert_YV24toRGB32(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int16_t *lookup)
+{
+	const uint8_t *src_y=(uint8_t *)mt_data_inf.src1;
+	const uint8_t *src_u=(uint8_t *)mt_data_inf.src2;
+	const uint8_t *src_v=(uint8_t *)mt_data_inf.src3;
+	RGB32BMP *dst=(RGB32BMP *)mt_data_inf.dst1;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	const int src_pitch_y=mt_data_inf.src_pitch1;
+	const int src_pitch_u=mt_data_inf.src_pitch2;
+	const int src_pitch_v=mt_data_inf.src_pitch3;
+	const int dst_pitch=mt_data_inf.dst_pitch1;
+
+	for (int32_t i=h_Y_min; i<h_Y_max; i++)
+	{
+		for (int32_t j=0; j<w; j++)
+		{
+			int16_t r,g,b;
+			const uint16_t y=src_y[j],u=src_u[j],v=src_v[j];
+
+			r=(lookup[y]+lookup[v+256]+(int16_t)dl.Offset_R) >> 5;
+			g=(lookup[y]+lookup[u+512]+lookup[v+768]+(int16_t)dl.Offset_G) >> 5;
+			b=(lookup[y]+lookup[u+1024]+(int16_t)dl.Offset_B) >> 5;
+
+			if (b<0) dst[j].b=0;
+			else
+			{
+				if (b>255) dst[j].b=255;
+				else dst[j].b=(uint8_t)b;
+			}
+			if (g<0) dst[j].g=0;
+			else
+			{
+				if (g>255) dst[j].g=255;
+				else dst[j].g=(uint8_t)g;
+			}
+			if (r<0) dst[j].r=0;
+			else
+			{
+				if (r>255) dst[j].r=255;
+				else dst[j].r=(uint8_t)r;
+			}
+			dst[j].alpha=255;
+		}
+		dst=(RGB32BMP *)((uint8_t *)dst+dst_pitch);
+		src_y+=src_pitch_y;
+		src_u+=src_pitch_u;
+		src_v+=src_pitch_v;
+	}
+}
+
+
+static void Convert_YV24toRGB32_SSE2(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int16_t *lookup)
+{
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+
+	JPSDR_HDRTools_Convert_YV24toRGB32_SSE2(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+		w,h_Y_max-h_Y_min,(int16_t)dl.Offset_R,(int16_t)dl.Offset_G,(int16_t)dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+		mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+}
+
+
+static void Convert_YV24toRGB32_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int16_t *lookup)
+{
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+
+	JPSDR_HDRTools_Convert_YV24toRGB32_AVX(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+		w,h_Y_max-h_Y_min,(int16_t)dl.Offset_R,(int16_t)dl.Offset_G,(int16_t)dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+		mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+}
+
+
+static void Convert_8_YV24toRGB64(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int32_t *lookup)
+{
+	const uint8_t *src_y=(uint8_t *)mt_data_inf.src1;
+	const uint8_t *src_u=(uint8_t *)mt_data_inf.src2;
+	const uint8_t *src_v=(uint8_t *)mt_data_inf.src3;
+	RGB64BMP *dst=(RGB64BMP *)mt_data_inf.dst1;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	const int src_pitch_y=mt_data_inf.src_pitch1;
+	const int src_pitch_u=mt_data_inf.src_pitch2;
+	const int src_pitch_v=mt_data_inf.src_pitch3;
+	const int dst_pitch=mt_data_inf.dst_pitch1;
+
+	for (int32_t i=h_Y_min; i<h_Y_max; i++)
+	{
+		for (int32_t j=0; j<w; j++)
+		{
+			int32_t r,g,b;
+			const uint32_t y=src_y[j],u=src_u[j],v=src_v[j];
+
+			r=(lookup[y]+lookup[v+256]+dl.Offset_R) >> 8;
+			g=(lookup[y]+lookup[u+512]+lookup[v+768]+dl.Offset_G) >> 8;
+			b=(lookup[y]+lookup[u+1024]+dl.Offset_B) >> 8;
+
+			if (b<0) dst[j].b=0;
+			else
+			{
+				if (b>65535) dst[j].b=65535;
+				else dst[j].b=(uint16_t)b;
+			}
+			if (g<0) dst[j].g=0;
+			else
+			{
+				if (g>65535) dst[j].g=65535;
+				else dst[j].g=(uint16_t)g;
+			}
+			if (r<0) dst[j].r=0;
+			else
+			{
+				if (r>65535) dst[j].r=65535;
+				else dst[j].r=(uint16_t)r;
+			}
+			dst[j].alpha=65535;
+		}
+		dst=(RGB64BMP *)((uint8_t *)dst+dst_pitch);
+		src_y+=src_pitch_y;
+		src_u+=src_pitch_u;
+		src_v+=src_pitch_v;
+	}
+}
+
+
+static void Convert_YV24toRGB64_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int32_t *lookup,
+	const uint8_t bits_per_pixel)
+{
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+
+	switch(bits_per_pixel)
+	{
+		case 8 :
+			JPSDR_HDRTools_Convert_8_YV24toRGB64_SSE41(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		case 10 :
+			JPSDR_HDRTools_Convert_10_YV24toRGB64_SSE41(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		case 12 :
+			JPSDR_HDRTools_Convert_12_YV24toRGB64_SSE41(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		case 14 :
+			JPSDR_HDRTools_Convert_14_YV24toRGB64_SSE41(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		case 16 :
+			JPSDR_HDRTools_Convert_16_YV24toRGB64_SSE41(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		default : break;
+	}
+}
+
+
+static void Convert_YV24toRGB64_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int32_t *lookup,
+	const uint8_t bits_per_pixel)
+{
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+
+	switch(bits_per_pixel)
+	{
+		case 8 :
+			JPSDR_HDRTools_Convert_8_YV24toRGB64_AVX(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		case 10 :
+			JPSDR_HDRTools_Convert_10_YV24toRGB64_AVX(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		case 12 :
+			JPSDR_HDRTools_Convert_12_YV24toRGB64_AVX(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		case 14 :
+			JPSDR_HDRTools_Convert_14_YV24toRGB64_AVX(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		case 16 :
+			JPSDR_HDRTools_Convert_16_YV24toRGB64_AVX(mt_data_inf.src1,mt_data_inf.src2,mt_data_inf.src3,mt_data_inf.dst1,
+				w,h_Y_max-h_Y_min,dl.Offset_R,dl.Offset_G,dl.Offset_B,lookup,mt_data_inf.src_modulo1,
+				mt_data_inf.src_modulo2,mt_data_inf.src_modulo3,mt_data_inf.dst_modulo1);
+			break;
+		default : break;
+	}
+}
+
+
+static void Convert_16_YV24toRGB64(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int32_t *lookup,
+	const uint8_t bits_per_pixel)
+{
+	const uint16_t *src_y=(uint16_t *)mt_data_inf.src1;
+	const uint16_t *src_u=(uint16_t *)mt_data_inf.src2;
+	const uint16_t *src_v=(uint16_t *)mt_data_inf.src3;
+	RGB64BMP *dst=(RGB64BMP *)mt_data_inf.dst1;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	const int src_pitch_y=mt_data_inf.src_pitch1;
+	const int src_pitch_u=mt_data_inf.src_pitch2;
+	const int src_pitch_v=mt_data_inf.src_pitch3;
+	const int dst_pitch=mt_data_inf.dst_pitch1;
+	const uint32_t vmax=(uint32_t)1 << bits_per_pixel;
+	const uint32_t vmax2=vmax*2,vmax3=vmax*3,vmax4=vmax*4;
+
+	for (int32_t i=h_Y_min; i<h_Y_max; i++)
+	{
+		for (int32_t j=0; j<w; j++)
+		{
+			int32_t r,g,b;
+			const uint32_t y=src_y[j],u=src_u[j],v=src_v[j];
+
+			r=(lookup[y]+lookup[v+vmax]+dl.Offset_R) >> 8;
+			g=(lookup[y]+lookup[u+vmax2]+lookup[v+vmax3]+dl.Offset_G) >> 8;
+			b=(lookup[y]+lookup[u+vmax4]+dl.Offset_B) >> 8;
+
+			if (b<0) dst[j].b=0;
+			else
+			{
+				if (b>65535) dst[j].b=65535;
+				else dst[j].b=(uint16_t)b;
+			}
+			if (g<0) dst[j].g=0;
+			else
+			{
+				if (g>65535) dst[j].g=65535;
+				else dst[j].g=(uint16_t)g;
+			}
+			if (r<0) dst[j].r=0;
+			else
+			{
+				if (r>65535) dst[j].r=65535;
+				else dst[j].r=(uint16_t)r;
+			}
+			dst[j].alpha=65535;
+		}
+		dst=(RGB64BMP *)((uint8_t *)dst+dst_pitch);
+		src_y=(uint16_t *)((uint8_t *)src_y+src_pitch_y);
+		src_u=(uint16_t *)((uint8_t *)src_u+src_pitch_u);
+		src_v=(uint16_t *)((uint8_t *)src_v+src_pitch_v);
+	}
+}
+
+
+static void Convert_RGB32toRGB32P(const MT_Data_Info_HDRTools &mt_data_inf,const uint8_t *lookup)
+{
+	const uint8_t *src=(uint8_t *)mt_data_inf.src1;
+	uint8_t *dst=(uint8_t *)mt_data_inf.dst1;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	const int src_pitch=mt_data_inf.src_pitch1;
+	const int dst_pitch=mt_data_inf.dst_pitch1;
+
+	for (int32_t i=h_Y_min; i<h_Y_max; i++)
+	{
+		uint32_t x=0;
+
+		for (int32_t j=0; j<w; j++)
+		{
+			dst[x++]=lookup[src[x]];
+			dst[x++]=lookup[src[x]];
+			dst[x++]=lookup[src[x]];
+			dst[x++]=255;
+		}
+		src+=src_pitch;
+		dst+=dst_pitch;
+	}
+}
+
+
+static void Convert_RGB64toRGB64P(const MT_Data_Info_HDRTools &mt_data_inf,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)mt_data_inf.src1;
+	uint8_t *dst_=(uint8_t *)mt_data_inf.dst1;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	const int src_pitch=mt_data_inf.src_pitch1;
+	const int dst_pitch=mt_data_inf.dst_pitch1;
+
+	for (int32_t i=h_Y_min; i<h_Y_max; i++)
+	{
+		const uint16_t *src=(uint16_t *)src_;
+		uint16_t *dst=(uint16_t *)dst_;
+		uint32_t x=0;
+
+		for (int32_t j=0; j<w; j++)
+		{
+			dst[x++]=lookup[src[x]];
+			dst[x++]=lookup[src[x]];
+			dst[x++]=lookup[src[x]];
+			dst[x++]=65535;
+		}
+		src_+=src_pitch;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_RGB32toYV24(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int16_t *lookup)
+{
+	const RGB32BMP *src=(RGB32BMP *)mt_data_inf.src1;
+	uint8_t *dst_y=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dst_u=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dst_v=(uint8_t *)mt_data_inf.dst3;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	const int src_pitch=mt_data_inf.src_pitch1;
+	const int dst_pitch_y=mt_data_inf.dst_pitch1;
+	const int dst_pitch_u=mt_data_inf.dst_pitch2;
+	const int dst_pitch_v=mt_data_inf.dst_pitch3;
+
+	for (int32_t i=h_Y_min; i<h_Y_max; i++)
+	{
+		for (int32_t j=0; j<w; j++)
+		{
+			int16_t y,u,v;
+			const uint16_t b=src[j].b,g=src[j].g,r=src[j].r;
+
+			y=((int16_t)dl.Offset_Y+lookup[r]+lookup[g+256]+lookup[b+512]) >> 6;
+			u=((int16_t)dl.Offset_U+lookup[r+768]+lookup[g+1024]+lookup[b+1280]) >> 6;
+			v=((int16_t)dl.Offset_V+lookup[r+1536]+lookup[g+1792]+lookup[b+2048]) >> 6;
+
+			if (y<(int16_t)dl.Min_Y) dst_y[j]=(uint8_t)dl.Min_Y;
+			else
+			{
+				if (y>(int16_t)dl.Max_Y) dst_y[j]=(uint8_t)dl.Max_Y;
+				else dst_y[j]=(uint8_t)y;
+			}
+			if (u<(int16_t)dl.Min_U) dst_u[j]=(uint8_t)dl.Min_U;
+			else
+			{
+				if (u>(int16_t)dl.Max_U) dst_u[j]=(uint8_t)dl.Max_U;
+				else dst_u[j]=(uint8_t)u;
+			}
+			if (v<(int16_t)dl.Min_V) dst_v[j]=(uint8_t)dl.Min_V;
+			else
+			{
+				if (v>(int16_t)dl.Max_V) dst_v[j]=(uint8_t)dl.Max_V;
+				else dst_v[j]=(uint8_t)v;
+			}
+		}
+		src=(RGB32BMP *)((uint8_t *)src+src_pitch);
+		dst_y+=dst_pitch_y;
+		dst_u+=dst_pitch_u;
+		dst_v+=dst_pitch_v;
+	}
+}
+
+
+static void Convert_RGB32toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int16_t *lookup)
+{
+	const RGB32BMP *src=(RGB32BMP *)mt_data_inf.src1;
+	uint8_t *dst_y=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dst_u=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dst_v=(uint8_t *)mt_data_inf.dst3;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	const int src_pitch=mt_data_inf.src_pitch1;
+	const int dst_pitch_y=mt_data_inf.dst_pitch1;
+	const int dst_pitch_u=mt_data_inf.dst_pitch2;
+	const int dst_pitch_v=mt_data_inf.dst_pitch3;
+
+	JPSDR_HDRTools_Convert_RGB32toYV24_SSE2(mt_data_inf.src1,mt_data_inf.dst1,mt_data_inf.dst2,mt_data_inf.dst3,
+		w,h_Y_max-h_Y_min,(int16_t)dl.Offset_Y,(int16_t)dl.Offset_U,(int16_t)dl.Offset_V,lookup,mt_data_inf.src_modulo1,
+		mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo3,
+		(int16_t)dl.Min_Y,(int16_t)dl.Max_Y,(int16_t)dl.Min_U,(int16_t)dl.Max_U,(int16_t)dl.Min_V,(int16_t)dl.Max_V);
+}
+
+
+static void Convert_RGB32toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const dataLookUp &dl,const int16_t *lookup)
+{
+	const RGB32BMP *src=(RGB32BMP *)mt_data_inf.src1;
+	uint8_t *dst_y=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dst_u=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dst_v=(uint8_t *)mt_data_inf.dst3;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	const int src_pitch=mt_data_inf.src_pitch1;
+	const int dst_pitch_y=mt_data_inf.dst_pitch1;
+	const int dst_pitch_u=mt_data_inf.dst_pitch2;
+	const int dst_pitch_v=mt_data_inf.dst_pitch3;
+
+	JPSDR_HDRTools_Convert_RGB32toYV24_AVX(mt_data_inf.src1,mt_data_inf.dst1,mt_data_inf.dst2,mt_data_inf.dst3,
+		w,h_Y_max-h_Y_min,(int16_t)dl.Offset_Y,(int16_t)dl.Offset_U,(int16_t)dl.Offset_V,lookup,
+		mt_data_inf.src_modulo1,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo3,
+		(int16_t)dl.Min_Y,(int16_t)dl.Max_Y,(int16_t)dl.Min_U,(int16_t)dl.Max_U,(int16_t)dl.Min_V,(int16_t)dl.Max_V);
+}
+
+
+static void Compute_Lookup_RGB_8(uint8_t color_mode,bool full_range,bool YUVtoRGB,int16_t *lookup,dataLookUp &data)
+{
+	double kr,kg,kb;
+	double Rv,Gu,Gv,Bu;
+	double Ur,Ug,Ub,Vr,Vg,Vb;
+	int16_t Off_Y,Off_U,Off_V;
+
+	if (full_range)
+	{
+		data.Min_Y=0;
+		data.Max_Y=255;
+		data.Min_U=0;
+		data.Max_U=255;
+		data.Min_V=0;
+		data.Max_V=255;
+		data.Coeff_Y=1.0;
+		data.Coeff_U=1.0;
+		data.Coeff_V=1.0;
+	}
+	else
+	{
+		data.Min_Y=16;
+		data.Max_Y=235;
+		data.Min_U=16;
+		data.Max_U=240;
+		data.Min_V=16;
+		data.Max_V=240;
+		data.Coeff_Y=219.0/255.0;
+		data.Coeff_U=224.0/255.0;
+		data.Coeff_V=224.0/225.0;
+	}	
+	switch (color_mode)
+	{
+		case 0 :								// BT-2100
+		case 1 : kr=0.2627; kb=0.0593; break;	// BT-2020
+		case 2 : kr=0.2126; kb=0.0722; break;	// BT-709
+		case 3 :								// BT-601_525
+		case 4 : kr=0.299; kb=0.114; break;		// BT-601_625
+	}
+	kg=1.0-kr-kb;
+
+	Rv=2.0*(1.0-kr);
+	Gu=-2.0*kb*(1.0-kb)/kg;
+	Gv=-2.0*kr*(1.0-kr)/kg;
+	Bu=2.0*(1.0-kb);
+
+	Ur=-0.5*kr/(1.0-kb);
+	Ug=-0.5*kg/(1.0-kb);
+	Ub=0.5;
+	Vr=0.5;
+	Vg=-0.5*kg/(1.0-kr);
+	Vb=-0.5*kb/(1.0-kr);
+
+	/*
+	R',G',B' : RGB value normalised between (0.0,0.0,0.0)[Black] to (1.0,1.0,1.0)[White]
+	Y' between (0.0 / +1.0) and Pb/Pr between (-0.5 / +0.5)
+
+	Y'=Kr*R'+Kg*G'+Kb*B'
+	Pb=0.5*(B'-Y')/(1-Kb)=-0.5*Kr/(1-Kb))*R'-0.5*Kg/(1-Kb)*G'+0.5*B'
+	Pr=0.5*(R'-Y')/(1-Kr)=0.5*R'-0.5*Kg/(1-Kr)*G'-0.5*Kb/(1-Kr)*B'
+
+	R'=Y'+2*(1-Kr)*Pr
+	G'=Y'-(2*Kb*(1-Kb)/Kg)*Pb-(2*Kr*(1-Kr)/Kg)*Pr
+	B'=Y'+2*(1-Kb)*Pb
+
+	Status with actual values here.
+	(Y) Y'=Kr*R'+Kg*G'+Kb*B'
+	(U) Pb=(u1*R'+u2*G'+B')*0.5
+	(V) Pr=(R'+v1*G'+v2*B')*0.5
+
+	(R) R'=Y'+r1*Pb
+	(G) G'=Y'+g1*Pb+g2*Pr
+	(B) B'=Y'+b1*Pb
+
+	For 8 bits data limited range :
+	(Y',Cb,Cr) = (16,128,128) + (219*Y',224*Pb,224*Pr)
+
+	Y = Off_Y + (Kr*R+Kg*G+Kb*B)*Coeff_Y
+	(Cb) U = Off_U + (Ur*R+Ug*G+Ub*B)*Coeff_U
+	(Cr) V = Off_V + (Vr*R+Vg*G+Vb*B)*Coeff_V
+
+	R = Y/Coeff_Y + Rv*V/Coeff_V + Off_R [ Off_R = -(Off_Y/Coeff_Y+Rv*Off_V/Coeff_V) ]
+	G = Y/Coeff_Y + Gu*U/Coeff_U + Gv*V/Coeff_V + Off_G [ Off_G = -(Off_Y/Coeff_Y+Gu*Off_U/Coeff_U+Gv*Off_V/Coeff_V) ]
+	B = Y/Coeff_Y + Bu*U/Coeff_U + Off_B [ Off_B = -(Off_Y/Coeff_Y+Bu*Off_U/Coeff_U) ]
+	*/
+
+	Off_Y=data.Min_Y;
+	Off_U=128;
+	Off_V=128;
+
+	data.Offset_Y=(Off_Y << 6)+32;
+	data.Offset_U=(Off_U << 6)+32;
+	data.Offset_V=(Off_V << 6)+32;
+
+	data.Offset_R=(int32_t)-round(16.0+32.0*(Off_Y/data.Coeff_Y+Rv*Off_V/data.Coeff_V));
+	data.Offset_G=(int32_t)-round(16.0+32.0*(Off_Y/data.Coeff_Y+Gu*Off_U/data.Coeff_U+Gv*Off_V/data.Coeff_V));
+	data.Offset_B=(int32_t)-round(16.0+32.0*(Off_Y/data.Coeff_Y+Bu*Off_U/data.Coeff_U));
+
+	if (YUVtoRGB)
+	{
+		for (int16_t i=0; i<=255; i++)
+		{
+			lookup[i]=(int16_t)round(i*32.0/data.Coeff_Y);
+			lookup[i+256]=(int16_t)round(i*Rv*32.0/data.Coeff_V);
+			lookup[i+512]=(int16_t)round(i*Gu*32.0/data.Coeff_U);
+			lookup[i+768]=(int16_t)round(i*Gv*32.0/data.Coeff_V);
+			lookup[i+1024]=(int16_t)round(i*Bu*32.0/data.Coeff_U);
+		}
+	}
+	else
+	{
+		for (int16_t i=0; i<=255; i++)
+		{
+			lookup[i]=(int16_t)round(i*kr*data.Coeff_Y*64.0);
+			lookup[i+256]=(int16_t)round(i*kg*data.Coeff_Y*64.0);
+			lookup[i+512]=(int16_t)round(i*kb*data.Coeff_Y*64.0);
+			lookup[i+768]=(int16_t)round(i*Ur*data.Coeff_U*64.0);
+			lookup[i+1024]=(int16_t)round(i*Ug*data.Coeff_U*64.0);
+			lookup[i+1280]=(int16_t)round(i*Ub*data.Coeff_U*64.0);
+			lookup[i+1536]=(int16_t)round(i*Vr*data.Coeff_V*64.0);
+			lookup[i+1792]=(int16_t)round(i*Vg*data.Coeff_V*64.0);
+			lookup[i+2048]=(int16_t)round(i*Vb*data.Coeff_V*64.0);
+		}
+	}
+}
+
+
+static void Compute_Lookup_RGB_16(uint8_t color_mode,bool full_range,bool YUVtoRGB,uint8_t bits_per_pixel,int32_t *lookup,dataLookUp &data)
+{
+	double kr,kg,kb;
+	double Rv,Gu,Gv,Bu;
+	double Ur,Ug,Ub,Vr,Vg,Vb;
+	int32_t Off_Y,Off_U,Off_V;
+	const uint8_t pshift1=bits_per_pixel-8,pshift2=24-bits_per_pixel;
+	const int32_t vmax=1 << bits_per_pixel;
+	const double coeff_div=((double)vmax)/65536.0,coeff_mul=(double)((int32_t)1 << pshift2);
+
+	if (full_range)
+	{
+		data.Min_Y=0;
+		data.Max_Y=255 << pshift1;
+		data.Min_U=0;
+		data.Max_U=255 << pshift1;
+		data.Min_V=0;
+		data.Max_V=255 << pshift1;
+		data.Coeff_Y=1.0;
+		data.Coeff_U=1.0;
+		data.Coeff_V=1.0;
+	}
+	else
+	{
+		data.Min_Y=16 << pshift1;
+		data.Max_Y=235 << pshift1;
+		data.Min_U=16 << pshift1;
+		data.Max_U=240 << pshift1;
+		data.Min_V=16 << pshift1;
+		data.Max_V=240 << pshift1;
+		data.Coeff_Y=219.0/255.0;
+		data.Coeff_U=224.0/255.0;
+		data.Coeff_V=224.0/225.0;
+	}	
+	switch (color_mode)
+	{
+		case 0 :								// BT-2100
+		case 1 : kr=0.2627; kb=0.0593; break;	// BT-2020
+		case 2 : kr=0.2126; kb=0.0722; break;	// BT-709
+		case 3 :								// BT-601_525
+		case 4 : kr=0.299; kb=0.114; break;		// BT-601_625
+	}
+	kg=1.0-kr-kb;
+
+	Rv=2.0*(1.0-kr);
+	Gu=-2.0*kb*(1.0-kb)/kg;
+	Gv=-2.0*kr*(1.0-kr)/kg;
+	Bu=2.0*(1.0-kb);
+
+	Ur=-0.5*kr/(1.0-kb);
+	Ug=-0.5*kg/(1.0-kb);
+	Ub=0.5;
+	Vr=0.5;
+	Vg=-0.5*kg/(1.0-kr);
+	Vb=-0.5*kb/(1.0-kr);
+
+	/*
+	R',G',B' : RGB value normalised between (0.0,0.0,0.0)[Black] to (1.0,1.0,1.0)[White]
+	Y' between (0.0 / +1.0) and Pb/Pr between (-0.5 / +0.5)
+
+	Y'=Kr*R'+Kg*G'+Kb*B'
+	Pb=0.5*(B'-Y')/(1-Kb)=-0.5*Kr/(1-Kb))*R'-0.5*Kg/(1-Kb)*G'+0.5*B'
+	Pr=0.5*(R'-Y')/(1-Kr)=0.5*R'-0.5*Kg/(1-Kr)*G'-0.5*Kb/(1-Kr)*B'
+
+	R'=Y'+2*(1-Kr)*Pr
+	G'=Y'-(2*Kb*(1-Kb)/Kg)*Pb-(2*Kr*(1-Kr)/Kg)*Pr
+	B'=Y'+2*(1-Kb)*Pb
+
+	Status with actual values here.
+	(Y) Y'=Kr*R'+Kg*G'+Kb*B'
+	(U) Pb=(u1*R'+u2*G'+B')*0.5
+	(V) Pr=(R'+v1*G'+v2*B')*0.5
+
+	(R) R'=Y'+r1*Pb
+	(G) G'=Y'+g1*Pb+g2*Pr
+	(B) B'=Y'+b1*Pb
+
+	For 8 bits data limited range :
+	(Y',Cb,Cr) = (16,128,128) + (219*Y',224*Pb,224*Pr)
+
+	Y = Off_Y + (Kr*R+Kg*G+Kb*B)*Coeff_Y
+	(Cb) U = Off_U + (Ur*R+Ug*G+Ub*B)*Coeff_U
+	(Cr) V = Off_V + (Vr*R+Vg*G+Vb*B)*Coeff_V
+
+	R = Y/Coeff_Y + Rv*V/Coeff_V + Off_R [ Off_R = -(Off_Y/Coeff_Y+Rv*Off_V/Coeff_V) ]
+	G = Y/Coeff_Y + Gu*U/Coeff_U + Gv*V/Coeff_V + Off_G [ Off_G = -(Off_Y/Coeff_Y+Gu*Off_U/Coeff_U+Gv*Off_V/Coeff_V) ]
+	B = Y/Coeff_Y + Bu*U/Coeff_U + Off_B [ Off_B = -(Off_Y/Coeff_Y+Bu*Off_U/Coeff_U) ]
+	*/
+	
+	Off_Y=data.Min_Y;
+	Off_U=128 << pshift1;
+	Off_V=128 << pshift1;
+
+	data.Offset_Y=(Off_Y << 8)+128;
+	data.Offset_U=(Off_U << 8)+128;
+	data.Offset_V=(Off_V << 8)+128;
+
+	data.Offset_R=(int32_t)-round(coeff_mul*0.5+coeff_mul*(Off_Y/data.Coeff_Y+Rv*Off_V/data.Coeff_V));
+	data.Offset_G=(int32_t)-round(coeff_mul*0.5+coeff_mul*(Off_Y/data.Coeff_Y+Gu*Off_U/data.Coeff_U+Gv*Off_V/data.Coeff_V));
+	data.Offset_B=(int32_t)-round(coeff_mul*0.5+coeff_mul*(Off_Y/data.Coeff_Y+Bu*Off_U/data.Coeff_U));
+
+	if (YUVtoRGB)
+	{
+		for (int32_t i=0; i<vmax; i++)
+		{
+			lookup[i]=(int32_t)round(i*coeff_mul/data.Coeff_Y);
+			lookup[i+vmax]=(int32_t)round(i*coeff_mul*Rv/data.Coeff_V);
+			lookup[i+2*vmax]=(int32_t)round(i*coeff_mul*Gu/data.Coeff_U);
+			lookup[i+3*vmax]=(int32_t)round(i*coeff_mul*Gv/data.Coeff_V);
+			lookup[i+4*vmax]=(int32_t)round(i*coeff_mul*Bu/data.Coeff_U);
+		}
+	}
+	else
+	{
+		for (int32_t i=0; i<65536; i++)
+		{
+			lookup[i]=(int32_t)round(i*coeff_div*kr*data.Coeff_Y*256.0);
+			lookup[i+65536]=(int32_t)round(i*coeff_div*kg*data.Coeff_Y*256.0);
+			lookup[i+2*65536]=(int32_t)round(i*coeff_div*kb*data.Coeff_Y*256.0);
+			lookup[i+3*65536]=(int32_t)round(i*coeff_div*Ur*data.Coeff_U*256.0);
+			lookup[i+4*65536]=(int32_t)round(i*coeff_div*Ug*data.Coeff_U*256.0);
+			lookup[i+5*65536]=(int32_t)round(i*coeff_div*Ub*data.Coeff_U*256.0);
+			lookup[i+6*65536]=(int32_t)round(i*coeff_div*Vr*data.Coeff_V*256.0);
+			lookup[i+7*65536]=(int32_t)round(i*coeff_div*Vg*data.Coeff_V*256.0);
+			lookup[i+8*65536]=(int32_t)round(i*coeff_div*Vb*data.Coeff_V*256.0);
+		}
+	}
+}
+
+
+
+ConvertYUVtoRGBP::ConvertYUVtoRGBP(PClip _child,int _Color,bool _Output16,bool _HLGMode,bool _fullrange,bool _mpeg2c,
 	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),Output16(_Output16),HLGMode(_HLGMode),mpeg2c(_mpeg2c),
+	GenericVideoFilter(_child),Color(_Color),Output16(_Output16),HLGMode(_HLGMode),fullrange(_fullrange),mpeg2c(_mpeg2c),
 		threads(_threads),sleep(_sleep)
 {
 	UserId=0;
@@ -2469,8 +3179,15 @@ ConvertYUVtoRGBP::ConvertYUVtoRGBP(PClip _child,int _Color,bool _Output16,bool _
 	lookup_Upscale8=(uint16_t *)malloc(256*sizeof(uint16_t));
 	lookup_8to16=(uint32_t *)malloc(256*sizeof(uint32_t));
 	lookup_Upscale16=(uint32_t *)malloc(vmax*sizeof(uint32_t));
+	lookupRGB_8=(int16_t *)malloc(5*256*sizeof(int16_t));
+	if (Output16 && (pixelsize==1) && (vi.pixel_type!=VideoInfo::CS_YV24))
+		lookupRGB_16=(int32_t *)malloc(5*65536*sizeof(int32_t));
+	else lookupRGB_16=(int32_t *)malloc(5*vmax*sizeof(int32_t));
+	lookupL_8=(uint8_t *)malloc(256*sizeof(uint8_t));
+	lookupL_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 
-	if ((lookup_Upscale8==NULL) || (lookup_8to16==NULL) || (lookup_Upscale16==NULL))
+	if ((lookup_Upscale8==NULL) || (lookup_8to16==NULL) || (lookup_Upscale16==NULL)
+		|| (lookupRGB_8==NULL) || (lookupRGB_16==NULL) || (lookupL_8==NULL) || (lookupL_16==NULL))
 	{
 		FreeData();
 		env->ThrowError("ConvertYUVtoRGBP: Error while allocating the lookup tables!");
@@ -2543,10 +3260,86 @@ ConvertYUVtoRGBP::ConvertYUVtoRGBP(PClip _child,int _Color,bool _Output16,bool _
 	for(uint8_t i=1; i<3; i++)
 		if (max_threads<threads_number[i]) max_threads=threads_number[i];
 
+	const double alpha=1.09929682680944,beta=0.018053968510807;
+	const double alpha2=267.84,beta2=0.0003024;
+
+	const double m1=0.1593017578125;
+	const double m2=78.84375;
+	const double c1=0.8359375;
+	const double c2=18.8515625;
+	const double c3=18.6875;
+	
 	for (uint16_t i=0; i<256; i++)
 	{
+		double x=((double)i)/255.0;
+
+		if (Color==0)
+		{
+			if (!HLGMode)
+			{
+				// PQ EOTF
+				const double x0=pow(x,1.0/m2);
+
+				if (x0<=c1) x=0.0;
+				else x=pow((x0-c1)/(c2-c3*x0),1.0/m1);
+			
+				// Reverse PQ OOTF
+				if (x>0.0)
+				{
+					x=pow(100.0*x,1.0/2.4);
+					if (x<=alpha2*beta2) x/=alpha2;
+					else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45)/59.5208;
+				}
+			}
+			else
+			{
+			}
+		}
+		else
+		{
+			if (x<(beta*4.5)) x/=4.5;
+			else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+		}
+		if (x>1.0) x=1.0;
+
+		lookupL_8[i]=(uint8_t)round(i*x);
 		lookup_Upscale8[i]=3*i+2;
 		lookup_8to16[i]=((uint32_t)i) << 8;
+	}
+
+	for (uint32_t i=0; i<65536; i++)
+	{
+		double x=((double)i)/65535.0;
+
+		if (Color==0)
+		{
+			if (!HLGMode)
+			{
+				// PQ EOTF
+				double x0=pow(x,1.0/m2);
+
+				if (x0<=c1) x=0.0;
+				else x=pow((x0-c1)/(c2-c3*x0),1.0/m1);
+			
+				// Reverse PQ OOTF
+				if (x>0.0)
+				{
+					x=pow(100.0*x,1.0/2.4);
+					if (x<=alpha2*beta2) x/=alpha2;
+					else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45)/59.5208;
+				}
+			}
+			else
+			{
+			}
+		}
+		else
+		{
+			if (x<(beta*4.5)) x/=4.5;
+			else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+		}
+		if (x>1.0) x=1.0;
+		lookupL_16[i]=(uint16_t)round(i*x);
 	}
 
 	if ((pixelsize==1) && Output16)
@@ -2560,12 +3353,18 @@ ConvertYUVtoRGBP::ConvertYUVtoRGBP(PClip _child,int _Color,bool _Output16,bool _
 			lookup_Upscale16[i]=3*i+2;
 	}
 
-/*	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
+	if (vi.pixel_type==VideoInfo::CS_BGR32) Compute_Lookup_RGB_8(Color,fullrange,true,lookupRGB_8,dl);
+	else
+	{
+		if (Output16 && (pixelsize==1) && (vi_original->pixel_type!=VideoInfo::CS_YV24))
+			Compute_Lookup_RGB_16(Color,fullrange,true,16,lookupRGB_16,dl);
+		else Compute_Lookup_RGB_16(Color,fullrange,true,bits_per_pixel,lookupRGB_16,dl);
+	}
+
+	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);*/
-	SSE2_Enable=false;
-	AVX_Enable=false;
-	AVX2_Enable=false;
+	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
+	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 
 	if (max_threads>1)
 	{
@@ -2576,7 +3375,6 @@ ConvertYUVtoRGBP::ConvertYUVtoRGBP(PClip _child,int _Color,bool _Output16,bool _
 			env->ThrowError("ConvertYUVtoRGBP: Error with the TheadPool while getting UserId!");
 		}
 	}
-	vi.pixel_type=vi_444->pixel_type;
 }
 
 
@@ -2585,6 +3383,10 @@ void ConvertYUVtoRGBP::FreeData(void)
 	mydelete(vi_444);
 	mydelete(vi_422);
 	mydelete(vi_original);
+	myfree(lookupL_16);
+	myfree(lookupL_8);
+	myfree(lookupRGB_16);
+	myfree(lookupRGB_8);
 	myfree(lookup_Upscale16);
 	myfree(lookup_8to16);
 	myfree(lookup_Upscale8);
@@ -2599,56 +3401,91 @@ ConvertYUVtoRGBP::~ConvertYUVtoRGBP()
 }
 
 
+int __stdcall ConvertYUVtoRGBP::SetCacheHints(int cachehints,int frame_range)
+{
+  switch (cachehints)
+  {
+	case CACHE_GET_MTMODE :
+		return MT_NICE_FILTER;
+	default :
+		return 0;
+  }
+}
+
+
 void ConvertYUVtoRGBP::StaticThreadpool(void *ptr)
 {
 	const Public_MT_Data_Thread *data=(const Public_MT_Data_Thread *)ptr;
 	ConvertYUVtoRGBP *ptrClass=(ConvertYUVtoRGBP *)data->pClass;
+
+	MT_Data_Info_HDRTools *mt_data_inf=((MT_Data_Info_HDRTools *)data->pData)+data->thread_Id;
 	
 	switch(data->f_process)
 	{
-		case 1 : Convert_Progressive_8_YV12toYV16(ptrClass->MT_Data[0][data->thread_Id],ptrClass->lookup_Upscale8);
+		case 1 : Convert_Progressive_8_YV12toYV16(*mt_data_inf,ptrClass->lookup_Upscale8);
 			break;
-		case 2 : Convert_Progressive_8_YV12toYV16_SSE2(ptrClass->MT_Data[0][data->thread_Id]);
+		case 2 : Convert_Progressive_8_YV12toYV16_SSE2(*mt_data_inf);
 			break;
-		case 3 : Convert_Progressive_8_YV12toYV16_AVX(ptrClass->MT_Data[0][data->thread_Id]);
+		case 3 : Convert_Progressive_8_YV12toYV16_AVX(*mt_data_inf);
 			break;
-		case 5 : Convert_Progressive_8to16_YV12toYV16(ptrClass->MT_Data[0][data->thread_Id],ptrClass->lookup_Upscale16,
-					 ptrClass->lookup_8to16);
+		case 5 : Convert_Progressive_8to16_YV12toYV16(*mt_data_inf,ptrClass->lookup_Upscale16,ptrClass->lookup_8to16);
 			break;
-		case 6 : Convert_Progressive_8to16_YV12toYV16_SSE2(ptrClass->MT_Data[0][data->thread_Id],ptrClass->lookup_Upscale16,
-					 ptrClass->lookup_8to16);
+		case 6 : Convert_Progressive_8to16_YV12toYV16_SSE2(*mt_data_inf,ptrClass->lookup_Upscale16,ptrClass->lookup_8to16);
 			break;
-		case 7 : Convert_Progressive_8to16_YV12toYV16_AVX(ptrClass->MT_Data[0][data->thread_Id],ptrClass->lookup_Upscale16,
-					 ptrClass->lookup_8to16);
+		case 7 : Convert_Progressive_8to16_YV12toYV16_AVX(*mt_data_inf,ptrClass->lookup_Upscale16,ptrClass->lookup_8to16);
 			break;
-		case 8 : Convert_Progressive_16_YV12toYV16(ptrClass->MT_Data[0][data->thread_Id],ptrClass->lookup_Upscale16);
+		case 8 : Convert_Progressive_16_YV12toYV16(*mt_data_inf,ptrClass->lookup_Upscale16);
 			break;
-		case 9 : Convert_Progressive_16_YV12toYV16_SSE2(ptrClass->MT_Data[0][data->thread_Id]);
+		case 9 : Convert_Progressive_16_YV12toYV16_SSE2(*mt_data_inf);
 			break;
-		case 10 : Convert_Progressive_16_YV12toYV16_AVX(ptrClass->MT_Data[0][data->thread_Id]);
+		case 10 : Convert_Progressive_16_YV12toYV16_AVX(*mt_data_inf);
 			break;
-		case 12 : Convert_8_YV16toYV24(ptrClass->MT_Data[1][data->thread_Id]);
+		case 12 : Convert_8_YV16toYV24(*mt_data_inf);
 			break;
-		case 13 : Convert_8_YV16toYV24_SSE2(ptrClass->MT_Data[1][data->thread_Id]);
+		case 13 : Convert_8_YV16toYV24_SSE2(*mt_data_inf);
 			break;
-		case 14 : Convert_8_YV16toYV24_AVX(ptrClass->MT_Data[1][data->thread_Id]);
+		case 14 : Convert_8_YV16toYV24_AVX(*mt_data_inf);
 			break;
-		case 15 : Convert_8to16_YV16toYV24(ptrClass->MT_Data[1][data->thread_Id],ptrClass->lookup_8to16);
+		case 15 : Convert_8to16_YV16toYV24(*mt_data_inf,ptrClass->lookup_8to16);
 			break;
-		case 16 : Convert_8to16_YV16toYV24_SSE2(ptrClass->MT_Data[1][data->thread_Id],ptrClass->lookup_8to16);
+		case 16 : Convert_8to16_YV16toYV24_SSE2(*mt_data_inf,ptrClass->lookup_8to16);
 			break;
-		case 17 : Convert_8to16_YV16toYV24_AVX(ptrClass->MT_Data[1][data->thread_Id],ptrClass->lookup_8to16);
+		case 17 : Convert_8to16_YV16toYV24_AVX(*mt_data_inf,ptrClass->lookup_8to16);
 			break;
-		case 18 : Convert_16_YV16toYV24(ptrClass->MT_Data[1][data->thread_Id]);
+		case 18 : Convert_16_YV16toYV24(*mt_data_inf);
 			break;
-		case 19 : Convert_16_YV16toYV24_SSE2(ptrClass->MT_Data[1][data->thread_Id]);
+		case 19 : Convert_16_YV16toYV24_SSE2(*mt_data_inf);
 			break;
-		case 20 : Convert_16_YV16toYV24_AVX(ptrClass->MT_Data[1][data->thread_Id]);
+		case 20 : Convert_16_YV16toYV24_AVX(*mt_data_inf);
+			break;
+		case 21 : Convert_YV24toRGB32(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_8);
+			break;
+		case 22 : Convert_YV24toRGB32_SSE2(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_8);
+			break;
+		case 23 : Convert_YV24toRGB32_AVX(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_8);
+			break;
+		case 24 : Convert_8_YV24toRGB64(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_16);
+			break;
+		case 25 : Convert_16_YV24toRGB64(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_16,ptrClass->bits_per_pixel);
+			break;
+		case 26 : Convert_YV24toRGB64_SSE41(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_16,ptrClass->bits_per_pixel);
+			break;
+		case 27 : Convert_YV24toRGB64_AVX(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_16,ptrClass->bits_per_pixel);
+			break;
+		case 28 : Convert_16_YV24toRGB64(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_16,16);
+			break;
+		case 29 : Convert_YV24toRGB64_SSE41(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_16,16);
+			break;
+		case 30 : Convert_YV24toRGB64_AVX(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_16,16);
+			break;
+		case 31 : Convert_RGB32toRGB32P(*mt_data_inf,ptrClass->lookupL_8);
+			break;
+		case 32 : Convert_RGB64toRGB64P(*mt_data_inf,ptrClass->lookupL_16);
 			break;
 #ifdef AVX2_BUILD_POSSIBLE
-		case 4 : Convert_Progressive_8_YV12toYV16_AVX2(ptrClass->MT_Data[0][data->thread_Id]);
+		case 4 : Convert_Progressive_8_YV12toYV16_AVX2(*mt_data_inf);
 			break;
-		case 11 : Convert_Progressive_16_YV12toYV16_AVX2(ptrClass->MT_Data[0][data->thread_Id]);
+		case 11 : Convert_Progressive_16_YV12toYV16_AVX2(*mt_data_inf);
 			break;
 #endif
 		default : ;
@@ -2660,8 +3497,7 @@ PVideoFrame __stdcall ConvertYUVtoRGBP::GetFrame(int n, IScriptEnvironment* env)
 {
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame tmp1 = env->NewVideoFrame(*vi_422,64);
-	//PVideoFrame tmp2 = env->NewVideoFrame(*vi_444,64);
-	PVideoFrame tmp2 = env->NewVideoFrame(vi,64);
+	PVideoFrame tmp2 = env->NewVideoFrame(*vi_444,64);
 	PVideoFrame dst = env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcY = src->GetReadPtr(PLANAR_Y);
@@ -2672,6 +3508,9 @@ PVideoFrame __stdcall ConvertYUVtoRGBP::GetFrame(int n, IScriptEnvironment* env)
 	const int src_pitch_Y = src->GetPitch(PLANAR_Y);
 	const int src_pitch_U = src->GetPitch(PLANAR_U);
 	const int src_pitch_V = src->GetPitch(PLANAR_V);
+	const int src_modulo_Y = src_pitch_Y - src->GetRowSize(PLANAR_Y);
+	const int src_modulo_U = src_pitch_U - src->GetRowSize(PLANAR_U);
+	const int src_modulo_V = src_pitch_V - src->GetRowSize(PLANAR_V);
 
 	const uint8_t *tmp1Yr = tmp1->GetReadPtr(PLANAR_Y);
 	const uint8_t *tmp1Ur = tmp1->GetReadPtr(PLANAR_U);
@@ -2692,26 +3531,34 @@ PVideoFrame __stdcall ConvertYUVtoRGBP::GetFrame(int n, IScriptEnvironment* env)
 	const int tmp2_pitch_Y = tmp2->GetPitch(PLANAR_Y);
 	const int tmp2_pitch_U = tmp2->GetPitch(PLANAR_U);
 	const int tmp2_pitch_V = tmp2->GetPitch(PLANAR_V);
+	const int tmp2_modulo_Y = tmp2_pitch_Y - tmp2->GetRowSize(PLANAR_Y);
+	const int tmp2_modulo_U = tmp2_pitch_U - tmp2->GetRowSize(PLANAR_U);
+	const int tmp2_modulo_V = tmp2_pitch_V - tmp2->GetRowSize(PLANAR_V);
 
-	const uint8_t *dstYr = dst->GetReadPtr(PLANAR_Y);
-	const uint8_t *dstUr = dst->GetReadPtr(PLANAR_U);
-	const uint8_t *dstVr = dst->GetReadPtr(PLANAR_V);
-	uint8_t *dstYw = dst->GetWritePtr(PLANAR_Y);
-	uint8_t *dstUw = dst->GetWritePtr(PLANAR_U);
-	uint8_t *dstVw = dst->GetWritePtr(PLANAR_V);
-	const int dst_pitch_Y = dst->GetPitch(PLANAR_Y);
-	const int dst_pitch_U = dst->GetPitch(PLANAR_U);
-	const int dst_pitch_V = dst->GetPitch(PLANAR_V);
+	const uint8_t *dstr = dst->GetReadPtr();
+	uint8_t *dstw = dst->GetWritePtr();
+	const int dst_h = dst->GetHeight();
+	const int dst_pitch = dst->GetPitch();
 
-	uint8_t f_proc;
-		
+	uint8_t *dstw0=dstw+(dst_h-1)*dst_pitch;
+	const int dst_pitch0 = -dst_pitch;
+	const int dst_modulo0 = dst_pitch0 - dst->GetRowSize();
+
+	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
+	int8_t nPool=-1;
+
+	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
+
+	for(uint8_t i=0; i<max_threads; i++)
+		MT_ThreadGF[i].pData=(void *)MT_DataGF;
+
 	if (max_threads>1)
 	{
-		if (!poolInterface->RequestThreadPool(UserId,max_threads,MT_Thread,-1,false))
+		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("AutoYUY2: Error with the TheadPool while requesting threadpool !");
 	}
 
-	/*
 	const bool src_Y_al32=((((size_t)srcY) & 0x1F)==0) && ((abs(src_pitch_Y) & 0x1F)==0);
 	const bool src_Y_al16=((((size_t)srcY) & 0x0F)==0) && ((abs(src_pitch_Y) & 0x0F)==0);
 	const bool src_UV_al32=((((size_t)srcU) & 0x1F)==0) && ((((size_t)srcV) & 0x1F)==0)
@@ -2741,74 +3588,32 @@ PVideoFrame __stdcall ConvertYUVtoRGBP::GetFrame(int n, IScriptEnvironment* env)
 		&& ((((size_t)tmp2Ur) & 0x0F)==0) && ((((size_t)tmp2Vr) & 0x0F)==0)
 		&& ((abs(tmp2_pitch_U) & 0x0F)==0) && ((abs(tmp2_pitch_V) & 0x0F)==0);
 
-	const bool dst_Y_al32=((((size_t)dstYw) & 0x1F)==0) && ((((size_t)dstYr) & 0x1F)==0)
-		&& ((abs(dst_pitch_Y) & 0x1F)==0);
-	const bool dst_Y_al16=((((size_t)dstYw) & 0x0F)==0) && ((((size_t)dstYr) & 0x0F)==0)
-		&& ((abs(dst_pitch_Y) & 0x0F)==0);
-	const bool dst_UV_al32=((((size_t)dstUw) & 0x1F)==0) && ((((size_t)dstVw) & 0x1F)==0)
-		&& ((((size_t)dstUr) & 0x1F)==0) && ((((size_t)dstVr) & 0x1F)==0)
-		&& ((abs(dst_pitch_U) & 0x1F)==0) && ((abs(dst_pitch_V) & 0x1F)==0);
-	const bool dst_UV_al16=((((size_t)dstUw) & 0x0F)==0) && ((((size_t)dstVw) & 0x0F)==0)
-		&& ((((size_t)dstUr) & 0x0F)==0) && ((((size_t)dstVr) & 0x0F)==0)
-		&& ((abs(dst_pitch_U) & 0x0F)==0) && ((abs(dst_pitch_V) & 0x0F)==0);*/
+	const bool dst_al32=((((size_t)dstw) & 0x1F)==0) && ((((size_t)dstr) & 0x1F)==0)
+		&& ((abs(dst_pitch) & 0x1F)==0);
+	const bool dst_al16=((((size_t)dstw) & 0x0F)==0) && ((((size_t)dstr) & 0x0F)==0)
+		&& ((abs(dst_pitch) & 0x0F)==0);
 
-	const bool src_Y_al32=true;
-	const bool src_Y_al16=true;
-	const bool src_UV_al32=true;
-	const bool src_UV_al16=true;
+	uint8_t f_proc=0;
 
-	const bool tmp1_Y_al32=true;
-	const bool tmp1_Y_al16=true;
-	const bool tmp1_UV_al32=true;
-	const bool tmp1_UV_al16=true;
+	// Process YUV420 to YUV422 upscale
+	memcpy(MT_DataGF,MT_Data[0],sizeof(MT_DataGF));
 
-	const bool tmp2_Y_al32=true;
-	const bool tmp2_Y_al16=true;
-	const bool tmp2_UV_al32=true;
-	const bool tmp2_UV_al16=true;
-
-	const bool dst_Y_al32=true;
-	const bool dst_Y_al16=true;
-	const bool dst_UV_al32=true;
-	const bool dst_UV_al16=true;
-
-/*
-	for(uint8_t j=0; j<3; j++)
-	{
-		for(uint8_t i=0; i<threads_number[j]; i++)
-		{
-			MT_Data[j][i].src1=(void *)(srcY+(MT_Data[j][i].src_Y_h_min*src_pitch_Y));
-			MT_Data[j][i].src2=(void *)(srcU+(MT_Data[j][i].src_UV_h_min*src_pitch_U));
-			MT_Data[j][i].src3=(void *)(srcV+(MT_Data[j][i].src_UV_h_min*src_pitch_V));
-			MT_Data[j][i].src_pitch1=src_pitch_Y;
-			MT_Data[j][i].src_pitch2=src_pitch_U;
-			MT_Data[j][i].src_pitch3=src_pitch_V;
-			MT_Data[j][i].dst1=(void *)(dst_Y+(MT_Data[j][i].dst_Y_h_min*dst_pitch_Y));
-			MT_Data[j][i].dst2=(void *)(dst_U+(MT_Data[j][i].dst_UV_h_min*dst_pitch_U));
-			MT_Data[j][i].dst3=(void *)(dst_V+(MT_Data[j][i].dst_UV_h_min*dst_pitch_V));
-			MT_Data[j][i].dst_pitch1=dst_pitch_Y;
-			MT_Data[j][i].dst_pitch2=dst_pitch_U;
-			MT_Data[j][i].dst_pitch3=dst_pitch_V;
-		}
-	}*/
-
-	// Process 420 to 422 upscale
 	if (vi_original->Is420())
 	{
 		for(uint8_t i=0; i<threads_number[0]; i++)
 		{
-			MT_Data[0][i].src1=(void *)(srcY+(MT_Data[0][i].src_Y_h_min*src_pitch_Y));
-			MT_Data[0][i].src2=(void *)(srcU+(MT_Data[0][i].src_UV_h_min*src_pitch_U));
-			MT_Data[0][i].src3=(void *)(srcV+(MT_Data[0][i].src_UV_h_min*src_pitch_V));
-			MT_Data[0][i].src_pitch1=src_pitch_Y;
-			MT_Data[0][i].src_pitch2=src_pitch_U;
-			MT_Data[0][i].src_pitch3=src_pitch_V;
-			MT_Data[0][i].dst1=(void *)(tmp1Yw+(MT_Data[0][i].dst_Y_h_min*tmp1_pitch_Y));
-			MT_Data[0][i].dst2=(void *)(tmp1Uw+(MT_Data[0][i].dst_UV_h_min*tmp1_pitch_U));
-			MT_Data[0][i].dst3=(void *)(tmp1Vw+(MT_Data[0][i].dst_UV_h_min*tmp1_pitch_V));
-			MT_Data[0][i].dst_pitch1=tmp1_pitch_Y;
-			MT_Data[0][i].dst_pitch2=tmp1_pitch_U;
-			MT_Data[0][i].dst_pitch3=tmp1_pitch_V;
+			MT_DataGF[i].src1=(void *)(srcY+(MT_DataGF[i].src_Y_h_min*src_pitch_Y));
+			MT_DataGF[i].src2=(void *)(srcU+(MT_DataGF[i].src_UV_h_min*src_pitch_U));
+			MT_DataGF[i].src3=(void *)(srcV+(MT_DataGF[i].src_UV_h_min*src_pitch_V));
+			MT_DataGF[i].src_pitch1=src_pitch_Y;
+			MT_DataGF[i].src_pitch2=src_pitch_U;
+			MT_DataGF[i].src_pitch3=src_pitch_V;
+			MT_DataGF[i].dst1=(void *)(tmp1Yw+(MT_DataGF[i].dst_Y_h_min*tmp1_pitch_Y));
+			MT_DataGF[i].dst2=(void *)(tmp1Uw+(MT_DataGF[i].dst_UV_h_min*tmp1_pitch_U));
+			MT_DataGF[i].dst3=(void *)(tmp1Vw+(MT_DataGF[i].dst_UV_h_min*tmp1_pitch_V));
+			MT_DataGF[i].dst_pitch1=tmp1_pitch_Y;
+			MT_DataGF[i].dst_pitch2=tmp1_pitch_U;
+			MT_DataGF[i].dst_pitch3=tmp1_pitch_V;
 		}
 
 		if (pixelsize==1)
@@ -2857,51 +3662,53 @@ PVideoFrame __stdcall ConvertYUVtoRGBP::GetFrame(int n, IScriptEnvironment* env)
 		if (threads_number[0]>1)
 		{
 			for(uint8_t i=0; i<threads_number[0]; i++)
-				MT_Thread[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId)) poolInterface->WaitThreadsEnd(UserId);
+				MT_ThreadGF[i].f_process=f_proc;
+			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
 
 			for(uint8_t i=0; i<threads_number[0]; i++)
-				MT_Thread[i].f_process=0;
+				MT_ThreadGF[i].f_process=0;
 		}
 		else
 		{
 			switch(f_proc)
 			{
-				case 1 : Convert_Progressive_8_YV12toYV16(MT_Data[0][0],lookup_Upscale8); break;
-				case 2 : Convert_Progressive_8_YV12toYV16_SSE2(MT_Data[0][0]); break;
-				case 3 : Convert_Progressive_8_YV12toYV16_AVX(MT_Data[0][0]); break;
-				case 5 : Convert_Progressive_8to16_YV12toYV16(MT_Data[0][0],lookup_Upscale16,lookup_8to16); break;
-				case 6 : Convert_Progressive_8to16_YV12toYV16_SSE2(MT_Data[0][0],lookup_Upscale16,lookup_8to16); break;
-				case 7 : Convert_Progressive_8to16_YV12toYV16_AVX(MT_Data[0][0],lookup_Upscale16,lookup_8to16); break;
-				case 8 : Convert_Progressive_16_YV12toYV16(MT_Data[0][0],lookup_Upscale16); break;
-				case 9 : Convert_Progressive_16_YV12toYV16_SSE2(MT_Data[0][0]); break;
-				case 10 : Convert_Progressive_16_YV12toYV16_AVX(MT_Data[0][0]); break;
+				case 1 : Convert_Progressive_8_YV12toYV16(MT_DataGF[0],lookup_Upscale8); break;
+				case 2 : Convert_Progressive_8_YV12toYV16_SSE2(MT_DataGF[0]); break;
+				case 3 : Convert_Progressive_8_YV12toYV16_AVX(MT_DataGF[0]); break;
+				case 5 : Convert_Progressive_8to16_YV12toYV16(MT_DataGF[0],lookup_Upscale16,lookup_8to16); break;
+				case 6 : Convert_Progressive_8to16_YV12toYV16_SSE2(MT_DataGF[0],lookup_Upscale16,lookup_8to16); break;
+				case 7 : Convert_Progressive_8to16_YV12toYV16_AVX(MT_DataGF[0],lookup_Upscale16,lookup_8to16); break;
+				case 8 : Convert_Progressive_16_YV12toYV16(MT_DataGF[0],lookup_Upscale16); break;
+				case 9 : Convert_Progressive_16_YV12toYV16_SSE2(MT_DataGF[0]); break;
+				case 10 : Convert_Progressive_16_YV12toYV16_AVX(MT_DataGF[0]); break;
 #ifdef AVX2_BUILD_POSSIBLE
-				case 4 : Convert_Progressive_8_YV12toYV16_AVX2(MT_Data[0][0]); break;
-				case 11 : Convert_Progressive_16_YV12toYV16_AVX2(MT_Data[0][0]); break;
+				case 4 : Convert_Progressive_8_YV12toYV16_AVX2(MT_DataGF[0]); break;
+				case 11 : Convert_Progressive_16_YV12toYV16_AVX2(MT_DataGF[0]); break;
 #endif
 				default : break;
 			}
 		}
 	}
 
-	// Process 422 to 444 upscale
+	// Process YUV422 to YUV444 upscale
+	memcpy(MT_DataGF,MT_Data[1],sizeof(MT_DataGF));
+
 	if (vi_original->Is422())
 	{
 		for(uint8_t i=0; i<threads_number[1]; i++)
 		{
-			MT_Data[1][i].src1=(void *)(srcY+(MT_Data[1][i].src_Y_h_min*src_pitch_Y));
-			MT_Data[1][i].src2=(void *)(srcU+(MT_Data[1][i].src_UV_h_min*src_pitch_U));
-			MT_Data[1][i].src3=(void *)(srcV+(MT_Data[1][i].src_UV_h_min*src_pitch_V));
-			MT_Data[1][i].src_pitch1=src_pitch_Y;
-			MT_Data[1][i].src_pitch2=src_pitch_U;
-			MT_Data[1][i].src_pitch3=src_pitch_V;
-			MT_Data[1][i].dst1=(void *)(tmp2Yw+(MT_Data[1][i].dst_Y_h_min*tmp2_pitch_Y));
-			MT_Data[1][i].dst2=(void *)(tmp2Uw+(MT_Data[1][i].dst_UV_h_min*tmp2_pitch_U));
-			MT_Data[1][i].dst3=(void *)(tmp2Vw+(MT_Data[1][i].dst_UV_h_min*tmp2_pitch_V));
-			MT_Data[1][i].dst_pitch1=tmp2_pitch_Y;
-			MT_Data[1][i].dst_pitch2=tmp2_pitch_U;
-			MT_Data[1][i].dst_pitch3=tmp2_pitch_V;
+			MT_DataGF[i].src1=(void *)(srcY+(MT_DataGF[i].src_Y_h_min*src_pitch_Y));
+			MT_DataGF[i].src2=(void *)(srcU+(MT_DataGF[i].src_UV_h_min*src_pitch_U));
+			MT_DataGF[i].src3=(void *)(srcV+(MT_DataGF[i].src_UV_h_min*src_pitch_V));
+			MT_DataGF[i].src_pitch1=src_pitch_Y;
+			MT_DataGF[i].src_pitch2=src_pitch_U;
+			MT_DataGF[i].src_pitch3=src_pitch_V;
+			MT_DataGF[i].dst1=(void *)(tmp2Yw+(MT_DataGF[i].dst_Y_h_min*tmp2_pitch_Y));
+			MT_DataGF[i].dst2=(void *)(tmp2Uw+(MT_DataGF[i].dst_UV_h_min*tmp2_pitch_U));
+			MT_DataGF[i].dst3=(void *)(tmp2Vw+(MT_DataGF[i].dst_UV_h_min*tmp2_pitch_V));
+			MT_DataGF[i].dst_pitch1=tmp2_pitch_Y;
+			MT_DataGF[i].dst_pitch2=tmp2_pitch_U;
+			MT_DataGF[i].dst_pitch3=tmp2_pitch_V;
 		}
 
 		if (pixelsize==1)
@@ -2941,18 +3748,18 @@ PVideoFrame __stdcall ConvertYUVtoRGBP::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number[1]; i++)
 		{
-			MT_Data[1][i].src1=(void *)(tmp1Yr+(MT_Data[1][i].src_Y_h_min*tmp1_pitch_Y));
-			MT_Data[1][i].src2=(void *)(tmp1Ur+(MT_Data[1][i].src_UV_h_min*tmp1_pitch_U));
-			MT_Data[1][i].src3=(void *)(tmp1Vr+(MT_Data[1][i].src_UV_h_min*tmp1_pitch_V));
-			MT_Data[1][i].src_pitch1=tmp1_pitch_Y;
-			MT_Data[1][i].src_pitch2=tmp1_pitch_U;
-			MT_Data[1][i].src_pitch3=tmp1_pitch_V;
-			MT_Data[1][i].dst1=(void *)(tmp2Yw+(MT_Data[1][i].dst_Y_h_min*tmp2_pitch_Y));
-			MT_Data[1][i].dst2=(void *)(tmp2Uw+(MT_Data[1][i].dst_UV_h_min*tmp2_pitch_U));
-			MT_Data[1][i].dst3=(void *)(tmp2Vw+(MT_Data[1][i].dst_UV_h_min*tmp2_pitch_V));
-			MT_Data[1][i].dst_pitch1=tmp2_pitch_Y;
-			MT_Data[1][i].dst_pitch2=tmp2_pitch_U;
-			MT_Data[1][i].dst_pitch3=tmp2_pitch_V;
+			MT_DataGF[i].src1=(void *)(tmp1Yr+(MT_DataGF[i].src_Y_h_min*tmp1_pitch_Y));
+			MT_DataGF[i].src2=(void *)(tmp1Ur+(MT_DataGF[i].src_UV_h_min*tmp1_pitch_U));
+			MT_DataGF[i].src3=(void *)(tmp1Vr+(MT_DataGF[i].src_UV_h_min*tmp1_pitch_V));
+			MT_DataGF[i].src_pitch1=tmp1_pitch_Y;
+			MT_DataGF[i].src_pitch2=tmp1_pitch_U;
+			MT_DataGF[i].src_pitch3=tmp1_pitch_V;
+			MT_DataGF[i].dst1=(void *)(tmp2Yw+(MT_DataGF[i].dst_Y_h_min*tmp2_pitch_Y));
+			MT_DataGF[i].dst2=(void *)(tmp2Uw+(MT_DataGF[i].dst_UV_h_min*tmp2_pitch_U));
+			MT_DataGF[i].dst3=(void *)(tmp2Vw+(MT_DataGF[i].dst_UV_h_min*tmp2_pitch_V));
+			MT_DataGF[i].dst_pitch1=tmp2_pitch_Y;
+			MT_DataGF[i].dst_pitch2=tmp2_pitch_U;
+			MT_DataGF[i].dst_pitch3=tmp2_pitch_V;
 		}
 
 		if (pixelsize==1)
@@ -2992,34 +3799,193 @@ PVideoFrame __stdcall ConvertYUVtoRGBP::GetFrame(int n, IScriptEnvironment* env)
 		if (threads_number[1]>1)
 		{
 			for(uint8_t i=0; i<threads_number[1]; i++)
-				MT_Thread[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId)) poolInterface->WaitThreadsEnd(UserId);
+				MT_ThreadGF[i].f_process=f_proc;
+			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
 
 			for(uint8_t i=0; i<threads_number[1]; i++)
-				MT_Thread[i].f_process=0;
+				MT_ThreadGF[i].f_process=0;
 		}
 		else
 		{
 			switch(f_proc)
 			{
-				case 12 : Convert_8_YV16toYV24(MT_Data[1][0]); break;
-				case 13 : Convert_8_YV16toYV24_SSE2(MT_Data[1][0]); break;
-				case 14 : Convert_8_YV16toYV24_AVX(MT_Data[1][0]); break;
-				case 15 : Convert_8to16_YV16toYV24(MT_Data[1][0],lookup_8to16); break;
-				case 16 : Convert_8to16_YV16toYV24_SSE2(MT_Data[1][0],lookup_8to16); break;
-				case 17 : Convert_8to16_YV16toYV24_AVX(MT_Data[1][0],lookup_8to16); break;
-				case 18 : Convert_16_YV16toYV24(MT_Data[1][0]); break;
-				case 19 : Convert_16_YV16toYV24_SSE2(MT_Data[1][0]); break;
-				case 20 : Convert_16_YV16toYV24_AVX(MT_Data[1][0]); break;
+				case 12 : Convert_8_YV16toYV24(MT_DataGF[0]); break;
+				case 13 : Convert_8_YV16toYV24_SSE2(MT_DataGF[0]); break;
+				case 14 : Convert_8_YV16toYV24_AVX(MT_DataGF[0]); break;
+				case 15 : Convert_8to16_YV16toYV24(MT_DataGF[0],lookup_8to16); break;
+				case 16 : Convert_8to16_YV16toYV24_SSE2(MT_DataGF[0],lookup_8to16); break;
+				case 17 : Convert_8to16_YV16toYV24_AVX(MT_DataGF[0],lookup_8to16); break;
+				case 18 : Convert_16_YV16toYV24(MT_DataGF[0]); break;
+				case 19 : Convert_16_YV16toYV24_SSE2(MT_DataGF[0]); break;
+				case 20 : Convert_16_YV16toYV24_AVX(MT_DataGF[0]); break;
 				default : break;
 			}
 		}
 	}
 
-	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep);
+	//Process YUV444 to RGB
+	memcpy(MT_DataGF,MT_Data[2],sizeof(MT_DataGF));
 
-	//return dst;
-	return tmp2;
+	if (vi_original->Is444())
+	{
+		for(uint8_t i=0; i<threads_number[2]; i++)
+		{
+			MT_DataGF[i].src1=(void *)(srcY+(MT_DataGF[i].src_Y_h_min*src_pitch_Y));
+			MT_DataGF[i].src2=(void *)(srcU+(MT_DataGF[i].src_UV_h_min*src_pitch_U));
+			MT_DataGF[i].src3=(void *)(srcV+(MT_DataGF[i].src_UV_h_min*src_pitch_V));
+			MT_DataGF[i].src_pitch1=src_pitch_Y;
+			MT_DataGF[i].src_pitch2=src_pitch_U;
+			MT_DataGF[i].src_pitch3=src_pitch_V;
+			MT_DataGF[i].src_modulo1=src_modulo_Y;
+			MT_DataGF[i].src_modulo2=src_modulo_U;
+			MT_DataGF[i].src_modulo3=src_modulo_V;
+			MT_DataGF[i].dst1=(void *)(dstw0+(MT_DataGF[i].dst_Y_h_min*dst_pitch0));
+			MT_DataGF[i].dst_pitch1=dst_pitch0;
+			MT_DataGF[i].dst_modulo1=dst_modulo0;
+		}
+
+		if (pixelsize==1)
+		{
+			if (Output16)
+			{
+				if (AVX_Enable) f_proc=27;
+				else
+				{
+					if (SSE41_Enable) f_proc=26;
+					else f_proc=24;
+				}
+			}
+			else
+			{
+				if (AVX_Enable) f_proc=23;
+				else
+				{
+					if (SSE41_Enable) f_proc=22;
+					else f_proc=21;
+				}
+			}
+		}
+		else
+		{
+			if (AVX_Enable) f_proc=27;
+			else
+			{
+				if (SSE41_Enable) f_proc=26;
+				else f_proc=25;
+			}
+		}
+	}
+	else
+	{
+		for(uint8_t i=0; i<threads_number[2]; i++)
+		{
+			MT_DataGF[i].src1=(void *)(tmp2Yr+(MT_DataGF[i].src_Y_h_min*tmp2_pitch_Y));
+			MT_DataGF[i].src2=(void *)(tmp2Ur+(MT_DataGF[i].src_UV_h_min*tmp2_pitch_U));
+			MT_DataGF[i].src3=(void *)(tmp2Vr+(MT_DataGF[i].src_UV_h_min*tmp2_pitch_V));
+			MT_DataGF[i].src_pitch1=tmp2_pitch_Y;
+			MT_DataGF[i].src_pitch2=tmp2_pitch_U;
+			MT_DataGF[i].src_pitch3=tmp2_pitch_V;
+			MT_DataGF[i].src_modulo1=tmp2_modulo_Y;
+			MT_DataGF[i].src_modulo2=tmp2_modulo_U;
+			MT_DataGF[i].src_modulo3=tmp2_modulo_V;
+			MT_DataGF[i].dst1=(void *)(dstw0+(MT_DataGF[i].dst_Y_h_min*dst_pitch0));
+			MT_DataGF[i].dst_pitch1=dst_pitch0;
+			MT_DataGF[i].dst_modulo1=dst_modulo0;
+		}
+
+		if (pixelsize==1)
+		{
+			if (Output16)
+			{
+				if (AVX_Enable) f_proc=30;
+				else
+				{
+					if (SSE41_Enable) f_proc=29;
+					else f_proc=28;
+				}
+			}
+			else
+			{
+				if (AVX_Enable) f_proc=23;
+				else
+				{
+					if (SSE41_Enable) f_proc=22;
+					else f_proc=21;
+				}
+			}
+		}
+		else
+		{
+			if (AVX_Enable) f_proc=27;
+			else
+			{
+				if (SSE41_Enable) f_proc=26;
+				else f_proc=25;
+			}
+		}
+	}
+
+	if (threads_number[2]>1)
+	{
+		for(uint8_t i=0; i<threads_number[2]; i++)
+			MT_ThreadGF[i].f_process=f_proc;
+		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+
+		for(uint8_t i=0; i<threads_number[2]; i++)
+			MT_ThreadGF[i].f_process=0;
+	}
+	else
+	{
+		switch(f_proc)
+		{
+			case 21 : Convert_YV24toRGB32(MT_DataGF[0],dl,lookupRGB_8); break;
+			case 22 : Convert_YV24toRGB32_SSE2(MT_DataGF[0],dl,lookupRGB_8); break;
+			case 23 : Convert_YV24toRGB32_AVX(MT_DataGF[0],dl,lookupRGB_8); break;
+			case 24 : Convert_8_YV24toRGB64(MT_DataGF[0],dl,lookupRGB_16); break;
+			case 25 : Convert_16_YV24toRGB64(MT_DataGF[0],dl,lookupRGB_16,bits_per_pixel); break;
+			case 26 : Convert_YV24toRGB64_SSE41(MT_DataGF[0],dl,lookupRGB_16,bits_per_pixel); break;
+			case 27 : Convert_YV24toRGB64_AVX(MT_DataGF[0],dl,lookupRGB_16,bits_per_pixel); break;
+			case 28 : Convert_16_YV24toRGB64(MT_DataGF[0],dl,lookupRGB_16,16); break;
+			case 29 : Convert_YV24toRGB64_SSE41(MT_DataGF[0],dl,lookupRGB_16,16); break;
+			case 30 : Convert_YV24toRGB64_AVX(MT_DataGF[0],dl,lookupRGB_16,16); break;
+			default : break;
+		}
+	}
+
+	//Process Non linear RGB to Linear RGB
+	for(uint8_t i=0; i<threads_number[2]; i++)
+	{
+		MT_DataGF[i].src1=(void *)(dstr+(MT_DataGF[i].src_Y_h_min*dst_pitch));
+		MT_DataGF[i].src_pitch1=dst_pitch;
+		MT_DataGF[i].dst1=(void *)(dstw+(MT_DataGF[i].dst_Y_h_min*dst_pitch));
+		MT_DataGF[i].dst_pitch1=dst_pitch;
+	}
+
+	if (vi.pixel_type==VideoInfo::CS_BGR32) f_proc=31;
+	else f_proc=32;
+
+	if (threads_number[2]>1)
+	{
+		for(uint8_t i=0; i<threads_number[2]; i++)
+			MT_ThreadGF[i].f_process=f_proc;
+		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+
+		for(uint8_t i=0; i<threads_number[2]; i++)
+			MT_ThreadGF[i].f_process=0;
+	}
+	else
+	{
+		switch(f_proc)
+		{
+			case 31 : Convert_RGB32toRGB32P(MT_DataGF[0],lookupL_8); break;
+			case 32 : Convert_RGB64toRGB64P(MT_DataGF[0],lookupL_16); break;
+			default : break;
+		}
+	}
+
+	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+
+	return dst;
 }
 
 
@@ -3027,13 +3993,16 @@ const AVS_Linkage *AVS_linkage = nullptr;
 
 
 /*
-  Chroma : int, default value : 0
+  Chroma : int, default value : 2
      0 : BT2100
 	 1 : BT2020
 	 2 : BT709
-	 3 : BT601
+	 3 : BT601_525
+	 4 : BT601_625
   Output16 : bool, default false.
   HLGMode : bool, default false.
+  fullrange : bool, default false.
+  mpeg2c : bool, default true.
 */
 AVSValue __cdecl Create_ConvertYUVtoRGBP(AVSValue args, void* user_data, IScriptEnvironment* env)
 {
@@ -3044,10 +4013,10 @@ AVSValue __cdecl Create_ConvertYUVtoRGBP(AVSValue args, void* user_data, IScript
 	if (!vi.IsPlanar() || !vi.IsYUV())
 		env->ThrowError("ConvertYUVtoRGBP: Input format must be planar YUV");
 
-	const int Color=args[1].AsInt(0);
+	const int Color=args[1].AsInt(2);
 	bool Output16=args[2].AsBool(false);
 	const bool HLGMode=args[3].AsBool(false);
-	const bool fullrange=args[4].AsBool(true);
+	const bool fullrange=args[4].AsBool(false);
 	const bool mpeg2c=args[5].AsBool(true);
 	const int threads=args[6].AsInt(0);
 	const bool LogicalCores=args[7].AsBool(true);
@@ -3060,8 +4029,8 @@ AVSValue __cdecl Create_ConvertYUVtoRGBP(AVSValue args, void* user_data, IScript
 
 	if (!avsp) Output16=false;
 
-	if ((Color<0) || (Color>3))
-		env->ThrowError("ConvertYUVtoRGBP: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601)");
+	if ((Color<0) || (Color>4))
+		env->ThrowError("ConvertYUVtoRGBP: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertYUVtoRGBP: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 
@@ -3117,7 +4086,7 @@ AVSValue __cdecl Create_ConvertYUVtoRGBP(AVSValue args, void* user_data, IScript
 		}
 	}
 
-	return new ConvertYUVtoRGBP(args[0].AsClip(),Color,Output16,HLGMode,mpeg2c,threads_number,sleep,env);
+	return new ConvertYUVtoRGBP(args[0].AsClip(),Color,Output16,HLGMode,fullrange,mpeg2c,threads_number,sleep,env);
 }
 
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScriptEnvironment* env, const AVS_Linkage* const vectors)

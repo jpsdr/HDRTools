@@ -32,6 +32,9 @@
 #define myfree(ptr) if (ptr!=NULL) { free(ptr); ptr=NULL;}
 #define mydelete(ptr) if (ptr!=NULL) { delete ptr; ptr=NULL;}
 
+#define trunc(x) (signed long) floor(x)
+#define round(x) (signed long) floor(x+0.5)
+
 typedef struct _RGB32BMP
 {
 	uint8_t b;
@@ -61,6 +64,12 @@ typedef union _URGB64BMP
 	uint64_t data64;
 } URGB64BMP;
 
+typedef struct _dataLookUp
+{
+	uint16_t Min_Y,Max_Y,Min_U,Max_U,Min_V,Max_V;
+	int32_t Offset_Y,Offset_U,Offset_V,Offset_R,Offset_G,Offset_B;
+	double Coeff_Y,Coeff_U,Coeff_V;
+} dataLookUp;
 
 typedef struct _MT_Data_Info_HDRTools
 {
@@ -68,6 +77,8 @@ typedef struct _MT_Data_Info_HDRTools
 	void *dst1,*dst2,*dst3;
 	int src_pitch1,src_pitch2,src_pitch3;
 	int dst_pitch1,dst_pitch2,dst_pitch3;
+	int src_modulo1,src_modulo2,src_modulo3;
+	int dst_modulo1,dst_modulo2,dst_modulo3;
 	int32_t src_Y_h_min,src_Y_h_max,src_Y_w;
 	int32_t src_UV_h_min,src_UV_h_max,src_UV_w;
 	int32_t dst_Y_h_min,dst_Y_h_max,dst_Y_w;
@@ -79,7 +90,7 @@ typedef struct _MT_Data_Info_HDRTools
 class ConvertYUVtoRGBP : public GenericVideoFilter
 {
 public:
-	ConvertYUVtoRGBP(PClip _child,int _Color,bool _Output16,bool _HLGMode,bool _mpeg2c,
+	ConvertYUVtoRGBP(PClip _child,int _Color,bool _Output16,bool _HLGMode,bool _fullrange,bool _mpeg2c,
 		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertYUVtoRGBP();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
@@ -92,13 +103,19 @@ private:
 	bool sleep;
 	uint16_t *lookup_Upscale8;
 	uint32_t *lookup_Upscale16,*lookup_8to16;
-	bool SSE2_Enable,AVX_Enable,AVX2_Enable;
+	int16_t *lookupRGB_8;
+	int32_t *lookupRGB_16;
+	uint8_t *lookupL_8;
+	uint16_t *lookupL_16;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
 	VideoInfo *vi_422,*vi_444,*vi_original;
+
+	dataLookUp dl;
 
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[3][MAX_MT_THREADS];

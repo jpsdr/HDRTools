@@ -54,5 +54,11 @@
     <MASM Include="HDRTools_asm_x64.asm">
       <Filter>Fichiers sources</Filter>
     </MASM>
+    <MASM Include="HDRTools_AVX2_asm.asm">
+      <Filter>Fichiers sources</Filter>
+    </MASM>
+    <MASM Include="HDRTools_AVX2_asm_x64.asm">
+      <Filter>Fichiers sources</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

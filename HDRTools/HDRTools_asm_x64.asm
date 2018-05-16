@@ -1,5 +1,11 @@
 .data
 
+data segment align(32)
+
+data_f_1 real4 8 dup(1.0)
+data_f_65535 real4 8 dup(65535.0)
+
+
 .code
 
 ;JPSDR_HDRTools_Move8to16 proc dst:dword,src:dword,w:dword
@@ -2043,6 +2049,415 @@ Convert_16_YV24toRGB64_AVX_2:
 	ret
 
 JPSDR_HDRTools_Convert_16_YV24toRGB64_AVX endp
+
+
+;JPSDR_HDRTools_Convert_RGBPStoRGB64_SSE41 proc src_R:dword,src_G:dword,src_B:dword,dst:dword,w:dword,h:dword,lookup:dword,
+;	src_modulo_R:dword,src_modulo_G:dword,src_modulo_B:dword,dst_modulo:dword
+; src_R = rcx
+; src_G = rdx
+; src_B = r8
+; dst = r9
+
+JPSDR_HDRTools_Convert_RGBPStoRGB64_SSE41 proc public frame
+
+w equ dword ptr[rbp+48]
+h equ dword ptr[rbp+56]
+lookup equ qword ptr[rbp+64]
+src_modulo_R equ qword ptr[rbp+72]
+src_modulo_G equ qword ptr[rbp+80]
+src_modulo_B equ qword ptr[rbp+88]
+dst_modulo equ qword ptr[rbp+96]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	push r14
+	.pushreg r14
+	push r15
+	.pushreg r15
+	
+	sub rsp,32
+	.allocstack 32
+	movdqu XMMWORD ptr[rsp],xmm6
+	.savexmm128 xmm6,0
+	movdqu XMMWORD ptr[rsp+16],xmm7
+	.savexmm128 xmm7,16
+	.endprolog
+	
+	movaps xmm3,XMMWORD ptr data_f_1
+	movaps xmm4,XMMWORD ptr data_f_65535
+	
+	cld
+	mov rdi,r9
+	mov r9,rcx
+	mov r10,rdx			; src_B=r8,src_G=r10,src_R=r9
+	mov rbx,lookup
+	mov r11d,w
+	mov r12,src_modulo_R
+	mov r13,src_modulo_G
+	mov r14,src_modulo_B
+	mov r15,dst_modulo
+	xor rcx,rcx
+	xor rax,rax
+	
+Convert_RGBPStoRGB64_SSE41_1:
+	mov ecx,r11d
+Convert_RGBPStoRGB64_SSE41_2:
+	xor rdx,rdx
+	movaps xmm0,XMMWORD ptr[r8]
+	movaps xmm1,XMMWORD ptr[r10]
+	movaps xmm2,XMMWORD ptr[r9]
+	minps xmm0,xmm3
+	minps xmm1,xmm3
+	minps xmm2,xmm3
+	mulps xmm0,xmm4
+	mulps xmm1,xmm4
+	mulps xmm2,xmm4
+	cvttps2dq xmm0,xmm0
+	cvttps2dq xmm1,xmm1
+	cvttps2dq xmm2,xmm2
+	packusdw xmm0,xmm0
+	packusdw xmm1,xmm1
+	packusdw xmm2,xmm2
+	
+	pextrw eax,xmm0,0
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	pextrw eax,xmm1,0
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	pextrw eax,xmm2,0
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz Convert_RGBPStoRGB64_SSE41_3
+	inc rdx
+	
+	pextrw eax,xmm0,1
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	pextrw eax,xmm1,1
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	pextrw eax,xmm2,1
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz short Convert_RGBPStoRGB64_SSE41_3
+	inc rdx
+
+	pextrw eax,xmm0,2
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	pextrw eax,xmm1,2
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	pextrw eax,xmm2,2
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz short Convert_RGBPStoRGB64_SSE41_3
+	inc rdx
+
+	pextrw eax,xmm0,3
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	pextrw eax,xmm1,3
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	pextrw eax,xmm2,3
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	
+Convert_RGBPStoRGB64_SSE41_3:
+	inc rdx	
+	shl rdx,2	
+	add r8,rdx
+	add r10,rdx
+	add r9,rdx	
+	or ecx,ecx
+	jnz Convert_RGBPStoRGB64_SSE41_2
+	
+	add rdi,r15
+	add r8,r14
+	add r10,r13
+	add r9,r12
+	dec h
+	jnz Convert_RGBPStoRGB64_SSE41_1
+	
+	movdqu xmm7,XMMWORD ptr[rsp+16]
+	movdqu xmm6,XMMWORD ptr[rsp]
+	add rsp,32
+	
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rdi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_Convert_RGBPStoRGB64_SSE41 endp
+
+
+;JPSDR_HDRTools_Convert_RGBPStoRGB64_AVX proc src_R:dword,src_G:dword,src_B:dword,dst:dword,w:dword,h:dword,lookup:dword,
+;	src_modulo_R:dword,src_modulo_G:dword,src_modulo_B:dword,dst_modulo:dword
+; src_R = rcx
+; src_G = rdx
+; src_B = r8
+; dst = r9
+
+JPSDR_HDRTools_Convert_RGBPStoRGB64_AVX proc public frame
+
+w equ dword ptr[rbp+48]
+h equ dword ptr[rbp+56]
+lookup equ qword ptr[rbp+64]
+src_modulo_R equ qword ptr[rbp+72]
+src_modulo_G equ qword ptr[rbp+80]
+src_modulo_B equ qword ptr[rbp+88]
+dst_modulo equ qword ptr[rbp+96]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	push r14
+	.pushreg r14
+	push r15
+	.pushreg r15
+	
+	sub rsp,32
+	.allocstack 32
+	vmovdqu XMMWORD ptr[rsp],xmm6
+	.savexmm128 xmm6,0
+	vmovdqu XMMWORD ptr[rsp+16],xmm7
+	.savexmm128 xmm7,16
+	.endprolog	
+
+	vmovaps ymm3,YMMWORD ptr data_f_1
+	vmovaps ymm4,YMMWORD ptr data_f_65535
+	
+	cld
+	mov rdi,r9
+	mov r9,rcx
+	mov r10,rdx			; src_B=r8,src_G=r10,src_R=r9
+	mov rbx,lookup
+	mov r11d,w
+	mov r12,src_modulo_R
+	mov r13,src_modulo_G
+	mov r14,src_modulo_B
+	mov r15,dst_modulo
+	xor rcx,rcx
+	xor rax,rax
+	
+Convert_RGBPStoRGB64_AVX_1:
+	mov ecx,r11d
+Convert_RGBPStoRGB64_AVX_2:
+	xor rdx,rdx
+	vmovaps ymm0,YMMWORD ptr[r8]
+	vmovaps ymm1,YMMWORD ptr[r10]
+	vmovaps ymm2,YMMWORD ptr[r9]
+	vminps ymm0,ymm0,ymm3
+	vminps ymm1,ymm1,ymm3
+	vminps ymm2,ymm2,ymm3
+	vmulps ymm0,ymm0,ymm4
+	vmulps ymm1,ymm1,ymm4
+	vmulps ymm2,ymm2,ymm4
+	vcvttps2dq ymm0,ymm0
+	vcvttps2dq ymm1,ymm1
+	vcvttps2dq ymm2,ymm2
+	
+	vextractf128 xmm5,ymm0,1
+	vextractf128 xmm6,ymm1,1
+	vextractf128 xmm7,ymm2,1
+	
+	vpackusdw xmm0,xmm0,xmm5
+	vpackusdw xmm1,xmm1,xmm6
+	vpackusdw xmm2,xmm2,xmm7
+	
+	vpextrw eax,xmm0,0
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm1,0
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm2,0
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz Convert_RGBPStoRGB64_AVX_3
+	inc rdx
+	
+	vpextrw eax,xmm0,1
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm1,1
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm2,1
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz Convert_RGBPStoRGB64_AVX_3
+	inc rdx
+
+	vpextrw eax,xmm0,2
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm1,2
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm2,2
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz Convert_RGBPStoRGB64_AVX_3
+	inc rdx
+
+	vpextrw eax,xmm0,3
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm1,3
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm2,3
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz Convert_RGBPStoRGB64_AVX_3
+	inc rdx
+	
+	vpextrw eax,xmm0,4
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm1,4
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm2,4
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz Convert_RGBPStoRGB64_AVX_3
+	inc rdx	
+	
+	vpextrw eax,xmm0,5
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm1,5
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm2,5
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz short Convert_RGBPStoRGB64_AVX_3
+	inc rdx	
+
+	vpextrw eax,xmm0,6
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm1,6
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm2,6
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	jz short Convert_RGBPStoRGB64_AVX_3
+	inc rdx		
+
+	vpextrw eax,xmm0,7
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm1,7
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	vpextrw eax,xmm2,7
+	mov ax,word ptr[rbx+2*rax]
+	stosw
+	xor eax,eax
+	stosw
+	dec ecx
+	
+Convert_RGBPStoRGB64_AVX_3:
+	inc rdx	
+	shl rdx,2	
+	add r8,rdx
+	add r10,rdx
+	add r9,rdx	
+	or ecx,ecx
+	jnz Convert_RGBPStoRGB64_AVX_2
+	
+	add rdi,r15
+	add r8,r14
+	add r10,r13
+	add r9,r12
+	dec h
+	jnz Convert_RGBPStoRGB64_AVX_1
+	
+	vzeroupper
+	
+	vmovdqu xmm7,XMMWORD ptr[rsp+16]
+	vmovdqu xmm6,XMMWORD ptr[rsp]
+	add rsp,32
+	
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rdi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_Convert_RGBPStoRGB64_AVX endp
 
 
 ;JPSDR_HDRTools_Convert_RGB32toYV24_SSE2 proc src:dword,dst_y:dword,dst_u:dword,dst_v:dword,w:dword,h:dword,offset_Y:word,

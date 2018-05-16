@@ -27,42 +27,6 @@
 #define HDRTOOLS_VERSION "HDRTools 0.1.0 JPSDR"
 // Inspired from Neuron2 filter
 
-#define Interlaced_Tab_Size 3
-
-#define myfree(ptr) if (ptr!=NULL) { free(ptr); ptr=NULL;}
-#define mydelete(ptr) if (ptr!=NULL) { delete ptr; ptr=NULL;}
-
-#define trunc(x) (signed long) floor(x)
-#define round(x) (signed long) floor(x+0.5)
-
-typedef struct _RGB32BMP
-{
-	uint8_t b;
-	uint8_t g;
-	uint8_t r;
-	uint8_t alpha;
-} RGB32BMP;
-
-typedef union _URGB32BMP
-{
-	RGB32BMP rgb32bmp;
-	uint32_t data32;
-} URGB32BMP;
-
-
-typedef struct _RGB64BMP
-{
-	uint16_t b;
-	uint16_t g;
-	uint16_t r;
-	uint16_t alpha;
-} RGB64BMP;
-
-typedef union _URGB64BMP
-{
-	RGB64BMP rgb64bmp;
-	uint64_t data64;
-} URGB64BMP;
 
 typedef struct _dataLookUp
 {
@@ -75,10 +39,10 @@ typedef struct _MT_Data_Info_HDRTools
 {
 	void *src1,*src2,*src3;
 	void *dst1,*dst2,*dst3;
-	int src_pitch1,src_pitch2,src_pitch3;
-	int dst_pitch1,dst_pitch2,dst_pitch3;
-	int src_modulo1,src_modulo2,src_modulo3;
-	int dst_modulo1,dst_modulo2,dst_modulo3;
+	ptrdiff_t src_pitch1,src_pitch2,src_pitch3;
+	ptrdiff_t dst_pitch1,dst_pitch2,dst_pitch3;
+	ptrdiff_t src_modulo1,src_modulo2,src_modulo3;
+	ptrdiff_t dst_modulo1,dst_modulo2,dst_modulo3;
 	int32_t src_Y_h_min,src_Y_h_max,src_Y_w;
 	int32_t src_UV_h_min,src_UV_h_max,src_UV_w;
 	int32_t dst_Y_h_min,dst_Y_h_max,dst_Y_w;
@@ -87,19 +51,19 @@ typedef struct _MT_Data_Info_HDRTools
 } MT_Data_Info_HDRTools;
 
 
-class ConvertYUVtoRGBP : public GenericVideoFilter
+class ConvertYUVtoLinearRGB : public GenericVideoFilter
 {
 public:
-	ConvertYUVtoRGBP(PClip _child,int _Color,bool _Output16,bool _HLGMode,bool _fullrange,bool _mpeg2c,
+	ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _fullrange,bool _mpeg2c,
 		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
-	virtual ~ConvertYUVtoRGBP();
+	virtual ~ConvertYUVtoLinearRGB();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
 	int __stdcall SetCacheHints(int cachehints, int frame_range);
 
 private:
-	int Color;
-	bool Output16,HLGMode,mpeg2c,fullrange;
+	int Color,OutputMode;
+	bool HLGMode,mpeg2c,fullrange;
 	bool sleep;
 	uint16_t *lookup_Upscale8;
 	uint32_t *lookup_Upscale16,*lookup_8to16;
@@ -107,13 +71,14 @@ private:
 	int32_t *lookupRGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16;
+	float *lookupL_32;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
-	VideoInfo *vi_422,*vi_444,*vi_original;
+	VideoInfo *vi_original,*vi_422,*vi_444,*vi_RGB64;
 
 	dataLookUp dl;
 
@@ -130,3 +95,45 @@ private:
 };
 
 
+
+class ConvertLinearRGBtoYUV : public GenericVideoFilter
+{
+public:
+	ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _fullrange,bool _mpeg2c,
+		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
+	virtual ~ConvertLinearRGBtoYUV();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	int Color,OutputMode;
+	bool HLGMode,mpeg2c,fullrange;
+	bool sleep;
+	uint16_t *lookup_Upscale8;
+	uint32_t *lookup_Upscale16,*lookup_8to16;
+	int16_t *lookupRGB_8;
+	int32_t *lookupRGB_16;
+	uint8_t *lookupL_8;
+	uint16_t *lookupL_16;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	VideoInfo *vi_original,*vi_422,*vi_444,*vi_RGB64;
+
+	dataLookUp dl;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[3][MAX_MT_THREADS];
+	uint8_t threads,threads_number[3],max_threads;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};

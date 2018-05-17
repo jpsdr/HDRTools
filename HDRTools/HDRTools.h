@@ -99,7 +99,7 @@ private:
 class ConvertLinearRGBtoYUV : public GenericVideoFilter
 {
 public:
-	ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _fullrange,bool _mpeg2c,
+	ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _fullrange,bool _mpeg2c,bool _fastmode,
 		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertLinearRGBtoYUV();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
@@ -108,10 +108,8 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,mpeg2c,fullrange;
+	bool HLGMode,mpeg2c,fullrange,fastmode;
 	bool sleep;
-	uint16_t *lookup_Upscale8;
-	uint32_t *lookup_Upscale16,*lookup_8to16;
 	int16_t *lookupRGB_8;
 	int32_t *lookupRGB_16;
 	uint8_t *lookupL_8;
@@ -122,7 +120,7 @@ private:
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
-	VideoInfo *vi_original,*vi_422,*vi_444,*vi_RGB64;
+	VideoInfo *vi_original,*vi_420,*vi_422,*vi_444,*vi_RGB32,*vi_RGB64;
 
 	dataLookUp dl;
 

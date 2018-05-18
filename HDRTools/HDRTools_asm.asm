@@ -2,11 +2,14 @@
 .xmm
 .model flat,c
 
+.data
+
 data segment align(32)
 
 data_f_65535 real4 8 dup(65535.0)
 
 .code
+
 
 JPSDR_HDRTools_Move8to16 proc dst:dword,src:dword,w:dword
 
@@ -2186,7 +2189,7 @@ Convert_RGBPStoRGB64_AVX_2:
 Convert_RGBPStoRGB64_AVX_3:
 	mov ecx,w
 	and ecx,7
-	jz Convert_RGBPStoRGB64_AVX_5
+	jz Convert_RGBPStoRGB64_AVX_7
 	
 	vmovaps ymm0,YMMWORD ptr[esi+4*eax]
 	vmovaps ymm1,YMMWORD ptr[edx+4*eax]

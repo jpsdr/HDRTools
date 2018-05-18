@@ -25,7 +25,6 @@
 #include "ThreadPoolInterface.h"
 
 #define HDRTOOLS_VERSION "HDRTools 0.1.0 JPSDR"
-// Inspired from Neuron2 filter
 
 
 typedef struct _dataLookUp

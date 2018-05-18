@@ -4,8 +4,8 @@ data segment align(32)
 
 data_f_65535 real4 8 dup(65535.0)
 
-
 .code
+
 
 ;JPSDR_HDRTools_Move8to16 proc dst:dword,src:dword,w:dword
 ; dst = rcx
@@ -2573,6 +2573,7 @@ Convert_RGBPStoRGB64_SSE41_5:
 	pop r13
 	pop r12
 	pop rbx
+	pop rsi
 	pop rbp
 
 	ret
@@ -2682,7 +2683,7 @@ Convert_RGBPStoRGB64_AVX_2:
 Convert_RGBPStoRGB64_AVX_3:
 	mov ecx,r11d
 	and ecx,7
-	jz Convert_RGBPStoRGB64_AVX_5
+	jz Convert_RGBPStoRGB64_AVX_7
 	
 	vmovaps ymm0,YMMWORD ptr[r8+4*rax]
 	vmovaps ymm1,YMMWORD ptr[rsi+4*rax]
@@ -2765,6 +2766,7 @@ Convert_RGBPStoRGB64_AVX_7:
 	pop r13
 	pop r12
 	pop rbx
+	pop rsi
 	pop rbp
 
 	ret

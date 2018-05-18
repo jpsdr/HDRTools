@@ -30,9 +30,6 @@
     <ClInclude Include="ThreadPoolInterface.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="Maths387.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HDRTools.cpp">
@@ -42,9 +39,6 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="ThreadPoolInterface.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Maths387.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -64,12 +58,6 @@
       <Filter>Fichiers sources</Filter>
     </MASM>
     <MASM Include="HDRTools_AVX2_asm_x64.asm">
-      <Filter>Fichiers sources</Filter>
-    </MASM>
-    <MASM Include="Maths387_asm_x64.asm">
-      <Filter>Fichiers sources</Filter>
-    </MASM>
-    <MASM Include="Maths387_asm_x86.asm">
       <Filter>Fichiers sources</Filter>
     </MASM>
   </ItemGroup>

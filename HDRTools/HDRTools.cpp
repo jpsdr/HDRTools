@@ -32,6 +32,9 @@
 
 static ThreadPoolInterface *poolInterface;
 
+extern "C" double pow_asm(double x,double y);
+extern "C" double pow_asm_avx(double x,double y);
+
 extern "C" void JPSDR_HDRTools_Move8to16(void *dst,const void *src,int32_t w);
 extern "C" void JPSDR_HDRTools_Move8to16_SSE2(void *dst,const void *src,int32_t w);
 extern "C" void JPSDR_HDRTools_Move8to16_AVX(void *dst,const void *src,int32_t w);
@@ -109,6 +112,15 @@ extern "C" void JPSDR_HDRTools_Convert_RGB32toYV24_AVX(const void *src,void *dst
 	int16_t offset_Y,int16_t offset_U,int16_t offset_V,const int16_t *lookup, ptrdiff_t src_modulo,
 	ptrdiff_t dst_modulo_Y,ptrdiff_t dst_modulo_U,ptrdiff_t dst_modulo_V,int16_t Min_Y,int16_t Max_Y,
 	int16_t Min_U,int16_t Max_U,int16_t Min_V,int16_t Max_V);
+
+extern "C" void JPSDR_HDRTools_Convert_16_RGB32toYV24_SSE41(const void *src,void *dst_y,void *dst_u,void *dst_v,int32_t w,int32_t h,
+	int32_t offset_Y,int32_t offset_U,int32_t offset_V,const int32_t *lookup, ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo_Y,ptrdiff_t dst_modulo_U,ptrdiff_t dst_modulo_V,uint16_t Min_Y,uint16_t Max_Y,
+	uint16_t Min_U,uint16_t Max_U,uint16_t Min_V,uint16_t Max_V);
+extern "C" void JPSDR_HDRTools_Convert_16_RGB32toYV24_AVX(const void *src,void *dst_y,void *dst_u,void *dst_v,int32_t w,int32_t h,
+	int32_t offset_Y,int32_t offset_U,int32_t offset_V,const int32_t *lookup, ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo_Y,ptrdiff_t dst_modulo_U,ptrdiff_t dst_modulo_V,uint16_t Min_Y,uint16_t Max_Y,
+	uint16_t Min_U,uint16_t Max_U,uint16_t Min_V,uint16_t Max_V);
 
 
 #ifdef AVX2_BUILD_POSSIBLE
@@ -340,19 +352,19 @@ static inline void Move_Full_8to16_AVX(const void *src_, void *dst_, const int32
 
 static void Convert_Progressive_8_YV12toYV16_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -370,7 +382,7 @@ static void Convert_Progressive_8_YV12toYV16_SSE2(const MT_Data_Info_HDRTools &m
 	src_Vp=src_V-src_pitch_V;
 	src_Vn=src_V+src_pitch_V;
 
-	Move_Full(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -467,19 +479,19 @@ static void Convert_Progressive_8_YV12toYV16_SSE2(const MT_Data_Info_HDRTools &m
 
 static void Convert_Progressive_8to16_YV12toYV16_SSE2(const MT_Data_Info_HDRTools &mt_data_inf,uint32_t *lookup1,uint32_t *lookup2)
 {
-	const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -500,7 +512,7 @@ static void Convert_Progressive_8to16_YV12toYV16_SSE2(const MT_Data_Info_HDRTool
 	src_Vp=src_V-src_pitch_V;
 	src_Vn=src_V+src_pitch_V;
 
-	Move_Full_8to16_SSE2(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full_8to16_SSE2(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -657,19 +669,19 @@ static void Convert_Progressive_8to16_YV12toYV16_SSE2(const MT_Data_Info_HDRTool
 
 static void Convert_Progressive_8_YV12toYV16_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -687,7 +699,7 @@ static void Convert_Progressive_8_YV12toYV16_AVX(const MT_Data_Info_HDRTools &mt
 	src_Vp=src_V-src_pitch_V;
 	src_Vn=src_V+src_pitch_V;
 
-	Move_Full(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -783,19 +795,19 @@ static void Convert_Progressive_8_YV12toYV16_AVX(const MT_Data_Info_HDRTools &mt
 
 static void Convert_Progressive_8to16_YV12toYV16_AVX(const MT_Data_Info_HDRTools &mt_data_inf,uint32_t *lookup1,uint32_t *lookup2)
 {
-	const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -816,7 +828,7 @@ static void Convert_Progressive_8to16_YV12toYV16_AVX(const MT_Data_Info_HDRTools
 	src_Vp=src_V-src_pitch_V;
 	src_Vn=src_V+src_pitch_V;
 
-	Move_Full_8to16_AVX(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full_8to16_AVX(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -972,19 +984,19 @@ static void Convert_Progressive_8to16_YV12toYV16_AVX(const MT_Data_Info_HDRTools
 
 static void Convert_Progressive_16_YV12toYV16_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -1004,7 +1016,7 @@ static void Convert_Progressive_16_YV12toYV16_SSE2(const MT_Data_Info_HDRTools &
 	src_Vn=src_V+src_pitch_V;
 
 
-	Move_Full(srcYp,dstYp,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcYp,dstYp,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -1100,19 +1112,19 @@ static void Convert_Progressive_16_YV12toYV16_SSE2(const MT_Data_Info_HDRTools &
 
 static void Convert_Progressive_16_YV12toYV16_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -1131,7 +1143,7 @@ static void Convert_Progressive_16_YV12toYV16_AVX(const MT_Data_Info_HDRTools &m
 	src_Vp=src_V-src_pitch_V;
 	src_Vn=src_V+src_pitch_V;
 
-	Move_Full(srcYp,dstYp,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcYp,dstYp,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -1228,19 +1240,19 @@ static void Convert_Progressive_16_YV12toYV16_AVX(const MT_Data_Info_HDRTools &m
 #ifdef AVX2_BUILD_POSSIBLE
 static void Convert_Progressive_8_YV12toYV16_AVX2(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -1258,7 +1270,7 @@ static void Convert_Progressive_8_YV12toYV16_AVX2(const MT_Data_Info_HDRTools &m
 	src_Vp=src_V-src_pitch_V;
 	src_Vn=src_V+src_pitch_V;
 
-	Move_Full(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -1354,19 +1366,19 @@ static void Convert_Progressive_8_YV12toYV16_AVX2(const MT_Data_Info_HDRTools &m
 
 static void Convert_Progressive_16_YV12toYV16_AVX2(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -1385,7 +1397,7 @@ static void Convert_Progressive_16_YV12toYV16_AVX2(const MT_Data_Info_HDRTools &
 	src_Vp=src_V-src_pitch_V;
 	src_Vn=src_V+src_pitch_V;
 
-	Move_Full(srcYp,dstYp,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcYp,dstYp,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -1482,19 +1494,19 @@ static void Convert_Progressive_16_YV12toYV16_AVX2(const MT_Data_Info_HDRTools &
 
 static void Convert_Progressive_8_YV12toYV16(const MT_Data_Info_HDRTools &mt_data_inf,const uint16_t *lookup)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU_=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV_=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -1514,7 +1526,7 @@ static void Convert_Progressive_8_YV12toYV16(const MT_Data_Info_HDRTools &mt_dat
 	dst_U=dstU_;
 	dst_V=dstV_;
 
-	Move_Full(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -1620,19 +1632,19 @@ static void Convert_Progressive_8_YV12toYV16(const MT_Data_Info_HDRTools &mt_dat
 
 static void Convert_Progressive_16_YV12toYV16(const MT_Data_Info_HDRTools &mt_data_inf,const uint32_t *lookup)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU_=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV_=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -1653,7 +1665,7 @@ static void Convert_Progressive_16_YV12toYV16(const MT_Data_Info_HDRTools &mt_da
 	dst_U=dstU_;
 	dst_V=dstV_;
 
-	Move_Full(srcY,dstY,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcY,dstY,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -1783,19 +1795,19 @@ static void Convert_Progressive_16_YV12toYV16(const MT_Data_Info_HDRTools &mt_da
 
 static void Convert_Progressive_8to16_YV12toYV16(const MT_Data_Info_HDRTools &mt_data_inf,const uint32_t *lookup1,const uint32_t *lookup2)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU_=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV_=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -1815,7 +1827,7 @@ static void Convert_Progressive_8to16_YV12toYV16(const MT_Data_Info_HDRTools &mt
 	dst_U=dstU_;
 	dst_V=dstV_;
 
-	Move_Full_8to16(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full_8to16(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	if (mt_data_inf.top)
@@ -1937,25 +1949,25 @@ static void Convert_Progressive_8to16_YV12toYV16(const MT_Data_Info_HDRTools &mt
 
 static void Convert_8_YV16toYV24(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
 	const int32_t w_U=(dst_w>>1)-1,w_V=(dst_w>>1)-1;
 
-	Move_Full(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	for(int32_t i=h_Y_min; i<h_Y_max; i++)
@@ -1995,19 +2007,19 @@ static void Convert_8_YV16toYV24(const MT_Data_Info_HDRTools &mt_data_inf)
 
 static void Convert_8_YV16toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -2017,7 +2029,7 @@ static void Convert_8_YV16toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
 	const uint32_t offsetU8=w_U16 << 4,offsetU16=offsetU8 << 1;
 	const uint32_t offsetV8=w_V16 << 4,offsetV16=offsetV8 << 1;
 
-	Move_Full(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	for(int32_t i=h_Y_min; i<h_Y_max; i++)
@@ -2065,19 +2077,19 @@ static void Convert_8_YV16toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
 
 static void Convert_8_YV16toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -2087,7 +2099,7 @@ static void Convert_8_YV16toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
 	const uint32_t offsetU8=w_U16 << 4,offsetU16=offsetU8 << 1;
 	const uint32_t offsetV8=w_V16 << 4,offsetV16=offsetV8 << 1;
 
-	Move_Full(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	for(int32_t i=h_Y_min; i<h_Y_max; i++)
@@ -2135,25 +2147,25 @@ static void Convert_8_YV16toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
 
 static void Convert_8to16_YV16toYV24(const MT_Data_Info_HDRTools &mt_data_inf,uint32_t *lookup)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
 	const int32_t w_U=(dst_w>>1)-1,w_V=(dst_w>>1)-1;
 
-	Move_Full_8to16(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full_8to16(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	for(int32_t i=h_Y_min; i<h_Y_max; i++)
@@ -2195,19 +2207,19 @@ static void Convert_8to16_YV16toYV24(const MT_Data_Info_HDRTools &mt_data_inf,ui
 
 static void Convert_8to16_YV16toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_inf,uint32_t *lookup)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -2217,7 +2229,7 @@ static void Convert_8to16_YV16toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_i
 	const uint32_t offsetU8=w_U8 << 3,offsetU16=offsetU8 << 2;
 	const uint32_t offsetV8=w_V8 << 3,offsetV16=offsetV8 << 2;
 
-	Move_Full_8to16_SSE2(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full_8to16_SSE2(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	for(int32_t i=h_Y_min; i<h_Y_max; i++)
@@ -2265,19 +2277,19 @@ static void Convert_8to16_YV16toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_i
 
 static void Convert_8to16_YV16toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_inf,uint32_t *lookup)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -2287,7 +2299,7 @@ static void Convert_8to16_YV16toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_in
 	const uint32_t offsetU8=w_U8 << 3,offsetU16=offsetU8 << 2;
 	const uint32_t offsetV8=w_V8 << 3,offsetV16=offsetV8 << 2;
 
-	Move_Full_8to16_AVX(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full_8to16_AVX(srcY,dstY,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	for(int32_t i=h_Y_min; i<h_Y_max; i++)
@@ -2335,25 +2347,25 @@ static void Convert_8to16_YV16toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_in
 
 static void Convert_16_YV16toYV24(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
 	const int32_t w_U=(dst_w>>1)-1,w_V=(dst_w>>1)-1;
 
-	Move_Full(srcY,dstY,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcY,dstY,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	for(int32_t i=h_Y_min; i<h_Y_max; i++)
@@ -2397,19 +2409,19 @@ static void Convert_16_YV16toYV24(const MT_Data_Info_HDRTools &mt_data_inf)
 
 static void Convert_16_YV16toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -2419,7 +2431,7 @@ static void Convert_16_YV16toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
 	const uint32_t offsetU8=w_U8 << 4,offsetU16=offsetU8 << 1;
 	const uint32_t offsetV8=w_V8 << 4,offsetV16=offsetV8 << 1;
 
-	Move_Full(srcY,dstY,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcY,dstY,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	for(int32_t i=h_Y_min; i<h_Y_max; i++)
@@ -2467,19 +2479,19 @@ static void Convert_16_YV16toYV24_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
 
 static void Convert_16_YV16toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
 {
-	const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
+	//const uint8_t *srcY=(const uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcU=(const uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcV=(const uint8_t *)mt_data_inf.src3;
-	uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
+	//uint8_t *dstY=(uint8_t *)mt_data_inf.dst1;
 	uint8_t *dstU=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstV=(uint8_t *)mt_data_inf.dst3;
 	const int32_t dst_w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
 	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
 	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
@@ -2489,7 +2501,7 @@ static void Convert_16_YV16toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
 	const uint32_t offsetU8=w_U8 << 4,offsetU16=offsetU8 << 1;
 	const uint32_t offsetV8=w_V8 << 4,offsetV16=offsetV8 << 1;
 
-	Move_Full(srcY,dstY,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+	//Move_Full(srcY,dstY,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
 
 // Planar U
 	for(int32_t i=h_Y_min; i<h_Y_max; i++)
@@ -2672,6 +2684,10 @@ static void Convert_YV24toRGB64_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,c
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
 
+	if (mt_data_inf.moveY8to16)
+		Move_Full_8to16_SSE2(mt_data_inf.dst2,mt_data_inf.src1,w,h_Y_max-h_Y_min,
+			mt_data_inf.dst_pitch2,mt_data_inf.src_pitch1);
+
 	switch(bits_per_pixel)
 	{
 		case 8 :
@@ -2710,6 +2726,10 @@ static void Convert_YV24toRGB64_AVX(const MT_Data_Info_HDRTools &mt_data_inf,con
 	const int32_t w=mt_data_inf.dst_Y_w;
 	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
 	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+
+	if (mt_data_inf.moveY8to16)
+		Move_Full_8to16_AVX(mt_data_inf.dst2,mt_data_inf.src1,w,h_Y_max-h_Y_min,
+			mt_data_inf.dst_pitch2,mt_data_inf.src_pitch1);
 
 	switch(bits_per_pixel)
 	{
@@ -2759,6 +2779,10 @@ static void Convert_16_YV24toRGB64(const MT_Data_Info_HDRTools &mt_data_inf,cons
 	const ptrdiff_t dst_pitch=mt_data_inf.dst_pitch1;
 	const uint32_t vmax=(uint32_t)1 << bits_per_pixel;
 	const uint32_t vmax2=vmax*2,vmax3=vmax*3,vmax4=vmax*4;
+
+	if (mt_data_inf.moveY8to16)
+		Move_Full_8to16(mt_data_inf.dst2,mt_data_inf.src1,w,h_Y_max-h_Y_min,
+			mt_data_inf.dst_pitch2,src_pitch_y);
 
 	for (int32_t i=h_Y_min; i<h_Y_max; i++)
 	{
@@ -2977,24 +3001,24 @@ static void Convert_LinearRGBPStoRGB64(const MT_Data_Info_HDRTools &mt_data_inf,
 
 		for(int32_t j=0; j<w; j++)
 		{
-			int32_t r=(int32_t)round(srcR[j]*65535.0);
-			int32_t g=(int32_t)round(srcG[j]*65535.0);
-			int32_t b=(int32_t)round(srcB[j]*65535.0);
+			int32_t r=(int32_t)round(srcR[j]*1048575.0f);
+			int32_t g=(int32_t)round(srcG[j]*1048575.0f);
+			int32_t b=(int32_t)round(srcB[j]*1048575.0f);
 
 			if (r<0) r=0;
 			else
 			{
-				if (r>65535) r=65535;
+				if (r>1048575) r=1048575;
 			}
 			if (g<0) g=0;
 			else
 			{
-				if (g>65535) g=65535;
+				if (g>1048575) g=1048575;
 			}
 			if (b<0) b=0;
 			else
 			{
-				if (b>65535) b=65535;
+				if (b>1048575) b=1048575;
 			}
 			dst[x++]=lookup[b];
 			dst[x++]=lookup[g];
@@ -3142,12 +3166,21 @@ static void Convert_LinearRGBPStoRGB64_SDR(const MT_Data_Info_HDRTools &mt_data_
 		{
 			double rd=srcR[j],gd=srcG[j],bd=srcB[j];
 
+#ifdef USE_ASM_FPU
+			if (rd<beta) rd*=coeff_m;
+			else rd=alpha*pow_asm(rd,coeff_p)-alpha_1;
+			if (gd<beta) gd*=coeff_m;
+			else gd=alpha*pow_asm(gd,coeff_p)-alpha_1;
+			if (bd<beta) bd*=coeff_m;
+			else bd=alpha*pow_asm(bd,coeff_p)-alpha_1;
+#else
 			if (rd<beta) rd*=coeff_m;
 			else rd=alpha*pow(rd,coeff_p)-alpha_1;
 			if (gd<beta) gd*=coeff_m;
 			else gd=alpha*pow(gd,coeff_p)-alpha_1;
 			if (bd<beta) bd*=coeff_m;
 			else bd=alpha*pow(bd,coeff_p)-alpha_1;
+#endif
 
 			int32_t r=(int32_t)round(rd*65535.0);
 			int32_t g=(int32_t)round(gd*65535.0);
@@ -3210,12 +3243,21 @@ static void Convert_LinearRGBPStoRGB64_SDR_SSE41(const MT_Data_Info_HDRTools &mt
 		{
 			double rd=srcR[j],gd=srcG[j],bd=srcB[j];
 
+#ifdef USE_ASM_FPU
+			if (rd<beta) rd*=coeff_m;
+			else rd=alpha*pow_asm(rd,coeff_p)-alpha_1;
+			if (gd<beta) gd*=coeff_m;
+			else gd=alpha*pow_asm(gd,coeff_p)-alpha_1;
+			if (bd<beta) bd*=coeff_m;
+			else bd=alpha*pow_asm(bd,coeff_p)-alpha_1;
+#else
 			if (rd<beta) rd*=coeff_m;
 			else rd=alpha*pow(rd,coeff_p)-alpha_1;
 			if (gd<beta) gd*=coeff_m;
 			else gd=alpha*pow(gd,coeff_p)-alpha_1;
 			if (bd<beta) bd*=coeff_m;
 			else bd=alpha*pow(bd,coeff_p)-alpha_1;
+#endif
 
 			srcR[j]=(float)rd;
 			srcG[j]=(float)gd;
@@ -3263,12 +3305,21 @@ static void Convert_LinearRGBPStoRGB64_SDR_AVX(const MT_Data_Info_HDRTools &mt_d
 		{
 			double rd=srcR[j],gd=srcG[j],bd=srcB[j];
 
+#ifdef USE_ASM_FPU
+			if (rd<beta) rd*=coeff_m;
+			else rd=alpha*pow_asm_avx(rd,coeff_p)-alpha_1;
+			if (gd<beta) gd*=coeff_m;
+			else gd=alpha*pow_asm_avx(gd,coeff_p)-alpha_1;
+			if (bd<beta) bd*=coeff_m;
+			else bd=alpha*pow_asm_avx(bd,coeff_p)-alpha_1;
+#else
 			if (rd<beta) rd*=coeff_m;
 			else rd=alpha*pow(rd,coeff_p)-alpha_1;
 			if (gd<beta) gd*=coeff_m;
 			else gd=alpha*pow(gd,coeff_p)-alpha_1;
 			if (bd<beta) bd*=coeff_m;
 			else bd=alpha*pow(bd,coeff_p)-alpha_1;
+#endif
 
 			srcR[j]=(float)rd;
 			srcG[j]=(float)gd;
@@ -3322,6 +3373,25 @@ static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_i
 		{
 			double rd=srcR[j],gd=srcG[j],bd=srcB[j],x0;
 
+#ifdef USE_ASM_FPU
+			if (rd<=beta2) rd*=alpha2;
+			else rd=pow_asm(coeff_m*rd,coeff_p1)*alpha-alpha_1;
+			rd=pow_asm(rd,coeff_p2)*coeff_100;
+			x0=pow_asm(rd,m1);
+			rd=pow_asm((c1+c2*x0)/(coeff_a+c3*x0),m2);
+
+			if (gd<=beta2) gd*=alpha2;
+			else gd=pow_asm(coeff_m*gd,coeff_p1)*alpha-alpha_1;
+			gd=pow_asm(gd,coeff_p2)*coeff_100;
+			x0=pow_asm(gd,m1);
+			gd=pow_asm((c1+c2*x0)/(coeff_a+c3*x0),m2);
+
+			if (bd<=beta2) bd*=alpha2;
+			else bd=pow_asm(coeff_m*bd,coeff_p1)*alpha-alpha_1;
+			bd=pow_asm(bd,coeff_p2)*coeff_100;
+			x0=pow_asm(bd,m1);
+			bd=pow_asm((c1+c2*x0)/(coeff_a+c3*x0),m2);
+#else
 			if (rd<=beta2) rd*=alpha2;
 			else rd=pow(coeff_m*rd,coeff_p1)*alpha-alpha_1;
 			rd=pow(rd,coeff_p2)*coeff_100;
@@ -3339,6 +3409,7 @@ static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_i
 			bd=pow(bd,coeff_p2)*coeff_100;
 			x0=pow(bd,m1);
 			bd=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
+#endif
 
 			int32_t r=(int32_t)round(rd*65535.0);
 			int32_t g=(int32_t)round(gd*65535.0);
@@ -3407,6 +3478,25 @@ static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_
 		{
 			double rd=srcR[j],gd=srcG[j],bd=srcB[j],x0;
 
+#ifdef USE_ASM_FPU
+			if (rd<=beta2) rd*=alpha2;
+			else rd=pow_asm(coeff_m*rd,coeff_p1)*alpha-alpha_1;
+			rd=pow_asm(rd,coeff_p2)*coeff_100;
+			x0=pow_asm(rd,m1);
+			rd=pow_asm((c1+c2*x0)/(coeff_a+c3*x0),m2);
+
+			if (gd<=beta2) gd*=alpha2;
+			else gd=pow_asm(coeff_m*gd,coeff_p1)*alpha-alpha_1;
+			gd=pow_asm(gd,coeff_p2)*coeff_100;
+			x0=pow_asm(gd,m1);
+			gd=pow_asm((c1+c2*x0)/(coeff_a+c3*x0),m2);
+
+			if (bd<=beta2) bd*=alpha2;
+			else bd=pow_asm(coeff_m*bd,coeff_p1)*alpha-alpha_1;
+			bd=pow_asm(bd,coeff_p2)*coeff_100;
+			x0=pow_asm(bd,m1);
+			bd=pow_asm((c1+c2*x0)/(coeff_a+c3*x0),m2);
+#else
 			if (rd<=beta2) rd*=alpha2;
 			else rd=pow(coeff_m*rd,coeff_p1)*alpha-alpha_1;
 			rd=pow(rd,coeff_p2)*coeff_100;
@@ -3424,6 +3514,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_
 			bd=pow(bd,coeff_p2)*coeff_100;
 			x0=pow(bd,m1);
 			bd=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
+#endif
 
 			srcR[j]=(float)rd;
 			srcG[j]=(float)gd;
@@ -3477,6 +3568,25 @@ static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_da
 		{
 			double rd=srcR[j],gd=srcG[j],bd=srcB[j],x0;
 
+#ifdef USE_ASM_FPU
+			if (rd<=beta2) rd*=alpha2;
+			else rd=pow_asm_avx(coeff_m*rd,coeff_p1)*alpha-alpha_1;
+			rd=pow_asm_avx(rd,coeff_p2)*coeff_100;
+			x0=pow_asm_avx(rd,m1);
+			rd=pow_asm_avx((c1+c2*x0)/(coeff_a+c3*x0),m2);
+
+			if (gd<=beta2) gd*=alpha2;
+			else gd=pow_asm_avx(coeff_m*gd,coeff_p1)*alpha-alpha_1;
+			gd=pow_asm_avx(gd,coeff_p2)*coeff_100;
+			x0=pow_asm_avx(gd,m1);
+			gd=pow_asm_avx((c1+c2*x0)/(coeff_a+c3*x0),m2);
+
+			if (bd<=beta2) bd*=alpha2;
+			else bd=pow_asm_avx(coeff_m*bd,coeff_p1)*alpha-alpha_1;
+			bd=pow_asm_avx(bd,coeff_p2)*coeff_100;
+			x0=pow_asm_avx(bd,m1);
+			bd=pow_asm_avx((c1+c2*x0)/(coeff_a+c3*x0),m2);
+#else
 			if (rd<=beta2) rd*=alpha2;
 			else rd=pow(coeff_m*rd,coeff_p1)*alpha-alpha_1;
 			rd=pow(rd,coeff_p2)*coeff_100;
@@ -3494,6 +3604,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_da
 			bd=pow(bd,coeff_p2)*coeff_100;
 			x0=pow(bd,m1);
 			bd=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
+#endif
 
 			srcR[j]=(float)rd;
 			srcG[j]=(float)gd;
@@ -3813,6 +3924,13 @@ static void Convert_RGB32toYV24_AVX(const MT_Data_Info_HDRTools &mt_data_inf,con
 		mt_data_inf.src_modulo1,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo3,
 		(int16_t)dl.Min_Y,(int16_t)dl.Max_Y,(int16_t)dl.Min_U,(int16_t)dl.Max_U,(int16_t)dl.Min_V,(int16_t)dl.Max_V);
 }
+
+
+/*
+*****************************************************************
+**               Matrix convertion functions                   **
+*****************************************************************
+*/
 
 
 static void Compute_Lookup_RGB_8(uint8_t color_mode,bool full_range,bool YUVtoRGB,int16_t *lookup,dataLookUp &data)
@@ -4621,7 +4739,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 	const bool tmp2_UV_al16=((((size_t)tmp2Uw) & 0x0F)==0) && ((((size_t)tmp2Vw) & 0x0F)==0)
 		&& ((((size_t)tmp2Ur) & 0x0F)==0) && ((((size_t)tmp2Vr) & 0x0F)==0)
 		&& ((abs(tmp2_pitch_U) & 0x0F)==0) && ((abs(tmp2_pitch_V) & 0x0F)==0);
-
+	
 	const bool tmp3_al32=((((size_t)tmp3w) & 0x1F)==0) && ((((size_t)tmp3r) & 0x1F)==0)
 		&& ((abs(tmp3_pitch) & 0x1F)==0);
 	const bool tmp3_al16=((((size_t)tmp3w) & 0x0F)==0) && ((((size_t)tmp3r) & 0x0F)==0)
@@ -4878,6 +4996,8 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 
 	if (vi_original->Is444())
 	{
+		bool test_al;
+
 		if (OutputMode!=2)
 		{
 			for(uint8_t i=0; i<threads_number[2]; i++)
@@ -4894,7 +5014,9 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 				MT_DataGF[i].dst1=(void *)(dstw0+(MT_DataGF[i].dst_Y_h_min*dst_pitch0));
 				MT_DataGF[i].dst_pitch1=dst_pitch0;
 				MT_DataGF[i].dst_modulo1=dst_modulo0;
+				MT_DataGF[i].moveY8to16=false;
 			}
+			test_al=dst_al16;
 		}
 		else
 		{
@@ -4912,106 +5034,140 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 				MT_DataGF[i].dst1=(void *)(tmp3w0+(MT_DataGF[i].dst_Y_h_min*tmp3_pitch0));
 				MT_DataGF[i].dst_pitch1=tmp3_pitch0;
 				MT_DataGF[i].dst_modulo1=tmp3_modulo0;
+				MT_DataGF[i].moveY8to16=false;
 			}
+			test_al=tmp3_al16;
 		}
 
 		if (pixelsize==1)
 		{
 			if (OutputMode!=0)
 			{
-				if (AVX_Enable) f_proc=27;
+				if (AVX_Enable && test_al) f_proc=27;
 				else
 				{
-					if (SSE41_Enable) f_proc=26;
+					if (SSE41_Enable && test_al) f_proc=26;
 					else f_proc=24;
 				}
 			}
 			else
 			{
-				if (AVX_Enable) f_proc=23;
+				if (AVX_Enable && test_al) f_proc=23;
 				else
 				{
-					if (SSE41_Enable) f_proc=22;
+					if (SSE41_Enable && test_al) f_proc=22;
 					else f_proc=21;
 				}
 			}
 		}
 		else
 		{
-			if (AVX_Enable) f_proc=27;
+			if (AVX_Enable && test_al) f_proc=27;
 			else
 			{
-				if (SSE41_Enable) f_proc=26;
+				if (SSE41_Enable && test_al) f_proc=26;
 				else f_proc=25;
 			}
 		}
 	}
 	else
 	{
+		bool test_al;
+
 		if (OutputMode!=2)
 		{
 			for(uint8_t i=0; i<threads_number[2]; i++)
 			{
-				MT_DataGF[i].src1=(void *)(tmp2Yr+(MT_DataGF[i].src_Y_h_min*tmp2_pitch_Y));
 				MT_DataGF[i].src2=(void *)(tmp2Ur+(MT_DataGF[i].src_UV_h_min*tmp2_pitch_U));
 				MT_DataGF[i].src3=(void *)(tmp2Vr+(MT_DataGF[i].src_UV_h_min*tmp2_pitch_V));
-				MT_DataGF[i].src_pitch1=tmp2_pitch_Y;
 				MT_DataGF[i].src_pitch2=tmp2_pitch_U;
 				MT_DataGF[i].src_pitch3=tmp2_pitch_V;
-				MT_DataGF[i].src_modulo1=tmp2_modulo_Y;
 				MT_DataGF[i].src_modulo2=tmp2_modulo_U;
 				MT_DataGF[i].src_modulo3=tmp2_modulo_V;
 				MT_DataGF[i].dst1=(void *)(dstw0+(MT_DataGF[i].dst_Y_h_min*dst_pitch0));
 				MT_DataGF[i].dst_pitch1=dst_pitch0;
 				MT_DataGF[i].dst_modulo1=dst_modulo0;
+
+				if ((pixelsize==1) && (OutputMode!=0))
+				{
+					MT_DataGF[i].src1=(void *)(tmp2Yr+(MT_DataGF[i].src_Y_h_min*tmp2_pitch_Y));
+					MT_DataGF[i].src_pitch1=tmp2_pitch_Y;
+					MT_DataGF[i].src_modulo1=tmp2_modulo_Y;
+					MT_DataGF[i].dst2=(void *)(srcY+(MT_DataGF[i].src_Y_h_min*src_pitch_Y));
+					MT_DataGF[i].dst_pitch2=src_pitch_Y;
+					MT_DataGF[i].moveY8to16=true;
+				}
+				else
+				{
+					MT_DataGF[i].src1=(void *)(srcY+(MT_DataGF[i].src_Y_h_min*src_pitch_Y));
+					MT_DataGF[i].src_pitch1=src_pitch_Y;
+					MT_DataGF[i].src_modulo1=src_modulo_Y;
+					MT_DataGF[i].moveY8to16=false;
+				}
 			}
+			test_al=dst_al16;
 		}
 		else
 		{
 			for(uint8_t i=0; i<threads_number[2]; i++)
 			{
-				MT_DataGF[i].src1=(void *)(tmp2Yr+(MT_DataGF[i].src_Y_h_min*tmp2_pitch_Y));
 				MT_DataGF[i].src2=(void *)(tmp2Ur+(MT_DataGF[i].src_UV_h_min*tmp2_pitch_U));
 				MT_DataGF[i].src3=(void *)(tmp2Vr+(MT_DataGF[i].src_UV_h_min*tmp2_pitch_V));
-				MT_DataGF[i].src_pitch1=tmp2_pitch_Y;
 				MT_DataGF[i].src_pitch2=tmp2_pitch_U;
 				MT_DataGF[i].src_pitch3=tmp2_pitch_V;
-				MT_DataGF[i].src_modulo1=tmp2_modulo_Y;
 				MT_DataGF[i].src_modulo2=tmp2_modulo_U;
 				MT_DataGF[i].src_modulo3=tmp2_modulo_V;
 				MT_DataGF[i].dst1=(void *)(tmp3w0+(MT_DataGF[i].dst_Y_h_min*tmp3_pitch0));
 				MT_DataGF[i].dst_pitch1=tmp3_pitch0;
 				MT_DataGF[i].dst_modulo1=tmp3_modulo0;
+
+				if (pixelsize==1)
+				{
+					MT_DataGF[i].src1=(void *)(tmp2Yr+(MT_DataGF[i].src_Y_h_min*tmp2_pitch_Y));
+					MT_DataGF[i].src_pitch1=tmp2_pitch_Y;
+					MT_DataGF[i].src_modulo1=tmp2_modulo_Y;
+					MT_DataGF[i].dst2=(void *)(srcY+(MT_DataGF[i].src_Y_h_min*src_pitch_Y));
+					MT_DataGF[i].dst_pitch2=src_pitch_Y;
+					MT_DataGF[i].moveY8to16=true;
+				}
+				else
+				{
+					MT_DataGF[i].src1=(void *)(srcY+(MT_DataGF[i].src_Y_h_min*src_pitch_Y));
+					MT_DataGF[i].src_pitch1=src_pitch_Y;
+					MT_DataGF[i].src_modulo1=src_modulo_Y;
+					MT_DataGF[i].moveY8to16=false;
+				}
 			}
+			test_al=tmp3_al16;
 		}
 
 		if (pixelsize==1)
 		{
 			if (OutputMode!=0)
 			{
-				if (AVX_Enable) f_proc=30;
+				if (AVX_Enable && test_al) f_proc=30;
 				else
 				{
-					if (SSE41_Enable) f_proc=29;
+					if (SSE41_Enable && test_al) f_proc=29;
 					else f_proc=28;
 				}
 			}
 			else
 			{
-				if (AVX_Enable) f_proc=23;
+				if (AVX_Enable && test_al) f_proc=23;
 				else
 				{
-					if (SSE41_Enable) f_proc=22;
+					if (SSE41_Enable && test_al) f_proc=22;
 					else f_proc=21;
 				}
 			}
 		}
 		else
 		{
-			if (AVX_Enable) f_proc=27;
+			if (AVX_Enable && test_al) f_proc=27;
 			else
 			{
-				if (SSE41_Enable) f_proc=26;
+				if (SSE41_Enable && test_al) f_proc=26;
 				else f_proc=25;
 			}
 		}
@@ -5142,8 +5298,10 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 	lookupRGB_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
 	lookupL_8=(uint8_t *)malloc(256*sizeof(uint8_t));
 	lookupL_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
+	lookupL_20=(uint16_t *)malloc(16*65536*sizeof(uint16_t));
 
-	if ((lookupRGB_8==NULL) || (lookupRGB_16==NULL) || (lookupL_8==NULL) || (lookupL_16==NULL))
+	if ((lookupRGB_8==NULL) || (lookupRGB_16==NULL) || (lookupL_8==NULL) || (lookupL_16==NULL)
+		|| (lookupL_20==NULL))
 	{
 		FreeData();
 		env->ThrowError("ConvertLinearRGBtoYUV: Error while allocating the lookup tables!");
@@ -5294,6 +5452,38 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 		lookupL_16[i]=(uint16_t)round(65535.0*x);
 	}
 
+	// 20 bits lookup table for float input fastmode
+	// float mantisse size is 24 bits
+	for (uint32_t i=0; i<1048576; i++)
+	{
+		double x=((double)i)/1048575.0;
+
+		if (Color==0)
+		{
+			if (!HLGMode)
+			{
+				// PQ OOTF
+				if (x<=beta2) x*=alpha2;
+				else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
+				x=pow(x,2.4)/100.0;
+
+				// PQ OETF
+				x=pow((c1+c2*pow(x,m1))/(1.0+c3*pow(x,m1)),m2);
+			}
+			else
+			{
+			}
+		}
+		else
+		{
+			// OETF
+			if (x<beta) x*=4.5;
+			else x=alpha*pow(x,0.45)-(alpha-1.0);
+		}
+		if (x>1.0) x=1.0;
+		lookupL_20[i]=(uint16_t)round(65535.0*x);
+	}
+
 	if (vi_original->pixel_type==VideoInfo::CS_BGR32) Compute_Lookup_RGB_8(Color,fullrange,false,lookupRGB_8,dl);
 	else Compute_Lookup_RGB_16(Color,fullrange,false,16,lookupRGB_16,dl);
 
@@ -5330,6 +5520,7 @@ void ConvertLinearRGBtoYUV::FreeData(void)
 	mydelete(vi_422);
 	mydelete(vi_420);
 	mydelete(vi_original);
+	myfree(lookupL_20);
 	myfree(lookupL_16);
 	myfree(lookupL_8);
 	myfree(lookupRGB_16);
@@ -5370,11 +5561,11 @@ void ConvertLinearRGBtoYUV::StaticThreadpool(void *ptr)
 			break;
 		case 2 : Convert_LinearRGB64toRGB64(*mt_data_inf,ptrClass->lookupL_16);
 			break;
-		case 3 : Convert_LinearRGBPStoRGB64(*mt_data_inf,ptrClass->lookupL_16);
+		case 3 : Convert_LinearRGBPStoRGB64(*mt_data_inf,ptrClass->lookupL_20);
 			break;
-		case 4 : Convert_LinearRGBPStoRGB64_SSE41(*mt_data_inf,ptrClass->lookupL_16);
+		case 4 : Convert_LinearRGBPStoRGB64_SSE41(*mt_data_inf,ptrClass->lookupL_20);
 			break;
-		case 5 : Convert_LinearRGBPStoRGB64_AVX(*mt_data_inf,ptrClass->lookupL_16);
+		case 5 : Convert_LinearRGBPStoRGB64_AVX(*mt_data_inf,ptrClass->lookupL_20);
 			break;
 		case 6 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf); break;
 		case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf); break;
@@ -5608,9 +5799,9 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 			{
 				case 1 : Convert_LinearRGB32toRGB32(MT_DataGF[0],lookupL_8); break;
 				case 2 : Convert_LinearRGB64toRGB64(MT_DataGF[0],lookupL_16); break;
-				case 3 : Convert_LinearRGBPStoRGB64(MT_DataGF[0],lookupL_16); break;
-				case 4 : Convert_LinearRGBPStoRGB64_SSE41(MT_DataGF[0],lookupL_16); break;
-				case 5 : Convert_LinearRGBPStoRGB64_AVX(MT_DataGF[0],lookupL_16); break;
+				case 3 : Convert_LinearRGBPStoRGB64(MT_DataGF[0],lookupL_20); break;
+				case 4 : Convert_LinearRGBPStoRGB64_SSE41(MT_DataGF[0],lookupL_20); break;
+				case 5 : Convert_LinearRGBPStoRGB64_AVX(MT_DataGF[0],lookupL_20); break;
 				case 6 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0]); break;
 				case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0]); break;
 				case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0]); break;

@@ -47,6 +47,7 @@ typedef struct _MT_Data_Info_HDRTools
 	int32_t dst_Y_h_min,dst_Y_h_max,dst_Y_w;
 	int32_t dst_UV_h_min,dst_UV_h_max,dst_UV_w;
 	bool top,bottom;
+	bool moveY8to16;
 } MT_Data_Info_HDRTools;
 
 
@@ -112,7 +113,7 @@ private:
 	int16_t *lookupRGB_8;
 	int32_t *lookupRGB_16;
 	uint8_t *lookupL_8;
-	uint16_t *lookupL_16;
+	uint16_t *lookupL_16,*lookupL_20;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;

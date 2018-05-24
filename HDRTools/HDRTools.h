@@ -182,3 +182,111 @@ private:
 
 	void FreeData(void);
 };
+
+
+class ConvertXYZtoYUV : public GenericVideoFilter
+{
+public:
+	ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,
+		bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,
+		float _Bx,float _By,float _Wx,float _Wy,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertXYZtoYUV();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	int Color,OutputMode;
+	bool HLGMode,OOTF,mpeg2c,fullrange,fastmode;
+	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
+	bool sleep;
+	int16_t *lookupRGB_8,*lookupXYZ_8;
+	int32_t *lookupRGB_16,*lookupXYZ_16;
+	uint8_t *lookupL_8;
+	uint16_t *lookupL_16,*lookupL_20;
+	float Coeff_XYZ[9],*Coeff_XYZ_asm;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	VideoInfo *vi_original,*vi_420,*vi_422,*vi_444,*vi_RGB32,*vi_RGB64;
+
+	dataLookUp dl;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[3][MAX_MT_THREADS];
+	uint8_t threads,threads_number[3],max_threads;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
+
+class ConvertXYZ_HDRtoSDR : public GenericVideoFilter
+{
+public:
+	ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float _MaxMastering,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertXYZ_HDRtoSDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	float MinMastering,MaxMastering;
+	bool sleep;
+	uint16_t *lookup_16;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
+
+class ConvertXYZ_SDRtoHDR : public GenericVideoFilter
+{
+public:
+	ConvertXYZ_SDRtoHDR(PClip _child,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertXYZ_SDRtoHDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	float MinMastering,MaxMastering;
+	bool sleep;
+	uint16_t *lookup_16;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};

@@ -13,6 +13,7 @@ data segment align(32)
 
 data_f_0 real4 8 dup(0.0)
 data_f_1 real4 8 dup(1.0)
+data_f_1_1 real4 8 dup(1.1)
 data_f_1048575 real4 8 dup(1048575.0)
 data_f_65535 real4 8 dup(65535.0)
 data_f_100 real4 8 dup(100.0)
@@ -5075,11 +5076,11 @@ Convert_PackedXYZ_16_AVX_4:
 JPSDR_HDRTools_Convert_PackedXYZ_16_AVX endp
 
 
-JPSDR_HDRTools_Convert_PlanarXYZ_32_SSE2 proc src1:dword,src2:dword,src3:dword,dst1:dword,dst2:dword,dst3:dword,
+JPSDR_HDRTools_Convert_PlanarRGBtoXYZ_32_SSE2 proc src1:dword,src2:dword,src3:dword,dst1:dword,dst2:dword,dst3:dword,
 	w:dword,h:dword,Coeff:dword,src_modulo1:dword,src_modulo2:dword,src_modulo3:dword,
 	dst_modulo1:dword,dst_modulo2:dword,dst_modulo3:dword
 
-	public JPSDR_HDRTools_Convert_PlanarXYZ_32_SSE2
+	public JPSDR_HDRTools_Convert_PlanarRGBtoXYZ_32_SSE2
 
 	push esi
 	push edi
@@ -5088,16 +5089,16 @@ JPSDR_HDRTools_Convert_PlanarXYZ_32_SSE2 proc src1:dword,src2:dword,src3:dword,d
 	mov esi,Coeff
 	movaps xmm0,XMMWORD ptr[esi]
 	movaps xmm1,XMMWORD ptr[esi+32]
-	movaps xmm2,XMMWORD ptr[esi+64]	
+	movaps xmm2,XMMWORD ptr[esi+64]
 	mov eax,src3
 	mov edi,dst1
 	mov ebx,dst2
 	mov edx,dst3
 	
-Convert_PlanarXYZ_32_SSE2_1:
+Convert_PlanarRGBtoXYZ_32_SSE2_1:
 	mov ecx,w
 	mov esi,src1
-Convert_PlanarXYZ_32_SSE2_2:
+Convert_PlanarRGBtoXYZ_32_SSE2_2:
 	add src1,4
 	movss xmm3,dword ptr[esi]
 	mov esi,src2
@@ -5115,7 +5116,7 @@ Convert_PlanarXYZ_32_SSE2_2:
 	
 	addps xmm3,xmm4
 	add eax,4
-	addps xmm3,xmm5	
+	addps xmm3,xmm5
 	mov esi,src1
 	movhlps xmm4,xmm3
 	
@@ -5128,7 +5129,7 @@ Convert_PlanarXYZ_32_SSE2_2:
 	add edx,4
 	add ebx,4
 	
-	loop Convert_PlanarXYZ_32_SSE2_2
+	loop Convert_PlanarRGBtoXYZ_32_SSE2_2
 
 	add esi,src_modulo1
 	mov src1,esi
@@ -5142,7 +5143,7 @@ Convert_PlanarXYZ_32_SSE2_2:
 	add edx,dst_modulo3
 	
 	dec h
-	jnz short Convert_PlanarXYZ_32_SSE2_1
+	jnz short Convert_PlanarRGBtoXYZ_32_SSE2_1
 	
 	pop ebx
 	pop edi
@@ -5150,14 +5151,96 @@ Convert_PlanarXYZ_32_SSE2_2:
 
 	ret
 
-JPSDR_HDRTools_Convert_PlanarXYZ_32_SSE2 endp
+JPSDR_HDRTools_Convert_PlanarRGBtoXYZ_32_SSE2 endp
 
 
-JPSDR_HDRTools_Convert_PlanarXYZ_32_AVX proc src1:dword,src2:dword,src3:dword,dst1:dword,dst2:dword,dst3:dword,
+JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_SSE2 proc src1:dword,src2:dword,src3:dword,dst1:dword,dst2:dword,dst3:dword,
 	w:dword,h:dword,Coeff:dword,src_modulo1:dword,src_modulo2:dword,src_modulo3:dword,
 	dst_modulo1:dword,dst_modulo2:dword,dst_modulo3:dword
 
-	public JPSDR_HDRTools_Convert_PlanarXYZ_32_AVX
+	public JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_SSE2
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,Coeff
+	movaps xmm0,XMMWORD ptr[esi]
+	movaps xmm1,XMMWORD ptr[esi+32]
+	movaps xmm2,XMMWORD ptr[esi+64]
+	movaps xmm6,XMMWORD ptr data_f_0
+	movaps xmm7,XMMWORD ptr data_f_1
+	mov eax,src3
+	mov edi,dst1
+	mov ebx,dst2
+	mov edx,dst3
+	
+Convert_PlanarXYZtoRGB_32_SSE2_1:
+	mov ecx,w
+	mov esi,src1
+Convert_PlanarXYZtoRGB_32_SSE2_2:
+	add src1,4
+	movss xmm3,dword ptr[esi]
+	mov esi,src2
+	add src2,4
+	movss xmm4,dword ptr[esi]
+	movss xmm5,dword ptr[eax]
+	
+	shufps xmm3,xmm3,0
+	shufps xmm4,xmm4,0
+	shufps xmm5,xmm5,0
+	
+	mulps xmm3,xmm0
+	mulps xmm4,xmm1
+	mulps xmm5,xmm2
+	
+	addps xmm3,xmm4
+	add eax,4
+	addps xmm3,xmm5
+	maxps xmm3,xmm6
+	minps xmm3,xmm7
+	mov esi,src1
+	movhlps xmm4,xmm3
+	
+	movss dword ptr[edi],xmm3
+	shufps xmm3,xmm3,1
+	movss dword ptr[edx],xmm4
+	movss dword ptr[ebx],xmm3
+	
+	add edi,4
+	add edx,4
+	add ebx,4
+	
+	loop Convert_PlanarXYZtoRGB_32_SSE2_2
+
+	add esi,src_modulo1
+	mov src1,esi
+	add eax,src_modulo3
+	mov esi,src2
+	add esi,src_modulo2
+	mov src2,esi
+	
+	add edi,dst_modulo1
+	add ebx,dst_modulo2
+	add edx,dst_modulo3
+	
+	dec h
+	jnz Convert_PlanarXYZtoRGB_32_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_PlanarRGBtoXYZ_32_AVX proc src1:dword,src2:dword,src3:dword,dst1:dword,dst2:dword,dst3:dword,
+	w:dword,h:dword,Coeff:dword,src_modulo1:dword,src_modulo2:dword,src_modulo3:dword,
+	dst_modulo1:dword,dst_modulo2:dword,dst_modulo3:dword
+
+	public JPSDR_HDRTools_Convert_PlanarRGBtoXYZ_32_AVX
 
 	local w0:dword
 	
@@ -5178,13 +5261,13 @@ JPSDR_HDRTools_Convert_PlanarXYZ_32_AVX proc src1:dword,src2:dword,src3:dword,ds
 	mov ebx,dst2
 	mov edx,dst3
 
-Convert_PlanarXYZ_32_AVX_1:
+Convert_PlanarRGBtoXYZ_32_AVX_1:
 	mov ecx,w0
 	or ecx,ecx
-	jz Convert_PlanarXYZ_32_AVX_3
+	jz Convert_PlanarRGBtoXYZ_32_AVX_3
 	
 	mov esi,src1
-Convert_PlanarXYZ_32_AVX_2:
+Convert_PlanarRGBtoXYZ_32_AVX_2:
 	vmovss xmm3,dword ptr[esi]
 	vmovss xmm6,dword ptr[esi+4]
 	add src1,8
@@ -5223,18 +5306,17 @@ Convert_PlanarXYZ_32_AVX_2:
 	vshufps xmm6,xmm6,xmm6,1
 	vmovss dword ptr[edx+4],xmm4
 	vmovss dword ptr[ebx+4],xmm6
-
 	
 	add edi,8
 	add edx,8
 	add ebx,8
 	
 	dec ecx
-	jnz Convert_PlanarXYZ_32_AVX_2
+	jnz Convert_PlanarRGBtoXYZ_32_AVX_2
 
-Convert_PlanarXYZ_32_AVX_3:
+Convert_PlanarRGBtoXYZ_32_AVX_3:
 	test w,1
-	jz short Convert_PlanarXYZ_32_AVX_4
+	jz short Convert_PlanarRGBtoXYZ_32_AVX_4
 	
 	add src1,4
 	vmovss xmm3,dword ptr[esi]
@@ -5266,7 +5348,7 @@ Convert_PlanarXYZ_32_AVX_3:
 	add edx,4
 	add ebx,4
 
-Convert_PlanarXYZ_32_AVX_4:	
+Convert_PlanarRGBtoXYZ_32_AVX_4:	
 	add esi,src_modulo1
 	mov src1,esi
 	add eax,src_modulo3
@@ -5279,7 +5361,7 @@ Convert_PlanarXYZ_32_AVX_4:
 	add edx,dst_modulo3
 	
 	dec h
-	jnz Convert_PlanarXYZ_32_AVX_1
+	jnz Convert_PlanarRGBtoXYZ_32_AVX_1
 	
 	vzeroupper
 	
@@ -5289,7 +5371,150 @@ Convert_PlanarXYZ_32_AVX_4:
 
 	ret
 
-JPSDR_HDRTools_Convert_PlanarXYZ_32_AVX endp
+JPSDR_HDRTools_Convert_PlanarRGBtoXYZ_32_AVX endp
+
+
+JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_AVX proc src1:dword,src2:dword,src3:dword,dst1:dword,dst2:dword,dst3:dword,
+	w:dword,h:dword,Coeff:dword,src_modulo1:dword,src_modulo2:dword,src_modulo3:dword,
+	dst_modulo1:dword,dst_modulo2:dword,dst_modulo3:dword
+
+	public JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_AVX
+
+	local w0:dword
+	
+	push esi
+	push edi
+	push ebx
+
+	mov eax,w
+	shr eax,1
+	mov w0,eax
+	
+	mov esi,Coeff
+	vmovaps ymm0,YMMWORD ptr[esi]
+	vmovaps ymm1,YMMWORD ptr[esi+32]
+	vmovaps ymm2,YMMWORD ptr[esi+64]
+	vmovaps ymm7,YMMWORD ptr data_f_1
+	mov eax,src3
+	mov edi,dst1
+	mov ebx,dst2
+	mov edx,dst3
+
+Convert_PlanarXYZtoRGB_32_AVX_1:
+	mov ecx,w0
+	or ecx,ecx
+	jz Convert_PlanarXYZtoRGB_32_AVX_3
+	
+	mov esi,src1
+Convert_PlanarXYZtoRGB_32_AVX_2:
+	vmovss xmm3,dword ptr[esi]
+	vmovss xmm6,dword ptr[esi+4]
+	add src1,8
+	vinsertf128 ymm3,ymm3,xmm6,1
+	mov esi,src2
+	vmovss xmm4,dword ptr[esi]
+	vmovss xmm6,dword ptr[esi+4]
+	add src2,8
+	vinsertf128 ymm4,ymm4,xmm6,1
+	vmovss xmm5,dword ptr[eax]
+	vmovss xmm6,dword ptr[eax+4]
+	add eax,8
+	vinsertf128 ymm5,ymm5,xmm6,1
+	
+	vshufps ymm3,ymm3,ymm3,0
+	vshufps ymm4,ymm4,ymm4,0
+	vshufps ymm5,ymm5,ymm5,0
+	
+	vmulps ymm3,ymm3,ymm0
+	vmulps ymm4,ymm4,ymm1
+	vmulps ymm5,ymm5,ymm2
+	
+	vaddps ymm3,ymm3,ymm4
+	mov esi,src1
+	vaddps ymm3,ymm3,ymm5
+	vmaxps ymm3,ymm3,YMMWORD ptr data_f_0
+	vminps ymm3,ymm3,ymm7
+	vextractf128 xmm6,ymm3,1
+	
+	vmovhlps xmm4,xmm4,xmm3
+	vmovss dword ptr[edi],xmm3
+	vshufps xmm3,xmm3,xmm3,1
+	vmovss dword ptr[edx],xmm4
+	vmovss dword ptr[ebx],xmm3
+
+	vmovhlps xmm4,xmm4,xmm6
+	vmovss dword ptr[edi+4],xmm6
+	vshufps xmm6,xmm6,xmm6,1
+	vmovss dword ptr[edx+4],xmm4
+	vmovss dword ptr[ebx+4],xmm6
+	
+	add edi,8
+	add edx,8
+	add ebx,8
+	
+	dec ecx
+	jnz Convert_PlanarXYZtoRGB_32_AVX_2
+
+Convert_PlanarXYZtoRGB_32_AVX_3:
+	test w,1
+	jz short Convert_PlanarXYZtoRGB_32_AVX_4
+	
+	add src1,4
+	vmovss xmm3,dword ptr[esi]
+	mov esi,src2
+	add src2,4
+	vmovss xmm4,dword ptr[esi]
+	vmovss xmm5,dword ptr[eax]
+	
+	vshufps xmm3,xmm3,xmm3,0
+	vshufps xmm4,xmm4,xmm4,0
+	vshufps xmm5,xmm5,xmm5,0
+	
+	vmulps xmm3,xmm3,xmm0
+	vmulps xmm4,xmm4,xmm1
+	vmulps xmm5,xmm5,xmm2
+	
+	vaddps xmm3,xmm3,xmm4
+	add eax,4
+	vaddps xmm3,xmm3,xmm5	
+	vmaxps xmm3,xmm3,XMMWORD ptr data_f_0
+	vminps xmm3,xmm3,xmm7	
+	mov esi,src1
+	vmovhlps xmm4,xmm4,xmm3
+	
+	vmovss dword ptr[edi],xmm3
+	vshufps xmm3,xmm3,xmm3,1
+	vmovss dword ptr[edx],xmm4
+	vmovss dword ptr[ebx],xmm3
+	
+	add edi,4
+	add edx,4
+	add ebx,4
+
+Convert_PlanarXYZtoRGB_32_AVX_4:	
+	add esi,src_modulo1
+	mov src1,esi
+	add eax,src_modulo3
+	mov esi,src2
+	add esi,src_modulo2
+	mov src2,esi
+	
+	add edi,dst_modulo1
+	add ebx,dst_modulo2
+	add edx,dst_modulo3
+	
+	dec h
+	jnz Convert_PlanarXYZtoRGB_32_AVX_1
+	
+	vzeroupper
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_AVX endp
 
 
 ;***************************************************
@@ -5312,7 +5537,7 @@ JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2 proc src:dword,dst:dword,w4:dword,h:
 	
 	movaps xmm1,XMMWORD ptr data_f_100
 	movaps xmm2,XMMWORD ptr data_f_0
-	movaps xmm3,XMMWORD ptr data_f_1
+	movaps xmm3,XMMWORD ptr data_f_1_1
 	
 Convert_XYZ_HDRtoSDR_32_SSE2_1:
 	mov ecx,ebx
@@ -5356,7 +5581,7 @@ JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX proc src:dword,dst:dword,w8:dword,h:d
 	
 	vmovaps ymm1,YMMWORD ptr data_f_100
 	vmovaps ymm2,YMMWORD ptr data_f_0
-	vmovaps ymm3,YMMWORD ptr data_f_1
+	vmovaps ymm3,YMMWORD ptr data_f_1_1
 	
 Convert_XYZ_HDRtoSDR_32_AVX_1:
 	mov ecx,ebx

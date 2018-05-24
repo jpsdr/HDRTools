@@ -54,8 +54,8 @@ typedef struct _MT_Data_Info_HDRTools
 class ConvertYUVtoLinearRGB : public GenericVideoFilter
 {
 public:
-	ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _fullrange,bool _mpeg2c,
-		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
+	ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,
+		bool _fullrange,bool _mpeg2c,uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertYUVtoLinearRGB();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -63,7 +63,7 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,mpeg2c,fullrange;
+	bool HLGMode,OOTF,mpeg2c,fullrange;
 	bool sleep;
 	uint16_t *lookup_Upscale8;
 	uint32_t *lookup_Upscale16,*lookup_8to16;
@@ -95,12 +95,59 @@ private:
 };
 
 
+class ConvertYUVtoXYZ : public GenericVideoFilter
+{
+public:
+	ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,
+		bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
+		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
+	virtual ~ConvertYUVtoXYZ();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	int Color,OutputMode;
+	bool HLGMode,OOTF,mpeg2c,fullrange;
+	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
+	bool sleep;
+	uint16_t *lookup_Upscale8;
+	uint32_t *lookup_Upscale16,*lookup_8to16;
+	int16_t *lookupRGB_8,*lookupXYZ_8;
+	int32_t *lookupRGB_16,*lookupXYZ_16;
+	uint8_t *lookupL_8;
+	uint16_t *lookupL_16;
+	float *lookupL_32;
+	float Coeff_XYZ[9],*Coeff_XYZ_asm;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	VideoInfo *vi_original,*vi_422,*vi_444,*vi_RGB64;
+
+	dataLookUp dl;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[3][MAX_MT_THREADS];
+	uint8_t threads,threads_number[3],max_threads;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
 
 class ConvertLinearRGBtoYUV : public GenericVideoFilter
 {
 public:
-	ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _fullrange,bool _mpeg2c,bool _fastmode,
-		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
+	ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,
+		bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads, bool _sleep,
+		IScriptEnvironment* env);
 	virtual ~ConvertLinearRGBtoYUV();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -108,7 +155,7 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,mpeg2c,fullrange,fastmode;
+	bool HLGMode,OOTF,mpeg2c,fullrange,fastmode;
 	bool sleep;
 	int16_t *lookupRGB_8;
 	int32_t *lookupRGB_16;

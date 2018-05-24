@@ -15,141 +15,11 @@ data_f_0 real4 8 dup(0.0)
 data_f_1 real4 8 dup(1.0)
 data_f_1048575 real4 8 dup(1048575.0)
 data_f_65535 real4 8 dup(65535.0)
+data_f_100 real4 8 dup(100.0)
+data_f_001 real4 8 dup(0.01)
+
 
 .code
-
-
-internal_pow proc near
-	
-	fyl2x					; st=x2*ln2(x1)
-	fld st					; résultat dans st(1) et st(0)
-	frndint					; partie entière n dans st(0)
-	fsub st(1),st			; st(1):=st(1)-st(0) => a dans st(1);
-	fxch st(1)				; a dans st(0) et n dans st(1)
-	f2xm1					; calcul 2^a-1
-	fadd un					; dans st(0) on a 2^a et dans st(1) n
-	fscale					; calcule st(0)*2^int(st(1)) ici (2^a)*(2^n)
-	fxch st(1)				; échange st(1) et st(0)
-	ffree st(0)				; libère st(0) pour vider la pile
-	fincstp					; dépile et incrémente le compteur de pile
-	
-	ret
-
-internal_pow endp
-
-
-pow_asm proc x:qword,y:qword
-
-	public pow_asm
-	
-	fld x
-	ftst
-	fstsw ax
-	and ax,4100h
-	jz short puiss_normale
-	and ax,4000h
-	jz short puiss_negative
-	ffree st
-	fincstp
-	fld y
-	ftst
-	fstsw ax
-	and ax,4000h
-	jnz short puiss_exp_nul
-	fldz
-	
-	ret
-puiss_exp_nul:
-	fld1
-	
-	ret
-puiss_normale:
-	fld y
-	fxch st(1)
-	call internal_pow
-	
-	ret
-puiss_negative:
-	fabs
-	fld y
-	frndint
-	fld st
-	fmul dword ptr un_demi
-	fld st
-	frndint
-	fsubp
-	ftst
-	fstsw ax
-	fxch st(1)
-	and ax,4000h
-	jnz short puiss_positif
-	call internal_pow
-	fchs
-	
-	ret
-puiss_positif:
-	call internal_pow	
-
-	ret
-	
-pow_asm endp
-
-
-pow_asm_avx proc x:qword,y:qword
-
-	public pow_asm_avx
-	
-	fld x
-	ftst
-	fstsw ax
-	and ax,4100h
-	jz short puiss_normale
-	and ax,4000h
-	jz short puiss_negative
-	ffree st
-	fincstp
-	fld y
-	ftst
-	fstsw ax
-	and ax,4000h
-	jnz short puiss_exp_nul
-	fldz
-	
-	ret
-puiss_exp_nul:
-	fld1
-	
-	ret
-puiss_normale:
-	fld y
-	fxch st(1)
-	call internal_pow
-	
-	ret
-puiss_negative:
-	fabs
-	fld y
-	frndint
-	fld st
-	fmul dword ptr un_demi
-	fld st
-	frndint
-	fsubp
-	ftst
-	fstsw ax
-	fxch st(1)
-	and ax,4000h
-	jnz short puiss_positif
-	call internal_pow
-	fchs
-	
-	ret
-puiss_positif:
-	call internal_pow	
-
-	ret
-	
-pow_asm_avx endp
 
 
 JPSDR_HDRTools_Move8to16 proc dst:dword,src:dword,w:dword
@@ -250,9 +120,9 @@ JPSDR_HDRTools_Move8to16_AVX endp
 ;**           YUV to RGB functions                **
 ;***************************************************
 	
-JPSDR_HDRTools_Convert420_to_Planar422_8_SSE2 proc src1:dword,src2:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_SSE2 proc src1:dword,src2:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert420_to_Planar422_8_SSE2
+	public JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_SSE2
 	
 	push esi
 	push edi
@@ -267,7 +137,7 @@ JPSDR_HDRTools_Convert420_to_Planar422_8_SSE2 proc src1:dword,src2:dword,dst:dwo
 	mov ecx,w	
 	mov ebx,16
 	
-Convert420_to_Planar422_8_SSE2_1:
+Convert_Planar420_to_Planar422_8_SSE2_1:
 	movdqa xmm0,XMMWORD ptr[esi+eax]
 	movdqa xmm1,XMMWORD ptr[edx+eax]
 	movdqa xmm2,xmm0
@@ -279,7 +149,7 @@ Convert420_to_Planar422_8_SSE2_1:
 	
 	movdqa XMMWORD ptr[edi+eax],xmm0
 	add eax,ebx
-	loop Convert420_to_Planar422_8_SSE2_1
+	loop Convert_Planar420_to_Planar422_8_SSE2_1
 	
 
 	pop ebx
@@ -288,12 +158,12 @@ Convert420_to_Planar422_8_SSE2_1:
 
 	ret
 
-JPSDR_HDRTools_Convert420_to_Planar422_8_SSE2 endp
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_SSE2 endp
 
 
-JPSDR_HDRTools_Convert420_to_Planar422_8to16_SSE2 proc src1:dword,src2:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_8to16_SSE2 proc src1:dword,src2:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert420_to_Planar422_8to16_SSE2
+	public JPSDR_HDRTools_Convert_Planar420_to_Planar422_8to16_SSE2
 	
 	push esi
 	push edi
@@ -308,7 +178,7 @@ JPSDR_HDRTools_Convert420_to_Planar422_8to16_SSE2 proc src1:dword,src2:dword,dst
 	mov ecx,w	
 	mov ebx,8
 	
-Convert420_to_Planar422_8to16_SSE2_1:
+Convert_Planar420_to_Planar422_8to16_SSE2_1:
 	movq xmm0,qword ptr[esi+eax]
 	movq xmm1,qword ptr[edx+eax]
 	
@@ -326,7 +196,7 @@ Convert420_to_Planar422_8to16_SSE2_1:
 	
 	movdqa XMMWORD ptr[edi+2*eax],xmm2
 	add eax,ebx
-	loop Convert420_to_Planar422_8to16_SSE2_1
+	loop Convert_Planar420_to_Planar422_8to16_SSE2_1
 	
 
 	pop ebx
@@ -335,12 +205,12 @@ Convert420_to_Planar422_8to16_SSE2_1:
 
 	ret
 
-JPSDR_HDRTools_Convert420_to_Planar422_8to16_SSE2 endp
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_8to16_SSE2 endp
 
 
-JPSDR_HDRTools_Convert420_to_Planar422_8_AVX proc src1:dword,src2:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX proc src1:dword,src2:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert420_to_Planar422_8_AVX
+	public JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX
 	
 	push esi
 	push edi
@@ -355,7 +225,7 @@ JPSDR_HDRTools_Convert420_to_Planar422_8_AVX proc src1:dword,src2:dword,dst:dwor
 	mov ecx,w	
 	mov ebx,16
 	
-Convert420_to_Planar422_8_AVX_1:
+Convert_Planar420_to_Planar422_8_AVX_1:
 	vmovdqa xmm0,XMMWORD ptr[esi+eax]
 	vmovdqa xmm1,XMMWORD ptr[edx+eax]
 	vpxor xmm2,xmm0,xmm3
@@ -366,7 +236,7 @@ Convert420_to_Planar422_8_AVX_1:
 	
 	vmovdqa XMMWORD ptr[edi+eax],xmm2
 	add eax,ebx
-	loop Convert420_to_Planar422_8_AVX_1
+	loop Convert_Planar420_to_Planar422_8_AVX_1
 	
 	pop ebx
 	pop edi
@@ -374,12 +244,12 @@ Convert420_to_Planar422_8_AVX_1:
 
 	ret
 
-JPSDR_HDRTools_Convert420_to_Planar422_8_AVX endp
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX endp
 
 
-JPSDR_HDRTools_Convert420_to_Planar422_8to16_AVX proc src1:dword,src2:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_8to16_AVX proc src1:dword,src2:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert420_to_Planar422_8to16_AVX
+	public JPSDR_HDRTools_Convert_Planar420_to_Planar422_8to16_AVX
 	
 	push esi
 	push edi
@@ -395,7 +265,7 @@ JPSDR_HDRTools_Convert420_to_Planar422_8to16_AVX proc src1:dword,src2:dword,dst:
 	mov ecx,w	
 	mov ebx,8
 	
-Convert420_to_Planar422_8to16_AVX_1:
+Convert_Planar420_to_Planar422_8to16_AVX_1:
 	vmovq xmm0,qword ptr[esi+eax]
 	vmovq xmm1,qword ptr[edx+eax]
 	vpunpcklbw xmm0,xmm4,xmm0
@@ -409,7 +279,7 @@ Convert420_to_Planar422_8to16_AVX_1:
 	
 	vmovdqa XMMWORD ptr[edi+2*eax],xmm2
 	add eax,ebx
-	loop Convert420_to_Planar422_8to16_AVX_1
+	loop Convert_Planar420_to_Planar422_8to16_AVX_1
 	
 	pop ebx
 	pop edi
@@ -417,12 +287,12 @@ Convert420_to_Planar422_8to16_AVX_1:
 
 	ret
 
-JPSDR_HDRTools_Convert420_to_Planar422_8to16_AVX endp
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_8to16_AVX endp
 
 
-JPSDR_HDRTools_Convert420_to_Planar422_16_SSE2 proc src1:dword,src2:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_SSE2 proc src1:dword,src2:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert420_to_Planar422_16_SSE2
+	public JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_SSE2
 	
 	push esi
 	push edi
@@ -437,7 +307,7 @@ JPSDR_HDRTools_Convert420_to_Planar422_16_SSE2 proc src1:dword,src2:dword,dst:dw
 	mov ecx,w	
 	mov ebx,16
 	
-Convert420_to_Planar422_16_SSE2_1:
+Convert_Planar420_to_Planar422_16_SSE2_1:
 	movdqa xmm0,XMMWORD ptr[esi+eax]
 	movdqa xmm1,XMMWORD ptr[edx+eax]
 	movdqa xmm2,xmm0
@@ -449,7 +319,7 @@ Convert420_to_Planar422_16_SSE2_1:
 	
 	movdqa XMMWORD ptr[edi+eax],xmm0
 	add eax,ebx
-	loop Convert420_to_Planar422_16_SSE2_1
+	loop Convert_Planar420_to_Planar422_16_SSE2_1
 	
 
 	pop ebx
@@ -458,12 +328,12 @@ Convert420_to_Planar422_16_SSE2_1:
 
 	ret
 
-JPSDR_HDRTools_Convert420_to_Planar422_16_SSE2 endp
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_SSE2 endp
 
 
-JPSDR_HDRTools_Convert420_to_Planar422_16_AVX proc src1:dword,src2:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX proc src1:dword,src2:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert420_to_Planar422_16_AVX
+	public JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX
 	
 	push esi
 	push edi
@@ -478,7 +348,7 @@ JPSDR_HDRTools_Convert420_to_Planar422_16_AVX proc src1:dword,src2:dword,dst:dwo
 	mov ecx,w	
 	mov ebx,16
 	
-Convert420_to_Planar422_16_AVX_1:
+Convert_Planar420_to_Planar422_16_AVX_1:
 	vmovdqa xmm0,XMMWORD ptr[esi+eax]
 	vmovdqa xmm1,XMMWORD ptr[edx+eax]
 	vpxor xmm2,xmm0,xmm3
@@ -489,7 +359,7 @@ Convert420_to_Planar422_16_AVX_1:
 	
 	vmovdqa XMMWORD ptr[edi+eax],xmm2
 	add eax,ebx
-	loop Convert420_to_Planar422_16_AVX_1
+	loop Convert_Planar420_to_Planar422_16_AVX_1
 	
 	pop ebx
 	pop edi
@@ -497,12 +367,12 @@ Convert420_to_Planar422_16_AVX_1:
 
 	ret
 
-JPSDR_HDRTools_Convert420_to_Planar422_16_AVX endp
+JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX endp
 
 
-JPSDR_HDRTools_Convert422_to_Planar444_8_SSE2 proc src:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_8_SSE2 proc src:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert422_to_Planar444_8_SSE2
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar444_8_SSE2
 	
 	push edi
 	push ebx
@@ -513,7 +383,7 @@ JPSDR_HDRTools_Convert422_to_Planar444_8_SSE2 proc src:dword,dst:dword,w:dword
 	mov ecx,w	
 	mov ebx,16
 	
-Convert422_to_Planar444_8_SSE2_1:
+Convert_Planar422_to_Planar444_8_SSE2_1:
 	movdqa xmm0,XMMWORD ptr[edx+eax]
 	movdqu xmm1,XMMWORD ptr[edx+eax+1]
 	movdqa xmm2,xmm0
@@ -525,19 +395,19 @@ Convert422_to_Planar444_8_SSE2_1:
 	movdqa XMMWORD ptr[edi+2*eax],xmm2
 	movdqa XMMWORD ptr[edi+2*eax+16],xmm3
 	add eax,ebx
-	loop Convert422_to_Planar444_8_SSE2_1
+	loop Convert_Planar422_to_Planar444_8_SSE2_1
 	
 	pop ebx
 	pop edi
 
 	ret
 
-JPSDR_HDRTools_Convert422_to_Planar444_8_SSE2 endp
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_8_SSE2 endp
 
 
-JPSDR_HDRTools_Convert422_to_Planar444_8_AVX proc src:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_8_AVX proc src:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert422_to_Planar444_8_AVX
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar444_8_AVX
 	
 	push edi
 	push ebx
@@ -548,7 +418,7 @@ JPSDR_HDRTools_Convert422_to_Planar444_8_AVX proc src:dword,dst:dword,w:dword
 	mov ecx,w	
 	mov ebx,16
 	
-Convert422_to_Planar444_8_AVX_1:
+Convert_Planar422_to_Planar444_8_AVX_1:
 	vmovdqa xmm0,XMMWORD ptr[edx+eax]
 	vmovdqu xmm1,XMMWORD ptr[edx+eax+1]
 	vpavgb xmm1,xmm1,xmm0
@@ -558,19 +428,19 @@ Convert422_to_Planar444_8_AVX_1:
 	vmovdqa XMMWORD ptr[edi+2*eax],xmm2
 	vmovdqa XMMWORD ptr[edi+2*eax+16],xmm3
 	add eax,ebx
-	loop Convert422_to_Planar444_8_AVX_1
+	loop Convert_Planar422_to_Planar444_8_AVX_1
 	
 	pop ebx
 	pop edi
 
 	ret
 
-JPSDR_HDRTools_Convert422_to_Planar444_8_AVX endp
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_8_AVX endp
 
 
-JPSDR_HDRTools_Convert422_to_Planar444_8to16_SSE2 proc src:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_8to16_SSE2 proc src:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert422_to_Planar444_8to16_SSE2
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar444_8to16_SSE2
 	
 	push esi
 	push edi
@@ -583,7 +453,7 @@ JPSDR_HDRTools_Convert422_to_Planar444_8to16_SSE2 proc src:dword,dst:dword,w:dwo
 	mov ecx,w	
 	mov ebx,32
 	
-Convert422_to_Planar444_8to16_SSE2_1:
+Convert_Planar422_to_Planar444_8to16_SSE2_1:
 	movq xmm0,qword ptr[esi+8*eax]
 	movq xmm1,qword ptr[esi+8*eax+1]
 	pxor xmm2,xmm2
@@ -600,7 +470,7 @@ Convert422_to_Planar444_8to16_SSE2_1:
 	movdqa XMMWORD ptr[edi+edx+16],xmm0
 	inc eax
 	add edx,ebx
-	loop Convert422_to_Planar444_8to16_SSE2_1
+	loop Convert_Planar422_to_Planar444_8to16_SSE2_1
 	
 	pop ebx
 	pop edi
@@ -608,12 +478,12 @@ Convert422_to_Planar444_8to16_SSE2_1:
 
 	ret
 
-JPSDR_HDRTools_Convert422_to_Planar444_8to16_SSE2 endp
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_8to16_SSE2 endp
 
 
-JPSDR_HDRTools_Convert422_to_Planar444_8to16_AVX proc src:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_8to16_AVX proc src:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert422_to_Planar444_8to16_AVX
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar444_8to16_AVX
 	
 	push esi
 	push edi
@@ -627,7 +497,7 @@ JPSDR_HDRTools_Convert422_to_Planar444_8to16_AVX proc src:dword,dst:dword,w:dwor
 	mov ecx,w	
 	mov ebx,32
 	
-Convert422_to_Planar444_8to16_AVX_1:
+Convert_Planar422_to_Planar444_8to16_AVX_1:
 	vmovq xmm0,qword ptr[esi+8*eax]
 	vmovq xmm1,qword ptr[esi+8*eax+1]
 	vpunpcklbw xmm0,xmm4,xmm0
@@ -641,7 +511,7 @@ Convert422_to_Planar444_8to16_AVX_1:
 	vmovdqa XMMWORD ptr[edi+edx+16],xmm3
 	inc eax
 	add edx,ebx
-	loop Convert422_to_Planar444_8to16_AVX_1
+	loop Convert_Planar422_to_Planar444_8to16_AVX_1
 	
 	pop ebx
 	pop edi
@@ -649,12 +519,12 @@ Convert422_to_Planar444_8to16_AVX_1:
 
 	ret
 
-JPSDR_HDRTools_Convert422_to_Planar444_8to16_AVX endp
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_8to16_AVX endp
 
 
-JPSDR_HDRTools_Convert422_to_Planar444_16_SSE2 proc src:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_16_SSE2 proc src:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert422_to_Planar444_16_SSE2
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar444_16_SSE2
 	
 	push edi
 	push ebx
@@ -665,7 +535,7 @@ JPSDR_HDRTools_Convert422_to_Planar444_16_SSE2 proc src:dword,dst:dword,w:dword
 	mov ecx,w	
 	mov ebx,16
 	
-Convert422_to_Planar444_16_SSE2_1:
+Convert_Planar422_to_Planar444_16_SSE2_1:
 	movdqa xmm0,XMMWORD ptr[edx+eax]
 	movdqu xmm1,XMMWORD ptr[edx+eax+2]
 	movdqa xmm2,xmm0
@@ -677,19 +547,19 @@ Convert422_to_Planar444_16_SSE2_1:
 	movdqa XMMWORD ptr[edi+2*eax],xmm2
 	movdqa XMMWORD ptr[edi+2*eax+16],xmm3
 	add eax,ebx
-	loop Convert422_to_Planar444_16_SSE2_1
+	loop Convert_Planar422_to_Planar444_16_SSE2_1
 	
 	pop ebx
 	pop edi
 
 	ret
 
-JPSDR_HDRTools_Convert422_to_Planar444_16_SSE2 endp
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_16_SSE2 endp
 
 
-JPSDR_HDRTools_Convert422_to_Planar444_16_AVX proc src:dword,dst:dword,w:dword
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_16_AVX proc src:dword,dst:dword,w:dword
 
-	public JPSDR_HDRTools_Convert422_to_Planar444_16_AVX
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar444_16_AVX
 	
 	push edi
 	push ebx
@@ -700,7 +570,7 @@ JPSDR_HDRTools_Convert422_to_Planar444_16_AVX proc src:dword,dst:dword,w:dword
 	mov ecx,w	
 	mov ebx,16
 	
-Convert422_to_Planar444_16_AVX_1:
+Convert_Planar422_to_Planar444_16_AVX_1:
 	vmovdqa xmm0,XMMWORD ptr[edx+eax]
 	vmovdqu xmm1,XMMWORD ptr[edx+eax+2]
 	vpavgw xmm1,xmm1,xmm0
@@ -710,14 +580,14 @@ Convert422_to_Planar444_16_AVX_1:
 	vmovdqa XMMWORD ptr[edi+2*eax],xmm2
 	vmovdqa XMMWORD ptr[edi+2*eax+16],xmm3
 	add eax,ebx
-	loop Convert422_to_Planar444_16_AVX_1
+	loop Convert_Planar422_to_Planar444_16_AVX_1
 	
 	pop ebx
 	pop edi
 
 	ret
 
-JPSDR_HDRTools_Convert422_to_Planar444_16_AVX endp
+JPSDR_HDRTools_Convert_Planar422_to_Planar444_16_AVX endp
 
 
 JPSDR_HDRTools_Convert_YV24toRGB32_SSE2 proc src_y:dword,src_u:dword,src_v:dword,dst:dword,w:dword,h:dword,offset_R:word,
@@ -848,7 +718,7 @@ Convert_YV24toRGB32_SSE2_2:
 	
 Convert_YV24toRGB32_SSE2_3:
 	mov eax,w
-	and eax,3
+	test eax,3
 	jz Convert_YV24toRGB32_SSE2_5
 	
 	pxor xmm0,xmm0
@@ -935,8 +805,7 @@ Convert_YV24toRGB32_SSE2_4:
 	
 	add edi,8
 	
-	mov eax,w
-	test eax,1
+	test w,1
 	jz short Convert_YV24toRGB32_SSE2_5
 
 	pxor xmm0,xmm0
@@ -1120,7 +989,7 @@ Convert_YV24toRGB32_AVX_2:
 	
 Convert_YV24toRGB32_AVX_3:
 	mov eax,w
-	and eax,3
+	test eax,3
 	jz Convert_YV24toRGB32_AVX_5
 	
 	test eax,2
@@ -1205,8 +1074,7 @@ Convert_YV24toRGB32_AVX_4:
 	
 	add edi,8
 	
-	mov eax,w
-	test eax,1
+	test w,1
 	jz short Convert_YV24toRGB32_AVX_5
 	
 	mov esi,src_y
@@ -1349,8 +1217,7 @@ Convert_8_YV24toRGB64_SSE41_2:
 	jnz Convert_8_YV24toRGB64_SSE41_2
 	
 Convert_8_YV24toRGB64_SSE41_3:	
-	mov eax,w
-	and eax,1
+	test w,1
 	jz short Convert_8_YV24toRGB64_SSE41_4
 	
 	pxor xmm0,xmm0
@@ -1495,8 +1362,7 @@ Convert_10_YV24toRGB64_SSE41_2:
 	jnz Convert_10_YV24toRGB64_SSE41_2
 	
 Convert_10_YV24toRGB64_SSE41_3:
-	mov eax,w
-	and eax,1
+	test w,1
 	jz short Convert_10_YV24toRGB64_SSE41_4
 
 	pxor xmm0,xmm0
@@ -1641,8 +1507,7 @@ Convert_12_YV24toRGB64_SSE41_2:
 	jnz Convert_12_YV24toRGB64_SSE41_2
 	
 Convert_12_YV24toRGB64_SSE41_3:
-	mov eax,w
-	and eax,1
+	test w,1
 	jz short Convert_12_YV24toRGB64_SSE41_4
 
 	pxor xmm0,xmm0
@@ -1787,8 +1652,7 @@ Convert_14_YV24toRGB64_SSE41_2:
 	jnz Convert_14_YV24toRGB64_SSE41_2
 	
 Convert_14_YV24toRGB64_SSE41_3:
-	mov eax,w
-	and eax,1
+	test w,1
 	jz short Convert_14_YV24toRGB64_SSE41_4
 	
 	pxor xmm0,xmm0
@@ -1933,8 +1797,7 @@ Convert_16_YV24toRGB64_SSE41_2:
 	jnz Convert_16_YV24toRGB64_SSE41_2
 	
 Convert_16_YV24toRGB64_SSE41_3:	
-	mov eax,w
-	and eax,1
+	test w,1
 	jz short Convert_16_YV24toRGB64_SSE41_4
 	
 	pxor xmm0,xmm0
@@ -2078,9 +1941,7 @@ Convert_8_YV24toRGB64_AVX_2:
 	jnz Convert_8_YV24toRGB64_AVX_2
 	
 Convert_8_YV24toRGB64_AVX_3:	
-
-	mov eax,w
-	and eax,1
+	test w,1
 	jz short Convert_8_YV24toRGB64_AVX_4
 
 	mov esi,src_y
@@ -2222,8 +2083,7 @@ Convert_10_YV24toRGB64_AVX_2:
 	jnz Convert_10_YV24toRGB64_AVX_2
 	
 Convert_10_YV24toRGB64_AVX_3:
-	mov eax,w
-	and eax,1
+	test w,1
 	jz short Convert_10_YV24toRGB64_AVX_4
 
 	mov esi,src_y
@@ -2365,8 +2225,7 @@ Convert_12_YV24toRGB64_AVX_2:
 	jnz Convert_12_YV24toRGB64_AVX_2
 	
 Convert_12_YV24toRGB64_AVX_3:	
-	mov eax,w
-	and eax,1
+	test eax,1
 	jz short Convert_12_YV24toRGB64_AVX_4
 	
 	mov esi,src_y
@@ -2508,8 +2367,7 @@ Convert_14_YV24toRGB64_AVX_2:
 	jnz Convert_14_YV24toRGB64_AVX_2
 	
 Convert_14_YV24toRGB64_AVX_3:
-	mov eax,w
-	and eax,1
+	test w,1
 	jz short Convert_14_YV24toRGB64_AVX_4
 
 	mov esi,src_y
@@ -2651,8 +2509,7 @@ Convert_16_YV24toRGB64_AVX_2:
 	jnz Convert_16_YV24toRGB64_AVX_2
 	
 Convert_16_YV24toRGB64_AVX_3:
-	mov eax,w
-	and eax,1
+	test w,1
 	jz short Convert_16_YV24toRGB64_AVX_4
 	
 	mov esi,src_y
@@ -3338,6 +3195,7 @@ Convert_RGB32toYV24_SSE2_1:
 	mov eax,w0
 	or eax,eax
 	jz Convert_RGB32toYV24_SSE2_3
+	
 	mov i,eax
 Convert_RGB32toYV24_SSE2_2:
 	movzx edx,byte ptr[esi]
@@ -3400,8 +3258,7 @@ Convert_RGB32toYV24_SSE2_2:
 	jnz Convert_RGB32toYV24_SSE2_2
 	
 Convert_RGB32toYV24_SSE2_3:	
-	mov eax,w
-	and eax,1
+	test w,1
 	jz Convert_RGB32toYV24_SSE2_4
 	
 	movzx edx,byte ptr[esi]
@@ -3425,6 +3282,7 @@ Convert_RGB32toYV24_SSE2_3:
 	psraw xmm0,6
 	pmaxsw xmm0,xmm2
 	pminsw xmm0,xmm3
+	packuswb xmm0,xmm0
 	
 	mov edi,dst_y
 	pextrw eax,xmm0,0
@@ -3466,11 +3324,11 @@ Convert_RGB32toYV24_SSE2_4:
 JPSDR_HDRTools_Convert_RGB32toYV24_SSE2 endp
 
 
-JPSDR_RGBConvert_Convert_RGB32toYV24_AVX proc src:dword,dst_y:dword,dst_u:dword,dst_v:dword,w:dword,h:dword,offset_Y:word,
+JPSDR_HDRTools_Convert_RGB32toYV24_AVX proc src:dword,dst_y:dword,dst_u:dword,dst_v:dword,w:dword,h:dword,offset_Y:word,
 	offset_U:word,offset_V:word,lookup:dword,src_modulo:dword,dst_modulo_y:dword,dst_modulo_u:dword,dst_modulo_v:dword,
 	Min_Y:word,Max_Y:word,Min_U:word,Max_U:word,Min_V:word,Max_V:word
 
-	public JPSDR_RGBConvert_Convert_RGB32toYV24_AVX
+	public JPSDR_HDRTools_Convert_RGB32toYV24_AVX
 
 	local i,w0:dword
 
@@ -3584,8 +3442,7 @@ Convert_RGB32toYV24_AVX_2:
 	jnz Convert_RGB32toYV24_AVX_2
 	
 Convert_RGB32toYV24_AVX_3:	
-	mov eax,w
-	and eax,1
+	test w,1
 	jz Convert_RGB32toYV24_AVX_4
 	
 	movzx edx,byte ptr[esi]
@@ -3609,6 +3466,7 @@ Convert_RGB32toYV24_AVX_3:
 	vpsraw xmm0,xmm0,6
 	vpmaxsw xmm0,xmm0,xmm2
 	vpminsw xmm0,xmm0,xmm3
+	vpackuswb xmm0,xmm0,xmm0
 	
 	mov edi,dst_y
 	vpextrw eax,xmm0,0
@@ -3647,14 +3505,14 @@ Convert_RGB32toYV24_AVX_4:
 
 	ret
 
-JPSDR_RGBConvert_Convert_RGB32toYV24_AVX endp
+JPSDR_HDRTools_Convert_RGB32toYV24_AVX endp
 
 
-JPSDR_HDRTools_Convert_16_RGB32toYV24_SSE41 proc src:dword,dst_y:dword,dst_u:dword,dst_v:dword,w:dword,h:dword,offset_Y:dword,
+JPSDR_HDRTools_Convert_RGB64toYV24_SSE41 proc src:dword,dst_y:dword,dst_u:dword,dst_v:dword,w:dword,h:dword,offset_Y:dword,
 	offset_U:dword,offset_V:dword,lookup:dword,src_modulo:dword,dst_modulo_y:dword,dst_modulo_u:dword,dst_modulo_v:dword,
 	Min_Y:word,Max_Y:word,Min_U:word,Max_U:word,Min_V:word,Max_V:word
 
-	public JPSDR_HDRTools_Convert_16_RGB32toYV24_SSE41
+	public JPSDR_HDRTools_Convert_RGB64toYV24_SSE41
 
 	local i,w0:dword
 
@@ -3698,27 +3556,28 @@ JPSDR_HDRTools_Convert_16_RGB32toYV24_SSE41 proc src:dword,dst_y:dword,dst_u:dwo
 	
 	mov esi,src
 
-Convert_16_RGB32toYV24_SSE41_1:
+Convert_RGB64toYV24_SSE41_1:
 	mov eax,w0
 	or eax,eax
-	jz Convert_16_RGB32toYV24_SSE41_3
+	jz Convert_RGB64toYV24_SSE41_3
+	
 	mov i,eax
-Convert_16_RGB32toYV24_SSE41_2:
+Convert_RGB64toYV24_SSE41_2:
 	movzx edx,word ptr[esi]
 	movzx ecx,word ptr[esi+2]
 	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
 	mov esi,lookup
 	mov eax,dword ptr[esi+4*ebx]
-	add eax,dword ptr[esi+4*ecx+1024]
-	add eax,dword ptr[esi+4*edx+2048]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
 	pinsrd xmm0,eax,0
-	mov eax,dword ptr[esi+4*ebx+3072]
-	add eax,dword ptr[esi+4*ecx+4096]
-	add eax,dword ptr[esi+4*edx+5120]
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
 	pinsrd xmm0,eax,1
-	mov eax,dword ptr[esi+4*ebx+6144]
-	add eax,dword ptr[esi+4*ecx+7168]
-	add eax,dword ptr[esi+4*edx+8192]
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
 	mov esi,src
 	pinsrd xmm0,eax,2
 	movzx edx,word ptr[esi+8]
@@ -3726,22 +3585,22 @@ Convert_16_RGB32toYV24_SSE41_2:
 	movzx ebx,word ptr[esi+12] ; ebx=R ecx=G edx=B
 	mov esi,lookup
 	mov eax,dword ptr[esi+4*ebx]
-	add eax,dword ptr[esi+4*ecx+1024]
-	add eax,dword ptr[esi+4*edx+2048]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
 	pinsrd xmm4,eax,0
-	mov eax,dword ptr[esi+4*ebx+3072]
-	add eax,dword ptr[esi+4*ecx+4096]
-	add eax,dword ptr[esi+4*edx+5120]
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
 	pinsrd xmm4,eax,1
-	mov eax,dword ptr[esi+4*ebx+6144]
-	add eax,dword ptr[esi+4*ecx+7168]
-	add eax,dword ptr[esi+4*edx+8192]
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
 	pinsrd xmm4,eax,2
 	
-	paddsw xmm0,xmm1
-	paddsw xmm4,xmm1
-	psraw xmm0,8
-	psraw xmm4,8
+	paddd xmm0,xmm1
+	paddd xmm4,xmm1
+	psrad xmm0,8
+	psrad xmm4,8
 	packusdw xmm0,xmm4
 	movhlps xmm4,xmm0
 	punpcklwd xmm0,xmm4
@@ -3765,32 +3624,31 @@ Convert_16_RGB32toYV24_SSE41_2:
 	mov esi,src
 	
 	dec i
-	jnz Convert_16_RGB32toYV24_SSE41_2
+	jnz Convert_RGB64toYV24_SSE41_2
 	
-Convert_16_RGB32toYV24_SSE41_3:	
-	mov eax,w
-	and eax,1
-	jz Convert_16_RGB32toYV24_SSE41_4
+Convert_RGB64toYV24_SSE41_3:	
+	test w,1
+	jz Convert_RGB64toYV24_SSE41_4
 	
 	movzx edx,word ptr[esi]
 	movzx ecx,word ptr[esi+2]
 	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
 	mov esi,lookup
 	mov eax,dword ptr[esi+4*ebx]
-	add eax,dword ptr[esi+4*ecx+1024]
-	add eax,dword ptr[esi+4*edx+2048]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
 	pinsrd xmm0,eax,0
-	mov eax,dword ptr[esi+4*ebx+3072]
-	add eax,dword ptr[esi+4*ecx+4095]
-	add eax,dword ptr[esi+4*edx+5120]
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
 	pinsrd xmm0,eax,1
-	mov eax,dword ptr[esi+4*ebx+6144]
-	add eax,dword ptr[esi+4*ecx+7168]
-	add eax,dword ptr[esi+4*edx+8192]
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
 	pinsrd xmm0,eax,2
 	
-	paddsw xmm0,xmm1
-	psraw xmm0,8
+	paddd xmm0,xmm1
+	psrad xmm0,8
 	packusdw xmm0,xmm0
 	punpcklwd xmm0,xmm0	
 	pmaxuw xmm0,xmm2
@@ -3812,7 +3670,7 @@ Convert_16_RGB32toYV24_SSE41_3:
 	
 	mov esi,src	
 	
-Convert_16_RGB32toYV24_SSE41_4:	
+Convert_RGB64toYV24_SSE41_4:	
 	add esi,src_modulo
 	mov eax,dst_y
 	add eax,dst_modulo_y
@@ -3825,7 +3683,7 @@ Convert_16_RGB32toYV24_SSE41_4:
 	mov dst_v,eax
 	mov src,esi
 	dec h
-	jnz Convert_16_RGB32toYV24_SSE41_1
+	jnz Convert_RGB64toYV24_SSE41_1
 
 	pop ebx
 	pop edi
@@ -3833,14 +3691,14 @@ Convert_16_RGB32toYV24_SSE41_4:
 
 	ret
 
-JPSDR_HDRTools_Convert_16_RGB32toYV24_SSE41 endp
+JPSDR_HDRTools_Convert_RGB64toYV24_SSE41 endp
 
 
-JPSDR_HDRTools_Convert_16_RGB32toYV24_AVX proc src:dword,dst_y:dword,dst_u:dword,dst_v:dword,w:dword,h:dword,offset_Y:dword,
+JPSDR_HDRTools_Convert_RGB64toYV24_AVX proc src:dword,dst_y:dword,dst_u:dword,dst_v:dword,w:dword,h:dword,offset_Y:dword,
 	offset_U:dword,offset_V:dword,lookup:dword,src_modulo:dword,dst_modulo_y:dword,dst_modulo_u:dword,dst_modulo_v:dword,
 	Min_Y:word,Max_Y:word,Min_U:word,Max_U:word,Min_V:word,Max_V:word
 
-	public JPSDR_HDRTools_Convert_16_RGB32toYV24_AVX
+	public JPSDR_HDRTools_Convert_RGB64toYV24_AVX
 
 	local i,w0:dword
 
@@ -3884,27 +3742,28 @@ JPSDR_HDRTools_Convert_16_RGB32toYV24_AVX proc src:dword,dst_y:dword,dst_u:dword
 	
 	mov esi,src
 
-Convert_16_RGB32toYV24_AVX_1:
+Convert_RGB64toYV24_AVX_1:
 	mov eax,w0
 	or eax,eax
-	jz Convert_16_RGB32toYV24_AVX_3
+	jz Convert_RGB64toYV24_AVX_3
+	
 	mov i,eax
-Convert_16_RGB32toYV24_AVX_2:
+Convert_RGB64toYV24_AVX_2:
 	movzx edx,word ptr[esi]
 	movzx ecx,word ptr[esi+2]
 	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
 	mov esi,lookup
 	mov eax,dword ptr[esi+4*ebx]
-	add eax,dword ptr[esi+4*ecx+1024]
-	add eax,dword ptr[esi+4*edx+2048]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
 	vpinsrd xmm0,xmm0,eax,0
-	mov eax,dword ptr[esi+4*ebx+3072]
-	add eax,dword ptr[esi+4*ecx+4096]
-	add eax,dword ptr[esi+4*edx+5120]
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
 	vpinsrd xmm0,xmm0,eax,1
-	mov eax,dword ptr[esi+4*ebx+6144]
-	add eax,dword ptr[esi+4*ecx+7168]
-	add eax,dword ptr[esi+4*edx+8192]
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
 	mov esi,src
 	vpinsrd xmm0,xmm0,eax,2
 	movzx edx,word ptr[esi+8]
@@ -3912,22 +3771,22 @@ Convert_16_RGB32toYV24_AVX_2:
 	movzx ebx,word ptr[esi+12] ; ebx=R ecx=G edx=B
 	mov esi,lookup
 	mov eax,dword ptr[esi+4*ebx]
-	add eax,dword ptr[esi+4*ecx+1024]
-	add eax,dword ptr[esi+4*edx+2048]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
 	vpinsrd xmm4,xmm4,eax,0
-	mov eax,dword ptr[esi+4*ebx+3072]
-	add eax,dword ptr[esi+4*ecx+4096]
-	add eax,dword ptr[esi+4*edx+5120]
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
 	vpinsrd xmm4,xmm4,eax,1
-	mov eax,dword ptr[esi+4*ebx+6144]
-	add eax,dword ptr[esi+4*ecx+7168]
-	add eax,dword ptr[esi+4*edx+8192]
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
 	vpinsrd xmm4,xmm4,eax,2
 	
-	vpaddsw xmm0,xmm0,xmm1
-	vpaddsw xmm4,xmm4,xmm1
-	vpsraw xmm0,xmm0,8
-	vpsraw xmm4,xmm4,8
+	vpaddd xmm0,xmm0,xmm1
+	vpaddd xmm4,xmm4,xmm1
+	vpsrad xmm0,xmm0,8
+	vpsrad xmm4,xmm4,8
 	vpackusdw xmm0,xmm0,xmm4
 	vmovhlps xmm4,xmm4,xmm0
 	vpunpcklwd xmm0,xmm0,xmm4
@@ -3951,32 +3810,31 @@ Convert_16_RGB32toYV24_AVX_2:
 	mov esi,src
 	
 	dec i
-	jnz Convert_16_RGB32toYV24_AVX_2
+	jnz Convert_RGB64toYV24_AVX_2
 	
-Convert_16_RGB32toYV24_AVX_3:	
-	mov eax,w
-	and eax,1
-	jz Convert_16_RGB32toYV24_AVX_4
+Convert_RGB64toYV24_AVX_3:	
+	test w,1
+	jz Convert_RGB64toYV24_AVX_4
 	
 	movzx edx,word ptr[esi]
 	movzx ecx,word ptr[esi+2]
 	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
 	mov esi,lookup
 	mov eax,dword ptr[esi+4*ebx]
-	add eax,dword ptr[esi+4*ecx+1024]
-	add eax,dword ptr[esi+4*edx+2048]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
 	vpinsrd xmm0,xmm0,eax,0
-	mov eax,dword ptr[esi+4*ebx+3072]
-	add eax,dword ptr[esi+4*ecx+4095]
-	add eax,dword ptr[esi+4*edx+5120]
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
 	vpinsrd xmm0,xmm0,eax,1
-	mov eax,dword ptr[esi+4*ebx+6144]
-	add eax,dword ptr[esi+4*ecx+7168]
-	add eax,dword ptr[esi+4*edx+8192]
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
 	vpinsrd xmm0,xmm0,eax,2
 	
-	vpaddsw xmm0,xmm0,xmm1
-	vpsraw xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm1
+	vpsrad xmm0,xmm0,8
 	vpackusdw xmm0,xmm0,xmm0
 	vpunpcklwd xmm0,xmm0,xmm0	
 	vpmaxuw xmm0,xmm0,xmm2
@@ -3998,7 +3856,7 @@ Convert_16_RGB32toYV24_AVX_3:
 	
 	mov esi,src	
 	
-Convert_16_RGB32toYV24_AVX_4:	
+Convert_RGB64toYV24_AVX_4:	
 	add esi,src_modulo
 	mov eax,dst_y
 	add eax,dst_modulo_y
@@ -4011,7 +3869,7 @@ Convert_16_RGB32toYV24_AVX_4:
 	mov dst_v,eax
 	mov src,esi
 	dec h
-	jnz Convert_16_RGB32toYV24_AVX_1
+	jnz Convert_RGB64toYV24_AVX_1
 
 	pop ebx
 	pop edi
@@ -4019,7 +3877,1594 @@ Convert_16_RGB32toYV24_AVX_4:
 
 	ret
 
-JPSDR_HDRTools_Convert_16_RGB32toYV24_AVX endp
+JPSDR_HDRTools_Convert_RGB64toYV24_AVX endp
+
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_8 proc src:dword,dst:dword,w:dword,h:dword,src_modulo:dword,dst_modulo:dword
+
+	public JPSDR_HDRTools_Convert_Planar444_to_Planar422_8
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src
+	mov ebx,src_modulo
+	mov edx,dst_modulo
+
+Convert_Planar444_to_Planar422_8_1:
+	mov ecx,w
+	
+Convert_Planar444_to_Planar422_8_2:
+	lodsw
+	stosb
+	loop Convert_Planar444_to_Planar422_8_2
+	
+	add esi,ebx
+	add edi,edx
+	dec h
+	jnz short Convert_Planar444_to_Planar422_8_1
+
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_8 endp
+
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_16 proc src:dword,dst:dword,w:dword,h:dword,src_modulo:dword,dst_modulo:dword
+
+	public JPSDR_HDRTools_Convert_Planar444_to_Planar422_16
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src
+	mov ebx,src_modulo
+	mov edx,dst_modulo
+
+Convert_Planar444_to_Planar422_16_1:
+	mov ecx,w
+	
+Convert_Planar444_to_Planar422_16_2:
+	lodsd
+	stosw
+	loop Convert_Planar444_to_Planar422_16_2
+	
+	add esi,ebx
+	add edi,edx
+	dec h
+	jnz short Convert_Planar444_to_Planar422_16_1
+
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_16 endp
+
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_8_SSE2 proc src:dword,dst:dword,w16:dword,h:dword,src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_Planar444_to_Planar422_8_SSE2
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src
+	mov ebx,16
+	mov edx,esi
+	add edx,ebx
+
+Convert_Planar444_to_Planar422_8_SSE2_1:
+	mov ecx,w16
+	xor eax,eax	
+	shr ecx,1
+	jz short Convert_Planar444_to_Planar422_8_SSE2_3
+	
+Convert_Planar444_to_Planar422_8_SSE2_2:
+	movdqa xmm0,XMMWORD ptr[esi+2*eax]
+	movdqa xmm1,XMMWORD ptr[edx+2*eax]
+	psrlw xmm0,8
+	psrlw xmm1,8
+	packuswb xmm0,xmm1
+	
+	movdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,ebx
+	loop Convert_Planar444_to_Planar422_8_SSE2_2
+	
+Convert_Planar444_to_Planar422_8_SSE2_3:	
+	test w16,1
+	jz short Convert_Planar444_to_Planar422_8_SSE2_4
+	
+	movdqa xmm0,XMMWORD ptr[esi+2*eax]
+	psrlw xmm0,8
+	packuswb xmm0,xmm0
+	
+	movq qword ptr[edi+eax],xmm0
+
+Convert_Planar444_to_Planar422_8_SSE2_4:	
+	add esi,src_pitch
+	add edx,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_Planar444_to_Planar422_8_SSE2_1
+
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_8_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_16_SSE41 proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_Planar444_to_Planar422_16_SSE41
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src
+	mov ebx,16
+	mov edx,esi
+	add edx,ebx
+
+Convert_Planar444_to_Planar422_16_SSE41_1:
+	mov ecx,w8
+	xor eax,eax
+	shr ecx,1
+	jz short Convert_Planar444_to_Planar422_16_SSE41_3
+
+Convert_Planar444_to_Planar422_16_SSE41_2:
+	movdqa xmm0,XMMWORD ptr[esi+2*eax]
+	movdqa xmm1,XMMWORD ptr[edx+2*eax]
+	psrld xmm0,16
+	psrld xmm1,16
+	packusdw xmm0,xmm1
+	
+	movdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,ebx
+	loop Convert_Planar444_to_Planar422_16_SSE41_2
+	
+Convert_Planar444_to_Planar422_16_SSE41_3:	
+	test w8,1
+	jz short Convert_Planar444_to_Planar422_16_SSE41_4
+	
+	movdqa xmm0,XMMWORD ptr[esi+2*eax]
+	psrld xmm0,16
+	packusdw xmm0,xmm0
+	movq qword ptr[edi+eax],xmm0
+	
+Convert_Planar444_to_Planar422_16_SSE41_4:	
+	add esi,src_pitch
+	add edx,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_Planar444_to_Planar422_16_SSE41_1
+
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_16_SSE41 endp
+
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_8_AVX proc src:dword,dst:dword,w16:dword,h:dword,src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_Planar444_to_Planar422_8_AVX
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src
+	mov ebx,16
+	mov edx,esi
+	add edx,ebx
+
+Convert_Planar444_to_Planar422_8_AVX_1:
+	mov ecx,w16
+	xor eax,eax	
+	shr ecx,1
+	jz short Convert_Planar444_to_Planar422_8_AVX_3
+	
+Convert_Planar444_to_Planar422_8_AVX_2:
+	vmovdqa xmm0,XMMWORD ptr[esi+2*eax]
+	vmovdqa xmm1,XMMWORD ptr[edx+2*eax]
+	vpsrlw xmm0,xmm0,8
+	vpsrlw xmm1,xmm1,8
+	vpackuswb xmm0,xmm0,xmm1
+	
+	vmovdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,ebx
+	loop Convert_Planar444_to_Planar422_8_AVX_2
+	
+Convert_Planar444_to_Planar422_8_AVX_3:	
+	test w16,1
+	jz short Convert_Planar444_to_Planar422_8_AVX_4
+	
+	vmovdqa xmm0,XMMWORD ptr[esi+2*eax]
+	vpsrlw xmm0,xmm0,8
+	vpackuswb xmm0,xmm0,xmm0
+	
+	vmovq qword ptr[edi+eax],xmm0
+
+Convert_Planar444_to_Planar422_8_AVX_4:	
+	add esi,src_pitch
+	add edx,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_Planar444_to_Planar422_8_AVX_1
+
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_8_AVX endp
+
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_16_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_Planar444_to_Planar422_16_AVX
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src
+	mov ebx,16
+	mov edx,esi
+	add edx,ebx
+
+Convert_Planar444_to_Planar422_16_AVX_1:
+	mov ecx,w8
+	xor eax,eax
+	shr ecx,1
+	jz short Convert_Planar444_to_Planar422_16_AVX_3
+
+Convert_Planar444_to_Planar422_16_AVX_2:
+	vmovdqa xmm0,XMMWORD ptr[esi+2*eax]
+	vmovdqa xmm1,XMMWORD ptr[edx+2*eax]
+	vpsrld xmm0,xmm0,16
+	vpsrld xmm1,xmm1,16
+	vpackusdw xmm0,xmm0,xmm1
+	
+	vmovdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,ebx
+	loop Convert_Planar444_to_Planar422_16_AVX_2
+	
+Convert_Planar444_to_Planar422_16_AVX_3:	
+	test w8,1
+	jz short Convert_Planar444_to_Planar422_16_AVX_4
+	
+	vmovdqa xmm0,XMMWORD ptr[esi+2*eax]
+	vpsrld xmm0,xmm0,16
+	vpackusdw xmm0,xmm0,xmm0
+	vmovq qword ptr[edi+eax],xmm0
+	
+Convert_Planar444_to_Planar422_16_AVX_4:	
+	add esi,src_pitch
+	add edx,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_Planar444_to_Planar422_16_AVX_1
+
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar444_to_Planar422_16_AVX endp
+
+
+JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_SSE2 proc src1:dword,src2:dword,dst:dword,w16:dword,h:dword,src_pitch2:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_SSE2
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src1
+	mov edx,src2
+	mov ebx,16
+	
+Convert_Planar422_to_Planar420_8_SSE2_1:
+	xor eax,eax
+	mov ecx,w16
+
+Convert_Planar422_to_Planar420_8_SSE2_2:
+	movdqa xmm0,XMMWORD ptr[esi+eax]
+	pavgb xmm0,XMMWORD ptr[edx+eax]
+	
+	movdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,ebx
+	loop Convert_Planar422_to_Planar420_8_SSE2_2
+	
+	add esi,src_pitch2
+	add edx,src_pitch2
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_Planar422_to_Planar420_8_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_SSE2 proc src1:dword,src2:dword,dst:dword,w8:dword,h:dword,src_pitch2:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_SSE2
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src1
+	mov edx,src2
+	mov ebx,16
+	
+Convert_Planar422_to_Planar420_16_SSE2_1:
+	xor eax,eax
+	mov ecx,w8
+
+Convert_Planar422_to_Planar420_16_SSE2_2:
+	movdqa xmm0,XMMWORD ptr[esi+eax]
+	pavgw xmm0,XMMWORD ptr[edx+eax]
+	
+	movdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,ebx
+	loop Convert_Planar422_to_Planar420_16_SSE2_2
+	
+	add esi,src_pitch2
+	add edx,src_pitch2
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_Planar422_to_Planar420_16_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_AVX proc src1:dword,src2:dword,dst:dword,w16:dword,h:dword,src_pitch2:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_AVX
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src1
+	mov edx,src2
+	mov ebx,16
+	
+Convert_Planar422_to_Planar420_8_AVX_1:
+	xor eax,eax
+	mov ecx,w16
+
+Convert_Planar422_to_Planar420_8_AVX_2:
+	vmovdqa xmm0,XMMWORD ptr[esi+eax]
+	vpavgb xmm0,xmm0,XMMWORD ptr[edx+eax]
+	
+	vmovdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,ebx
+	loop Convert_Planar422_to_Planar420_8_AVX_2
+	
+	add esi,src_pitch2
+	add edx,src_pitch2
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_Planar422_to_Planar420_8_AVX_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_AVX endp
+
+
+JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_AVX proc src1:dword,src2:dword,dst:dword,w8:dword,h:dword,src_pitch2:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_AVX
+	
+	push esi
+	push edi
+	push ebx
+	
+	mov edi,dst
+	mov esi,src1
+	mov edx,src2
+	mov ebx,16
+	
+Convert_Planar422_to_Planar420_16_AVX_1:
+	xor eax,eax
+	mov ecx,w8
+
+Convert_Planar422_to_Planar420_16_AVX_2:
+	vmovdqa xmm0,XMMWORD ptr[esi+eax]
+	vpavgw xmm0,xmm0,XMMWORD ptr[edx+eax]
+	
+	vmovdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,ebx
+	loop Convert_Planar422_to_Planar420_16_AVX_2
+	
+	add esi,src_pitch2
+	add edx,src_pitch2
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_Planar422_to_Planar420_16_AVX_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_AVX endp
+
+
+;***************************************************
+;**             XYZ/RGB functions                 **
+;***************************************************
+
+
+JPSDR_HDRTools_Convert_PackedXYZ_8_SSE2 proc src:dword,dst:dword,w:dword,h:dword,lookup:dword,
+	src_modulo:dword,dst_modulo:dword
+
+	public JPSDR_HDRTools_Convert_PackedXYZ_8_SSE2
+
+	local i,w0:dword
+
+	push esi
+	push edi
+	push ebx
+
+	mov eax,w
+	shr eax,2
+	mov w0,eax
+	
+	mov edi,dst
+	mov esi,src
+
+Convert_PackedXYZ_8_SSE2_1:
+	mov eax,w0
+	or eax,eax
+	jz Convert_PackedXYZ_8_SSE2_3
+	
+	mov i,eax
+Convert_PackedXYZ_8_SSE2_2:
+	pxor xmm0,xmm0
+	movzx edx,byte ptr[esi]
+	movzx ecx,byte ptr[esi+1]
+	movzx ebx,byte ptr[esi+2] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	pinsrw xmm0,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	pinsrw xmm0,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	mov esi,src
+	pinsrw xmm0,eax,0
+	movzx edx,byte ptr[esi+4]
+	movzx ecx,byte ptr[esi+5]
+	movzx ebx,byte ptr[esi+6] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	pinsrw xmm0,eax,6
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	pinsrw xmm0,eax,5
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	mov esi,src
+	pinsrw xmm0,eax,4
+	
+	pxor xmm1,xmm1
+	movzx edx,byte ptr[esi+8]
+	movzx ecx,byte ptr[esi+9]
+	movzx ebx,byte ptr[esi+10] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	pinsrw xmm1,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	pinsrw xmm1,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	mov esi,src
+	pinsrw xmm1,eax,0
+	movzx edx,byte ptr[esi+12]
+	movzx ecx,byte ptr[esi+13]
+	movzx ebx,byte ptr[esi+14] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	pinsrw xmm1,eax,6
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	pinsrw xmm1,eax,5
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	pinsrw xmm1,eax,4
+	
+	psraw xmm0,4
+	psraw xmm1,4
+	packuswb xmm0,xmm1
+	
+	movdqa XMMWORD ptr[edi],xmm0
+	
+	add src,16
+	add edi,16
+	
+	mov esi,src
+	
+	dec i
+	jnz Convert_PackedXYZ_8_SSE2_2
+	
+Convert_PackedXYZ_8_SSE2_3:	
+	test w,3
+	jz Convert_PackedXYZ_8_SSE2_5
+	
+	pxor xmm0,xmm0
+	test w,2
+	jnz short Convert_PackedXYZ_8_SSE2_4
+	
+	movzx edx,byte ptr[esi]
+	movzx ecx,byte ptr[esi+1]
+	movzx ebx,byte ptr[esi+2] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	pinsrw xmm0,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	pinsrw xmm0,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	pinsrw xmm0,eax,0
+	
+	psraw xmm0,4
+	packuswb xmm0,xmm0
+	
+	movd dword ptr[edi],xmm0
+	
+	add src,4
+	add edi,4
+	
+	mov esi,src
+	
+	jmp Convert_PackedXYZ_8_SSE2_5
+	
+Convert_PackedXYZ_8_SSE2_4:
+	movzx edx,byte ptr[esi]
+	movzx ecx,byte ptr[esi+1]
+	movzx ebx,byte ptr[esi+2] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	pinsrw xmm0,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	pinsrw xmm0,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	mov esi,src
+	pinsrw xmm0,eax,0
+	movzx edx,byte ptr[esi+4]
+	movzx ecx,byte ptr[esi+5]
+	movzx ebx,byte ptr[esi+6] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	pinsrw xmm0,eax,6
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	pinsrw xmm0,eax,5
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	pinsrw xmm0,eax,4
+	
+	psraw xmm0,4
+	packuswb xmm0,xmm0
+	
+	movq qword ptr[edi],xmm0
+	
+	add src,8
+	add edi,8
+	
+	mov esi,src
+	
+	test w,1
+	jz short Convert_PackedXYZ_8_SSE2_5
+	
+	pxor xmm0,xmm0
+	movzx edx,byte ptr[esi]
+	movzx ecx,byte ptr[esi+1]
+	movzx ebx,byte ptr[esi+2] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	pinsrw xmm0,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	pinsrw xmm0,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	pinsrw xmm0,eax,0
+	
+	psraw xmm0,4
+	packuswb xmm0,xmm0
+	
+	movd dword ptr[edi],xmm0
+	
+	add src,4
+	add edi,4
+	
+	mov esi,src
+	
+Convert_PackedXYZ_8_SSE2_5:	
+	add esi,src_modulo
+	add edi,dst_modulo
+	mov src,esi
+	
+	dec h
+	jnz Convert_PackedXYZ_8_SSE2_1
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_PackedXYZ_8_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_PackedXYZ_8_AVX proc src:dword,dst:dword,w:dword,h:dword,lookup:dword,
+	src_modulo:dword,dst_modulo:dword
+
+	public JPSDR_HDRTools_Convert_PackedXYZ_8_AVX
+
+	local i,w0:dword
+
+	push esi
+	push edi
+	push ebx
+
+	mov eax,w
+	shr eax,2
+	mov w0,eax
+	
+	mov edi,dst
+	mov esi,src
+	vpxor xmm0,xmm0,xmm0
+	vpxor xmm1,xmm1,xmm1
+
+Convert_PackedXYZ_8_AVX_1:
+	mov eax,w0
+	or eax,eax
+	jz Convert_PackedXYZ_8_AVX_3
+	
+	mov i,eax
+Convert_PackedXYZ_8_AVX_2:
+	movzx edx,byte ptr[esi]
+	movzx ecx,byte ptr[esi+1]
+	movzx ebx,byte ptr[esi+2] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	vpinsrw xmm0,xmm0,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	vpinsrw xmm0,xmm0,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	mov esi,src
+	vpinsrw xmm0,xmm0,eax,0
+	movzx edx,byte ptr[esi+4]
+	movzx ecx,byte ptr[esi+5]
+	movzx ebx,byte ptr[esi+6] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	vpinsrw xmm0,xmm0,eax,6
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	vpinsrw xmm0,xmm0,eax,5
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	mov esi,src
+	vpinsrw xmm0,xmm0,eax,4
+	
+	movzx edx,byte ptr[esi+8]
+	movzx ecx,byte ptr[esi+9]
+	movzx ebx,byte ptr[esi+10] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	vpinsrw xmm1,xmm1,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	vpinsrw xmm1,xmm1,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	mov esi,src
+	vpinsrw xmm1,xmm1,eax,0
+	movzx edx,byte ptr[esi+12]
+	movzx ecx,byte ptr[esi+13]
+	movzx ebx,byte ptr[esi+14] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	vpinsrw xmm1,xmm1,eax,6
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	vpinsrw xmm1,xmm1,eax,5
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	vpinsrw xmm1,xmm1,eax,4
+	
+	vpsraw xmm0,xmm0,4
+	vpsraw xmm1,xmm1,4
+	vpackuswb xmm2,xmm0,xmm1
+	
+	vmovdqa XMMWORD ptr[edi],xmm2
+	
+	add src,16
+	add edi,16
+	
+	mov esi,src
+	
+	dec i
+	jnz Convert_PackedXYZ_8_AVX_2
+	
+Convert_PackedXYZ_8_AVX_3:	
+	test w,3
+	jz Convert_PackedXYZ_8_AVX_5
+	
+	test w,2
+	jnz short Convert_PackedXYZ_8_AVX_4
+	
+	movzx edx,byte ptr[esi]
+	movzx ecx,byte ptr[esi+1]
+	movzx ebx,byte ptr[esi+2] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	vpinsrw xmm0,xmm0,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	vpinsrw xmm0,xmm0,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	vpinsrw xmm0,xmm0,eax,0
+	
+	vpsraw xmm0,xmm0,4
+	vpackuswb xmm2,xmm0,xmm0
+	
+	vmovd dword ptr[edi],xmm2
+	
+	add src,4
+	add edi,4
+	
+	mov esi,src
+	
+	jmp Convert_PackedXYZ_8_AVX_5
+	
+Convert_PackedXYZ_8_AVX_4:
+	movzx edx,byte ptr[esi]
+	movzx ecx,byte ptr[esi+1]
+	movzx ebx,byte ptr[esi+2] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	vpinsrw xmm0,xmm0,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	vpinsrw xmm0,xmm0,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	mov esi,src
+	vpinsrw xmm0,xmm0,eax,0
+	movzx edx,byte ptr[esi+4]
+	movzx ecx,byte ptr[esi+5]
+	movzx ebx,byte ptr[esi+6] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	vpinsrw xmm0,xmm0,eax,6
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	vpinsrw xmm0,xmm0,eax,5
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	vpinsrw xmm0,xmm0,eax,4
+	
+	vpsraw xmm0,xmm0,4
+	vpackuswb xmm2,xmm0,xmm0
+	
+	movq qword ptr[edi],xmm2
+	
+	add src,8
+	add edi,8
+	
+	mov esi,src
+	
+	test w,1
+	jz short Convert_PackedXYZ_8_AVX_5
+	
+	movzx edx,byte ptr[esi]
+	movzx ecx,byte ptr[esi+1]
+	movzx ebx,byte ptr[esi+2] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	movzx eax,word ptr[esi+2*ebx]
+	add ax,word ptr[esi+2*ecx+512]
+	add ax,word ptr[esi+2*edx+1024]
+	vpinsrw xmm0,xmm0,eax,2
+	movzx eax,word ptr[esi+2*ebx+1536]
+	add ax,word ptr[esi+2*ecx+2048]
+	add ax,word ptr[esi+2*edx+2560]
+	vpinsrw xmm0,xmm0,eax,1
+	movzx eax,word ptr[esi+2*ebx+3072]
+	add ax,word ptr[esi+2*ecx+3584]
+	add ax,word ptr[esi+2*edx+4096]
+	vpinsrw xmm0,xmm0,eax,0
+	
+	vpsraw xmm0,xmm0,4
+	vpackuswb xmm2,xmm0,xmm0
+	
+	vmovd dword ptr[edi],xmm2
+	
+	add src,4
+	add edi,4
+	
+	mov esi,src
+	
+Convert_PackedXYZ_8_AVX_5:	
+	add esi,src_modulo
+	add edi,dst_modulo
+	mov src,esi
+	
+	dec h
+	jnz Convert_PackedXYZ_8_AVX_1
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_PackedXYZ_8_AVX endp
+
+
+JPSDR_HDRTools_Convert_PackedXYZ_16_SSE41 proc src:dword,dst:dword,w:dword,h:dword,lookup:dword,
+	src_modulo:dword,dst_modulo:dword
+
+	public JPSDR_HDRTools_Convert_PackedXYZ_16_SSE41
+
+	local i,w0:dword
+
+	push esi
+	push edi
+	push ebx
+
+	mov eax,w
+	shr eax,1
+	mov w0,eax
+	
+	mov edi,dst
+	mov esi,src
+
+Convert_PackedXYZ_16_SSE41_1:
+	mov eax,w0
+	or eax,eax
+	jz Convert_PackedXYZ_16_SSE41_3
+	
+	mov i,eax
+Convert_PackedXYZ_16_SSE41_2:
+	pxor xmm0,xmm0
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	mov eax,dword ptr[esi+4*ebx]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
+	pinsrd xmm0,eax,2
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
+	pinsrd xmm0,eax,1
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
+	mov esi,src
+	pinsrd xmm0,eax,0
+
+	pxor xmm1,xmm1
+	movzx edx,word ptr[esi+8]
+	movzx ecx,word ptr[esi+10]
+	movzx ebx,word ptr[esi+12] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	mov eax,dword ptr[esi+4*ebx]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
+	pinsrd xmm1,eax,2
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
+	pinsrd xmm1,eax,1
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
+	pinsrd xmm1,eax,0
+	
+	psrad xmm0,8
+	psrad xmm1,8
+	packusdw xmm0,xmm1
+	
+	movdqa XMMWORD ptr[edi],xmm0
+	
+	add src,16
+	add edi,16
+	
+	mov esi,src
+	
+	dec i
+	jnz Convert_PackedXYZ_16_SSE41_2
+	
+Convert_PackedXYZ_16_SSE41_3:	
+	test w,1
+	jz short Convert_PackedXYZ_16_SSE41_4
+	
+	pxor xmm0,xmm0
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	mov eax,dword ptr[esi+4*ebx]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
+	pinsrd xmm0,eax,2
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
+	pinsrd xmm0,eax,1
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
+	pinsrd xmm0,eax,0
+	
+	psrad xmm0,8
+	packusdw xmm0,xmm0
+	
+	movq qword ptr[edi],xmm0
+	
+	add src,8
+	add edi,8
+	
+	mov esi,src
+	
+Convert_PackedXYZ_16_SSE41_4:	
+	add esi,src_modulo
+	add edi,dst_modulo
+	mov src,esi
+	
+	dec h
+	jnz Convert_PackedXYZ_16_SSE41_1
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_PackedXYZ_16_SSE41 endp
+
+
+JPSDR_HDRTools_Convert_PackedXYZ_16_AVX proc src:dword,dst:dword,w:dword,h:dword,lookup:dword,
+	src_modulo:dword,dst_modulo:dword
+
+	public JPSDR_HDRTools_Convert_PackedXYZ_16_AVX
+
+	local i,w0:dword
+
+	push esi
+	push edi
+	push ebx
+
+	mov eax,w
+	shr eax,1
+	mov w0,eax
+	
+	vpxor xmm0,xmm0,xmm0
+	vpxor xmm1,xmm1,xmm1
+	
+	mov edi,dst
+	mov esi,src
+
+Convert_PackedXYZ_16_AVX_1:
+	mov eax,w0
+	or eax,eax
+	jz Convert_PackedXYZ_16_AVX_3
+	
+	mov i,eax
+Convert_PackedXYZ_16_AVX_2:
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	mov eax,dword ptr[esi+4*ebx]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,2
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
+	vpinsrd xmm0,xmm0,eax,1
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
+	mov esi,src
+	vpinsrd xmm0,xmm0,eax,0
+
+	movzx edx,word ptr[esi+8]
+	movzx ecx,word ptr[esi+10]
+	movzx ebx,word ptr[esi+12] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	mov eax,dword ptr[esi+4*ebx]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
+	vpinsrd xmm1,xmm1,eax,2
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
+	vpinsrd xmm1,xmm1,eax,1
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
+	vpinsrd xmm1,xmm1,eax,0
+	
+	vpsrad xmm0,xmm0,8
+	vpsrad xmm1,xmm1,8
+	vpackusdw xmm2,xmm0,xmm1
+	
+	vmovdqa XMMWORD ptr[edi],xmm2
+	
+	add src,16
+	add edi,16
+	
+	mov esi,src
+	
+	dec i
+	jnz Convert_PackedXYZ_16_AVX_2
+	
+Convert_PackedXYZ_16_AVX_3:	
+	test w,1
+	jz short Convert_PackedXYZ_16_AVX_4
+	
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R/X ecx=G/Y edx=B/Z
+	mov esi,lookup
+	mov eax,dword ptr[esi+4*ebx]
+	add eax,dword ptr[esi+4*ecx+262144]
+	add eax,dword ptr[esi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,2
+	mov eax,dword ptr[esi+4*ebx+786432]
+	add eax,dword ptr[esi+4*ecx+1048576]
+	add eax,dword ptr[esi+4*edx+1310720]
+	vpinsrd xmm0,xmm0,eax,1
+	mov eax,dword ptr[esi+4*ebx+1572864]
+	add eax,dword ptr[esi+4*ecx+1835008]
+	add eax,dword ptr[esi+4*edx+2097152]
+	vpinsrd xmm0,xmm0,eax,0
+	
+	vpsrad xmm0,xmm0,8
+	vpackusdw xmm2,xmm0,xmm0
+	
+	vmovq qword ptr[edi],xmm2
+	
+	add src,8
+	add edi,8
+	
+	mov esi,src
+	
+Convert_PackedXYZ_16_AVX_4:	
+	add esi,src_modulo
+	add edi,dst_modulo
+	mov src,esi
+	
+	dec h
+	jnz Convert_PackedXYZ_16_AVX_1
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_PackedXYZ_16_AVX endp
+
+
+JPSDR_HDRTools_Convert_PlanarXYZ_32_SSE2 proc src1:dword,src2:dword,src3:dword,dst1:dword,dst2:dword,dst3:dword,
+	w:dword,h:dword,Coeff:dword,src_modulo1:dword,src_modulo2:dword,src_modulo3:dword,
+	dst_modulo1:dword,dst_modulo2:dword,dst_modulo3:dword
+
+	public JPSDR_HDRTools_Convert_PlanarXYZ_32_SSE2
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,Coeff
+	movaps xmm0,XMMWORD ptr[esi]
+	movaps xmm1,XMMWORD ptr[esi+32]
+	movaps xmm2,XMMWORD ptr[esi+64]	
+	mov eax,src3
+	mov edi,dst1
+	mov ebx,dst2
+	mov edx,dst3
+	
+Convert_PlanarXYZ_32_SSE2_1:
+	mov ecx,w
+	mov esi,src1
+Convert_PlanarXYZ_32_SSE2_2:
+	add src1,4
+	movss xmm3,dword ptr[esi]
+	mov esi,src2
+	add src2,4
+	movss xmm4,dword ptr[esi]
+	movss xmm5,dword ptr[eax]
+	
+	shufps xmm3,xmm3,0
+	shufps xmm4,xmm4,0
+	shufps xmm5,xmm5,0
+	
+	mulps xmm3,xmm0
+	mulps xmm4,xmm1
+	mulps xmm5,xmm2
+	
+	addps xmm3,xmm4
+	add eax,4
+	addps xmm3,xmm5	
+	mov esi,src1
+	movhlps xmm4,xmm3
+	
+	movss dword ptr[edi],xmm3
+	shufps xmm3,xmm3,1
+	movss dword ptr[edx],xmm4
+	movss dword ptr[ebx],xmm3
+	
+	add edi,4
+	add edx,4
+	add ebx,4
+	
+	loop Convert_PlanarXYZ_32_SSE2_2
+
+	add esi,src_modulo1
+	mov src1,esi
+	add eax,src_modulo3
+	mov esi,src2
+	add esi,src_modulo2
+	mov src2,esi
+	
+	add edi,dst_modulo1
+	add ebx,dst_modulo2
+	add edx,dst_modulo3
+	
+	dec h
+	jnz short Convert_PlanarXYZ_32_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_PlanarXYZ_32_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_PlanarXYZ_32_AVX proc src1:dword,src2:dword,src3:dword,dst1:dword,dst2:dword,dst3:dword,
+	w:dword,h:dword,Coeff:dword,src_modulo1:dword,src_modulo2:dword,src_modulo3:dword,
+	dst_modulo1:dword,dst_modulo2:dword,dst_modulo3:dword
+
+	public JPSDR_HDRTools_Convert_PlanarXYZ_32_AVX
+
+	local w0:dword
+	
+	push esi
+	push edi
+	push ebx
+
+	mov eax,w
+	shr eax,1
+	mov w0,eax
+	
+	mov esi,Coeff
+	vmovaps ymm0,YMMWORD ptr[esi]
+	vmovaps ymm1,YMMWORD ptr[esi+32]
+	vmovaps ymm2,YMMWORD ptr[esi+64]	
+	mov eax,src3
+	mov edi,dst1
+	mov ebx,dst2
+	mov edx,dst3
+
+Convert_PlanarXYZ_32_AVX_1:
+	mov ecx,w0
+	or ecx,ecx
+	jz Convert_PlanarXYZ_32_AVX_3
+	
+	mov esi,src1
+Convert_PlanarXYZ_32_AVX_2:
+	vmovss xmm3,dword ptr[esi]
+	vmovss xmm6,dword ptr[esi+4]
+	add src1,8
+	vinsertf128 ymm3,ymm3,xmm6,1
+	mov esi,src2
+	vmovss xmm4,dword ptr[esi]
+	vmovss xmm6,dword ptr[esi+4]
+	add src2,8
+	vinsertf128 ymm4,ymm4,xmm6,1
+	vmovss xmm5,dword ptr[eax]
+	vmovss xmm6,dword ptr[eax+4]
+	add eax,8
+	vinsertf128 ymm5,ymm5,xmm6,1
+	
+	vshufps ymm3,ymm3,ymm3,0
+	vshufps ymm4,ymm4,ymm4,0
+	vshufps ymm5,ymm5,ymm5,0
+	
+	vmulps ymm3,ymm3,ymm0
+	vmulps ymm4,ymm4,ymm1
+	vmulps ymm5,ymm5,ymm2
+	
+	vaddps ymm3,ymm3,ymm4
+	mov esi,src1
+	vaddps ymm3,ymm3,ymm5
+	vextractf128 xmm6,ymm3,1
+	
+	vmovhlps xmm4,xmm4,xmm3
+	vmovss dword ptr[edi],xmm3
+	vshufps xmm3,xmm3,xmm3,1
+	vmovss dword ptr[edx],xmm4
+	vmovss dword ptr[ebx],xmm3
+
+	vmovhlps xmm4,xmm4,xmm6
+	vmovss dword ptr[edi+4],xmm6
+	vshufps xmm6,xmm6,xmm6,1
+	vmovss dword ptr[edx+4],xmm4
+	vmovss dword ptr[ebx+4],xmm6
+
+	
+	add edi,8
+	add edx,8
+	add ebx,8
+	
+	dec ecx
+	jnz Convert_PlanarXYZ_32_AVX_2
+
+Convert_PlanarXYZ_32_AVX_3:
+	test w,1
+	jz short Convert_PlanarXYZ_32_AVX_4
+	
+	add src1,4
+	vmovss xmm3,dword ptr[esi]
+	mov esi,src2
+	add src2,4
+	vmovss xmm4,dword ptr[esi]
+	vmovss xmm5,dword ptr[eax]
+	
+	vshufps xmm3,xmm3,xmm3,0
+	vshufps xmm4,xmm4,xmm4,0
+	vshufps xmm5,xmm5,xmm5,0
+	
+	vmulps xmm3,xmm3,xmm0
+	vmulps xmm4,xmm4,xmm1
+	vmulps xmm5,xmm5,xmm2
+	
+	vaddps xmm3,xmm3,xmm4
+	add eax,4
+	vaddps xmm3,xmm3,xmm5	
+	mov esi,src1
+	vmovhlps xmm4,xmm4,xmm3
+	
+	vmovss dword ptr[edi],xmm3
+	vshufps xmm3,xmm3,xmm3,1
+	vmovss dword ptr[edx],xmm4
+	vmovss dword ptr[ebx],xmm3
+	
+	add edi,4
+	add edx,4
+	add ebx,4
+
+Convert_PlanarXYZ_32_AVX_4:	
+	add esi,src_modulo1
+	mov src1,esi
+	add eax,src_modulo3
+	mov esi,src2
+	add esi,src_modulo2
+	mov src2,esi
+	
+	add edi,dst_modulo1
+	add ebx,dst_modulo2
+	add edx,dst_modulo3
+	
+	dec h
+	jnz Convert_PlanarXYZ_32_AVX_1
+	
+	vzeroupper
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_PlanarXYZ_32_AVX endp
+
+
+;***************************************************
+;**           XYZ/HDR/SDR functions               **
+;***************************************************
+	
+
+JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2 proc src:dword,dst:dword,w4:dword,h:dword,src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,src
+	mov edi,dst
+	mov ebx,w4
+	mov edx,16
+	
+	movaps xmm1,XMMWORD ptr data_f_100
+	movaps xmm2,XMMWORD ptr data_f_0
+	movaps xmm3,XMMWORD ptr data_f_1
+	
+Convert_XYZ_HDRtoSDR_32_SSE2_1:
+	mov ecx,ebx
+	xor eax,eax
+Convert_XYZ_HDRtoSDR_32_SSE2_2:	
+	movaps xmm0,XMMWORD ptr [esi+eax]
+	mulps xmm0,xmm1
+	maxps xmm0,xmm2
+	minps xmm0,xmm3
+	movaps XMMWORD ptr [edi+eax],xmm0
+	
+	add eax,edx
+	loop Convert_XYZ_HDRtoSDR_32_SSE2_2
+	
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_XYZ_HDRtoSDR_32_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2 endp
+	
+
+JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,src
+	mov edi,dst
+	mov ebx,w8
+	mov edx,32
+	
+	vmovaps ymm1,YMMWORD ptr data_f_100
+	vmovaps ymm2,YMMWORD ptr data_f_0
+	vmovaps ymm3,YMMWORD ptr data_f_1
+	
+Convert_XYZ_HDRtoSDR_32_AVX_1:
+	mov ecx,ebx
+	xor eax,eax
+Convert_XYZ_HDRtoSDR_32_AVX_2:	
+	vmulps ymm0,ymm1,YMMWORD ptr [esi+eax]
+	vmaxps ymm0,ymm0,ymm2
+	vminps ymm0,ymm0,ymm3
+	vmovaps YMMWORD ptr [edi+eax],ymm0
+	
+	add eax,edx
+	loop Convert_XYZ_HDRtoSDR_32_AVX_2
+	
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_XYZ_HDRtoSDR_32_AVX_1
+	
+	vzeroupper
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX endp	
+
+
+JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2 proc src:dword,dst:dword,w4:dword,h:dword,src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,src
+	mov edi,dst
+	mov ebx,w4
+	mov edx,16
+	
+	movaps xmm1,XMMWORD ptr data_f_001
+	
+Convert_XYZ_SDRtoHDR_32_SSE2_1:
+	mov ecx,ebx
+	xor eax,eax
+Convert_XYZ_SDRtoHDR_32_SSE2_2:	
+	movaps xmm0,XMMWORD ptr [esi+eax]
+	mulps xmm0,xmm1
+	movaps XMMWORD ptr [edi+eax],xmm0
+	
+	add eax,edx
+	loop Convert_XYZ_SDRtoHDR_32_SSE2_2
+	
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_XYZ_SDRtoHDR_32_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,src
+	mov edi,dst
+	mov ebx,w8
+	mov edx,32
+	
+	vmovaps ymm1,YMMWORD ptr data_f_001
+	
+Convert_XYZ_SDRtoHDR_32_AVX_1:
+	mov ecx,ebx
+	xor eax,eax
+Convert_XYZ_SDRtoHDR_32_AVX_2:	
+	vmulps ymm0,ymm1,YMMWORD ptr [esi+eax]
+	vmovaps YMMWORD ptr [edi+eax],ymm0
+	
+	add eax,edx
+	loop Convert_XYZ_SDRtoHDR_32_AVX_2
+	
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_XYZ_SDRtoHDR_32_AVX_1
+	
+	vzeroupper
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX endp
 
 
 end

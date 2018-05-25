@@ -6478,8 +6478,8 @@ dst_pitch equ qword ptr[rbp+56]
 	xor rcx,rcx
 	
 	movaps xmm1,XMMWORD ptr data_f_100
-	movaps xmm2,XMMWORD ptr data_f_0
-	movaps xmm3,XMMWORD ptr data_f_1_1
+	;movaps xmm2,XMMWORD ptr data_f_0
+	;movaps xmm3,XMMWORD ptr data_f_1_1
 	
 Convert_XYZ_HDRtoSDR_32_SSE2_1:
 	mov ecx,r8d
@@ -6487,8 +6487,8 @@ Convert_XYZ_HDRtoSDR_32_SSE2_1:
 Convert_XYZ_HDRtoSDR_32_SSE2_2:	
 	movaps xmm0,XMMWORD ptr [rsi+rax]
 	mulps xmm0,xmm1
-	maxps xmm0,xmm2
-	minps xmm0,xmm3
+	;maxps xmm0,xmm2
+	;minps xmm0,xmm3
 	movaps XMMWORD ptr [rdx+rax],xmm0
 	
 	add rax,rbx
@@ -6535,16 +6535,16 @@ dst_pitch equ qword ptr[rbp+56]
 	xor rcx,rcx
 	
 	vmovaps ymm1,YMMWORD ptr data_f_100
-	vmovaps ymm2,YMMWORD ptr data_f_0
-	vmovaps ymm3,YMMWORD ptr data_f_1_1
+	;vmovaps ymm2,YMMWORD ptr data_f_0
+	;vmovaps ymm3,YMMWORD ptr data_f_1_1
 	
 Convert_XYZ_HDRtoSDR_32_AVX_1:
 	mov ecx,r8d
 	xor rax,rax
 Convert_XYZ_HDRtoSDR_32_AVX_2:	
 	vmulps ymm0,ymm1,YMMWORD ptr [rsi+rax]
-	vmaxps ymm0,ymm0,ymm2
-	vminps ymm0,ymm0,ymm3
+	;vmaxps ymm0,ymm0,ymm2
+	;vminps ymm0,ymm0,ymm3
 	vmovaps YMMWORD ptr [rdx+rax],ymm0
 	
 	add rax,rbx

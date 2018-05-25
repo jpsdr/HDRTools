@@ -5536,8 +5536,8 @@ JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2 proc src:dword,dst:dword,w4:dword,h:
 	mov edx,16
 	
 	movaps xmm1,XMMWORD ptr data_f_100
-	movaps xmm2,XMMWORD ptr data_f_0
-	movaps xmm3,XMMWORD ptr data_f_1_1
+	;movaps xmm2,XMMWORD ptr data_f_0
+	;movaps xmm3,XMMWORD ptr data_f_1_1
 	
 Convert_XYZ_HDRtoSDR_32_SSE2_1:
 	mov ecx,ebx
@@ -5545,8 +5545,8 @@ Convert_XYZ_HDRtoSDR_32_SSE2_1:
 Convert_XYZ_HDRtoSDR_32_SSE2_2:	
 	movaps xmm0,XMMWORD ptr [esi+eax]
 	mulps xmm0,xmm1
-	maxps xmm0,xmm2
-	minps xmm0,xmm3
+	;maxps xmm0,xmm2
+	;minps xmm0,xmm3
 	movaps XMMWORD ptr [edi+eax],xmm0
 	
 	add eax,edx
@@ -5580,16 +5580,16 @@ JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX proc src:dword,dst:dword,w8:dword,h:d
 	mov edx,32
 	
 	vmovaps ymm1,YMMWORD ptr data_f_100
-	vmovaps ymm2,YMMWORD ptr data_f_0
-	vmovaps ymm3,YMMWORD ptr data_f_1_1
+	;vmovaps ymm2,YMMWORD ptr data_f_0
+	;vmovaps ymm3,YMMWORD ptr data_f_1_1
 	
 Convert_XYZ_HDRtoSDR_32_AVX_1:
 	mov ecx,ebx
 	xor eax,eax
 Convert_XYZ_HDRtoSDR_32_AVX_2:	
 	vmulps ymm0,ymm1,YMMWORD ptr [esi+eax]
-	vmaxps ymm0,ymm0,ymm2
-	vminps ymm0,ymm0,ymm3
+	;vmaxps ymm0,ymm0,ymm2
+	;vminps ymm0,ymm0,ymm3
 	vmovaps YMMWORD ptr [edi+eax],ymm0
 	
 	add eax,edx

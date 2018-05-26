@@ -316,7 +316,8 @@ private:
 class ConvertXYZ_HDRtoSDR : public GenericVideoFilter
 {
 public:
-	ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float _MaxMastering,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
+	ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float _MaxMastering,float _Coeff_X,
+		float _Coeff_Y,float _Coeff_Z,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
 	virtual ~ConvertXYZ_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -325,7 +326,8 @@ public:
 private:
 	float MinMastering,MaxMastering;
 	bool sleep;
-	uint16_t *lookup_16;
+	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
+	float Coeff_X,Coeff_Y,Coeff_Z;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;
@@ -348,7 +350,8 @@ private:
 class ConvertXYZ_SDRtoHDR : public GenericVideoFilter
 {
 public:
-	ConvertXYZ_SDRtoHDR(PClip _child,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
+	ConvertXYZ_SDRtoHDR(PClip _child,float _Coeff_X,float _Coeff_Y,float _Coeff_Z,
+		uint8_t _threads, bool _sleep,IScriptEnvironment* env);
 	virtual ~ConvertXYZ_SDRtoHDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -357,7 +360,8 @@ public:
 private:
 	float MinMastering,MaxMastering;
 	bool sleep;
-	uint16_t *lookup_16;
+	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
+	float Coeff_X,Coeff_Y,Coeff_Z;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;

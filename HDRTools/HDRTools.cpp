@@ -178,15 +178,14 @@ extern "C" void JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_AVX(const void *src1,co
 	ptrdiff_t src_modulo3,ptrdiff_t dst_modulo1,ptrdiff_t dst_modulo2,ptrdiff_t dst_modulo3);
 
 extern "C" void JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2(const void *src,void *dst,int32_t w4,int32_t h,
-	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *Coeff);
 extern "C" void JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX(const void *src,void *dst,int32_t w8,int32_t h,
-	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
-
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *Coeff);
 
 extern "C" void JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2(const void *src,void *dst,int32_t w4,int32_t h,
-	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *Coeff);
 extern "C" void JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX(const void *src,void *dst,int32_t w8,int32_t h,
-	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *Coeff);
 
 
 #define myfree(ptr) if (ptr!=NULL) { free(ptr); ptr=NULL;}
@@ -4579,7 +4578,8 @@ static void Convert_XYZtoRGBPS_AVX(const MT_Data_Info_HDRTools &mt_data_inf,cons
 */
 
 
-static void Convert_XYZ_HDRtoSDR_32(const MT_Data_Info_HDRTools &mt_data_inf)
+static void Convert_XYZ_HDRtoSDR_32(const MT_Data_Info_HDRTools &mt_data_inf,
+	const float Coeff_X,const float Coeff_Y,const float Coeff_Z)
 {
 	const uint8_t *srcX_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcY_=(uint8_t *)mt_data_inf.src2;
@@ -4603,7 +4603,7 @@ static void Convert_XYZ_HDRtoSDR_32(const MT_Data_Info_HDRTools &mt_data_inf)
 		float *dstX=(float *)dstX_;
 
 		for (int32_t j=0; j<w; j++)
-			dstX[j]=srcX[j]*100.0f;
+			dstX[j]=srcX[j]*Coeff_X;
 
 		srcX_+=src_pitch_X;
 		dstX_+=dst_pitch_X;
@@ -4615,7 +4615,7 @@ static void Convert_XYZ_HDRtoSDR_32(const MT_Data_Info_HDRTools &mt_data_inf)
 		float *dstY=(float *)dstY_;
 
 		for (int32_t j=0; j<w; j++)
-			dstY[j]=srcY[j]*100.0f;
+			dstY[j]=srcY[j]*Coeff_Y;
 
 		srcY_+=src_pitch_Y;
 		dstY_+=dst_pitch_Y;
@@ -4627,7 +4627,7 @@ static void Convert_XYZ_HDRtoSDR_32(const MT_Data_Info_HDRTools &mt_data_inf)
 		float *dstZ=(float *)dstZ_;
 
 		for (int32_t j=0; j<w; j++)
-			dstZ[j]=srcZ[j]*100.0f;
+			dstZ[j]=srcZ[j]*Coeff_Z;
 
 		srcZ_+=src_pitch_Z;
 		dstZ_+=dst_pitch_Z;
@@ -4635,35 +4635,38 @@ static void Convert_XYZ_HDRtoSDR_32(const MT_Data_Info_HDRTools &mt_data_inf)
 }
 
 
-static void Convert_XYZ_HDRtoSDR_32_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
+static void Convert_XYZ_HDRtoSDR_32_SSE2(const MT_Data_Info_HDRTools &mt_data_inf,
+	float Coeff_X,float Coeff_Y,float Coeff_Z)
 {
 	const int32_t w4=(mt_data_inf.dst_Y_w+3)>>2;
 	const int32_t h=mt_data_inf.dst_Y_h_max-mt_data_inf.dst_Y_h_min;
 
 	JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2(mt_data_inf.src1,mt_data_inf.dst1,w4,h,mt_data_inf.src_pitch1,
-		mt_data_inf.dst_pitch1);
+		mt_data_inf.dst_pitch1,&Coeff_X);
 	JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2(mt_data_inf.src2,mt_data_inf.dst2,w4,h,mt_data_inf.src_pitch2,
-		mt_data_inf.dst_pitch2);
+		mt_data_inf.dst_pitch2,&Coeff_Y);
 	JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2(mt_data_inf.src3,mt_data_inf.dst3,w4,h,mt_data_inf.src_pitch3,
-		mt_data_inf.dst_pitch3);
+		mt_data_inf.dst_pitch3,&Coeff_Z);
 }
 
 
-static void Convert_XYZ_HDRtoSDR_32_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
+static void Convert_XYZ_HDRtoSDR_32_AVX(const MT_Data_Info_HDRTools &mt_data_inf,
+	float Coeff_X,float Coeff_Y,float Coeff_Z)
 {
 	const int32_t w8=(mt_data_inf.dst_Y_w+7)>>3;
 	const int32_t h=mt_data_inf.dst_Y_h_max-mt_data_inf.dst_Y_h_min;
 
 	JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX(mt_data_inf.src1,mt_data_inf.dst1,w8,h,mt_data_inf.src_pitch1,
-		mt_data_inf.dst_pitch1);
+		mt_data_inf.dst_pitch1,&Coeff_X);
 	JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX(mt_data_inf.src2,mt_data_inf.dst2,w8,h,mt_data_inf.src_pitch2,
-		mt_data_inf.dst_pitch2);
+		mt_data_inf.dst_pitch2,&Coeff_Y);
 	JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX(mt_data_inf.src3,mt_data_inf.dst3,w8,h,mt_data_inf.src_pitch3,
-		mt_data_inf.dst_pitch3);
+		mt_data_inf.dst_pitch3,&Coeff_Z);
 }
 
 
-static void Convert_XYZ_SDRtoHDR_32(const MT_Data_Info_HDRTools &mt_data_inf)
+static void Convert_XYZ_SDRtoHDR_32(const MT_Data_Info_HDRTools &mt_data_inf,
+	const float Coeff_X,const float Coeff_Y,const float Coeff_Z)
 {
 	const uint8_t *srcX_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcY_=(uint8_t *)mt_data_inf.src2;
@@ -4719,35 +4722,38 @@ static void Convert_XYZ_SDRtoHDR_32(const MT_Data_Info_HDRTools &mt_data_inf)
 }
 
 
-static void Convert_XYZ_SDRtoHDR_32_SSE2(const MT_Data_Info_HDRTools &mt_data_inf)
+static void Convert_XYZ_SDRtoHDR_32_SSE2(const MT_Data_Info_HDRTools &mt_data_inf,
+	float Coeff_X,float Coeff_Y,float Coeff_Z)
 {
 	const int32_t w4=(mt_data_inf.dst_Y_w+3)>>2;
 	const int32_t h=mt_data_inf.dst_Y_h_max-mt_data_inf.dst_Y_h_min;
 
 	JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2(mt_data_inf.src1,mt_data_inf.dst1,w4,h,mt_data_inf.src_pitch1,
-		mt_data_inf.dst_pitch1);
+		mt_data_inf.dst_pitch1,&Coeff_X);
 	JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2(mt_data_inf.src2,mt_data_inf.dst2,w4,h,mt_data_inf.src_pitch2,
-		mt_data_inf.dst_pitch2);
+		mt_data_inf.dst_pitch2,&Coeff_Y);
 	JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2(mt_data_inf.src3,mt_data_inf.dst3,w4,h,mt_data_inf.src_pitch3,
-		mt_data_inf.dst_pitch3);
+		mt_data_inf.dst_pitch3,&Coeff_Z);
 }
 
 
-static void Convert_XYZ_SDRtoHDR_32_AVX(const MT_Data_Info_HDRTools &mt_data_inf)
+static void Convert_XYZ_SDRtoHDR_32_AVX(const MT_Data_Info_HDRTools &mt_data_inf,
+	float Coeff_X,float Coeff_Y,float Coeff_Z)
 {
 	const int32_t w8=(mt_data_inf.dst_Y_w+7)>>3;
 	const int32_t h=mt_data_inf.dst_Y_h_max-mt_data_inf.dst_Y_h_min;
 
 	JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX(mt_data_inf.src1,mt_data_inf.dst1,w8,h,mt_data_inf.src_pitch1,
-		mt_data_inf.dst_pitch1);
+		mt_data_inf.dst_pitch1,&Coeff_X);
 	JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX(mt_data_inf.src2,mt_data_inf.dst2,w8,h,mt_data_inf.src_pitch2,
-		mt_data_inf.dst_pitch2);
+		mt_data_inf.dst_pitch2,&Coeff_Y);
 	JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX(mt_data_inf.src3,mt_data_inf.dst3,w8,h,mt_data_inf.src_pitch3,
-		mt_data_inf.dst_pitch3);
+		mt_data_inf.dst_pitch3,&Coeff_Z);
 }
 
 
-static void Convert_XYZ_HDRtoSDR_16(const MT_Data_Info_HDRTools &mt_data_inf,const uint16_t *lookup)
+static void Convert_XYZ_HDRtoSDR_16(const MT_Data_Info_HDRTools &mt_data_inf,
+	const uint16_t *lookupX,const uint16_t *lookupY,const uint16_t *lookupZ)
 {
 	const uint8_t *src_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *dst_=(uint8_t *)mt_data_inf.dst1;
@@ -4765,9 +4771,9 @@ static void Convert_XYZ_HDRtoSDR_16(const MT_Data_Info_HDRTools &mt_data_inf,con
 
 		for(int32_t j=0; j<w; j++)
 		{
-			dst[x++]=lookup[src[x]];
-			dst[x++]=lookup[src[x]];
-			dst[x++]=lookup[src[x]];
+			dst[x++]=lookupZ[src[x]];
+			dst[x++]=lookupY[src[x]];
+			dst[x++]=lookupX[src[x]];
 			x++;
 		}
 		src_+=src_pitch;
@@ -4776,7 +4782,8 @@ static void Convert_XYZ_HDRtoSDR_16(const MT_Data_Info_HDRTools &mt_data_inf,con
 }
 
 
-static void Convert_XYZ_SDRtoHDR_16(const MT_Data_Info_HDRTools &mt_data_inf,const uint16_t *lookup)
+static void Convert_XYZ_SDRtoHDR_16(const MT_Data_Info_HDRTools &mt_data_inf,
+	const uint16_t *lookupX,const uint16_t *lookupY,const uint16_t *lookupZ)
 {
 	const uint8_t *src_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *dst_=(uint8_t *)mt_data_inf.dst1;
@@ -4794,9 +4801,9 @@ static void Convert_XYZ_SDRtoHDR_16(const MT_Data_Info_HDRTools &mt_data_inf,con
 
 		for(int32_t j=0; j<w; j++)
 		{
-			dst[x++]=lookup[src[x]];
-			dst[x++]=lookup[src[x]];
-			dst[x++]=lookup[src[x]];
+			dst[x++]=lookupZ[src[x]];
+			dst[x++]=lookupY[src[x]];
+			dst[x++]=lookupX[src[x]];
 			x++;
 		}
 		src_+=src_pitch;
@@ -5075,7 +5082,7 @@ bool ComputeXYZMatrix(float Rx,float Ry,float Gx,float Gy,float Bx,float By,floa
 {
 	float Xw,Yw,Zw,Xr,Yr,Zr,Xg,Yg,Zg,Xb,Yb,Zb,Y;
 	float Sr,Sg,Sb;
-	float Xmin,Xmax,Ymin,Ymax,Zmin,Zmax;
+	double Xmin,Xmax,Ymin,Ymax,Zmin,Zmax;
 
 	Vector_Compute x(3,DATA_FLOAT),y(3,DATA_FLOAT);
 	Matrix_Compute a(3,3,DATA_FLOAT),b(3,3,DATA_FLOAT);
@@ -5255,75 +5262,75 @@ bool ComputeXYZMatrix(float Rx,float Ry,float Gx,float Gy,float Bx,float By,floa
 	Coeff_XYZ_asm[19]=0.0f; Coeff_XYZ_asm[23]=0.0f;
 	Coeff_XYZ_asm[20]=Coeff_XYZ_asm[16]; Coeff_XYZ_asm[21]=Coeff_XYZ_asm[17]; Coeff_XYZ_asm[22]=Coeff_XYZ_asm[18];
 
-	float Coeff_X=Xmax-Xmin,Coeff_Y=Ymax-Ymin,Coeff_Z=Zmax-Zmin;
+	double Coeff_X=Xmax-Xmin,Coeff_Y=Ymax-Ymin,Coeff_Z=Zmax-Zmin;
 
-	if ((Coeff_X==0.0f) || (Coeff_Y==0.0f) || (Coeff_Z==0.0f)) return(false);
+	if ((Coeff_X==0.0) || (Coeff_Y==0.0) || (Coeff_Z==0.0)) return(false);
 
-	Xmin=0.0f; Ymin=0.0f; Zmin=0.0f;
-	Coeff_X=1.0f; Coeff_Y=1.0f; Coeff_Z=1.0f;
+	Xmin=0.0; Ymin=0.0; Zmin=0.0;
+	Coeff_X=1.0; Coeff_Y=1.0; Coeff_Z=1.0;
 
 	if (RGBtoXYZ)
 	{
 		for(uint16_t i=0; i<256; i++)
 		{
-			float x=((float)i)/255.0f;
+			double x=((double)i)/255.0;
 
-			LookupXYZ_8[i]=(int16_t)round(8.0f+16.0f*255.0f*(x*Coeff_XYZ[0]-Xmin)/Coeff_X);
-			LookupXYZ_8[i+256]=(int16_t)round(16.0f*255.0f*x*Coeff_XYZ[1]/Coeff_X);
-			LookupXYZ_8[i+512]=(int16_t)round(16.0f*255.0f*x*Coeff_XYZ[2]/Coeff_X);
-			LookupXYZ_8[i+768]=(int16_t)round(8.0f+16.0f*255.0f*(x*Coeff_XYZ[3]-Ymin)/Coeff_Y);
-			LookupXYZ_8[i+1024]=(int16_t)round(16.0f*255.0f*x*Coeff_XYZ[4]/Coeff_Y);
-			LookupXYZ_8[i+1280]=(int16_t)round(16.0f*255.0f*x*Coeff_XYZ[5]/Coeff_Y);
-			LookupXYZ_8[i+1536]=(int16_t)round(8.0f+16.0f*255.0f*(x*Coeff_XYZ[6]-Zmin)/Coeff_Z);
-			LookupXYZ_8[i+1792]=(int16_t)round(16.0f*255.0f*x*Coeff_XYZ[7]/Coeff_Z);
-			LookupXYZ_8[i+2048]=(int16_t)round(16.0f*255.0f*x*Coeff_XYZ[8]/Coeff_Z);
+			LookupXYZ_8[i]=(int16_t)round(8.0+16.0*255.0*(x*(double)Coeff_XYZ[0]-Xmin)/Coeff_X);
+			LookupXYZ_8[i+256]=(int16_t)round(16.0*255.0*x*(double)Coeff_XYZ[1]/Coeff_X);
+			LookupXYZ_8[i+512]=(int16_t)round(16.0*255.0*x*(double)Coeff_XYZ[2]/Coeff_X);
+			LookupXYZ_8[i+768]=(int16_t)round(8.0+16.0*255.0*(x*(double)Coeff_XYZ[3]-Ymin)/Coeff_Y);
+			LookupXYZ_8[i+1024]=(int16_t)round(16.0*255.0*x*(double)Coeff_XYZ[4]/Coeff_Y);
+			LookupXYZ_8[i+1280]=(int16_t)round(16.0*255.0*x*(double)Coeff_XYZ[5]/Coeff_Y);
+			LookupXYZ_8[i+1536]=(int16_t)round(8.0+16.0*255.0*(x*(double)Coeff_XYZ[6]-Zmin)/Coeff_Z);
+			LookupXYZ_8[i+1792]=(int16_t)round(16.0*255.0*x*(double)Coeff_XYZ[7]/Coeff_Z);
+			LookupXYZ_8[i+2048]=(int16_t)round(16.0*255.0*x*(double)Coeff_XYZ[8]/Coeff_Z);
 		}
 
 		for(uint32_t i=0; i<65536; i++)
 		{
-			float x=((float)i)/65535.3f;
+			double x=((double)i)/65535.0;
 
-			LookupXYZ_16[i]=(int32_t)round(128.0f+255.0f*65535.0f*(x*Coeff_XYZ[0]-Xmin)/Coeff_X);
-			LookupXYZ_16[i+65536]=(int32_t)round(255.0f*65535.0f*x*Coeff_XYZ[1]/Coeff_X);
-			LookupXYZ_16[i+2*65536]=(int32_t)round(255.0f*65535.0f*x*Coeff_XYZ[2]/Coeff_X);
-			LookupXYZ_16[i+3*65536]=(int32_t)round(128.0f+255.0f*65535.0f*(x*Coeff_XYZ[3]-Ymin)/Coeff_Y);
-			LookupXYZ_16[i+4*65536]=(int32_t)round(255.0f*65535.0f*x*Coeff_XYZ[4]/Coeff_Y);
-			LookupXYZ_16[i+5*65536]=(int32_t)round(255.0f*65535.0f*x*Coeff_XYZ[5]/Coeff_Y);
-			LookupXYZ_16[i+6*65536]=(int32_t)round(128.0f+255.0f*65535.0f*(x*Coeff_XYZ[6]-Zmin)/Coeff_Z);
-			LookupXYZ_16[i+7*65536]=(int32_t)round(255.0f*65535.0f*x*Coeff_XYZ[7]/Coeff_Z);
-			LookupXYZ_16[i+8*65536]=(int32_t)round(255.0f*65535.0f*x*Coeff_XYZ[8]/Coeff_Z);
+			LookupXYZ_16[i]=(int32_t)round(128.0+255.0*65535.0*(x*(double)Coeff_XYZ[0]-Xmin)/Coeff_X);
+			LookupXYZ_16[i+65536]=(int32_t)round(255.0*65535.0*x*(double)Coeff_XYZ[1]/Coeff_X);
+			LookupXYZ_16[i+2*65536]=(int32_t)round(255.0*65535.0*x*(double)Coeff_XYZ[2]/Coeff_X);
+			LookupXYZ_16[i+3*65536]=(int32_t)round(128.0+255.0*65535.0*(x*(double)Coeff_XYZ[3]-Ymin)/Coeff_Y);
+			LookupXYZ_16[i+4*65536]=(int32_t)round(255.0*65535.0*x*(double)Coeff_XYZ[4]/Coeff_Y);
+			LookupXYZ_16[i+5*65536]=(int32_t)round(255.0*65535.0*x*(double)Coeff_XYZ[5]/Coeff_Y);
+			LookupXYZ_16[i+6*65536]=(int32_t)round(128.0+255.0*65535.0*(x*(double)Coeff_XYZ[6]-Zmin)/Coeff_Z);
+			LookupXYZ_16[i+7*65536]=(int32_t)round(255.0*65535.0*x*(double)Coeff_XYZ[7]/Coeff_Z);
+			LookupXYZ_16[i+8*65536]=(int32_t)round(255.0*65535.0*x*(double)Coeff_XYZ[8]/Coeff_Z);
 		}
 	}
 	else
 	{
 		for(uint16_t i=0; i<256; i++)
 		{
-			float x=((float)i)/255.0f;
+			double x=((double)i)/255.0;
 
-			LookupXYZ_8[i]=(int16_t)round(8.0f+16.0f*255.0f*(Coeff_X*x+Xmin)*Coeff_XYZ[0]);
-			LookupXYZ_8[i+256]=(int16_t)round(16.0f*255.0f*(Coeff_X*x+Xmin)*Coeff_XYZ[1]);
-			LookupXYZ_8[i+512]=(int16_t)round(16.0f*255.0f*(Coeff_X*x+Xmin)*Coeff_XYZ[2]);
-			LookupXYZ_8[i+768]=(int16_t)round(8.0f+16.0f*255.0f*(Coeff_Y*x+Ymin)*Coeff_XYZ[3]);
-			LookupXYZ_8[i+1024]=(int16_t)round(16.0f*255.0f*(Coeff_Y*x+Ymin)*Coeff_XYZ[4]);
-			LookupXYZ_8[i+1280]=(int16_t)round(16.0f*255.0f*(Coeff_Y*x+Ymin)*Coeff_XYZ[5]);
-			LookupXYZ_8[i+1536]=(int16_t)round(8.0f+16.0f*255.0f*(Coeff_Z*x+Zmin)*Coeff_XYZ[6]);
-			LookupXYZ_8[i+1792]=(int16_t)round(16.0f*255.0f*(Coeff_Z*x+Zmin)*Coeff_XYZ[7]);
-			LookupXYZ_8[i+2048]=(int16_t)round(16.0f*255.0f*(Coeff_Z*x+Zmin)*Coeff_XYZ[8]);
+			LookupXYZ_8[i]=(int16_t)round(8.0+16.0*255.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[0]);
+			LookupXYZ_8[i+256]=(int16_t)round(16.0*255.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[1]);
+			LookupXYZ_8[i+512]=(int16_t)round(16.0*255.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[2]);
+			LookupXYZ_8[i+768]=(int16_t)round(8.0+16.0*255.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[3]);
+			LookupXYZ_8[i+1024]=(int16_t)round(16.0*255.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[4]);
+			LookupXYZ_8[i+1280]=(int16_t)round(16.0*255.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[5]);
+			LookupXYZ_8[i+1536]=(int16_t)round(8.0+16.0*255.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[6]);
+			LookupXYZ_8[i+1792]=(int16_t)round(16.0*255.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[7]);
+			LookupXYZ_8[i+2048]=(int16_t)round(16.0*255.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[8]);
 		}
 
 		for(uint32_t i=0; i<65536; i++)
 		{
-			float x=((float)i)/65535.3f;
+			double x=((double)i)/65535.0;
 
-			LookupXYZ_16[i]=(int32_t)round(128.0f+255.0f*65535.0f*(Coeff_X*x+Xmin)*Coeff_XYZ[0]);
-			LookupXYZ_16[i+65536]=(int32_t)round(255.0f*65535.0f*(Coeff_X*x+Xmin)*Coeff_XYZ[1]);
-			LookupXYZ_16[i+2*65536]=(int32_t)round(255.0f*65535.0f*(Coeff_X*x+Xmin)*Coeff_XYZ[2]);
-			LookupXYZ_16[i+3*65536]=(int32_t)round(128.0f+255.0f*65535.0f*(Coeff_Y*x+Ymin)*Coeff_XYZ[3]);
-			LookupXYZ_16[i+4*65536]=(int32_t)round(255.0f*65535.0f*(Coeff_Y*x+Ymin)*Coeff_XYZ[4]);
-			LookupXYZ_16[i+5*65536]=(int32_t)round(255.0f*65535.0f*(Coeff_Y*x+Ymin)*Coeff_XYZ[5]);
-			LookupXYZ_16[i+6*65536]=(int32_t)round(128.0f+255.0f*65535.0f*(Coeff_Z*x+Zmin)*Coeff_XYZ[6]);
-			LookupXYZ_16[i+7*65536]=(int32_t)round(255.0f*65535.0f*(Coeff_Z*x+Zmin)*Coeff_XYZ[7]);
-			LookupXYZ_16[i+8*65536]=(int32_t)round(255.0f*65535.0f*(Coeff_Z*x+Zmin)*Coeff_XYZ[8]);
+			LookupXYZ_16[i]=(int32_t)round(128.0+255.0*65535.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[0]);
+			LookupXYZ_16[i+65536]=(int32_t)round(255.0*65535.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[1]);
+			LookupXYZ_16[i+2*65536]=(int32_t)round(255.0*65535.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[2]);
+			LookupXYZ_16[i+3*65536]=(int32_t)round(128.0+255.0*65535.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[3]);
+			LookupXYZ_16[i+4*65536]=(int32_t)round(255.0*65535.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[4]);
+			LookupXYZ_16[i+5*65536]=(int32_t)round(255.0*65535.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[5]);
+			LookupXYZ_16[i+6*65536]=(int32_t)round(128.0+255.0*65535.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[6]);
+			LookupXYZ_16[i+7*65536]=(int32_t)round(255.0*65535.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[7]);
+			LookupXYZ_16[i+8*65536]=(int32_t)round(255.0*65535.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[8]);
 		}
 	}
 
@@ -10640,8 +10647,9 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 
 
 ConvertXYZ_HDRtoSDR::ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float _MaxMastering,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),MinMastering(_MinMastering),MaxMastering(_MaxMastering),threads(_threads),sleep(_sleep)
+	float _Coeff_X,float _Coeff_Y,float _Coeff_Z,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	GenericVideoFilter(_child),MinMastering(_MinMastering),MaxMastering(_MaxMastering),Coeff_X(_Coeff_X),
+		Coeff_Y(_Coeff_Y),Coeff_Z(_Coeff_Z),threads(_threads),sleep(_sleep)
 {
 	UserId=0;
 
@@ -10662,9 +10670,11 @@ ConvertXYZ_HDRtoSDR::ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float 
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	const uint32_t vmax=1 << bits_per_pixel;
 
-	lookup_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
+	lookupX_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
+	lookupY_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
+	lookupZ_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 
-	if (lookup_16==NULL)
+	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL))
 	{
 		FreeData();
 		env->ThrowError("ConvertXYZ_HDRtoSDR: Error while allocating the lookup tables!");
@@ -10672,10 +10682,16 @@ ConvertXYZ_HDRtoSDR::ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float 
 
 	for(uint32_t i=0; i<65536; i++)
 	{
-		double x=100.0*(((double)i)/65535.0);
+		double x=(((double)i)/65535.0)*Coeff_X;
+		double y=(((double)i)/65535.0)*Coeff_Y;
+		double z=(((double)i)/65535.0)*Coeff_Z;
 
 		if (x>1.0) x=1.0;
-		lookup_16[i]=(uint16_t)round(x*65535.0);
+		if (y>1.0) y=1.0;
+		if (z>1.0) z=1.0;
+		lookupX_16[i]=(uint16_t)round(x*65535.0);
+		lookupY_16[i]=(uint16_t)round(y*65535.0);
+		lookupZ_16[i]=(uint16_t)round(z*65535.0);
 	}
 
 	if (vi.height<32) threads_number=1;
@@ -10702,7 +10718,9 @@ ConvertXYZ_HDRtoSDR::ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float 
 
 void ConvertXYZ_HDRtoSDR::FreeData(void) 
 {
-	myfree(lookup_16);
+	myfree(lookupZ_16);
+	myfree(lookupY_16);
+	myfree(lookupX_16);
 }
 
 
@@ -10735,10 +10753,14 @@ void ConvertXYZ_HDRtoSDR::StaticThreadpool(void *ptr)
 	
 	switch(data->f_process)
 	{
-		case 1 : Convert_XYZ_HDRtoSDR_16(*mt_data_inf,ptrClass->lookup_16); break;
-		case 2 : Convert_XYZ_HDRtoSDR_32(*mt_data_inf); break;
-		case 3 : Convert_XYZ_HDRtoSDR_32_SSE2(*mt_data_inf); break;
-		case 4 : Convert_XYZ_HDRtoSDR_32_AVX(*mt_data_inf); break;
+		case 1 : Convert_XYZ_HDRtoSDR_16(*mt_data_inf,ptrClass->lookupX_16,ptrClass->lookupY_16,
+					 ptrClass->lookupZ_16); break;
+		case 2 : Convert_XYZ_HDRtoSDR_32(*mt_data_inf,ptrClass->Coeff_X,ptrClass->Coeff_Y,
+					 ptrClass->Coeff_Z); break;
+		case 3 : Convert_XYZ_HDRtoSDR_32_SSE2(*mt_data_inf,ptrClass->Coeff_X,ptrClass->Coeff_Y,
+					 ptrClass->Coeff_Z); break;
+		case 4 : Convert_XYZ_HDRtoSDR_32_AVX(*mt_data_inf,ptrClass->Coeff_X,ptrClass->Coeff_Y,
+					 ptrClass->Coeff_Z); break;
 		default : ;
 	}
 }
@@ -10890,10 +10912,10 @@ PVideoFrame __stdcall ConvertXYZ_HDRtoSDR::GetFrame(int n, IScriptEnvironment* e
 	{
 		switch(f_proc)
 		{
-			case 1 : Convert_XYZ_HDRtoSDR_16(MT_DataGF[0],lookup_16); break;
-			case 2 : Convert_XYZ_HDRtoSDR_32(MT_DataGF[0]); break;
-			case 3 : Convert_XYZ_HDRtoSDR_32_SSE2(MT_DataGF[0]); break;
-			case 4 : Convert_XYZ_HDRtoSDR_32_AVX(MT_DataGF[0]); break;
+			case 1 : Convert_XYZ_HDRtoSDR_16(MT_DataGF[0],lookupX_16,lookupY_16,lookupZ_16); break;
+			case 2 : Convert_XYZ_HDRtoSDR_32(MT_DataGF[0],Coeff_X,Coeff_Y,Coeff_Z); break;
+			case 3 : Convert_XYZ_HDRtoSDR_32_SSE2(MT_DataGF[0],Coeff_X,Coeff_Y,Coeff_Z); break;
+			case 4 : Convert_XYZ_HDRtoSDR_32_AVX(MT_DataGF[0],Coeff_X,Coeff_Y,Coeff_Z); break;
 			default : break;
 		}
 	}
@@ -10911,8 +10933,10 @@ PVideoFrame __stdcall ConvertXYZ_HDRtoSDR::GetFrame(int n, IScriptEnvironment* e
 */
 
 
-ConvertXYZ_SDRtoHDR::ConvertXYZ_SDRtoHDR(PClip _child,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),threads(_threads),sleep(_sleep)
+ConvertXYZ_SDRtoHDR::ConvertXYZ_SDRtoHDR(PClip _child,float _Coeff_X,float _Coeff_Y,float _Coeff_Z,
+	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	Coeff_X(_Coeff_X),Coeff_Y(_Coeff_Y),Coeff_Z(_Coeff_Z),
+		GenericVideoFilter(_child),threads(_threads),sleep(_sleep)
 {
 	UserId=0;
 
@@ -10933,9 +10957,15 @@ ConvertXYZ_SDRtoHDR::ConvertXYZ_SDRtoHDR(PClip _child,uint8_t _threads,bool _sle
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	const uint32_t vmax=1 << bits_per_pixel;
 
-	lookup_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
+	Coeff_X=1.0f/Coeff_X;
+	Coeff_Y=1.0f/Coeff_Y;
+	Coeff_Z=1.0f/Coeff_Z;
 
-	if (lookup_16==NULL)
+	lookupX_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
+	lookupY_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
+	lookupZ_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
+
+	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL))
 	{
 		FreeData();
 		env->ThrowError("ConvertXYZ_SDRtoHDR: Error while allocating the lookup tables!");
@@ -10943,9 +10973,13 @@ ConvertXYZ_SDRtoHDR::ConvertXYZ_SDRtoHDR(PClip _child,uint8_t _threads,bool _sle
 
 	for(uint32_t i=0; i<65536; i++)
 	{
-		double x=0.01*(((double)i)/65535.0);
+		double x=(((double)i)/65535.0)*Coeff_X;
+		double y=(((double)i)/65535.0)*Coeff_Y;
+		double z=(((double)i)/65535.0)*Coeff_Z;
 
-		lookup_16[i]=(uint16_t)round(x*65535.0);
+		lookupX_16[i]=(uint16_t)round(x*65535.0);
+		lookupY_16[i]=(uint16_t)round(y*65535.0);
+		lookupZ_16[i]=(uint16_t)round(z*65535.0);
 	}
 
 	if (vi.height<32) threads_number=1;
@@ -10972,7 +11006,9 @@ ConvertXYZ_SDRtoHDR::ConvertXYZ_SDRtoHDR(PClip _child,uint8_t _threads,bool _sle
 
 void ConvertXYZ_SDRtoHDR::FreeData(void) 
 {
-	myfree(lookup_16);
+	myfree(lookupZ_16);
+	myfree(lookupX_16);
+	myfree(lookupY_16);
 }
 
 
@@ -11005,10 +11041,14 @@ void ConvertXYZ_SDRtoHDR::StaticThreadpool(void *ptr)
 	
 	switch(data->f_process)
 	{
-		case 1 : Convert_XYZ_SDRtoHDR_16(*mt_data_inf,ptrClass->lookup_16); break;
-		case 2 : Convert_XYZ_SDRtoHDR_32(*mt_data_inf); break;
-		case 3 : Convert_XYZ_SDRtoHDR_32_SSE2(*mt_data_inf); break;
-		case 4 : Convert_XYZ_SDRtoHDR_32_AVX(*mt_data_inf); break;
+		case 1 : Convert_XYZ_SDRtoHDR_16(*mt_data_inf,ptrClass->lookupX_16,ptrClass->lookupY_16,
+					 ptrClass->lookupZ_16); break;
+		case 2 : Convert_XYZ_SDRtoHDR_32(*mt_data_inf,ptrClass->Coeff_X,ptrClass->Coeff_Y,
+					 ptrClass->Coeff_Z); break;
+		case 3 : Convert_XYZ_SDRtoHDR_32_SSE2(*mt_data_inf,ptrClass->Coeff_X,ptrClass->Coeff_Y,
+					 ptrClass->Coeff_Z); break;
+		case 4 : Convert_XYZ_SDRtoHDR_32_AVX(*mt_data_inf,ptrClass->Coeff_X,ptrClass->Coeff_Y,
+					 ptrClass->Coeff_Z); break;
 		default : ;
 	}
 }
@@ -11160,10 +11200,10 @@ PVideoFrame __stdcall ConvertXYZ_SDRtoHDR::GetFrame(int n, IScriptEnvironment* e
 	{
 		switch(f_proc)
 		{
-			case 1 : Convert_XYZ_SDRtoHDR_16(MT_DataGF[0],lookup_16); break;
-			case 2 : Convert_XYZ_SDRtoHDR_32(MT_DataGF[0]); break;
-			case 3 : Convert_XYZ_SDRtoHDR_32_SSE2(MT_DataGF[0]); break;
-			case 4 : Convert_XYZ_SDRtoHDR_32_AVX(MT_DataGF[0]); break;
+			case 1 : Convert_XYZ_SDRtoHDR_16(MT_DataGF[0],lookupX_16,lookupY_16,lookupZ_16); break;
+			case 2 : Convert_XYZ_SDRtoHDR_32(MT_DataGF[0],Coeff_X,Coeff_Y,Coeff_Z); break;
+			case 3 : Convert_XYZ_SDRtoHDR_32_SSE2(MT_DataGF[0],Coeff_X,Coeff_Y,Coeff_Z); break;
+			case 4 : Convert_XYZ_SDRtoHDR_32_AVX(MT_DataGF[0],Coeff_X,Coeff_Y,Coeff_Z); break;
 			default : break;
 		}
 	}
@@ -12205,6 +12245,9 @@ AVSValue __cdecl Create_ConvertXYZ_HDRtoSDR(AVSValue args, void* user_data, IScr
 	const bool SetAffinity=args[6].AsBool(false);
 	const bool sleep = args[7].AsBool(false);
 	int prefetch=args[8].AsInt(0);
+	const float Coeff_X=(float)args[9].AsFloat(100.0f);
+	const float Coeff_Y=(float)args[10].AsFloat(100.0f);
+	const float Coeff_Z=(float)args[11].AsFloat(100.0f);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -12267,7 +12310,8 @@ AVSValue __cdecl Create_ConvertXYZ_HDRtoSDR(AVSValue args, void* user_data, IScr
 		}
 	}
 
-	return new ConvertXYZ_HDRtoSDR(args[0].AsClip(),MinMastering,MaxMastering,threads_number,sleep,env);
+	return new ConvertXYZ_HDRtoSDR(args[0].AsClip(),MinMastering,MaxMastering,Coeff_X,Coeff_Y,Coeff_Z,
+		threads_number,sleep,env);
 }
 
 
@@ -12281,11 +12325,14 @@ AVSValue __cdecl Create_ConvertXYZ_SDRtoHDR(AVSValue args, void* user_data, IScr
 		env->ThrowError("ConvertXYZ_SDRtoHDR: Input format must be RGB64 or RGBPS");
 
 	const int threads=args[1].AsInt(0);
-	const bool LogicalCores=args[2].AsBool(true);
-	const bool MaxPhysCores=args[3].AsBool(true);
-	const bool SetAffinity=args[4].AsBool(false);
-	const bool sleep = args[5].AsBool(false);
-	int prefetch=args[6].AsInt(0);
+	const float Coeff_X=(float)args[2].AsFloat(100.0f);
+	const float Coeff_Y=(float)args[3].AsFloat(100.0f);
+	const float Coeff_Z=(float)args[4].AsFloat(100.0f);
+	const bool LogicalCores=args[5].AsBool(true);
+	const bool MaxPhysCores=args[6].AsBool(true);
+	const bool SetAffinity=args[7].AsBool(false);
+	const bool sleep = args[8].AsBool(false);
+	int prefetch=args[9].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -12343,7 +12390,7 @@ AVSValue __cdecl Create_ConvertXYZ_SDRtoHDR(AVSValue args, void* user_data, IScr
 		}
 	}
 
-	return new ConvertXYZ_SDRtoHDR(args[0].AsClip(),threads_number,sleep,env);
+	return new ConvertXYZ_SDRtoHDR(args[0].AsClip(),Coeff_X,Coeff_Y,Coeff_Z,threads_number,sleep,env);
 }
 
 
@@ -12375,13 +12422,6 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertXYZtoYUV, 0);
 
-    env->AddFunction("ConvertXYZ_HDRtoSDR",
-		"c[MinMastering]f[MaxMastering]f[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
-		Create_ConvertXYZ_HDRtoSDR, 0);
-    env->AddFunction("ConvertXYZ_SDRtoHDR",
-		"c[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
-		Create_ConvertXYZ_SDRtoHDR, 0);
-
     env->AddFunction("ConvertRGBtoXYZ",
 		"c[Color]i[OutputMode]i[HLGMode]b[OOTF]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
@@ -12392,6 +12432,13 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertXYZtoRGB, 0);
 
+    env->AddFunction("ConvertXYZ_HDRtoSDR",
+		"c[MinMastering]f[MaxMastering]f[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i" \
+		"[Coeff_X]f[Coeff_Y]f[Coeff_Z]f",
+		Create_ConvertXYZ_HDRtoSDR, 0);
+    env->AddFunction("ConvertXYZ_SDRtoHDR",
+		"c[Coeff_X]f[Coeff_Y]f[Coeff_Z]f[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
+		Create_ConvertXYZ_SDRtoHDR, 0);
 
     return HDRTOOLS_VERSION;
 }

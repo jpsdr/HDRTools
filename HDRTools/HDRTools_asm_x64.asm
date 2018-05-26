@@ -9,11 +9,8 @@ data segment align(32)
 
 data_f_0 real4 8 dup(0.0)
 data_f_1 real4 8 dup(1.0)
-data_f_1_1 real4 8 dup(1.1)
 data_f_1048575 real4 8 dup(1048575.0)
 data_f_65535 real4 8 dup(65535.0)
-data_f_100 real4 8 dup(100.0)
-data_f_001 real4 8 dup(0.01)
 
 .code
 
@@ -6452,6 +6449,7 @@ JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_AVX endp
 
 
 ;JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2 proc src:dword,dst:dword,w4:dword,h:dword,src_pitch:dword,dst_pitch:dword
+;	Coeff:dword
 ; src = rcx
 ; dst = rdx
 ; w4 = r8d
@@ -6461,6 +6459,7 @@ JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2 proc public frame
 
 src_pitch equ qword ptr[rbp+48]
 dst_pitch equ qword ptr[rbp+56]
+Coeff equ qword ptr[rbp+64]
 
 	push rbp
 	.pushreg rbp
@@ -6471,15 +6470,15 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rbx
 	.endprolog
 
+	mov rsi,Coeff
+	movss xmm1,dword ptr[rsi]
+	shufps xmm1,xmm1,0
+	
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
 	mov rbx,16
 	xor rcx,rcx
-	
-	movaps xmm1,XMMWORD ptr data_f_100
-	;movaps xmm2,XMMWORD ptr data_f_0
-	;movaps xmm3,XMMWORD ptr data_f_1_1
 	
 Convert_XYZ_HDRtoSDR_32_SSE2_1:
 	mov ecx,r8d
@@ -6487,8 +6486,6 @@ Convert_XYZ_HDRtoSDR_32_SSE2_1:
 Convert_XYZ_HDRtoSDR_32_SSE2_2:	
 	movaps xmm0,XMMWORD ptr [rsi+rax]
 	mulps xmm0,xmm1
-	;maxps xmm0,xmm2
-	;minps xmm0,xmm3
 	movaps XMMWORD ptr [rdx+rax],xmm0
 	
 	add rax,rbx
@@ -6508,7 +6505,8 @@ Convert_XYZ_HDRtoSDR_32_SSE2_2:
 JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_SSE2 endp
 
 
-;JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword
+;JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword,
+;	Coeff:dword
 ; src = rcx
 ; dst = rdx
 ; w8 = r8d
@@ -6518,6 +6516,7 @@ JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX proc public frame
 
 src_pitch equ qword ptr[rbp+48]
 dst_pitch equ qword ptr[rbp+56]
+Coeff equ qword ptr[rbp+64]
 
 	push rbp
 	.pushreg rbp
@@ -6528,23 +6527,22 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rbx
 	.endprolog
 
+	mov rsi,Coeff
+	vmovss xmm1,dword ptr[rsi]
+	vshufps xmm1,xmm1,xmm1,0
+	vinsertf128 ymm1,ymm1,xmm1,1
+
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
 	mov rbx,32
 	xor rcx,rcx
 	
-	vmovaps ymm1,YMMWORD ptr data_f_100
-	;vmovaps ymm2,YMMWORD ptr data_f_0
-	;vmovaps ymm3,YMMWORD ptr data_f_1_1
-	
 Convert_XYZ_HDRtoSDR_32_AVX_1:
 	mov ecx,r8d
 	xor rax,rax
 Convert_XYZ_HDRtoSDR_32_AVX_2:	
 	vmulps ymm0,ymm1,YMMWORD ptr [rsi+rax]
-	;vmaxps ymm0,ymm0,ymm2
-	;vminps ymm0,ymm0,ymm3
 	vmovaps YMMWORD ptr [rdx+rax],ymm0
 	
 	add rax,rbx
@@ -6566,7 +6564,8 @@ Convert_XYZ_HDRtoSDR_32_AVX_2:
 JPSDR_HDRTools_Convert_XYZ_HDRtoSDR_32_AVX endp
 
 
-;JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2 proc src:dword,dst:dword,w4:dword,h:dword,src_pitch:dword,dst_pitch:dword
+;JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2 proc src:dword,dst:dword,w4:dword,h:dword,src_pitch:dword,dst_pitch:dword,
+;	Coeff:dword
 ; src = rcx
 ; dst = rdx
 ; w4 = r8d
@@ -6576,6 +6575,7 @@ JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2 proc public frame
 
 src_pitch equ qword ptr[rbp+48]
 dst_pitch equ qword ptr[rbp+56]
+Coeff equ qword ptr[rbp+64]
 
 	push rbp
 	.pushreg rbp
@@ -6586,13 +6586,15 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rbx
 	.endprolog
 
+	mov rsi,Coeff
+	movss xmm1,dword ptr[rsi]
+	shufps xmm1,xmm1,0
+	
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
 	mov rbx,16
 	xor rcx,rcx
-	
-	movaps xmm1,XMMWORD ptr data_f_001
 	
 Convert_XYZ_SDRtoHDR_32_SSE2_1:
 	mov ecx,r8d
@@ -6619,7 +6621,8 @@ Convert_XYZ_SDRtoHDR_32_SSE2_2:
 JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_SSE2 endp
 
 
-;JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword
+;JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword,
+;	Coeff:dword
 ; src = rcx
 ; dst = rdx
 ; w8 = r8d
@@ -6629,6 +6632,7 @@ JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX proc public frame
 
 src_pitch equ qword ptr[rbp+48]
 dst_pitch equ qword ptr[rbp+56]
+Coeff equ qword ptr[rbp+64]
 
 	push rbp
 	.pushreg rbp
@@ -6639,13 +6643,16 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rbx
 	.endprolog
 
+	mov rsi,Coeff
+	vmovss xmm1,dword ptr[rsi]
+	vshufps xmm1,xmm1,xmm1,0
+	vinsertf128 ymm1,ymm1,xmm1,1
+	
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
 	mov rbx,32
 	xor rcx,rcx
-	
-	vmovaps ymm1,YMMWORD ptr data_f_001
 	
 Convert_XYZ_SDRtoHDR_32_AVX_1:
 	mov ecx,r8d

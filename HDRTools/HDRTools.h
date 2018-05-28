@@ -54,7 +54,7 @@ typedef struct _MT_Data_Info_HDRTools
 class ConvertYUVtoLinearRGB : public GenericVideoFilter
 {
 public:
-	ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,
+	ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _EOTF,
 		bool _fullrange,bool _mpeg2c,uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertYUVtoLinearRGB();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
@@ -63,7 +63,7 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,mpeg2c,fullrange;
+	bool HLGMode,OOTF,mpeg2c,fullrange,EOTF;
 	bool sleep;
 	uint16_t *lookup_Upscale8;
 	uint32_t *lookup_Upscale16,*lookup_8to16;
@@ -98,7 +98,7 @@ private:
 class ConvertYUVtoXYZ : public GenericVideoFilter
 {
 public:
-	ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,
+	ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _EOTF,
 		bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
 		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertYUVtoXYZ();
@@ -108,7 +108,7 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,mpeg2c,fullrange;
+	bool HLGMode,OOTF,mpeg2c,fullrange,EOTF;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	bool sleep;
 	uint16_t *lookup_Upscale8;
@@ -145,7 +145,7 @@ private:
 class ConvertRGBtoXYZ : public GenericVideoFilter
 {
 public:
-	ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,
+	ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _EOTF,
 		float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
 		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertRGBtoXYZ();
@@ -155,7 +155,7 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF;
+	bool HLGMode,OOTF,EOTF;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	bool sleep;
 	int16_t *lookupXYZ_8;
@@ -186,7 +186,7 @@ private:
 class ConvertLinearRGBtoYUV : public GenericVideoFilter
 {
 public:
-	ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,
+	ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _OETF,
 		bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads, bool _sleep,
 		IScriptEnvironment* env);
 	virtual ~ConvertLinearRGBtoYUV();
@@ -196,7 +196,7 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,mpeg2c,fullrange,fastmode;
+	bool HLGMode,OOTF,mpeg2c,fullrange,fastmode,OETF;
 	bool sleep;
 	int16_t *lookupRGB_8;
 	int32_t *lookupRGB_16;
@@ -228,7 +228,7 @@ private:
 class ConvertXYZtoYUV : public GenericVideoFilter
 {
 public:
-	ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,
+	ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _OETF,
 		bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,
 		float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,
 		float _pBx,float _pBy,float _pWx,float _pWy,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
@@ -239,7 +239,7 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,mpeg2c,fullrange,fastmode;
+	bool HLGMode,OOTF,mpeg2c,fullrange,fastmode,OETF;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	bool sleep;
@@ -274,7 +274,7 @@ private:
 class ConvertXYZtoRGB : public GenericVideoFilter
 {
 public:
-	ConvertXYZtoRGB(PClip _child,int _Color,bool _HLGMode,bool _OOTF,
+	ConvertXYZtoRGB(PClip _child,int _Color,bool _HLGMode,bool _OOTF,bool _OETF,
 		bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,
 		float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,
 		float _pBx,float _pBy,float _pWx,float _pWy,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
@@ -285,7 +285,7 @@ public:
 
 private:
 	int Color;
-	bool HLGMode,OOTF,fastmode;
+	bool HLGMode,OOTF,fastmode,OETF;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	bool sleep;

@@ -5293,9 +5293,6 @@ bool ComputeXYZMatrix(float Rx,float Ry,float Gx,float Gy,float Bx,float By,floa
 
 	if ((Coeff_X==0.0) || (Coeff_Y==0.0) || (Coeff_Z==0.0)) return(false);
 
-	Xmin=0.0; Ymin=0.0; Zmin=0.0;
-	Coeff_X=1.0; Coeff_Y=1.0; Coeff_Z=1.0;
-
 	if (RGBtoXYZ)
 	{
 		for(uint16_t i=0; i<256; i++)
@@ -5335,13 +5332,13 @@ bool ComputeXYZMatrix(float Rx,float Ry,float Gx,float Gy,float Bx,float By,floa
 			double x=((double)i)/255.0;
 
 			LookupXYZ_8[i]=(int16_t)round(8.0+16.0*255.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[0]);
-			LookupXYZ_8[i+256]=(int16_t)round(16.0*255.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[1]);
-			LookupXYZ_8[i+512]=(int16_t)round(16.0*255.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[2]);
-			LookupXYZ_8[i+768]=(int16_t)round(8.0+16.0*255.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[3]);
+			LookupXYZ_8[i+256]=(int16_t)round(16.0*255.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[1]);
+			LookupXYZ_8[i+512]=(int16_t)round(16.0*255.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[2]);
+			LookupXYZ_8[i+768]=(int16_t)round(8.0+16.0*255.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[3]);
 			LookupXYZ_8[i+1024]=(int16_t)round(16.0*255.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[4]);
-			LookupXYZ_8[i+1280]=(int16_t)round(16.0*255.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[5]);
-			LookupXYZ_8[i+1536]=(int16_t)round(8.0+16.0*255.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[6]);
-			LookupXYZ_8[i+1792]=(int16_t)round(16.0*255.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[7]);
+			LookupXYZ_8[i+1280]=(int16_t)round(16.0*255.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[5]);
+			LookupXYZ_8[i+1536]=(int16_t)round(8.0+16.0*255.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[6]);
+			LookupXYZ_8[i+1792]=(int16_t)round(16.0*255.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[7]);
 			LookupXYZ_8[i+2048]=(int16_t)round(16.0*255.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[8]);
 		}
 
@@ -5350,13 +5347,13 @@ bool ComputeXYZMatrix(float Rx,float Ry,float Gx,float Gy,float Bx,float By,floa
 			double x=((double)i)/65535.0;
 
 			LookupXYZ_16[i]=(int32_t)round(128.0+255.0*65535.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[0]);
-			LookupXYZ_16[i+65536]=(int32_t)round(255.0*65535.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[1]);
-			LookupXYZ_16[i+2*65536]=(int32_t)round(255.0*65535.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[2]);
-			LookupXYZ_16[i+3*65536]=(int32_t)round(128.0+255.0*65535.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[3]);
+			LookupXYZ_16[i+65536]=(int32_t)round(255.0*65535.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[1]);
+			LookupXYZ_16[i+2*65536]=(int32_t)round(255.0*65535.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[2]);
+			LookupXYZ_16[i+3*65536]=(int32_t)round(128.0+255.0*65535.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[3]);
 			LookupXYZ_16[i+4*65536]=(int32_t)round(255.0*65535.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[4]);
-			LookupXYZ_16[i+5*65536]=(int32_t)round(255.0*65535.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[5]);
-			LookupXYZ_16[i+6*65536]=(int32_t)round(128.0+255.0*65535.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[6]);
-			LookupXYZ_16[i+7*65536]=(int32_t)round(255.0*65535.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[7]);
+			LookupXYZ_16[i+5*65536]=(int32_t)round(255.0*65535.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[5]);
+			LookupXYZ_16[i+6*65536]=(int32_t)round(128.0+255.0*65535.0*(Coeff_X*x+Xmin)*(double)Coeff_XYZ[6]);
+			LookupXYZ_16[i+7*65536]=(int32_t)round(255.0*65535.0*(Coeff_Y*x+Ymin)*(double)Coeff_XYZ[7]);
 			LookupXYZ_16[i+8*65536]=(int32_t)round(255.0*65535.0*(Coeff_Z*x+Zmin)*(double)Coeff_XYZ[8]);
 		}
 	}

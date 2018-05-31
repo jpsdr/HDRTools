@@ -5413,6 +5413,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 		|| (lookupL_16==NULL) || (lookupL_32==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertYUVtoLinearRGB: Error while allocating the lookup tables!");
 	}
 
@@ -5424,6 +5425,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 	if ((vi_original==NULL) || (vi_422==NULL) || (vi_444==NULL) || (vi_RGB64==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertYUVtoLinearRGB: Error while creating VideoInfo!");
 	}
 
@@ -5639,8 +5641,8 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 	{
 		if (!poolInterface->GetUserId(UserId))
 		{
-			poolInterface->DeAllocateAllThreads(true);
 			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while getting UserId!");
 		}
 	}
@@ -5667,8 +5669,8 @@ void ConvertYUVtoLinearRGB::FreeData(void)
 ConvertYUVtoLinearRGB::~ConvertYUVtoLinearRGB() 
 {
 	if (max_threads>1) poolInterface->RemoveUserId(UserId);
-	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 	FreeData();
+	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 }
 
 
@@ -6464,6 +6466,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 		|| (lookupL_20==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertLinearRGBtoYUV: Error while allocating the lookup tables!");
 	}
 
@@ -6478,6 +6481,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 		|| (vi_RGB32==NULL) || (vi_RGB64==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertLinearRGBtoYUV: Error while creating VideoInfo!");
 	}
 
@@ -6686,8 +6690,8 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 	{
 		if (!poolInterface->GetUserId(UserId))
 		{
-			poolInterface->DeAllocateAllThreads(true);
 			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertLinearRGBtoYUV: Error with the TheadPool while getting UserId!");
 		}
 	}
@@ -6713,8 +6717,8 @@ void ConvertLinearRGBtoYUV::FreeData(void)
 ConvertLinearRGBtoYUV::~ConvertLinearRGBtoYUV() 
 {
 	if (max_threads>1) poolInterface->RemoveUserId(UserId);
-	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 	FreeData();
+	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 }
 
 
@@ -7453,6 +7457,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 	if ((vi_original==NULL) || (vi_422==NULL) || (vi_444==NULL) || (vi_RGB64==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertYUVtoXYZ: Error while creating VideoInfo!");
 	}
 
@@ -7460,6 +7465,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 		lookupXYZ_8,lookupXYZ_16,Coeff_XYZ,Coeff_XYZ_asm,true))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertYUVtoXYZ: Error while computing XYZ matrix!");
 	}
 
@@ -7675,8 +7681,8 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 	{
 		if (!poolInterface->GetUserId(UserId))
 		{
-			poolInterface->DeAllocateAllThreads(true);
 			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertYUVtoXYZ: Error with the TheadPool while getting UserId!");
 		}
 	}
@@ -7706,8 +7712,8 @@ void ConvertYUVtoXYZ::FreeData(void)
 ConvertYUVtoXYZ::~ConvertYUVtoXYZ() 
 {
 	if (max_threads>1) poolInterface->RemoveUserId(UserId);
-	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 	FreeData();
+	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 }
 
 
@@ -8619,6 +8625,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _H
 		|| (lookupL_20==NULL) || (lookupXYZ_8==NULL) || (lookupXYZ_16==NULL) || (Coeff_XYZ_asm==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertXYZtoYUV: Error while allocating the lookup tables!");
 	}
 
@@ -8633,6 +8640,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _H
 		|| (vi_RGB32==NULL) || (vi_RGB64==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertXYZtoYUV: Error while creating VideoInfo!");
 	}
 
@@ -8640,6 +8648,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _H
 		lookupXYZ_8,lookupXYZ_16,Coeff_XYZ,Coeff_XYZ_asm,false))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertXYZtoYUV: Error while computing XYZ matrix!");
 	}
 
@@ -8848,8 +8857,8 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _H
 	{
 		if (!poolInterface->GetUserId(UserId))
 		{
-			poolInterface->DeAllocateAllThreads(true);
 			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZtoYUV: Error with the TheadPool while getting UserId!");
 		}
 	}
@@ -8878,8 +8887,8 @@ void ConvertXYZtoYUV::FreeData(void)
 ConvertXYZtoYUV::~ConvertXYZtoYUV() 
 {
 	if (max_threads>1) poolInterface->RemoveUserId(UserId);
-	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 	FreeData();
+	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 }
 
 
@@ -9703,6 +9712,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 		|| (lookupL_32==NULL) || (Coeff_XYZ_asm==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertRGBtoXYZ: Error while allocating the lookup tables!");
 	}
 
@@ -9710,6 +9720,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 		lookupXYZ_8,lookupXYZ_16,Coeff_XYZ,Coeff_XYZ_asm,true))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertRGBtoXYZ: Error while computing XYZ matrix!");
 	}
 
@@ -9848,8 +9859,8 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 	{
 		if (!poolInterface->GetUserId(UserId))
 		{
-			poolInterface->DeAllocateAllThreads(true);
 			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertRGBtoXYZ: Error with the TheadPool while getting UserId!");
 		}
 	}
@@ -9872,8 +9883,8 @@ void ConvertRGBtoXYZ::FreeData(void)
 ConvertRGBtoXYZ::~ConvertRGBtoXYZ() 
 {
 	if (threads_number>1) poolInterface->RemoveUserId(UserId);
-	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 	FreeData();
+	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 }
 
 
@@ -10222,6 +10233,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,bool _HLGMode,bool _OOT
 		|| (lookupL_20==NULL) || (lookupXYZ_8==NULL) || (lookupXYZ_16==NULL) || (Coeff_XYZ_asm==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertXYZtoRGB: Error while allocating the lookup tables!");
 	}
 
@@ -10229,6 +10241,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,bool _HLGMode,bool _OOT
 		lookupXYZ_8,lookupXYZ_16,Coeff_XYZ,Coeff_XYZ_asm,false))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertXYZtoRGB: Error while computing XYZ matrix!");
 	}
 
@@ -10391,8 +10404,8 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,bool _HLGMode,bool _OOT
 	{
 		if (!poolInterface->GetUserId(UserId))
 		{
-			poolInterface->DeAllocateAllThreads(true);
 			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZtoRGB: Error with the TheadPool while getting UserId!");
 		}
 	}
@@ -10413,8 +10426,8 @@ void ConvertXYZtoRGB::FreeData(void)
 ConvertXYZtoRGB::~ConvertXYZtoRGB() 
 {
 	if (threads_number>1) poolInterface->RemoveUserId(UserId);
-	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 	FreeData();
+	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 }
 
 
@@ -10803,6 +10816,7 @@ ConvertXYZ_HDRtoSDR::ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float 
 	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertXYZ_HDRtoSDR: Error while allocating the lookup tables!");
 	}
 
@@ -10834,8 +10848,8 @@ ConvertXYZ_HDRtoSDR::ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float 
 	{
 		if (!poolInterface->GetUserId(UserId))
 		{
-			poolInterface->DeAllocateAllThreads(true);
 			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZ_HDRtoSDR: Error with the TheadPool while getting UserId!");
 		}
 	}
@@ -10853,8 +10867,8 @@ void ConvertXYZ_HDRtoSDR::FreeData(void)
 ConvertXYZ_HDRtoSDR::~ConvertXYZ_HDRtoSDR() 
 {
 	if (threads_number>1) poolInterface->RemoveUserId(UserId);
-	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 	FreeData();
+	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 }
 
 
@@ -11094,6 +11108,7 @@ ConvertXYZ_SDRtoHDR::ConvertXYZ_SDRtoHDR(PClip _child,float _Coeff_X,float _Coef
 	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL))
 	{
 		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertXYZ_SDRtoHDR: Error while allocating the lookup tables!");
 	}
 
@@ -11122,8 +11137,8 @@ ConvertXYZ_SDRtoHDR::ConvertXYZ_SDRtoHDR(PClip _child,float _Coeff_X,float _Coef
 	{
 		if (!poolInterface->GetUserId(UserId))
 		{
-			poolInterface->DeAllocateAllThreads(true);
 			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZ_SDRtoHDR: Error with the TheadPool while getting UserId!");
 		}
 	}
@@ -11141,8 +11156,8 @@ void ConvertXYZ_SDRtoHDR::FreeData(void)
 ConvertXYZ_SDRtoHDR::~ConvertXYZ_SDRtoHDR() 
 {
 	if (threads_number>1) poolInterface->RemoveUserId(UserId);
-	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 	FreeData();
+	if (threads>1) poolInterface->DeAllocateAllThreads(true);
 }
 
 

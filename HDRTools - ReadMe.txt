@@ -233,11 +233,11 @@ The others parameters are identical to ConvertLinearRGBtoYUV.
 **         ConvertRGBtoXYZ          **
 **************************************
 
-ConvertRGBtoXYZ(int Color,int OutputMode,bool HLGMode,bool OOTF,bool EOTF,
+ConvertRGBtoXYZ(int Color,int OutputMode,bool HLGMode,bool OOTF,bool EOTF,fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
-Accepted input : RGB32 or RGB64.
+Accepted input : RGB32, RGB64 and Planar float RGB.
 The output will be tagged RGB even if data is XYZ.
 
 The parameters are identical to ConvertYUVtoXYZ.
@@ -247,14 +247,21 @@ The parameters are identical to ConvertYUVtoXYZ.
 **         ConvertXYZtoRGB          **
 **************************************
 
-ConvertXYZtoRGB(int Color,bool HLGMode,bool OOTF,bool OETF,bool fasmode,
+ConvertXYZtoRGB(int Color,int OutputMode,bool HLGMode,bool OOTF,bool OETF,bool fasmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
 Accepted input : RGB32, RGB64 and Planar float RGB.
 
-The parameters are identical to ConvertXYZtoYUV.
+   OutputMode -
+      Set the output data mode.
+         0 : No change
+	 1 : Input 8 to 16 bits : no change, Input Planar float RGB -> Outpout RGB64.
+       Default: 0 (int)
+
+
+The others parameters are identical to ConvertXYZtoYUV.
 
 
 **************************************

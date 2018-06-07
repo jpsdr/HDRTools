@@ -24,7 +24,7 @@
 #include "avisynth.h"
 #include "ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 0.1.0 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 0.2.0 JPSDR"
 
 
 typedef struct _dataLookUp
@@ -145,7 +145,7 @@ private:
 class ConvertRGBtoXYZ : public GenericVideoFilter
 {
 public:
-	ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _EOTF,
+	ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _EOTF,bool _fastmode,
 		float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
 		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertRGBtoXYZ();
@@ -155,14 +155,14 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,EOTF;
+	bool HLGMode,OOTF,EOTF,fastmode;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	bool sleep;
 	int16_t *lookupXYZ_8;
 	int32_t *lookupXYZ_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_8to16;
-	float *lookupL_32,*lookupL_8to32;
+	float *lookupL_32,*lookupL_8to32,*lookupL_20;
 	float Coeff_XYZ[9],*Coeff_XYZ_asm;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
@@ -274,7 +274,7 @@ private:
 class ConvertXYZtoRGB : public GenericVideoFilter
 {
 public:
-	ConvertXYZtoRGB(PClip _child,int _Color,bool _HLGMode,bool _OOTF,bool _OETF,
+	ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _OETF,
 		bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,
 		float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,
 		float _pBx,float _pBy,float _pWx,float _pWy,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
@@ -284,7 +284,7 @@ public:
 	int __stdcall SetCacheHints(int cachehints, int frame_range);
 
 private:
-	int Color;
+	int Color,OutputMode;
 	bool HLGMode,OOTF,fastmode,OETF;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
@@ -293,7 +293,7 @@ private:
 	int32_t *lookupXYZ_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_20;
-	float Coeff_XYZ[9],*Coeff_XYZ_asm;
+	float Coeff_XYZ[9],*Coeff_XYZ_asm,*lookupL_32;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;

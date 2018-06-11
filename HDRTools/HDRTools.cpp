@@ -3383,8 +3383,8 @@ static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_i
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
-	const double alpha2=267.84,beta2=0.0003024;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_m=59.5208,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3467,8 +3467,8 @@ static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
-	const double alpha2=267.84,beta2=0.0003024;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_m=59.5208,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3545,8 +3545,8 @@ static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_da
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
-	const double alpha2=267.84,beta2=0.0003024;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_m=59.5208,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3621,8 +3621,8 @@ static void Convert_LinearRGBPStoRGB64_HLG(const MT_Data_Info_HDRTools &mt_data_
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
-	const double alpha2=267.84,beta2=0.0003024;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_m=59.5208,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3705,8 +3705,8 @@ static void Convert_LinearRGBPStoRGB64_HLG_SSE41(const MT_Data_Info_HDRTools &mt
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
-	const double alpha2=267.84,beta2=0.0003024;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_m=59.5208,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3783,8 +3783,8 @@ static void Convert_LinearRGBPStoRGB64_HLG_AVX(const MT_Data_Info_HDRTools &mt_d
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
-	const double alpha2=267.84,beta2=0.0003024;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_m=59.5208,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -4813,7 +4813,7 @@ static void Convert_RGBPStoLinearRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 	const ptrdiff_t dst_pitch_B=mt_data_inf.dst_pitch3;
 
 	const double alpha=1.09929682680944,alpha_1=alpha-1.0,alpha_inv=1.0/alpha;
-	const double alpha2=1.0/267.84,beta2=0.0003024*267.84;
+	const double alpha2=1.0/(4.5*59.5208),beta2=0.018053968510807*4.5;
 	const double coeff_p1=1.0/2.4,coeff_p2=1.0/0.45,coeff_m=1.0/59.5208,coeff_100=100.0;
 
 	const double m1=1.0/0.1593017578125;
@@ -4940,7 +4940,7 @@ static void Convert_RGBPStoLinearRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_
 	const ptrdiff_t dst_pitch_B=mt_data_inf.dst_pitch3;
 
 	const double alpha=1.09929682680944,alpha_1=alpha-1.0,alpha_inv=1.0/alpha;
-	const double alpha2=1.0/267.84,beta2=0.0003024*267.84;
+	const double alpha2=1.0/(4.5*59.5208),beta2=0.018053968510807*4.5;
 	const double coeff_p1=1.0/2.4,coeff_p2=1.0/0.45,coeff_m=1.0/59.5208,coeff_100=100.0;
 
 	const double m1=1.0/0.1593017578125;
@@ -5605,8 +5605,8 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
-	const double alpha2=267.84,beta2=0.0003024;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_m=59.5208,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -5725,8 +5725,8 @@ static void Convert_LinearRGBPStoRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
-	const double alpha2=267.84,beta2=0.0003024;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_m=59.5208,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -6824,7 +6824,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 	*/
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
-	const double alpha2=267.84,beta2=0.0003024;
+	const double alpha2=4.5*59.5208,beta2=beta/59.5208;
 
 	const double m1=0.1593017578125;
 	const double m2=78.84375;
@@ -7860,7 +7860,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 	*/
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
-	const double alpha2=267.84,beta2=0.0003024;
+	const double alpha2=4.5*59.5208,beta2=beta/59.5208;
 
 	const double m1=0.1593017578125;
 	const double m2=78.84375;
@@ -8864,7 +8864,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 	*/
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
-	const double alpha2=267.84,beta2=0.0003024;
+	const double alpha2=4.5*59.5208,beta2=beta/59.5208;
 
 	const double m1=0.1593017578125;
 	const double m2=78.84375;
@@ -10027,7 +10027,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _H
 	*/
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
-	const double alpha2=267.84,beta2=0.0003024;
+	const double alpha2=4.5*59.5208,beta2=beta/59.5208;
 
 	const double m1=0.1593017578125;
 	const double m2=78.84375;
@@ -11062,7 +11062,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 	*/
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
-	const double alpha2=267.84,beta2=0.0003024;
+	const double alpha2=4.5*59.5208,beta2=beta/59.5208;
 
 	const double m1=0.1593017578125;
 	const double m2=78.84375;
@@ -11731,7 +11731,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,bool _H
 	*/
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
-	const double alpha2=267.84,beta2=0.0003024;
+	const double alpha2=4.5*59.5208,beta2=beta/59.5208;
 
 	const double m1=0.1593017578125;
 	const double m2=78.84375;

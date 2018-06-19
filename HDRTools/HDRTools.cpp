@@ -13667,14 +13667,14 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			pRx=(float)args[17].AsFloat(0.708f);
-			pRy=(float)args[18].AsFloat(0.292f);
-			pGx=(float)args[19].AsFloat(0.170f);
-			pGy=(float)args[20].AsFloat(0.797f);
-			pBx=(float)args[21].AsFloat(0.131f);
-			pBy=(float)args[22].AsFloat(0.046f);
-			pWx=(float)args[23].AsFloat(0.31271f);
-			pWy=(float)args[24].AsFloat(0.32902f);
+			pRx=(float)args[18].AsFloat(0.708f);
+			pRy=(float)args[19].AsFloat(0.292f);
+			pGx=(float)args[20].AsFloat(0.170f);
+			pGy=(float)args[21].AsFloat(0.797f);
+			pBx=(float)args[22].AsFloat(0.131f);
+			pBy=(float)args[23].AsFloat(0.046f);
+			pWx=(float)args[24].AsFloat(0.31271f);
+			pWy=(float)args[25].AsFloat(0.32902f);
 			break;
 		case 2 :
 			pRx=(float)args[18].AsFloat(0.640f);

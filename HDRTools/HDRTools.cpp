@@ -6684,10 +6684,10 @@ bool ComputeXYZScale(float Rx,float Ry,float Gx,float Gy,float Bx,float By,float
 ********************************************************************************************
 */
 
-ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _EOTF,
-	bool _fullrange,bool _mpeg2c,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+	bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),EOTF(_EOTF),
-		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep)
+		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
 	UserId=0;
 
@@ -7742,10 +7742,10 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 */
 
 
-ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _OETF,
-	bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+	bool _OOTF,bool _OETF,bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),OETF(_OETF),
-		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep)
+		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
 	UserId=0;
 
@@ -8711,12 +8711,12 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 */
 
 
-ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _EOTF,
-	bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+	bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,
+	float _Wx,float _Wy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
-		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy)
+		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
 	UserId=0;
 
@@ -9894,14 +9894,15 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 */
 
 
-ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _OETF,
-	bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
+ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+	bool _OOTF,bool _OETF,bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
 	float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
 	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),OETF(_OETF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
-		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy)
+		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),
+		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
 	UserId=0;
 
@@ -10985,12 +10986,12 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 */
 
 
-ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _EOTF,bool _fastmode,
-	float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
+ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+	bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
 	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),EOTF(_EOTF),
 		fastmode(_fastmode),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
-		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy)
+		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
 	UserId=0;
 
@@ -11654,14 +11655,15 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 */
 
 
-ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,bool _OOTF,bool _OETF,
-	bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
+ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+	bool _OOTF,bool _OETF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
 	float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
 	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),HLGMode(_HLGMode),OOTF(_OOTF),OETF(_OETF),
 		OutputMode(_OutputMode),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
-		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy)
+		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),
+		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
 	UserId=0;
 
@@ -13029,16 +13031,18 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 	const int Color=args[1].AsInt(2);
 	int OutputMode=args[2].AsInt(0);
 	const bool HLGMode=args[3].AsBool(false);
-	const bool OOTF=args[4].AsBool(true);
-	const bool EOTF=args[5].AsBool(true);
-	const bool fullrange=args[6].AsBool(false);
-	const bool mpeg2c=args[7].AsBool(true);
-	const int threads=args[8].AsInt(0);
-	const bool LogicalCores=args[9].AsBool(true);
-	const bool MaxPhysCores=args[10].AsBool(true);
-	const bool SetAffinity=args[11].AsBool(false);
-	const bool sleep = args[12].AsBool(false);
-	int prefetch=args[13].AsInt(0);
+	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
+	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const bool OOTF=args[6].AsBool(true);
+	const bool EOTF=args[7].AsBool(true);
+	const bool fullrange=args[8].AsBool(false);
+	const bool mpeg2c=args[9].AsBool(true);
+	const int threads=args[10].AsInt(0);
+	const bool LogicalCores=args[11].AsBool(true);
+	const bool MaxPhysCores=args[12].AsBool(true);
+	const bool SetAffinity=args[13].AsBool(false);
+	const bool sleep = args[14].AsBool(false);
+	int prefetch=args[15].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13103,7 +13107,7 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 		}
 	}
 
-	return new ConvertYUVtoLinearRGB(args[0].AsClip(),Color,OutputMode,HLGMode,OOTF,EOTF,fullrange,
+	return new ConvertYUVtoLinearRGB(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fullrange,
 		mpeg2c,threads_number,sleep,env);
 }
 
@@ -13141,16 +13145,18 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	const int Color=args[1].AsInt(2);
 	int OutputMode=args[2].AsInt(0);
 	const bool HLGMode=args[3].AsBool(false);
-	const bool OOTF=args[4].AsBool(true);
-	const bool EOTF=args[5].AsBool(true);
-	const bool fullrange=args[6].AsBool(false);
-	const bool mpeg2c=args[7].AsBool(true);
-	const int threads=args[16].AsInt(0);
-	const bool LogicalCores=args[17].AsBool(true);
-	const bool MaxPhysCores=args[18].AsBool(true);
-	const bool SetAffinity=args[19].AsBool(false);
-	const bool sleep = args[20].AsBool(false);
-	int prefetch=args[21].AsInt(0);
+	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
+	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const bool OOTF=args[6].AsBool(true);
+	const bool EOTF=args[7].AsBool(true);
+	const bool fullrange=args[8].AsBool(false);
+	const bool mpeg2c=args[9].AsBool(true);
+	const int threads=args[18].AsInt(0);
+	const bool LogicalCores=args[19].AsBool(true);
+	const bool MaxPhysCores=args[20].AsBool(true);
+	const bool SetAffinity=args[21].AsBool(false);
+	const bool sleep = args[22].AsBool(false);
+	int prefetch=args[23].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13165,44 +13171,44 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			Rx=(float)args[8].AsFloat(0.708f);
-			Ry=(float)args[9].AsFloat(0.292f);
-			Gx=(float)args[10].AsFloat(0.170f);
-			Gy=(float)args[11].AsFloat(0.797f);
-			Bx=(float)args[12].AsFloat(0.131f);
-			By=(float)args[13].AsFloat(0.046f);
-			Wx=(float)args[14].AsFloat(0.31271f);
-			Wy=(float)args[15].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.708f);
+			Ry=(float)args[11].AsFloat(0.292f);
+			Gx=(float)args[12].AsFloat(0.170f);
+			Gy=(float)args[13].AsFloat(0.797f);
+			Bx=(float)args[14].AsFloat(0.131f);
+			By=(float)args[15].AsFloat(0.046f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		case 2 :
-			Rx=(float)args[8].AsFloat(0.640f);
-			Ry=(float)args[9].AsFloat(0.330f);
-			Gx=(float)args[10].AsFloat(0.300f);
-			Gy=(float)args[11].AsFloat(0.600f);
-			Bx=(float)args[12].AsFloat(0.150f);
-			By=(float)args[13].AsFloat(0.060f);
-			Wx=(float)args[14].AsFloat(0.31271f);
-			Wy=(float)args[15].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.640f);
+			Ry=(float)args[11].AsFloat(0.330f);
+			Gx=(float)args[12].AsFloat(0.300f);
+			Gy=(float)args[13].AsFloat(0.600f);
+			Bx=(float)args[14].AsFloat(0.150f);
+			By=(float)args[15].AsFloat(0.060f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		case 3 :
-			Rx=(float)args[8].AsFloat(0.630f);
-			Ry=(float)args[9].AsFloat(0.340f);
-			Gx=(float)args[10].AsFloat(0.310f);
-			Gy=(float)args[11].AsFloat(0.595f);
-			Bx=(float)args[12].AsFloat(0.155f);
-			By=(float)args[13].AsFloat(0.070f);
-			Wx=(float)args[14].AsFloat(0.31271f);
-			Wy=(float)args[15].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.630f);
+			Ry=(float)args[11].AsFloat(0.340f);
+			Gx=(float)args[12].AsFloat(0.310f);
+			Gy=(float)args[13].AsFloat(0.595f);
+			Bx=(float)args[14].AsFloat(0.155f);
+			By=(float)args[15].AsFloat(0.070f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		case 4 :
-			Rx=(float)args[8].AsFloat(0.640f);
-			Ry=(float)args[9].AsFloat(0.330f);
-			Gx=(float)args[10].AsFloat(0.290f);
-			Gy=(float)args[11].AsFloat(0.600f);
-			Bx=(float)args[12].AsFloat(0.150f);
-			By=(float)args[13].AsFloat(0.060f);
-			Wx=(float)args[14].AsFloat(0.31271f);
-			Wy=(float)args[15].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.640f);
+			Ry=(float)args[11].AsFloat(0.330f);
+			Gx=(float)args[12].AsFloat(0.290f);
+			Gy=(float)args[13].AsFloat(0.600f);
+			Bx=(float)args[14].AsFloat(0.150f);
+			By=(float)args[15].AsFloat(0.060f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13264,8 +13270,8 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertYUVtoXYZ(args[0].AsClip(),Color,OutputMode,HLGMode,OOTF,EOTF,fullrange,mpeg2c,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,
-		threads_number,sleep,env);
+	return new ConvertYUVtoXYZ(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fullrange,mpeg2c,
+		Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,env);
 }
 
 
@@ -13300,17 +13306,19 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 	const int Color=args[1].AsInt(2);
 	int OutputMode=args[2].AsInt(0);
 	const bool HLGMode=args[3].AsBool(false);
-	const bool OOTF=args[4].AsBool(true);
-	const bool OETF=args[5].AsBool(true);
-	const bool fullrange=args[6].AsBool(false);
-	const bool mpeg2c=args[7].AsBool(true);
-	const bool fastmode=args[8].AsBool(true);
-	const int threads=args[9].AsInt(0);
-	const bool LogicalCores=args[10].AsBool(true);
-	const bool MaxPhysCores=args[11].AsBool(true);
-	const bool SetAffinity=args[12].AsBool(false);
-	const bool sleep = args[13].AsBool(false);
-	int prefetch=args[14].AsInt(0);
+	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
+	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const bool OOTF=args[6].AsBool(true);
+	const bool OETF=args[7].AsBool(true);
+	const bool fullrange=args[8].AsBool(false);
+	const bool mpeg2c=args[9].AsBool(true);
+	const bool fastmode=args[10].AsBool(true);
+	const int threads=args[11].AsInt(0);
+	const bool LogicalCores=args[12].AsBool(true);
+	const bool MaxPhysCores=args[13].AsBool(true);
+	const bool SetAffinity=args[14].AsBool(false);
+	const bool sleep = args[15].AsBool(false);
+	int prefetch=args[16].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13373,7 +13381,7 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 		}
 	}
 
-	return new ConvertLinearRGBtoYUV(args[0].AsClip(),Color,OutputMode,HLGMode,OOTF,OETF,fullrange,
+	return new ConvertLinearRGBtoYUV(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,OETF,fullrange,
 		mpeg2c,fastmode,threads_number,sleep,env);
 }
 
@@ -13411,15 +13419,17 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 	const int Color=args[1].AsInt(2);
 	int OutputMode=args[2].AsInt(0);
 	const bool HLGMode=args[3].AsBool(false);
-	const bool OOTF=args[4].AsBool(true);
-	const bool EOTF=args[5].AsBool(true);
-	const bool fastmode=args[6].AsBool(true);
-	const int threads=args[15].AsInt(0);
-	const bool LogicalCores=args[16].AsBool(true);
-	const bool MaxPhysCores=args[17].AsBool(true);
-	const bool SetAffinity=args[18].AsBool(false);
-	const bool sleep = args[19].AsBool(false);
-	int prefetch=args[20].AsInt(0);
+	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
+	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const bool OOTF=args[6].AsBool(true);
+	const bool EOTF=args[7].AsBool(true);
+	const bool fastmode=args[8].AsBool(true);
+	const int threads=args[17].AsInt(0);
+	const bool LogicalCores=args[18].AsBool(true);
+	const bool MaxPhysCores=args[19].AsBool(true);
+	const bool SetAffinity=args[20].AsBool(false);
+	const bool sleep = args[21].AsBool(false);
+	int prefetch=args[22].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13434,44 +13444,44 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			Rx=(float)args[7].AsFloat(0.708f);
-			Ry=(float)args[8].AsFloat(0.292f);
-			Gx=(float)args[9].AsFloat(0.170f);
-			Gy=(float)args[10].AsFloat(0.797f);
-			Bx=(float)args[11].AsFloat(0.131f);
-			By=(float)args[12].AsFloat(0.046f);
-			Wx=(float)args[13].AsFloat(0.31271f);
-			Wy=(float)args[14].AsFloat(0.32902f);
+			Rx=(float)args[9].AsFloat(0.708f);
+			Ry=(float)args[10].AsFloat(0.292f);
+			Gx=(float)args[11].AsFloat(0.170f);
+			Gy=(float)args[12].AsFloat(0.797f);
+			Bx=(float)args[13].AsFloat(0.131f);
+			By=(float)args[14].AsFloat(0.046f);
+			Wx=(float)args[15].AsFloat(0.31271f);
+			Wy=(float)args[16].AsFloat(0.32902f);
 			break;
 		case 2 :
-			Rx=(float)args[7].AsFloat(0.640f);
-			Ry=(float)args[8].AsFloat(0.330f);
-			Gx=(float)args[9].AsFloat(0.300f);
-			Gy=(float)args[10].AsFloat(0.600f);
-			Bx=(float)args[11].AsFloat(0.150f);
-			By=(float)args[12].AsFloat(0.060f);
-			Wx=(float)args[13].AsFloat(0.31271f);
-			Wy=(float)args[14].AsFloat(0.32902f);
+			Rx=(float)args[9].AsFloat(0.640f);
+			Ry=(float)args[10].AsFloat(0.330f);
+			Gx=(float)args[11].AsFloat(0.300f);
+			Gy=(float)args[12].AsFloat(0.600f);
+			Bx=(float)args[13].AsFloat(0.150f);
+			By=(float)args[14].AsFloat(0.060f);
+			Wx=(float)args[15].AsFloat(0.31271f);
+			Wy=(float)args[16].AsFloat(0.32902f);
 			break;
 		case 3 :
-			Rx=(float)args[7].AsFloat(0.630f);
-			Ry=(float)args[8].AsFloat(0.340f);
-			Gx=(float)args[9].AsFloat(0.310f);
-			Gy=(float)args[10].AsFloat(0.595f);
-			Bx=(float)args[11].AsFloat(0.155f);
-			By=(float)args[12].AsFloat(0.070f);
-			Wx=(float)args[13].AsFloat(0.31271f);
-			Wy=(float)args[14].AsFloat(0.32902f);
+			Rx=(float)args[9].AsFloat(0.630f);
+			Ry=(float)args[10].AsFloat(0.340f);
+			Gx=(float)args[11].AsFloat(0.310f);
+			Gy=(float)args[12].AsFloat(0.595f);
+			Bx=(float)args[13].AsFloat(0.155f);
+			By=(float)args[14].AsFloat(0.070f);
+			Wx=(float)args[15].AsFloat(0.31271f);
+			Wy=(float)args[16].AsFloat(0.32902f);
 			break;
 		case 4 :
-			Rx=(float)args[7].AsFloat(0.640f);
-			Ry=(float)args[8].AsFloat(0.330f);
-			Gx=(float)args[9].AsFloat(0.290f);
-			Gy=(float)args[10].AsFloat(0.600f);
-			Bx=(float)args[11].AsFloat(0.150f);
-			By=(float)args[12].AsFloat(0.060f);
-			Wx=(float)args[13].AsFloat(0.31271f);
-			Wy=(float)args[14].AsFloat(0.32902f);
+			Rx=(float)args[9].AsFloat(0.640f);
+			Ry=(float)args[10].AsFloat(0.330f);
+			Gx=(float)args[11].AsFloat(0.290f);
+			Gy=(float)args[12].AsFloat(0.600f);
+			Bx=(float)args[13].AsFloat(0.150f);
+			By=(float)args[14].AsFloat(0.060f);
+			Wx=(float)args[15].AsFloat(0.31271f);
+			Wy=(float)args[16].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13533,7 +13543,7 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertRGBtoXYZ(args[0].AsClip(),Color,OutputMode,HLGMode,OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,
+	return new ConvertRGBtoXYZ(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,
 		threads_number,sleep,env);
 }
 
@@ -13578,17 +13588,19 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	int pColor;
 	int OutputMode=args[2].AsInt(0);
 	const bool HLGMode=args[3].AsBool(false);
-	const bool OOTF=args[4].AsBool(true);
-	const bool OETF=args[5].AsBool(true);
-	const bool fullrange=args[6].AsBool(false);
-	const bool mpeg2c=args[7].AsBool(true);
-	const bool fastmode=args[8].AsBool(true);
-	const int threads=args[26].AsInt(0);
-	const bool LogicalCores=args[27].AsBool(true);
-	const bool MaxPhysCores=args[28].AsBool(true);
-	const bool SetAffinity=args[29].AsBool(false);
-	const bool sleep = args[30].AsBool(false);
-	int prefetch=args[31].AsInt(0);
+	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
+	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const bool OOTF=args[6].AsBool(true);
+	const bool OETF=args[7].AsBool(true);
+	const bool fullrange=args[8].AsBool(false);
+	const bool mpeg2c=args[9].AsBool(true);
+	const bool fastmode=args[10].AsBool(true);
+	const int threads=args[28].AsInt(0);
+	const bool LogicalCores=args[29].AsBool(true);
+	const bool MaxPhysCores=args[30].AsBool(true);
+	const bool SetAffinity=args[31].AsBool(false);
+	const bool sleep = args[32].AsBool(false);
+	int prefetch=args[33].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13596,8 +13608,8 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertXYZtoYUV: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	switch(Color)
 	{
-		case 0 : pColor=args[17].AsInt(2); break;
-		default : pColor=args[17].AsInt(0); break;
+		case 0 : pColor=args[19].AsInt(2); break;
+		default : pColor=args[19].AsInt(0); break;
 	}
 	if ((pColor<0) || (pColor>4))
 		env->ThrowError("ConvertXYZtoYUV: [pColor] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
@@ -13608,54 +13620,54 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			Rx=(float)args[9].AsFloat(0.708f);
-			Ry=(float)args[10].AsFloat(0.292f);
-			Gx=(float)args[11].AsFloat(0.170f);
-			Gy=(float)args[12].AsFloat(0.797f);
-			Bx=(float)args[13].AsFloat(0.131f);
-			By=(float)args[14].AsFloat(0.046f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[11].AsFloat(0.708f);
+			Ry=(float)args[12].AsFloat(0.292f);
+			Gx=(float)args[13].AsFloat(0.170f);
+			Gy=(float)args[14].AsFloat(0.797f);
+			Bx=(float)args[15].AsFloat(0.131f);
+			By=(float)args[16].AsFloat(0.046f);
+			Wx=(float)args[17].AsFloat(0.31271f);
+			Wy=(float)args[18].AsFloat(0.32902f);
 			break;
 		case 2 :
-			Rx=(float)args[9].AsFloat(0.640f);
-			Ry=(float)args[10].AsFloat(0.330f);
-			Gx=(float)args[11].AsFloat(0.300f);
-			Gy=(float)args[12].AsFloat(0.600f);
-			Bx=(float)args[13].AsFloat(0.150f);
-			By=(float)args[14].AsFloat(0.060f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[11].AsFloat(0.640f);
+			Ry=(float)args[12].AsFloat(0.330f);
+			Gx=(float)args[13].AsFloat(0.300f);
+			Gy=(float)args[14].AsFloat(0.600f);
+			Bx=(float)args[15].AsFloat(0.150f);
+			By=(float)args[16].AsFloat(0.060f);
+			Wx=(float)args[17].AsFloat(0.31271f);
+			Wy=(float)args[18].AsFloat(0.32902f);
 			break;
 		case 3 :
-			Rx=(float)args[9].AsFloat(0.630f);
-			Ry=(float)args[10].AsFloat(0.340f);
-			Gx=(float)args[11].AsFloat(0.310f);
-			Gy=(float)args[12].AsFloat(0.595f);
-			Bx=(float)args[13].AsFloat(0.155f);
-			By=(float)args[14].AsFloat(0.070f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[11].AsFloat(0.630f);
+			Ry=(float)args[12].AsFloat(0.340f);
+			Gx=(float)args[13].AsFloat(0.310f);
+			Gy=(float)args[14].AsFloat(0.595f);
+			Bx=(float)args[15].AsFloat(0.155f);
+			By=(float)args[16].AsFloat(0.070f);
+			Wx=(float)args[17].AsFloat(0.31271f);
+			Wy=(float)args[18].AsFloat(0.32902f);
 			break;
 		case 4 :
-			Rx=(float)args[9].AsFloat(0.640f);
-			Ry=(float)args[10].AsFloat(0.330f);
-			Gx=(float)args[11].AsFloat(0.290f);
-			Gy=(float)args[12].AsFloat(0.600f);
-			Bx=(float)args[13].AsFloat(0.150f);
-			By=(float)args[14].AsFloat(0.060f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[11].AsFloat(0.640f);
+			Ry=(float)args[12].AsFloat(0.330f);
+			Gx=(float)args[13].AsFloat(0.290f);
+			Gy=(float)args[14].AsFloat(0.600f);
+			Bx=(float)args[15].AsFloat(0.150f);
+			By=(float)args[16].AsFloat(0.060f);
+			Wx=(float)args[17].AsFloat(0.31271f);
+			Wy=(float)args[18].AsFloat(0.32902f);
 			break;
 		default :
-			Rx=(float)args[9].AsFloat(0.640f);
-			Ry=(float)args[10].AsFloat(0.330f);
-			Gx=(float)args[11].AsFloat(0.300f);
-			Gy=(float)args[12].AsFloat(0.600f);
-			Bx=(float)args[13].AsFloat(0.150f);
-			By=(float)args[14].AsFloat(0.060f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[11].AsFloat(0.640f);
+			Ry=(float)args[12].AsFloat(0.330f);
+			Gx=(float)args[13].AsFloat(0.300f);
+			Gy=(float)args[14].AsFloat(0.600f);
+			Bx=(float)args[15].AsFloat(0.150f);
+			By=(float)args[16].AsFloat(0.060f);
+			Wx=(float)args[17].AsFloat(0.31271f);
+			Wy=(float)args[18].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13667,54 +13679,54 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			pRx=(float)args[18].AsFloat(0.708f);
-			pRy=(float)args[19].AsFloat(0.292f);
-			pGx=(float)args[20].AsFloat(0.170f);
-			pGy=(float)args[21].AsFloat(0.797f);
-			pBx=(float)args[22].AsFloat(0.131f);
-			pBy=(float)args[23].AsFloat(0.046f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[20].AsFloat(0.708f);
+			pRy=(float)args[21].AsFloat(0.292f);
+			pGx=(float)args[22].AsFloat(0.170f);
+			pGy=(float)args[23].AsFloat(0.797f);
+			pBx=(float)args[24].AsFloat(0.131f);
+			pBy=(float)args[25].AsFloat(0.046f);
+			pWx=(float)args[26].AsFloat(0.31271f);
+			pWy=(float)args[27].AsFloat(0.32902f);
 			break;
 		case 2 :
-			pRx=(float)args[18].AsFloat(0.640f);
-			pRy=(float)args[19].AsFloat(0.330f);
-			pGx=(float)args[20].AsFloat(0.300f);
-			pGy=(float)args[21].AsFloat(0.600f);
-			pBx=(float)args[22].AsFloat(0.150f);
-			pBy=(float)args[23].AsFloat(0.060f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[20].AsFloat(0.640f);
+			pRy=(float)args[21].AsFloat(0.330f);
+			pGx=(float)args[22].AsFloat(0.300f);
+			pGy=(float)args[23].AsFloat(0.600f);
+			pBx=(float)args[24].AsFloat(0.150f);
+			pBy=(float)args[25].AsFloat(0.060f);
+			pWx=(float)args[26].AsFloat(0.31271f);
+			pWy=(float)args[27].AsFloat(0.32902f);
 			break;
 		case 3 :
-			pRx=(float)args[18].AsFloat(0.630f);
-			pRy=(float)args[19].AsFloat(0.340f);
-			pGx=(float)args[20].AsFloat(0.310f);
-			pGy=(float)args[21].AsFloat(0.595f);
-			pBx=(float)args[22].AsFloat(0.155f);
-			pBy=(float)args[23].AsFloat(0.070f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[20].AsFloat(0.630f);
+			pRy=(float)args[21].AsFloat(0.340f);
+			pGx=(float)args[22].AsFloat(0.310f);
+			pGy=(float)args[23].AsFloat(0.595f);
+			pBx=(float)args[24].AsFloat(0.155f);
+			pBy=(float)args[25].AsFloat(0.070f);
+			pWx=(float)args[26].AsFloat(0.31271f);
+			pWy=(float)args[27].AsFloat(0.32902f);
 			break;
 		case 4 :
-			pRx=(float)args[18].AsFloat(0.640f);
-			pRy=(float)args[19].AsFloat(0.330f);
-			pGx=(float)args[20].AsFloat(0.290f);
-			pGy=(float)args[21].AsFloat(0.600f);
-			pBx=(float)args[22].AsFloat(0.150f);
-			pBy=(float)args[23].AsFloat(0.060f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[20].AsFloat(0.640f);
+			pRy=(float)args[21].AsFloat(0.330f);
+			pGx=(float)args[22].AsFloat(0.290f);
+			pGy=(float)args[23].AsFloat(0.600f);
+			pBx=(float)args[24].AsFloat(0.150f);
+			pBy=(float)args[25].AsFloat(0.060f);
+			pWx=(float)args[26].AsFloat(0.31271f);
+			pWy=(float)args[27].AsFloat(0.32902f);
 			break;
 		default :
-			pRx=(float)args[18].AsFloat(0.640f);
-			pRy=(float)args[19].AsFloat(0.330f);
-			pGx=(float)args[20].AsFloat(0.300f);
-			pGy=(float)args[21].AsFloat(0.600f);
-			pBx=(float)args[22].AsFloat(0.150f);
-			pBy=(float)args[23].AsFloat(0.060f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[20].AsFloat(0.640f);
+			pRy=(float)args[21].AsFloat(0.330f);
+			pGx=(float)args[22].AsFloat(0.300f);
+			pGy=(float)args[23].AsFloat(0.600f);
+			pBx=(float)args[24].AsFloat(0.150f);
+			pBy=(float)args[25].AsFloat(0.060f);
+			pWx=(float)args[26].AsFloat(0.31271f);
+			pWy=(float)args[27].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13776,7 +13788,7 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertXYZtoYUV(args[0].AsClip(),Color,OutputMode,HLGMode,OOTF,OETF,fullrange,
+	return new ConvertXYZtoYUV(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,OETF,fullrange,
 		mpeg2c,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
 		threads_number,sleep,env);
 }
@@ -13819,15 +13831,17 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	const int OutputMode=args[2].AsInt(0);
 	int pColor;
 	const bool HLGMode=args[3].AsBool(false);
-	const bool OOTF=args[4].AsBool(true);
-	const bool OETF=args[5].AsBool(true);
-	const bool fastmode=args[6].AsBool(true);
-	const int threads=args[24].AsInt(0);
-	const bool LogicalCores=args[25].AsBool(true);
-	const bool MaxPhysCores=args[26].AsBool(true);
-	const bool SetAffinity=args[27].AsBool(false);
-	const bool sleep = args[28].AsBool(false);
-	int prefetch=args[29].AsInt(0);
+	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
+	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const bool OOTF=args[6].AsBool(true);
+	const bool OETF=args[7].AsBool(true);
+	const bool fastmode=args[8].AsBool(true);
+	const int threads=args[26].AsInt(0);
+	const bool LogicalCores=args[27].AsBool(true);
+	const bool MaxPhysCores=args[28].AsBool(true);
+	const bool SetAffinity=args[29].AsBool(false);
+	const bool sleep = args[30].AsBool(false);
+	int prefetch=args[31].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13835,8 +13849,8 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertXYZtoRGB: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	switch(Color)
 	{
-		case 0 : pColor=args[15].AsInt(2); break;
-		default : pColor=args[15].AsInt(0); break;
+		case 0 : pColor=args[17].AsInt(2); break;
+		default : pColor=args[17].AsInt(0); break;
 	}
 	if ((pColor<0) || (pColor>4))
 		env->ThrowError("ConvertXYZtoRGB: [pColor] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
@@ -13848,54 +13862,54 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			Rx=(float)args[7].AsFloat(0.708f);
-			Ry=(float)args[8].AsFloat(0.292f);
-			Gx=(float)args[9].AsFloat(0.170f);
-			Gy=(float)args[10].AsFloat(0.797f);
-			Bx=(float)args[11].AsFloat(0.131f);
-			By=(float)args[12].AsFloat(0.046f);
-			Wx=(float)args[13].AsFloat(0.31271f);
-			Wy=(float)args[14].AsFloat(0.32902f);
+			Rx=(float)args[9].AsFloat(0.708f);
+			Ry=(float)args[10].AsFloat(0.292f);
+			Gx=(float)args[11].AsFloat(0.170f);
+			Gy=(float)args[12].AsFloat(0.797f);
+			Bx=(float)args[13].AsFloat(0.131f);
+			By=(float)args[14].AsFloat(0.046f);
+			Wx=(float)args[15].AsFloat(0.31271f);
+			Wy=(float)args[16].AsFloat(0.32902f);
 			break;
 		case 2 :
-			Rx=(float)args[7].AsFloat(0.640f);
-			Ry=(float)args[8].AsFloat(0.330f);
-			Gx=(float)args[9].AsFloat(0.300f);
-			Gy=(float)args[10].AsFloat(0.600f);
-			Bx=(float)args[11].AsFloat(0.150f);
-			By=(float)args[12].AsFloat(0.060f);
-			Wx=(float)args[13].AsFloat(0.31271f);
-			Wy=(float)args[14].AsFloat(0.32902f);
+			Rx=(float)args[9].AsFloat(0.640f);
+			Ry=(float)args[10].AsFloat(0.330f);
+			Gx=(float)args[11].AsFloat(0.300f);
+			Gy=(float)args[12].AsFloat(0.600f);
+			Bx=(float)args[13].AsFloat(0.150f);
+			By=(float)args[14].AsFloat(0.060f);
+			Wx=(float)args[15].AsFloat(0.31271f);
+			Wy=(float)args[16].AsFloat(0.32902f);
 			break;
 		case 3 :
-			Rx=(float)args[7].AsFloat(0.630f);
-			Ry=(float)args[8].AsFloat(0.340f);
-			Gx=(float)args[9].AsFloat(0.310f);
-			Gy=(float)args[10].AsFloat(0.595f);
-			Bx=(float)args[11].AsFloat(0.155f);
-			By=(float)args[12].AsFloat(0.070f);
-			Wx=(float)args[13].AsFloat(0.31271f);
-			Wy=(float)args[14].AsFloat(0.32902f);
+			Rx=(float)args[9].AsFloat(0.630f);
+			Ry=(float)args[10].AsFloat(0.340f);
+			Gx=(float)args[11].AsFloat(0.310f);
+			Gy=(float)args[12].AsFloat(0.595f);
+			Bx=(float)args[13].AsFloat(0.155f);
+			By=(float)args[14].AsFloat(0.070f);
+			Wx=(float)args[15].AsFloat(0.31271f);
+			Wy=(float)args[16].AsFloat(0.32902f);
 			break;
 		case 4 :
-			Rx=(float)args[7].AsFloat(0.640f);
-			Ry=(float)args[8].AsFloat(0.330f);
-			Gx=(float)args[9].AsFloat(0.290f);
-			Gy=(float)args[10].AsFloat(0.600f);
-			Bx=(float)args[11].AsFloat(0.150f);
-			By=(float)args[12].AsFloat(0.060f);
-			Wx=(float)args[13].AsFloat(0.31271f);
-			Wy=(float)args[14].AsFloat(0.32902f);
+			Rx=(float)args[9].AsFloat(0.640f);
+			Ry=(float)args[10].AsFloat(0.330f);
+			Gx=(float)args[11].AsFloat(0.290f);
+			Gy=(float)args[12].AsFloat(0.600f);
+			Bx=(float)args[13].AsFloat(0.150f);
+			By=(float)args[14].AsFloat(0.060f);
+			Wx=(float)args[15].AsFloat(0.31271f);
+			Wy=(float)args[16].AsFloat(0.32902f);
 			break;
 		default :
-			Rx=(float)args[7].AsFloat(0.640f);
-			Ry=(float)args[8].AsFloat(0.330f);
-			Gx=(float)args[9].AsFloat(0.300f);
-			Gy=(float)args[10].AsFloat(0.600f);
-			Bx=(float)args[11].AsFloat(0.150f);
-			By=(float)args[12].AsFloat(0.060f);
-			Wx=(float)args[13].AsFloat(0.31271f);
-			Wy=(float)args[14].AsFloat(0.32902f);
+			Rx=(float)args[9].AsFloat(0.640f);
+			Ry=(float)args[10].AsFloat(0.330f);
+			Gx=(float)args[11].AsFloat(0.300f);
+			Gy=(float)args[12].AsFloat(0.600f);
+			Bx=(float)args[13].AsFloat(0.150f);
+			By=(float)args[14].AsFloat(0.060f);
+			Wx=(float)args[15].AsFloat(0.31271f);
+			Wy=(float)args[16].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13907,54 +13921,54 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			pRx=(float)args[16].AsFloat(0.708f);
-			pRy=(float)args[17].AsFloat(0.292f);
-			pGx=(float)args[18].AsFloat(0.170f);
-			pGy=(float)args[19].AsFloat(0.797f);
-			pBx=(float)args[20].AsFloat(0.131f);
-			pBy=(float)args[21].AsFloat(0.046f);
-			pWx=(float)args[22].AsFloat(0.31271f);
-			pWy=(float)args[23].AsFloat(0.32902f);
+			pRx=(float)args[18].AsFloat(0.708f);
+			pRy=(float)args[19].AsFloat(0.292f);
+			pGx=(float)args[20].AsFloat(0.170f);
+			pGy=(float)args[21].AsFloat(0.797f);
+			pBx=(float)args[22].AsFloat(0.131f);
+			pBy=(float)args[23].AsFloat(0.046f);
+			pWx=(float)args[24].AsFloat(0.31271f);
+			pWy=(float)args[25].AsFloat(0.32902f);
 			break;
 		case 2 :
-			pRx=(float)args[16].AsFloat(0.640f);
-			pRy=(float)args[17].AsFloat(0.330f);
-			pGx=(float)args[18].AsFloat(0.300f);
-			pGy=(float)args[19].AsFloat(0.600f);
-			pBx=(float)args[20].AsFloat(0.150f);
-			pBy=(float)args[21].AsFloat(0.060f);
-			pWx=(float)args[22].AsFloat(0.31271f);
-			pWy=(float)args[23].AsFloat(0.32902f);
+			pRx=(float)args[18].AsFloat(0.640f);
+			pRy=(float)args[19].AsFloat(0.330f);
+			pGx=(float)args[20].AsFloat(0.300f);
+			pGy=(float)args[21].AsFloat(0.600f);
+			pBx=(float)args[22].AsFloat(0.150f);
+			pBy=(float)args[23].AsFloat(0.060f);
+			pWx=(float)args[24].AsFloat(0.31271f);
+			pWy=(float)args[25].AsFloat(0.32902f);
 			break;
 		case 3 :
-			pRx=(float)args[16].AsFloat(0.630f);
-			pRy=(float)args[17].AsFloat(0.340f);
-			pGx=(float)args[18].AsFloat(0.310f);
-			pGy=(float)args[19].AsFloat(0.595f);
-			pBx=(float)args[20].AsFloat(0.155f);
-			pBy=(float)args[21].AsFloat(0.070f);
-			pWx=(float)args[22].AsFloat(0.31271f);
-			pWy=(float)args[23].AsFloat(0.32902f);
+			pRx=(float)args[18].AsFloat(0.630f);
+			pRy=(float)args[19].AsFloat(0.340f);
+			pGx=(float)args[20].AsFloat(0.310f);
+			pGy=(float)args[21].AsFloat(0.595f);
+			pBx=(float)args[22].AsFloat(0.155f);
+			pBy=(float)args[23].AsFloat(0.070f);
+			pWx=(float)args[24].AsFloat(0.31271f);
+			pWy=(float)args[25].AsFloat(0.32902f);
 			break;
 		case 4 :
-			pRx=(float)args[16].AsFloat(0.640f);
-			pRy=(float)args[17].AsFloat(0.330f);
-			pGx=(float)args[18].AsFloat(0.290f);
-			pGy=(float)args[19].AsFloat(0.600f);
-			pBx=(float)args[20].AsFloat(0.150f);
-			pBy=(float)args[21].AsFloat(0.060f);
-			pWx=(float)args[22].AsFloat(0.31271f);
-			pWy=(float)args[23].AsFloat(0.32902f);
+			pRx=(float)args[18].AsFloat(0.640f);
+			pRy=(float)args[19].AsFloat(0.330f);
+			pGx=(float)args[20].AsFloat(0.290f);
+			pGy=(float)args[21].AsFloat(0.600f);
+			pBx=(float)args[22].AsFloat(0.150f);
+			pBy=(float)args[23].AsFloat(0.060f);
+			pWx=(float)args[24].AsFloat(0.31271f);
+			pWy=(float)args[25].AsFloat(0.32902f);
 			break;
 		default :
-			pRx=(float)args[16].AsFloat(0.640f);
-			pRy=(float)args[17].AsFloat(0.330f);
-			pGx=(float)args[18].AsFloat(0.300f);
-			pGy=(float)args[19].AsFloat(0.600f);
-			pBx=(float)args[20].AsFloat(0.150f);
-			pBy=(float)args[21].AsFloat(0.060f);
-			pWx=(float)args[22].AsFloat(0.31271f);
-			pWy=(float)args[23].AsFloat(0.32902f);
+			pRx=(float)args[18].AsFloat(0.640f);
+			pRy=(float)args[19].AsFloat(0.330f);
+			pGx=(float)args[20].AsFloat(0.300f);
+			pGy=(float)args[21].AsFloat(0.600f);
+			pBx=(float)args[22].AsFloat(0.150f);
+			pBy=(float)args[23].AsFloat(0.060f);
+			pWx=(float)args[24].AsFloat(0.31271f);
+			pWy=(float)args[25].AsFloat(0.32902f);
 			break;
 	}
 
@@ -14016,7 +14030,7 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertXYZtoRGB(args[0].AsClip(),Color,OutputMode,HLGMode,OOTF,OETF,
+	return new ConvertXYZtoRGB(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,OETF,
 		fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
 		threads_number,sleep,env);
 }
@@ -14043,8 +14057,8 @@ AVSValue __cdecl Create_ConvertXYZ_HDRtoSDR(AVSValue args, void* user_data, IScr
 	const bool sleep = args[7].AsBool(false);
 	int prefetch=args[8].AsInt(0);
 	const float Coeff_X=(float)args[9].AsFloat(100.0f);
-	const float Coeff_Y=(float)args[10].AsFloat(100.0f);
-	const float Coeff_Z=(float)args[11].AsFloat(100.0f);
+	const float Coeff_Y=(float)args[10].AsFloat(Coeff_X);
+	const float Coeff_Z=(float)args[11].AsFloat(Coeff_X);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -14123,8 +14137,8 @@ AVSValue __cdecl Create_ConvertXYZ_SDRtoHDR(AVSValue args, void* user_data, IScr
 
 	const int threads=args[1].AsInt(0);
 	const float Coeff_X=(float)args[2].AsFloat(100.0f);
-	const float Coeff_Y=(float)args[3].AsFloat(100.0f);
-	const float Coeff_Z=(float)args[4].AsFloat(100.0f);
+	const float Coeff_Y=(float)args[3].AsFloat(Coeff_X);
+	const float Coeff_Z=(float)args[4].AsFloat(Coeff_X);
 	const bool LogicalCores=args[5].AsBool(true);
 	const bool MaxPhysCores=args[6].AsBool(true);
 	const bool SetAffinity=args[7].AsBool(false);
@@ -14201,30 +14215,30 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 	if (!poolInterface->GetThreadPoolInterfaceStatus()) env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool status!");
 
     env->AddFunction("ConvertYUVtoLinearRGB",
-		"c[Color]i[OutputMode]i[HLGMode]b[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b" \
-		"[sleep]b[prefetch]i",
+		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b" \
+		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertYUVtoLinearRGB, 0);
     env->AddFunction("ConvertLinearRGBtoYUV",
-		"c[Color]i[OutputMode]i[HLGMode]b[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b[threads]i[logicalCores]b[MaxPhysCore]b" \
-		"[SetAffinity]b[sleep]b[prefetch]i",
+		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b" \
+		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertLinearRGBtoYUV, 0);
 
     env->AddFunction("ConvertYUVtoXYZ",
-		"c[Color]i[OutputMode]i[HLGMode]b[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
+		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertYUVtoXYZ, 0);
     env->AddFunction("ConvertXYZtoYUV",
-		"c[Color]i[OutputMode]i[HLGMode]b[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b" \
+		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b" \
 		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertXYZtoYUV, 0);
 
     env->AddFunction("ConvertRGBtoXYZ",
-		"c[Color]i[OutputMode]i[HLGMode]b[OOTF]b[EOTF]b[fastmode]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
+		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fastmode]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertRGBtoXYZ, 0);
     env->AddFunction("ConvertXYZtoRGB",
-		"c[Color]i[OutputMode]i[HLGMode]b[OOTF]b[OETF]b[fastmode]b" \
+		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fastmode]b" \
 		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertXYZtoRGB, 0);

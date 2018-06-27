@@ -6684,9 +6684,9 @@ bool ComputeXYZScale(float Rx,float Ry,float Gx,float Gy,float Bx,float By,float
 ********************************************************************************************
 */
 
-ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 	bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),EOTF(_EOTF),
+	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
 	UserId=0;
@@ -6838,7 +6838,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (EOTF)
 				{
@@ -6886,7 +6886,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (EOTF)
 				{
@@ -7742,9 +7742,9 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 */
 
 
-ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 	bool _OOTF,bool _OETF,bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),OETF(_OETF),
+	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),OETF(_OETF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
 	UserId=0;
@@ -7874,7 +7874,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (OOTF)
 				{
@@ -7915,7 +7915,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (OOTF)
 				{
@@ -7957,7 +7957,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (OOTF)
 				{
@@ -8333,7 +8333,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 		{
 			if (Color==0)
 			{
-				if (HLGMode)
+				if (HDRMode==2)
 				{
 					if (AVX_Enable && src_RGBP_al32 && tmp1_al16) f_proc=14;
 					else
@@ -8711,10 +8711,10 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 */
 
 
-ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 	bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,
 	float _Wx,float _Wy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),EOTF(_EOTF),
+	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
 		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
@@ -8878,7 +8878,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (EOTF)
 				{
@@ -8926,7 +8926,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (EOTF)
 				{
@@ -9894,11 +9894,11 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 */
 
 
-ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 	bool _OOTF,bool _OETF,bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
 	float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
 	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),OETF(_OETF),
+	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),OETF(_OETF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
 		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),
@@ -10042,7 +10042,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (OOTF)
 				{
@@ -10083,7 +10083,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (OOTF)
 				{
@@ -10125,7 +10125,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (OOTF)
 				{
@@ -10608,7 +10608,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 		{
 			if (Color==0)
 			{
-				if (HLGMode)
+				if (HDRMode==2)
 				{
 					if (AVX_Enable && src_RGBP_al32 && tmp1_al16) f_proc=14;
 					else
@@ -10986,10 +10986,10 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 */
 
 
-ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 	bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
 	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HLGMode(_HLGMode),OOTF(_OOTF),EOTF(_EOTF),
+	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fastmode(_fastmode),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
 		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
 {
@@ -11077,7 +11077,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (EOTF)
 				{
@@ -11125,7 +11125,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (EOTF)
 				{
@@ -11171,7 +11171,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (EOTF)
 				{
@@ -11507,7 +11507,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			{
 				if (Color==0)
 				{
-					if (HLGMode) f_proc=21;
+					if (HDRMode==2) f_proc=21;
 					else f_proc=22;
 				}
 				else f_proc=20;
@@ -11655,11 +11655,11 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 */
 
 
-ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 	bool _OOTF,bool _OETF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
 	float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
 	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),HLGMode(_HLGMode),OOTF(_OOTF),OETF(_OETF),
+	GenericVideoFilter(_child),Color(_Color),HDRMode(_HDRMode),OOTF(_OOTF),OETF(_OETF),
 		OutputMode(_OutputMode),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
 		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),
@@ -11747,7 +11747,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (OOTF)
 				{
@@ -11788,7 +11788,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (OOTF)
 				{
@@ -11830,7 +11830,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,bool _H
 
 		if (Color==0)
 		{
-			if (!HLGMode)
+			if (HDRMode==0)
 			{
 				if (OOTF)
 				{
@@ -12281,7 +12281,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 			{
 				if (Color==0)
 				{
-					if (HLGMode)
+					if (HDRMode==2)
 					{
 						if (AVX_Enable && src_RGBP_al32 && dst_al16) f_proc=23;
 						else
@@ -12338,7 +12338,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 				{
 					if (Color==0)
 					{
-						if (HLGMode) f_proc=29;
+						if (HDRMode==2) f_proc=29;
 						else f_proc=30;
 					}
 					else f_proc=31;
@@ -13030,9 +13030,9 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 
 	const int Color=args[1].AsInt(2);
 	int OutputMode=args[2].AsInt(0);
-	const bool HLGMode=args[3].AsBool(false);
-	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
-	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const uint8_t HDRMode=args[3].AsInt(0);
+	const double HLG_Lb=args[4].AsFloat(0.05f);
+	const double HLG_Lw=args[5].AsFloat(1000.0f);
 	const bool OOTF=args[6].AsBool(true);
 	const bool EOTF=args[7].AsBool(true);
 	const bool fullrange=args[8].AsBool(false);
@@ -13052,6 +13052,8 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 		env->ThrowError("ConvertYUVtoLinearRGB: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	if ((OutputMode<0) || (OutputMode>2))
 		env->ThrowError("ConvertYUVtoLinearRGB: [OutputMode] must be 0, 1 or 2");
+	if ((HDRMode<0) || (HDRMode>2))
+		env->ThrowError("ConvertYUVtoLinearRGB: [HDRMode] must be 0, 1 or 2");
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertYUVtoLinearRGB: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
@@ -13107,7 +13109,7 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 		}
 	}
 
-	return new ConvertYUVtoLinearRGB(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fullrange,
+	return new ConvertYUVtoLinearRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fullrange,
 		mpeg2c,threads_number,sleep,env);
 }
 
@@ -13144,9 +13146,9 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 
 	const int Color=args[1].AsInt(2);
 	int OutputMode=args[2].AsInt(0);
-	const bool HLGMode=args[3].AsBool(false);
-	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
-	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const uint8_t HDRMode=args[3].AsInt(0);
+	const double HLG_Lb=args[4].AsFloat(0.05f);
+	const double HLG_Lw=args[5].AsFloat(1000.0f);
 	const bool OOTF=args[6].AsBool(true);
 	const bool EOTF=args[7].AsBool(true);
 	const bool fullrange=args[8].AsBool(false);
@@ -13166,6 +13168,8 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertYUVtoXYZ: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	if ((OutputMode<0) || (OutputMode>2))
 		env->ThrowError("ConvertYUVtoXYZ: [OutputMode] must be 0, 1 or 2");
+	if ((HDRMode<0) || (HDRMode>2))
+		env->ThrowError("ConvertYUVtoXYZ: [HDRMode] must be 0, 1 or 2");
 
 	switch(Color)
 	{
@@ -13270,7 +13274,7 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertYUVtoXYZ(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fullrange,mpeg2c,
+	return new ConvertYUVtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fullrange,mpeg2c,
 		Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,env);
 }
 
@@ -13305,9 +13309,9 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 
 	const int Color=args[1].AsInt(2);
 	int OutputMode=args[2].AsInt(0);
-	const bool HLGMode=args[3].AsBool(false);
-	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
-	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const uint8_t HDRMode=args[3].AsInt(0);
+	const double HLG_Lb=args[4].AsFloat(0.05f);
+	const double HLG_Lw=args[5].AsFloat(1000.0f);
 	const bool OOTF=args[6].AsBool(true);
 	const bool OETF=args[7].AsBool(true);
 	const bool fullrange=args[8].AsBool(false);
@@ -13326,6 +13330,8 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 		env->ThrowError("ConvertLinearRGBtoYUV: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	if ((OutputMode<0) || (OutputMode>2))
 		env->ThrowError("ConvertLinearRGBtoYUV: [OutputMode] must be 0, 1 or 2");
+	if ((HDRMode<0) || (HDRMode>2))
+		env->ThrowError("ConvertLinearRGBtoYUV: [HDRMode] must be 0, 1 or 2");
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertLinearRGBtoYUV: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
@@ -13381,7 +13387,7 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 		}
 	}
 
-	return new ConvertLinearRGBtoYUV(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,OETF,fullrange,
+	return new ConvertLinearRGBtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,OETF,fullrange,
 		mpeg2c,fastmode,threads_number,sleep,env);
 }
 
@@ -13418,9 +13424,9 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 
 	const int Color=args[1].AsInt(2);
 	int OutputMode=args[2].AsInt(0);
-	const bool HLGMode=args[3].AsBool(false);
-	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
-	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const uint8_t HDRMode=args[3].AsInt(0);
+	const double HLG_Lb=args[4].AsFloat(0.05f);
+	const double HLG_Lw=args[5].AsFloat(1000.0f);
 	const bool OOTF=args[6].AsBool(true);
 	const bool EOTF=args[7].AsBool(true);
 	const bool fastmode=args[8].AsBool(true);
@@ -13439,6 +13445,8 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertRGBtoXYZ: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	if ((OutputMode<0) || (OutputMode>2))
 		env->ThrowError("ConvertRGBtoXYZ: [OutputMode] must be 0, 1 or 2");
+	if ((HDRMode<0) || (HDRMode>2))
+		env->ThrowError("ConvertRGBtoXYZ: [HDRMode] must be 0, 1 or 2");
 
 	switch(Color)
 	{
@@ -13543,7 +13551,7 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertRGBtoXYZ(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,
+	return new ConvertRGBtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,
 		threads_number,sleep,env);
 }
 
@@ -13587,9 +13595,9 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	const int Color=args[1].AsInt(2);
 	int pColor;
 	int OutputMode=args[2].AsInt(0);
-	const bool HLGMode=args[3].AsBool(false);
-	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
-	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const uint8_t HDRMode=args[3].AsInt(0);
+	const double HLG_Lb=args[4].AsFloat(0.05f);
+	const double HLG_Lw=args[5].AsFloat(1000.0f);
 	const bool OOTF=args[6].AsBool(true);
 	const bool OETF=args[7].AsBool(true);
 	const bool fullrange=args[8].AsBool(false);
@@ -13615,6 +13623,8 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertXYZtoYUV: [pColor] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	if ((OutputMode<0) || (OutputMode>2))
 		env->ThrowError("ConvertXYZtoYUV: [OutputMode] must be 0, 1 or 2");
+	if ((HDRMode<0) || (HDRMode>2))
+		env->ThrowError("ConvertXYZtoYUV: [HDRMode] must be 0, 1 or 2");
 
 	switch(Color)
 	{
@@ -13788,7 +13798,7 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertXYZtoYUV(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,OETF,fullrange,
+	return new ConvertXYZtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,OETF,fullrange,
 		mpeg2c,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
 		threads_number,sleep,env);
 }
@@ -13830,9 +13840,9 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	const int Color=args[1].AsInt(2);
 	const int OutputMode=args[2].AsInt(0);
 	int pColor;
-	const bool HLGMode=args[3].AsBool(false);
-	const float HLG_Lb=(float)args[4].AsFloat(0.05f);
-	const float HLG_Lw=(float)args[5].AsFloat(1000.0f);
+	const uint8_t HDRMode=args[3].AsInt(0);
+	const double HLG_Lb=args[4].AsFloat(0.05f);
+	const double HLG_Lw=args[5].AsFloat(1000.0f);
 	const bool OOTF=args[6].AsBool(true);
 	const bool OETF=args[7].AsBool(true);
 	const bool fastmode=args[8].AsBool(true);
@@ -13857,6 +13867,8 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 
 	if ((OutputMode<0) || (OutputMode>1))
 		env->ThrowError("ConvertXYZtoRGB: [OutputMode] must be 0 or 1");
+	if ((HDRMode<0) || (HDRMode>2))
+		env->ThrowError("ConvertXYZtoRGB: [HDRMode] must be 0, 1 or 2");
 
 	switch(Color)
 	{
@@ -14030,7 +14042,7 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertXYZtoRGB(args[0].AsClip(),Color,OutputMode,HLGMode,HLG_Lb,HLG_Lw,OOTF,OETF,
+	return new ConvertXYZtoRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,OETF,
 		fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
 		threads_number,sleep,env);
 }
@@ -14215,30 +14227,30 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 	if (!poolInterface->GetThreadPoolInterfaceStatus()) env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool status!");
 
     env->AddFunction("ConvertYUVtoLinearRGB",
-		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertYUVtoLinearRGB, 0);
     env->AddFunction("ConvertLinearRGBtoYUV",
-		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertLinearRGBtoYUV, 0);
 
     env->AddFunction("ConvertYUVtoXYZ",
-		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertYUVtoXYZ, 0);
     env->AddFunction("ConvertXYZtoYUV",
-		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b" \
 		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertXYZtoYUV, 0);
 
     env->AddFunction("ConvertRGBtoXYZ",
-		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fastmode]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fastmode]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertRGBtoXYZ, 0);
     env->AddFunction("ConvertXYZtoRGB",
-		"c[Color]i[OutputMode]i[HLGMode]b[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fastmode]b" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fastmode]b" \
 		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertXYZtoRGB, 0);

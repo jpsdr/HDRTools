@@ -54,7 +54,7 @@ typedef struct _MT_Data_Info_HDRTools
 class ConvertYUVtoLinearRGB : public GenericVideoFilter
 {
 public:
-	ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,
+	ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 		bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertYUVtoLinearRGB();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
@@ -63,9 +63,10 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,mpeg2c,fullrange,EOTF;
+	bool OOTF,mpeg2c,fullrange,EOTF;
+	uint8_t HDRMode;
 	bool sleep;
-	float HLG_Lb,HLG_Lw;
+	double HLG_Lb,HLG_Lw;
 	uint16_t *lookup_Upscale8;
 	uint32_t *lookup_Upscale16,*lookup_8to16;
 	int16_t *lookupRGB_8;
@@ -79,7 +80,7 @@ private:
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
-	VideoInfo *vi_original,*vi_422,*vi_444,*vi_RGB64;
+	VideoInfo *vi_original,*vi_422,*vi_444,*vi_RGB64,*vi_PlaneY_HLG;
 
 	dataLookUp dl;
 
@@ -99,7 +100,7 @@ private:
 class ConvertYUVtoXYZ : public GenericVideoFilter
 {
 public:
-	ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,bool _OOTF,bool _EOTF,
+	ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,bool _OOTF,bool _EOTF,
 		bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
 		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertYUVtoXYZ();
@@ -109,10 +110,11 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,mpeg2c,fullrange,EOTF;
+	bool OOTF,mpeg2c,fullrange,EOTF;
+	uint8_t HDRMode;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	bool sleep;
-	float HLG_Lb,HLG_Lw;
+	double HLG_Lb,HLG_Lw;
 	uint16_t *lookup_Upscale8;
 	uint32_t *lookup_Upscale16,*lookup_8to16;
 	int16_t *lookupRGB_8,*lookupXYZ_8;
@@ -147,7 +149,7 @@ private:
 class ConvertRGBtoXYZ : public GenericVideoFilter
 {
 public:
-	ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,bool _OOTF,bool _EOTF,
+	ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,bool _OOTF,bool _EOTF,
 		bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
 		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertRGBtoXYZ();
@@ -157,10 +159,11 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,EOTF,fastmode;
+	bool OOTF,EOTF,fastmode;
+	uint8_t HDRMode;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	bool sleep;
-	float HLG_Lb,HLG_Lw;
+	double HLG_Lb,HLG_Lw;
 	int16_t *lookupXYZ_8;
 	int32_t *lookupXYZ_16;
 	uint8_t *lookupL_8;
@@ -189,7 +192,7 @@ private:
 class ConvertLinearRGBtoYUV : public GenericVideoFilter
 {
 public:
-	ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,bool _OOTF,bool _OETF,
+	ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,bool _OOTF,bool _OETF,
 		bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads, bool _sleep,
 		IScriptEnvironment* env);
 	virtual ~ConvertLinearRGBtoYUV();
@@ -199,9 +202,10 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,mpeg2c,fullrange,fastmode,OETF;
+	bool OOTF,mpeg2c,fullrange,fastmode,OETF;
+	uint8_t HDRMode;
 	bool sleep;
-	float HLG_Lb,HLG_Lw;
+	double HLG_Lb,HLG_Lw;
 	int16_t *lookupRGB_8;
 	int32_t *lookupRGB_16;
 	uint8_t *lookupL_8;
@@ -232,7 +236,7 @@ private:
 class ConvertXYZtoYUV : public GenericVideoFilter
 {
 public:
-	ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,bool _OOTF,bool _OETF,
+	ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,bool _OOTF,bool _OETF,
 		bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,
 		float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,
 		float _pBx,float _pBy,float _pWx,float _pWy,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
@@ -243,11 +247,12 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,mpeg2c,fullrange,fastmode,OETF;
+	bool OOTF,mpeg2c,fullrange,fastmode,OETF;
+	uint8_t HDRMode;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	bool sleep;
-	float HLG_Lb,HLG_Lw;
+	double HLG_Lb,HLG_Lw;
 	int16_t *lookupRGB_8,*lookupXYZ_8;
 	int32_t *lookupRGB_16,*lookupXYZ_16;
 	uint8_t *lookupL_8;
@@ -279,7 +284,7 @@ private:
 class ConvertXYZtoRGB : public GenericVideoFilter
 {
 public:
-	ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,bool _HLGMode,float _HLG_Lb,float _HLG_Lw,bool _OOTF,bool _OETF,
+	ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,bool _OOTF,bool _OETF,
 		bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,
 		float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,
 		float _pBx,float _pBy,float _pWx,float _pWy,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
@@ -290,11 +295,12 @@ public:
 
 private:
 	int Color,OutputMode;
-	bool HLGMode,OOTF,fastmode,OETF;
+	bool OOTF,fastmode,OETF;
+	uint8_t HDRMode;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	bool sleep;
-	float HLG_Lb,HLG_Lw;
+	double HLG_Lb,HLG_Lw;
 	int16_t *lookupXYZ_8;
 	int32_t *lookupXYZ_16;
 	uint8_t *lookupL_8;

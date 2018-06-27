@@ -40,13 +40,28 @@ Accepted input : Planar YUV 8 to 16 bits.
          0 : No change : Input 8 Bits -> Output : RGB32, Input > 8 Bits -> Output : RGB64
 	 1 : The ouput will be RGB64
 	 2 : The ouput will be RGBPS (Planar RGB float)
+
        Default: 0 (int)
 
-   HLGMode -
-      Has effect only if Color=0. If set to true, HLG mode will be used instead of PQ.
-      Not implemented yet?
+   HDRMode -
+      Has effect only if Color=0.
+         0 : PQ mode.
+         1 : HLG normalized 10000 cd/m² mode.
+         2 : HLG not normalized.
 
-       Default: false (bool)
+       Default: 0 (int)
+
+   HLGLw -
+      Set the white level in cd/m² for HLG mastering.
+      Has effect only if HDRMode is set to 1 or 2.
+
+       Default: 1000.0 (float)
+
+   HLGLb -
+      Set the black level in cd/m² for HLG mastering.
+      Has effect only if HDRMode is set to 1 or 2.
+
+       Default: 0.05 (float)
 
    OOTF -
       Has effect only if Color=0. If set to false, the inv OOTF step will be skipped
@@ -296,12 +311,12 @@ For now, it's just a linear scalling, just for testing. Formula is just Out_X=Co
    Coeff_Y -
       Linear scalar value used on Y plane.
       
-       Default: 100.0 (float)
+       Default: Coeff_X (float)
 
    Coeff_Z -
       Linear scalar value used on Z plane.
       
-       Default: 100.0 (float)
+       Default: Coeff_X (float)
 
 The others parameters are identical to  ConvertYUVtoLinearRGB.
 
@@ -325,12 +340,12 @@ Produce linear scalling. Formula is just Out_X=In_X/Coeff_X (etc...).
    Coeff_Y -
       Linear scalar value used on Y plane.
       
-       Default: 100.0 (float)
+       Default: Coeff_X (float)
 
    Coeff_Z -
       Linear scalar value used on Z plane.
       
-       Default: 100.0 (float)
+       Default: Coeff_X (float)
 
 The others parameters are identical to  ConvertYUVtoLinearRGB.
 

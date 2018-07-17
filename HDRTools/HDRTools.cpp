@@ -33,6 +33,19 @@
 
 static ThreadPoolInterface *poolInterface;
 
+extern "C" void JPSDR_HDRTools_LookupRGB32(const void *src,void *dst,int32_t w,int32_t h,ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo,const void *lookup);
+extern "C" void JPSDR_HDRTools_LookupRGB32toRGB64(const void *src,void *dst,int32_t w,int32_t h,ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo,const void *lookup);
+extern "C" void JPSDR_HDRTools_LookupRGB64(const void *src,void *dst,int32_t w,int32_t h,ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo,const void *lookup);
+extern "C" void JPSDR_HDRTools_Lookup_Planar8(const void *src,void *dst,int32_t w,int32_t h,ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo,const void *lookup);
+extern "C" void JPSDR_HDRTools_Lookup_Planar16(const void *src,void *dst,int32_t w,int32_t h,ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo,const void *lookup);
+extern "C" void JPSDR_HDRTools_Lookup_Planar32(const void *src,void *dst,int32_t w,int32_t h,ptrdiff_t src_modulo,
+	ptrdiff_t dst_modulo,const void *lookup);
+
 extern "C" void JPSDR_HDRTools_Move8to16(void *dst,const void *src,int32_t w);
 extern "C" void JPSDR_HDRTools_Move8to16_SSE2(void *dst,const void *src,int32_t w);
 extern "C" void JPSDR_HDRTools_Move8to16_AVX(void *dst,const void *src,int32_t w);
@@ -177,6 +190,64 @@ extern "C" void JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_AVX(const void *src1,co
 	void *dst1,void *dst2,void *dst3,int32_t w,int32_t h,const float *Coeff,ptrdiff_t src_modulo1,ptrdiff_t src_modulo2,
 	ptrdiff_t src_modulo3,ptrdiff_t dst_modulo1,ptrdiff_t dst_modulo2,ptrdiff_t dst_modulo3);
 
+extern "C" void JPSDR_HDRTools_Convert_RGB32toPlaneY16_SSE2(const void *src,void *dst,int32_t w,int32_t h,
+	const int16_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_RGB32toPlaneY16_AVX(const void *src,void *dst,int32_t w,int32_t h,
+	const int16_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41(const void *src,void *dst,int32_t w,int32_t h,
+	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_AVX(const void *src,void *dst,int32_t w,int32_t h,
+	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_SSE41(const void *src,void *dst,int32_t w,int32_t h,
+	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_AVX(const void *src,void *dst,int32_t w,int32_t h,
+	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_SSE41(const void *src,void *dst,int32_t w,int32_t h,
+	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_AVX(const void *src,void *dst,int32_t w,int32_t h,
+	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_SSE2(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_12_SSE2(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_12_AVX(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+
+extern "C" void JPSDR_HDRTools_Scale_HLG_SSE2(const void *src,void *dst,int32_t w4,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *Coeff);
+extern "C" void JPSDR_HDRTools_Scale_HLG_AVX(const void *src,void *dst,int32_t w8,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *Coeff);
+extern "C" void JPSDR_HDRTools_Scale_20_float_SSE2(const void *src,void *dst,int32_t w4,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+extern "C" void JPSDR_HDRTools_Scale_20_float_AVX(const void *src,void *dst,int32_t w8,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+
+extern "C" void JPSDR_HDRTools_Convert_RGBPStoPlaneY32F_SSE2(const void *srcR,const void *srcG,const void *srcB,
+	void *dst,int32_t w4,int32_t h,ptrdiff_t src_pitchR,ptrdiff_t src_pitchG,ptrdiff_t src_pitchB,
+	ptrdiff_t dst_pitch,float *Coeff_R,float *Coeff_G,float *Coeff_B);
+extern "C" void JPSDR_HDRTools_Convert_RGBPStoPlaneY32D_SSE2(const void *srcR,const void *srcG,const void *srcB,
+	void *dst,int32_t w4,int32_t h,ptrdiff_t src_pitchR,ptrdiff_t src_pitchG,ptrdiff_t src_pitchB,
+	ptrdiff_t dst_pitch,float *Coeff_R,float *Coeff_G,float *Coeff_B);
+extern "C" void JPSDR_HDRTools_Convert_RGBPStoPlaneY32F_AVX(const void *srcR,const void *srcG,const void *srcB,
+	void *dst,int32_t w8,int32_t h,ptrdiff_t src_pitchR,ptrdiff_t src_pitchG,ptrdiff_t src_pitchB,
+	ptrdiff_t dst_pitch,float *Coeff_R,float *Coeff_G,float *Coeff_B);
+extern "C" void JPSDR_HDRTools_Convert_RGBPStoPlaneY32D_AVX(const void *srcR,const void *srcG,const void *srcB,
+	void *dst,int32_t w8,int32_t h,ptrdiff_t src_pitchR,ptrdiff_t src_pitchG,ptrdiff_t src_pitchB,
+	ptrdiff_t dst_pitch,float *Coeff_R,float *Coeff_G,float *Coeff_B);
+
+extern "C" void JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE2(void *dst,void *srcY,int32_t w,int32_t h,
+	ptrdiff_t dst_pitch,ptrdiff_t src_pitchY);
+extern "C" void JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(void *dst,void *srcY,int32_t w,int32_t h,
+	ptrdiff_t dst_pitch,ptrdiff_t src_pitchY);
+
+extern "C" void JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_SSE2(void *dstR,void *dstG,void *dstB,void *srcY,
+	int32_t w4,int32_t h,ptrdiff_t dst_pitchR,ptrdiff_t dst_pitchG,ptrdiff_t dst_pitchB,ptrdiff_t src_pitchY);
+extern "C" void JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_AVX(void *dstR,void *dstG,void *dstB,void *srcY,
+	int32_t w8,int32_t h,ptrdiff_t dst_pitchR,ptrdiff_t dst_pitchG,ptrdiff_t dst_pitchB,ptrdiff_t src_pitchY);
+
 extern "C" void JPSDR_HDRTools_Scale_20_XYZ_SSE2(const void *src,void *dst,int32_t w4,int32_t h,
 	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *ValMin,float *Coeff);
 extern "C" void JPSDR_HDRTools_Scale_20_XYZ_SSE41(const void *src,void *dst,int32_t w4,int32_t h,
@@ -202,6 +273,14 @@ extern "C" void JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX(const void *src,void 
 	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *Coeff);
 
 #ifdef AVX2_BUILD_POSSIBLE
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX2(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_12_AVX2(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+
+extern "C" void JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(void *dst,void *srcY,int32_t w,int32_t h,
+	ptrdiff_t dst_pitch,ptrdiff_t src_pitchY);
+
 extern "C" void JPSDR_HDRTools_Scale_20_XYZ_AVX2(const void *src,void *dst,int32_t w8,int32_t h,
 	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *ValMin,float *Coeff);
 extern "C" void JPSDR_HDRTools_Scale_20_RGB_AVX2(const void *src,void *dst,int32_t w8,int32_t h,
@@ -2890,6 +2969,10 @@ static void Convert_16_YV24toRGB64(const MT_Data_Info_HDRTools &mt_data_inf,cons
 
 static void Convert_RGB32toLinearRGB32(const MT_Data_Info_HDRTools &mt_data_inf,const uint8_t *lookup)
 {
+
+	JPSDR_HDRTools_LookupRGB32(mt_data_inf.src1,mt_data_inf.dst1,mt_data_inf.dst_Y_w,mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min,
+		mt_data_inf.src_modulo1,mt_data_inf.dst_modulo1,lookup);
+/*
 	const uint8_t *src=(uint8_t *)mt_data_inf.src1;
 	uint8_t *dst=(uint8_t *)mt_data_inf.dst1;
 	const int32_t w=mt_data_inf.dst_Y_w;
@@ -2911,12 +2994,16 @@ static void Convert_RGB32toLinearRGB32(const MT_Data_Info_HDRTools &mt_data_inf,
 		}
 		src+=src_pitch;
 		dst+=dst_pitch;
-	}
+	}*/
 }
 
 
 static void Convert_RGB64toLinearRGB64(const MT_Data_Info_HDRTools &mt_data_inf,const uint16_t *lookup)
 {
+
+	JPSDR_HDRTools_LookupRGB64(mt_data_inf.src1,mt_data_inf.dst1,mt_data_inf.dst_Y_w,mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min,
+		mt_data_inf.src_modulo1,mt_data_inf.dst_modulo1,lookup);
+/*
 	const uint8_t *src_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *dst_=(uint8_t *)mt_data_inf.dst1;
 	const int32_t w=mt_data_inf.dst_Y_w;
@@ -2940,7 +3027,7 @@ static void Convert_RGB64toLinearRGB64(const MT_Data_Info_HDRTools &mt_data_inf,
 		}
 		src_+=src_pitch;
 		dst_+=dst_pitch;
-	}
+	}*/
 }
 
 
@@ -2988,6 +3075,9 @@ static void Convert_RGB64toLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_inf,
 
 static void Convert_LinearRGB32toRGB32(const MT_Data_Info_HDRTools &mt_data_inf,const uint8_t *lookup)
 {
+	JPSDR_HDRTools_LookupRGB32(mt_data_inf.src1,mt_data_inf.dst1,mt_data_inf.dst_Y_w,mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min,
+		mt_data_inf.src_modulo1,mt_data_inf.dst_modulo1,lookup);
+/*
 	const uint8_t *src=(uint8_t *)mt_data_inf.src1;
 	uint8_t *dst=(uint8_t *)mt_data_inf.dst1;
 	const ptrdiff_t src_pitch=mt_data_inf.src_pitch1;
@@ -3009,12 +3099,15 @@ static void Convert_LinearRGB32toRGB32(const MT_Data_Info_HDRTools &mt_data_inf,
 		}
 		src+=src_pitch;
 		dst+=dst_pitch;
-	}
+	}*/
 }
 
 
 static void Convert_LinearRGB64toRGB64(const MT_Data_Info_HDRTools &mt_data_inf,const uint16_t *lookup)
 {
+	JPSDR_HDRTools_LookupRGB64(mt_data_inf.src1,mt_data_inf.dst1,mt_data_inf.dst_Y_w,mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min,
+		mt_data_inf.src_modulo1,mt_data_inf.dst_modulo1,lookup);
+/*
 	const uint8_t *src_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *dst_=(uint8_t *)mt_data_inf.dst1;
 	const ptrdiff_t src_pitch=mt_data_inf.src_pitch1;
@@ -3038,7 +3131,7 @@ static void Convert_LinearRGB64toRGB64(const MT_Data_Info_HDRTools &mt_data_inf,
 		}
 		src_+=src_pitch;
 		dst_+=dst_pitch;
-	}
+	}*/
 }
 
 
@@ -3363,7 +3456,7 @@ static void Convert_LinearRGBPStoRGB64_SDR_AVX(const MT_Data_Info_HDRTools &mt_d
 }
 
 
-static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool OETF)
+static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
 {
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3412,7 +3505,7 @@ static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_i
 				else bd=pow(coeff_m*bd,coeff_p1)*alpha-alpha_1;
 				bd=pow(bd,coeff_p2)*coeff_100;
 			}
-			if (OETF)
+			if (EOTF)
 			{
 				x0=pow(rd,m1);
 				rd=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
@@ -3445,7 +3538,7 @@ static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_i
 }
 
 
-static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool OETF)
+static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
 {
 	uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3494,7 +3587,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_
 				else bd=pow(coeff_m*bd,coeff_p1)*alpha-alpha_1;
 				bd=pow(bd,coeff_p2)*coeff_100;
 			}
-			if (OETF)
+			if (EOTF)
 			{
 				x0=pow(rd,m1);
 				rd=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
@@ -3523,7 +3616,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_
 }
 
 
-static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool OETF)
+static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
 {
 	uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3572,7 +3665,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_da
 				else bd=pow(coeff_m*bd,coeff_p1)*alpha-alpha_1;
 				bd=pow(bd,coeff_p2)*coeff_100;
 			}
-			if (OETF)
+			if (EOTF)
 			{
 				x0=pow(rd,m1);
 				rd=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
@@ -3601,7 +3694,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_da
 }
 
 
-static void Convert_LinearRGBPStoRGB64_HLG(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool OETF)
+static void Convert_LinearRGBPStoRGB64_HLG(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
 {
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3650,7 +3743,7 @@ static void Convert_LinearRGBPStoRGB64_HLG(const MT_Data_Info_HDRTools &mt_data_
 				else bd=pow(coeff_m*bd,coeff_p1)*alpha-alpha_1;
 				bd=pow(bd,coeff_p2)*coeff_100;
 			}
-			if (OETF)
+			if (EOTF)
 			{
 				x0=pow(rd,m1);
 				rd=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
@@ -3683,7 +3776,7 @@ static void Convert_LinearRGBPStoRGB64_HLG(const MT_Data_Info_HDRTools &mt_data_
 }
 
 
-static void Convert_LinearRGBPStoRGB64_HLG_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool OETF)
+static void Convert_LinearRGBPStoRGB64_HLG_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
 {
 	uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3732,7 +3825,7 @@ static void Convert_LinearRGBPStoRGB64_HLG_SSE41(const MT_Data_Info_HDRTools &mt
 				else bd=pow(coeff_m*bd,coeff_p1)*alpha-alpha_1;
 				bd=pow(bd,coeff_p2)*coeff_100;
 			}
-			if (OETF)
+			if (EOTF)
 			{
 				x0=pow(rd,m1);
 				rd=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
@@ -3761,7 +3854,7 @@ static void Convert_LinearRGBPStoRGB64_HLG_SSE41(const MT_Data_Info_HDRTools &mt
 }
 
 
-static void Convert_LinearRGBPStoRGB64_HLG_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool OETF)
+static void Convert_LinearRGBPStoRGB64_HLG_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
 {
 	uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3810,7 +3903,7 @@ static void Convert_LinearRGBPStoRGB64_HLG_AVX(const MT_Data_Info_HDRTools &mt_d
 				else bd=pow(coeff_m*bd,coeff_p1)*alpha-alpha_1;
 				bd=pow(bd,coeff_p2)*coeff_100;
 			}
-			if (OETF)
+			if (EOTF)
 			{
 				x0=pow(rd,m1);
 				rd=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
@@ -4376,6 +4469,9 @@ static void Convert_RGBPStoXYZ_AVX(const MT_Data_Info_HDRTools &mt_data_inf,cons
 
 static void Convert_RGB32toLinearRGB64(const MT_Data_Info_HDRTools &mt_data_inf,const uint16_t *lookup)
 {
+	JPSDR_HDRTools_LookupRGB32toRGB64(mt_data_inf.src1,mt_data_inf.dst1,mt_data_inf.dst_Y_w,
+		mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min,mt_data_inf.src_modulo1,mt_data_inf.dst_modulo1,lookup);
+/*
 	const uint8_t *src=(uint8_t *)mt_data_inf.src1;
 	uint8_t *dst_=(uint8_t *)mt_data_inf.dst1;
 	const int32_t w=mt_data_inf.dst_Y_w;
@@ -4399,7 +4495,7 @@ static void Convert_RGB32toLinearRGB64(const MT_Data_Info_HDRTools &mt_data_inf,
 		}
 		src+=src_pitch;
 		dst_+=dst_pitch;
-	}
+	}*/
 }
 
 
@@ -4504,6 +4600,18 @@ static void Convert_RGBPStoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_inf,
 
 static void Convert_RGBPStoLinearRGBPS_SSE2(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
 {
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w4=(w+3)>>2;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_SSE2(mt_data_inf.src1,mt_data_inf.dst1,w4,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Scale_20_RGB_SSE2(mt_data_inf.src2,mt_data_inf.dst2,w4,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Scale_20_RGB_SSE2(mt_data_inf.src3,mt_data_inf.dst3,w4,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
@@ -4545,18 +4653,27 @@ static void Convert_RGBPStoLinearRGBPS_SSE2(const MT_Data_Info_HDRTools &mt_data
 		for(int32_t j=0; j<w; j++)
 			dstB[j]=lookup[srcB[j]];
 
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
 		dstR_+=dst_pitch_R;
 		dstG_+=dst_pitch_G;
 		dstB_+=dst_pitch_B;
-	}
+	}*/
 }
 
 
 static void Convert_RGBPStoLinearRGBPS_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
 {
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w4=(w+3)>>2;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_SSE41(mt_data_inf.src1,mt_data_inf.dst1,w4,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Scale_20_RGB_SSE41(mt_data_inf.src2,mt_data_inf.dst2,w4,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Scale_20_RGB_SSE41(mt_data_inf.src3,mt_data_inf.dst3,w4,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
@@ -4598,18 +4715,27 @@ static void Convert_RGBPStoLinearRGBPS_SSE41(const MT_Data_Info_HDRTools &mt_dat
 		for(int32_t j=0; j<w; j++)
 			dstB[j]=lookup[srcB[j]];
 
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
 		dstR_+=dst_pitch_R;
 		dstG_+=dst_pitch_G;
 		dstB_+=dst_pitch_B;
-	}
+	}*/
 }
 
 
 static void Convert_RGBPStoLinearRGBPS_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
 {
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w8=(w+7)>>3;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX(mt_data_inf.src1,mt_data_inf.dst1,w8,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Scale_20_RGB_AVX(mt_data_inf.src2,mt_data_inf.dst2,w8,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Scale_20_RGB_AVX(mt_data_inf.src3,mt_data_inf.dst3,w8,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
@@ -4651,19 +4777,28 @@ static void Convert_RGBPStoLinearRGBPS_AVX(const MT_Data_Info_HDRTools &mt_data_
 		for(int32_t j=0; j<w; j++)
 			dstB[j]=lookup[srcB[j]];
 
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
 		dstR_+=dst_pitch_R;
 		dstG_+=dst_pitch_G;
 		dstB_+=dst_pitch_B;
-	}
+	}*/
 }
 
 
 #ifdef AVX2_BUILD_POSSIBLE
 static void Convert_RGBPStoLinearRGBPS_AVX2(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
 {
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w8=(w+7)>>3;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(mt_data_inf.src1,mt_data_inf.dst1,w8,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(mt_data_inf.src2,mt_data_inf.dst2,w8,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(mt_data_inf.src3,mt_data_inf.dst3,w8,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
@@ -4705,17 +4840,14 @@ static void Convert_RGBPStoLinearRGBPS_AVX2(const MT_Data_Info_HDRTools &mt_data
 		for(int32_t j=0; j<w; j++)
 			dstB[j]=lookup[srcB[j]];
 
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
 		dstR_+=dst_pitch_R;
 		dstG_+=dst_pitch_G;
 		dstB_+=dst_pitch_B;
-	}
+	}*/
 }
 #endif
 
-static void Convert_RGBPStoLinearRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_inf,const bool EOTF)
+static void Convert_RGBPStoLinearRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_inf,const bool OETF)
 {
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -4747,7 +4879,7 @@ static void Convert_RGBPStoLinearRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_
 		float *dstG=(float *)dstG_;
 		float *dstB=(float *)dstB_;
 
-		if (EOTF)
+		if (OETF)
 		{
 			for(int32_t j=0; j<w; j++)
 			{
@@ -5292,6 +5424,18 @@ static void Convert_LinearRGBPStoRGBPS(const MT_Data_Info_HDRTools &mt_data_inf,
 
 static void Convert_LinearRGBPStoRGBPS_SSE2(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
 {
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w4=(w+3)>>2;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_SSE2(mt_data_inf.src1,mt_data_inf.dst1,w4,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Scale_20_RGB_SSE2(mt_data_inf.src2,mt_data_inf.dst2,w4,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Scale_20_RGB_SSE2(mt_data_inf.src3,mt_data_inf.dst3,w4,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
@@ -5333,18 +5477,27 @@ static void Convert_LinearRGBPStoRGBPS_SSE2(const MT_Data_Info_HDRTools &mt_data
 		for(int32_t j=0; j<w; j++)
 			dstB[j]=lookup[srcB[j]];
 
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
 		dstR_+=dst_pitch_R;
 		dstG_+=dst_pitch_G;
 		dstB_+=dst_pitch_B;
-	}
+	}*/
 }
 
 
 static void Convert_LinearRGBPStoRGBPS_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
 {
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w4=(w+3)>>2;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_SSE41(mt_data_inf.src1,mt_data_inf.dst1,w4,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Scale_20_RGB_SSE41(mt_data_inf.src2,mt_data_inf.dst2,w4,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Scale_20_RGB_SSE41(mt_data_inf.src3,mt_data_inf.dst3,w4,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
@@ -5386,18 +5539,27 @@ static void Convert_LinearRGBPStoRGBPS_SSE41(const MT_Data_Info_HDRTools &mt_dat
 		for(int32_t j=0; j<w; j++)
 			dstB[j]=lookup[srcB[j]];
 
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
 		dstR_+=dst_pitch_R;
 		dstG_+=dst_pitch_G;
 		dstB_+=dst_pitch_B;
-	}
+	}*/
 }
 
 
 static void Convert_LinearRGBPStoRGBPS_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
 {
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w8=(w+7)>>3;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX(mt_data_inf.src1,mt_data_inf.dst1,w8,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Scale_20_RGB_AVX(mt_data_inf.src2,mt_data_inf.dst2,w8,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Scale_20_RGB_AVX(mt_data_inf.src3,mt_data_inf.dst3,w8,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
@@ -5439,19 +5601,28 @@ static void Convert_LinearRGBPStoRGBPS_AVX(const MT_Data_Info_HDRTools &mt_data_
 		for(int32_t j=0; j<w; j++)
 			dstB[j]=lookup[srcB[j]];
 
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
 		dstR_+=dst_pitch_R;
 		dstG_+=dst_pitch_G;
 		dstB_+=dst_pitch_B;
-	}
+	}*/
 }
 
 
 #ifdef AVX2_BUILD_POSSIBLE
 static void Convert_LinearRGBPStoRGBPS_AVX2(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
 {
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w8=(w+7)>>3;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(mt_data_inf.src1,mt_data_inf.dst1,w8,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(mt_data_inf.src2,mt_data_inf.dst2,w8,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(mt_data_inf.src3,mt_data_inf.dst3,w8,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
 	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
@@ -5493,13 +5664,10 @@ static void Convert_LinearRGBPStoRGBPS_AVX2(const MT_Data_Info_HDRTools &mt_data
 		for(int32_t j=0; j<w; j++)
 			dstB[j]=lookup[srcB[j]];
 
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
 		dstR_+=dst_pitch_R;
 		dstG_+=dst_pitch_G;
 		dstB_+=dst_pitch_B;
-	}
+	}*/
 }
 #endif
 
@@ -5581,7 +5749,7 @@ static void Convert_LinearRGBPStoRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_
 }
 
 
-static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool OETF)
+static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
 {
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -5618,7 +5786,7 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 		float *dstG=(float *)dstG_;
 		float *dstB=(float *)dstB_;
 
-		if (OOTF || OETF)
+		if (OOTF || EOTF)
 		{
 			for(int32_t j=0; j<w; j++)
 			{
@@ -5631,7 +5799,7 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 					x=pow(x,coeff_p2)*coeff_100;
 				}
 
-				if (OETF)
+				if (EOTF)
 				{
 					double x0=pow(x,m1);
 
@@ -5652,7 +5820,7 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 					x=pow(x,coeff_p2)*coeff_100;
 				}
 
-				if (OETF)
+				if (EOTF)
 				{
 					double x0=pow(x,m1);
 
@@ -5673,7 +5841,7 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 					x=pow(x,coeff_p2)*coeff_100;
 				}
 
-				if (OETF)
+				if (EOTF)
 				{
 					double x0=pow(x,m1);
 
@@ -5701,7 +5869,7 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 }
 
 
-static void Convert_LinearRGBPStoRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool OETF)
+static void Convert_LinearRGBPStoRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
 {
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -5738,7 +5906,7 @@ static void Convert_LinearRGBPStoRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_
 		float *dstG=(float *)dstG_;
 		float *dstB=(float *)dstB_;
 
-		if (OOTF || OETF)
+		if (OOTF || EOTF)
 		{
 			for(int32_t j=0; j<w; j++)
 			{
@@ -5751,7 +5919,7 @@ static void Convert_LinearRGBPStoRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_
 					x=pow(x,coeff_p2)*coeff_100;
 				}
 
-				if (OETF)
+				if (EOTF)
 				{
 					double x0=pow(x,m1);
 
@@ -5772,7 +5940,7 @@ static void Convert_LinearRGBPStoRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_
 					x=pow(x,coeff_p2)*coeff_100;
 				}
 
-				if (OETF)
+				if (EOTF)
 				{
 					double x0=pow(x,m1);
 
@@ -5793,7 +5961,7 @@ static void Convert_LinearRGBPStoRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_
 					x=pow(x,coeff_p2)*coeff_100;
 				}
 
-				if (OETF)
+				if (EOTF)
 				{
 					double x0=pow(x,m1);
 
@@ -5819,6 +5987,612 @@ static void Convert_LinearRGBPStoRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_
 		dstB_+=dst_pitch_B;
 	}
 }
+
+
+
+/*
+*****************************************************************
+**               Specifics HLG functions                       **
+*****************************************************************
+*/
+
+
+static void Convert_RGB32toPlaneY16(void *src1, void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t dst_pitch,int16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB32BMP *src=(RGB32BMP *)src_;
+		uint16_t *dst=(uint16_t *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const int16_t y=(lookup[src[j].r]+lookup[(uint16_t)(src[j].g)+256]+lookup[(uint16_t)(src[j].b)+512])>>6;
+
+			dst[j]=((uint16_t)std::max((int16_t)0,std::min((int16_t)255,y)))<<8;
+		}
+
+		src_+=src_pitch;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_10_RGB64toPlaneY32(void *src1, void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t dst_pitch,int32_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		uint32_t *dst=(uint32_t *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const int32_t y=((lookup[src[j].r]+lookup[(uint32_t)(src[j].g)+65536]+lookup[(uint32_t)(src[j].b)+131072])>>8)+32;
+
+			dst[j]=(((uint32_t)std::max((int32_t)0,std::min((int32_t)65535,y)))<<4)&0x000FFC00;
+		}
+
+		src_+=src_pitch;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_12_RGB64toPlaneY32(void *src1, void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t dst_pitch,int32_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		uint32_t *dst=(uint32_t *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const int32_t y=((lookup[src[j].r]+lookup[(uint32_t)(src[j].g)+65536]+lookup[(uint32_t)(src[j].b)+131072])>>8)+8;
+
+			dst[j]=(((uint32_t)std::max((int32_t)0,std::min((int32_t)65535,y)))<<8)&0x00FFC000;
+		}
+
+		src_+=src_pitch;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_16_RGB64toPlaneY32(void *src1, void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t dst_pitch,const ptrdiff_t dst_modulo,int32_t *lookupRGB,float *lookupY)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		uint32_t *dst=(uint32_t *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const int32_t y=(lookupRGB[src[j].r]+lookupRGB[(uint32_t)(src[j].g)+65536]+lookupRGB[(uint32_t)(src[j].b)+131072])>>8;
+
+			dst[j]=(uint32_t)std::max((int32_t)0,std::min((int32_t)65535,y));
+		}
+
+		src_+=src_pitch;
+		dst_+=dst_pitch;
+	}
+
+	JPSDR_HDRTools_Lookup_Planar32(dst1,dst1,w,h,dst_modulo,dst_modulo,lookupY);
+}
+
+
+static void Convert_RGBPStoPlaneY32(void *src1,void *src2,void *src3,void *dst1,const int32_t w,const int32_t h,
+	const ptrdiff_t src_pitchR,const ptrdiff_t src_pitchG,const ptrdiff_t src_pitchB,const ptrdiff_t dst_pitch,
+	uint8_t ColorMode,bool fastmode,float *lookupY,const float lb)
+{
+	const uint8_t *srcR_=(uint8_t *)src1;
+	const uint8_t *srcG_=(uint8_t *)src2;
+	const uint8_t *srcB_=(uint8_t *)src3;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	float Coeff_R,Coeff_G,Coeff_B;
+
+	switch (ColorMode)
+	{
+		case 0 :											// BT-2100
+		case 1 : Coeff_R=0.2627f; Coeff_B=0.0593f; break;	// BT-2020
+		case 2 : Coeff_R=0.2126f; Coeff_B=0.0722f; break;	// BT-709
+		case 3 :											// BT-601_525
+		case 4 : Coeff_R=0.299f; Coeff_B=0.114f; break;		// BT-601_625
+	}
+	Coeff_G=1.0f-Coeff_R-Coeff_B;
+
+
+	if (fastmode)
+	{
+		for(int32_t i=0; i<h; i++)
+		{
+			const float *srcR=(float *)srcR_;
+			const float *srcG=(float *)srcG_;
+			const float *srcB=(float *)srcB_;
+			float *dst=(float *)dst_;
+		
+			for(int32_t j=0; j<w; j++)
+				dst[j]=lookupY[(int32_t)round((Coeff_R*srcR[j]+Coeff_R*srcR[j]+Coeff_R*srcR[j])*1048575.0f)];
+
+			srcR_+=src_pitchR;
+			srcG_+=src_pitchG;
+			srcB_+=src_pitchB;
+			dst_+=dst_pitch;
+		}
+	}
+	else
+	{
+		for(int32_t i=0; i<h; i++)
+		{
+			const float *srcR=(float *)srcR_;
+			const float *srcG=(float *)srcG_;
+			const float *srcB=(float *)srcB_;
+			float *dst=(float *)dst_;
+		
+			for(int32_t j=0; j<w; j++)
+				dst[j]=pow(Coeff_R*srcR[j]+Coeff_R*srcR[j]+Coeff_R*srcR[j],lb);
+
+			srcR_+=src_pitchR;
+			srcG_+=src_pitchG;
+			srcB_+=src_pitchB;
+			dst_+=dst_pitch;
+		}
+	}
+}
+
+
+static void Convert_RGBPStoPlaneY32_SSE2(void *src1,void *src2,void *src3,void *dst1,const int32_t w,const int32_t h,
+	const ptrdiff_t src_pitchR,const ptrdiff_t src_pitchG,const ptrdiff_t src_pitchB,const ptrdiff_t dst_pitch,
+	const ptrdiff_t dst_modulo,uint8_t ColorMode,bool fastmode,float *lookupY,const float lb)
+{
+	const int32_t w4=(w+3)>>2;
+
+	float Coeff_R,Coeff_G,Coeff_B;
+
+	switch (ColorMode)
+	{
+		case 0 :											// BT-2100
+		case 1 : Coeff_R=0.2627f; Coeff_B=0.0593f; break;	// BT-2020
+		case 2 : Coeff_R=0.2126f; Coeff_B=0.0722f; break;	// BT-709
+		case 3 :											// BT-601_525
+		case 4 : Coeff_R=0.299f; Coeff_B=0.114f; break;		// BT-601_625
+	}
+	Coeff_G=1.0f-Coeff_R-Coeff_B;
+
+
+	if (fastmode)
+	{
+		JPSDR_HDRTools_Convert_RGBPStoPlaneY32D_SSE2(src1,src2,src3,dst1,w4,h,src_pitchR,src_pitchG,src_pitchB,
+			dst_pitch,&Coeff_R,&Coeff_G,&Coeff_B);
+		JPSDR_HDRTools_Lookup_Planar32(dst1,dst1,w,h,dst_modulo,dst_modulo,lookupY);
+	}
+	else
+	{
+		JPSDR_HDRTools_Convert_RGBPStoPlaneY32F_SSE2(src1,src2,src3,dst1,w4,h,src_pitchR,src_pitchG,src_pitchB,
+			dst_pitch,&Coeff_R,&Coeff_G,&Coeff_B);
+
+		uint8_t *dst_=(uint8_t *)dst1;
+
+		for(int32_t i=0; i<h; i++)
+		{
+			float *dst=(float *)dst_;
+
+			for(int32_t j=0; j<w; j++)
+				dst[j]=pow(dst[j],lb);
+
+			dst_+=dst_pitch;
+		}
+	}
+}
+
+
+static void Convert_RGBPStoPlaneY32_AVX(void *src1,void *src2,void *src3,void *dst1,const int32_t w,const int32_t h,
+	const ptrdiff_t src_pitchR,const ptrdiff_t src_pitchG,const ptrdiff_t src_pitchB,const ptrdiff_t dst_pitch,
+	const ptrdiff_t dst_modulo,uint8_t ColorMode,bool fastmode,float *lookupY,const float lb)
+{
+	const int32_t w8=(w+7)>>3;
+
+	float Coeff_R,Coeff_G,Coeff_B;
+
+	switch (ColorMode)
+	{
+		case 0 :											// BT-2100
+		case 1 : Coeff_R=0.2627f; Coeff_B=0.0593f; break;	// BT-2020
+		case 2 : Coeff_R=0.2126f; Coeff_B=0.0722f; break;	// BT-709
+		case 3 :											// BT-601_525
+		case 4 : Coeff_R=0.299f; Coeff_B=0.114f; break;		// BT-601_625
+	}
+	Coeff_G=1.0f-Coeff_R-Coeff_B;
+
+
+	if (fastmode)
+	{
+		JPSDR_HDRTools_Convert_RGBPStoPlaneY32D_AVX(src1,src2,src3,dst1,w8,h,src_pitchR,src_pitchG,src_pitchB,
+			dst_pitch,&Coeff_R,&Coeff_G,&Coeff_B);
+		JPSDR_HDRTools_Lookup_Planar32(dst1,dst1,w,h,dst_modulo,dst_modulo,lookupY);
+	}
+	else
+	{
+		JPSDR_HDRTools_Convert_RGBPStoPlaneY32F_AVX(src1,src2,src3,dst1,w8,h,src_pitchR,src_pitchG,src_pitchB,
+			dst_pitch,&Coeff_R,&Coeff_G,&Coeff_B);
+
+		uint8_t *dst_=(uint8_t *)dst1;
+
+		for(int32_t i=0; i<h; i++)
+		{
+			float *dst=(float *)dst_;
+
+			for(int32_t j=0; j<w; j++)
+				dst[j]=pow(dst[j],lb);
+
+			dst_+=dst_pitch;
+		}
+	}
+}
+
+
+static void Convert_RGB32_HLG_OOTF(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint8_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB32BMP *src=(RGB32BMP *)src_;
+		const uint16_t *srcY=(uint16_t *)srcY_;
+		RGB32BMP *dst=(RGB32BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint16_t y=srcY[j];
+
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_10_RGB64_HLG_OOTF(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			const uint32_t b=std::min((uint32_t)src[j].b+32,(uint32_t)65535)>>6;
+			const uint32_t g=std::min((uint32_t)src[j].g+32,(uint32_t)65535)>>6;
+			const uint32_t r=std::min((uint32_t)src[j].r+32,(uint32_t)65535)>>6;
+			
+			dst[j].b=lookup[y | b];
+			dst[j].g=lookup[y | g];
+			dst[j].r=lookup[y | r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_10_RGB64_HLG_OOTF_SSE2(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_SSE2(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_10_RGB64_HLG_OOTF_AVX(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_12_RGB64_HLG_OOTF(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			const uint32_t b=std::min((uint32_t)src[j].b+8,(uint32_t)65535)>>4;
+			const uint32_t g=std::min((uint32_t)src[j].g+8,(uint32_t)65535)>>4;
+			const uint32_t r=std::min((uint32_t)src[j].r+8,(uint32_t)65535)>>4;
+			
+			dst[j].b=lookup[y | b];
+			dst[j].g=lookup[y | g];
+			dst[j].r=lookup[y | r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_12_RGB64_HLG_OOTF_SSE2(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_12_SSE2(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_12_RGB64_HLG_OOTF_AVX(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_12_AVX(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_16_RGB64_HLG_OOTF(void *dst1,void *src1,const int32_t w,const int32_t h,const ptrdiff_t dst_pitch,
+	const ptrdiff_t src_pitchY)
+{
+	uint8_t *dst_=(uint8_t *)dst1;
+	const uint8_t *srcY_=(uint8_t *)src1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		const float *srcY=(const float *)srcY_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const float y=srcY[j];
+			
+			dst[j].b=(uint16_t)round(y*dst[j].b);
+			dst[j].g=(uint16_t)round(y*dst[j].g);
+			dst[j].r=(uint16_t)round(y*dst[j].r);
+			dst[j].alpha=0;
+		}
+
+		dst_+=dst_pitch;
+		srcY_+=src_pitchY;
+	}
+}
+
+
+static void Convert_RGBPS_HLG_OOTF(void *dst1,void *dst2,void *dst3,void *src1,const int32_t w,const int32_t h,
+	const ptrdiff_t dst_pitchR,const ptrdiff_t dst_pitchG,const ptrdiff_t dst_pitchB,const ptrdiff_t src_pitchY)
+{
+	uint8_t *dstR_=(uint8_t *)dst1;
+	uint8_t *dstG_=(uint8_t *)dst2;
+	uint8_t *dstB_=(uint8_t *)dst3;
+	const uint8_t *srcY_=(uint8_t *)src1;
+	
+	for(int32_t i=0; i<h; i++)
+	{
+		float *dstR=(float *)dstR_;
+		float *dstG=(float *)dstG_;
+		float *dstB=(float *)dstB_;
+		const float *srcY=(const float *)srcY_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const float y=srcY[j];
+			
+			dstR[j]*=y;
+			dstG[j]*=y;
+			dstB[j]*=y;
+		}
+
+		dstR_+=dst_pitchR;
+		dstG_+=dst_pitchG;
+		dstB_+=dst_pitchB;
+		srcY_+=src_pitchY;
+	}
+}
+
+
+#ifdef AVX2_BUILD_POSSIBLE
+static void Convert_10_RGB64_HLG_OOTF_AVX2(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX2(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_12_RGB64_HLG_OOTF_AVX2(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_12_AVX2(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+#endif
 
 
 /*
@@ -6067,6 +6841,52 @@ static void Convert_XYZ_SDRtoHDR_16(const MT_Data_Info_HDRTools &mt_data_inf,
 **               Matrix convertion functions                   **
 *****************************************************************
 */
+
+
+static void Compute_Lookup_HLG_8(uint8_t color_mode,int16_t *lookup)
+{
+	double kr,kg,kb;
+
+	switch (color_mode)
+	{
+		case 0 :								// BT-2100
+		case 1 : kr=0.2627; kb=0.0593; break;	// BT-2020
+		case 2 : kr=0.2126; kb=0.0722; break;	// BT-709
+		case 3 :								// BT-601_525
+		case 4 : kr=0.299; kb=0.114; break;		// BT-601_625
+	}
+	kg=1.0-kr-kb;
+
+	for (int16_t i=0; i<=255; i++)
+	{
+		lookup[i]=(int16_t)round(32.0+i*kr*64.0);
+		lookup[i+256]=(int16_t)round(i*kg*64.0);
+		lookup[i+512]=(int16_t)round(i*kb*64.0);
+	}
+}
+
+
+static void Compute_Lookup_HLG_16(uint8_t color_mode,int32_t *lookup)
+{
+	double kr,kg,kb;
+
+	switch (color_mode)
+	{
+		case 0 :								// BT-2100
+		case 1 : kr=0.2627; kb=0.0593; break;	// BT-2020
+		case 2 : kr=0.2126; kb=0.0722; break;	// BT-709
+		case 3 :								// BT-601_525
+		case 4 : kr=0.299; kb=0.114; break;		// BT-601_625
+	}
+	kg=1.0-kr-kb;
+
+	for (int32_t i=0; i<65536; i++)
+	{
+		lookup[i]=(int32_t)round(128.0+i*kr*256.0);
+		lookup[i+65536]=(int32_t)round(i*kg*256.0);
+		lookup[i+2*65536]=(int32_t)round(i*kb*256.0);
+	}
+}
 
 
 static void Compute_Lookup_RGB_8(uint8_t color_mode,bool full_range,bool YUVtoRGB,int16_t *lookup,dataLookUp &data)
@@ -6684,10 +7504,12 @@ bool ComputeXYZScale(float Rx,float Ry,float Gx,float Gy,float Bx,float By,float
 ********************************************************************************************
 */
 
-ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,
+	double _HLG_Lw,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,uint8_t _threads,bool _sleep,
+	IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
-		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
+		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),
+		HLGColor(_HLGColor)
 {
 	UserId=0;
 
@@ -6707,8 +7529,10 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 	pixelsize = (uint8_t)vi.ComponentSize(); // AVS16
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	const uint32_t vmax=1 << bits_per_pixel;
+	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
-	vi_original=NULL; vi_422=NULL; vi_444=NULL; vi_RGB64=NULL;
+	vi_original=NULL; vi_422=NULL; vi_444=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
+	lookupHLG_RGB_8=NULL; lookupHLG_RGB_16=NULL; lookupHLG_Y=NULL; lookupHLG_OOTF=NULL;
 
 	lookup_Upscale8=(uint16_t *)malloc(256*sizeof(uint16_t));
 	lookup_8to16=(uint32_t *)malloc(256*sizeof(uint32_t));
@@ -6730,12 +7554,36 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 		env->ThrowError("ConvertYUVtoLinearRGB: Error while allocating the lookup tables!");
 	}
 
+	bool _ootf=false;
+
+	if (HLG_Mode)
+	{
+		lookupHLG_RGB_8=(int16_t *)malloc(3*256*sizeof(int16_t));
+		lookupHLG_RGB_16=(int32_t *)malloc(3*65536*sizeof(int32_t));
+		if (OutputMode!=0)
+		{
+			switch(pixelsize)
+			{
+				case 1 :
+				case 2 :
+					if (OutputMode==1) lookupHLG_Y=(float *)malloc(65536*sizeof(float));
+					else lookupHLG_Y=(float *)malloc(1048576*sizeof(float));
+					break;
+				default : lookupHLG_Y=(float *)malloc(1048576*sizeof(float)); break;
+			}
+		}
+		else
+		{
+		}
+	}
+
 	vi_original = new VideoInfo(vi);
 	vi_422 = new VideoInfo(vi);
 	vi_444 = new VideoInfo(vi);
 	vi_RGB64 = new VideoInfo(vi);
+	if (HLG_Mode) vi_PlaneY_HLG = new VideoInfo(vi);
 
-	if ((vi_original==NULL) || (vi_422==NULL) || (vi_444==NULL) || (vi_RGB64==NULL))
+	if ((vi_original==NULL) || (vi_422==NULL) || (vi_444==NULL) || (vi_RGB64==NULL) || (HLG_Mode && (vi_PlaneY_HLG==NULL)))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -6815,11 +7663,11 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 
 	/*
 	HDR (PQ) :
-	PQ_EOTF -> PQ_OOTF_Inv -> [Capteur]
-	[Capteur] -> PQ_OOTF -> PQ_OETF
+	PQ_EOTF -> PQ_OOTF-1 -> [Capteur]
+	[Capteur] -> PQ_OOTF -> PQ_EOTF-1
 
 	SDR :
-	EOTF -> [Capteur]
+	OETF-1 -> [Capteur]
 	[Capteur] -> OETF
 	*/
 
@@ -6832,6 +7680,12 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 	const double c2=18.8515625;
 	const double c3=18.6875;
 
+	const double lambda=1.2+log10(HLG_Lw/1000.0);
+	const double alphaHLG=HLG_Lw-HLG_Lb;
+	const double betaHLG=HLG_Lb;
+	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a),a_1=1.0/a;
+	const double coeff3=1.0/3.0,coeff12=1.0/12.0;
+
 	for (uint16_t i=0; i<256; i++)
 	{
 		double x=((double)i)/255.0;
@@ -6842,7 +7696,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 			{
 				if (EOTF)
 				{
-					// PQ EOTF
+					// PQ_EOTF
 					const double x0=pow(x,1.0/m2);
 
 					if (x0<=c1) x=0.0;
@@ -6851,7 +7705,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 
 				if (OOTF)
 				{			
-					// PQ_OOTF_Inv
+					// PQ_OOTF-1
 					if (x>0.0)
 					{
 						x=pow(100.0*x,1.0/2.4);
@@ -6862,18 +7716,21 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 			}
 			else
 			{
+				// HLG_OETF-1
+				if (x<=0.5) x=coeff3*x*x;
+				else x=coeff12*(exp((x-c)*a_1)+b);
 			}
 		}
 		else
 		{
 			if (EOTF)
 			{
-				// EOTF
+				// OETF-1
 				if (x<(beta*4.5)) x/=4.5;
 				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
 			}
 		}
-		if (x>1.0) x=1.0;
+		x=std::min(std::max(0.0,x),1.0);
 
 		lookupL_8[i]=(uint8_t)round(255.0*x);
 		lookup_Upscale8[i]=3*i+2;
@@ -6890,7 +7747,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 			{
 				if (EOTF)
 				{
-					// PQ EOTF
+					// PQ_EOTF
 					double x0=pow(x,1.0/m2);
 
 					if (x0<=c1) x=0.0;
@@ -6899,7 +7756,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 			
 				if (OOTF)
 				{
-					// PQ_OOTF_Inv
+					// PQ_OOTF-1
 					if (x>0.0)
 					{
 						x=pow(100.0*x,1.0/2.4);
@@ -6910,18 +7767,22 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 			}
 			else
 			{
+				// HLG_OETF-1
+				if (x<=0.5) x=coeff3*x*x;
+				else x=coeff12*(exp((x-c)*a_1)+b);
 			}
 		}
 		else
 		{
 			if (EOTF)
 			{
-				// EOTF
+				// OETF-1
 				if (x<(beta*4.5)) x/=4.5;
 				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
 			}
 		}
-		if (x>1.0) x=1.0;
+		x=std::min(std::max(0.0,x),1.0);
+
 		lookupL_16[i]=(uint16_t)round(65535.0*x);
 		lookupL_32[i]=(float)x;
 	}
@@ -6964,10 +7825,15 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,int _Color,int _Output
 
 void ConvertYUVtoLinearRGB::FreeData(void) 
 {
+	mydelete(vi_PlaneY_HLG);
 	mydelete(vi_RGB64);
 	mydelete(vi_444);
 	mydelete(vi_422);
 	mydelete(vi_original);
+	myfree(lookupHLG_OOTF);
+	myfree(lookupHLG_Y);
+	myfree(lookupHLG_RGB_16);
+	myfree(lookupHLG_RGB_8);
 	myfree(lookupL_32);
 	myfree(lookupL_16);
 	myfree(lookupL_8);
@@ -7073,11 +7939,12 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 
 	const uint8_t *dstr;
 	uint8_t *dstw,*dstw0;
-	ptrdiff_t dst_pitch,dst_pitch0,dst_modulo0;
+	ptrdiff_t dst_pitch,dst_modulo,dst_pitch0,dst_modulo0;
 
 	const uint8_t *dstRr,*dstGr,*dstBr;
 	uint8_t *dstRw,*dstGw,*dstBw;
 	ptrdiff_t dst_pitch_R,dst_pitch_G,dst_pitch_B;
+	ptrdiff_t dst_modulo_R,dst_modulo_G,dst_modulo_B;
 
 	int32_t h;
 
@@ -7160,12 +8027,16 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 		dst_pitch_R = dst->GetPitch(PLANAR_R);
 		dst_pitch_G = dst->GetPitch(PLANAR_G);
 		dst_pitch_B = dst->GetPitch(PLANAR_B);
+		dst_modulo_R = dst_pitch_R - dst->GetRowSize(PLANAR_R);
+		dst_modulo_G = dst_pitch_G - dst->GetRowSize(PLANAR_R);
+		dst_modulo_B = dst_pitch_B - dst->GetRowSize(PLANAR_R);
 	}
 
 	dstr = dst->GetReadPtr();
 	dstw = dst->GetWritePtr();
 	h = dst->GetHeight();
 	dst_pitch = dst->GetPitch();
+	dst_modulo = dst_pitch - dst->GetRowSize();
 
 	dstw0=dstw+(h-1)*dst_pitch;
 	dst_pitch0 = -dst_pitch;
@@ -7682,8 +8553,10 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 		{
 			MT_DataGF[i].src1=(void *)(dstr+(MT_DataGF[i].src_Y_h_min*dst_pitch));
 			MT_DataGF[i].src_pitch1=dst_pitch;
+			MT_DataGF[i].src_modulo1=dst_modulo;
 			MT_DataGF[i].dst1=(void *)(dstw+(MT_DataGF[i].dst_Y_h_min*dst_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch;
+			MT_DataGF[i].dst_modulo1=dst_modulo;
 		}
 	}
 	else
@@ -7699,6 +8572,9 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 			MT_DataGF[i].dst_pitch1=dst_pitch_R;
 			MT_DataGF[i].dst_pitch2=dst_pitch_G;
 			MT_DataGF[i].dst_pitch3=dst_pitch_B;
+			MT_DataGF[i].dst_modulo1=dst_modulo_R;
+			MT_DataGF[i].dst_modulo2=dst_modulo_G;
+			MT_DataGF[i].dst_modulo3=dst_modulo_B;
 		}
 	}
 
@@ -7742,10 +8618,12 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 */
 
 
-ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	bool _OOTF,bool _OETF,bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),OETF(_OETF),
-		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
+ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,
+	double _HLG_Lw,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads,
+	bool _sleep,IScriptEnvironment* env) :
+	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
+		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),
+		HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
 {
 	UserId=0;
 
@@ -7767,7 +8645,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 	const uint32_t vmax=1 << bits_per_pixel;
 
 	vi_original=NULL; vi_420=NULL; vi_422=NULL; vi_444=NULL;
-	vi_RGB32=NULL; vi_RGB64=NULL;
+	vi_RGB32=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
 
 	lookupRGB_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupRGB_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
@@ -7789,9 +8667,10 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 	vi_444 = new VideoInfo(vi);
 	vi_RGB32 = new VideoInfo(vi);
 	vi_RGB64 = new VideoInfo(vi);
+	vi_PlaneY_HLG = new VideoInfo(vi);
 
 	if ((vi_original==NULL) || (vi_420==NULL) || (vi_422==NULL) || (vi_444==NULL)
-		|| (vi_RGB32==NULL) || (vi_RGB64==NULL))
+		|| (vi_RGB32==NULL) || (vi_RGB64==NULL) || (vi_PlaneY_HLG==NULL))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -7850,12 +8729,12 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 		if (max_threads<threads_number[i]) max_threads=threads_number[i];
 
 	/*
-	HDR :
-	PQ_EOTF -> PQ_OOTF_Inv -> [Capteur]
-	[Capteur] -> PQ_OOTF -> PQ_OETF
+	HDR (PQ) :
+	PQ_EOTF -> PQ_OOTF-1 -> [Capteur]
+	[Capteur] -> PQ_OOTF -> PQ_EOTF-1
 
 	SDR :
-	EOTF -> [Capteur]
+	OETF-1 -> [Capteur]
 	[Capteur] -> OETF
 	*/
 
@@ -7867,6 +8746,12 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
+
+	const double lambda=1.2+log10(HLG_Lw/1000.0);
+	const double alphaHLG=HLG_Lw-HLG_Lb;
+	const double betaHLG=HLG_Lb;
+	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a);
+	const double coeff12=1.0/12.0;
 	
 	for (uint16_t i=0; i<256; i++)
 	{
@@ -7878,14 +8763,14 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 			{
 				if (OOTF)
 				{
-					// PQ OOTF
+					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
 					x=pow(x,2.4)/100.0;
 				}
-				if (OETF)
+				if (EOTF)
 				{
-					// PQ OETF
+					// PQ_EOTF-1
 					double x0=pow(x,m1);
 
 					x=pow((c1+c2*x0)/(1.0+c3*x0),m2);
@@ -7893,18 +8778,21 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 			}
 			else
 			{
+				// HLG_OETF
+				if (x<=coeff12) x=sqrt(3.0*x);
+				else x=a*log(12.0*x-b)+c;
 			}
 		}
 		else
 		{
-			if (OETF)
+			if (EOTF || OOTF)
 			{
 			// OETF
 				if (x<beta) x*=4.5;
 				else x=alpha*pow(x,0.45)-(alpha-1.0);
 			}
 		}
-		if (x>1.0) x=1.0;
+		x=std::min(std::max(0.0,x),1.0);
 
 		lookupL_8[i]=(uint8_t)round(255.0*x);
 	}
@@ -7919,14 +8807,14 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 			{
 				if (OOTF)
 				{
-					// PQ OOTF
+					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
 					x=pow(x,2.4)/100.0;
 				}
-				if (OETF)
+				if (EOTF)
 				{
-					// PQ OETF
+					// PQ_EOTF-1
 					double x0=pow(x,m1);
 
 					x=pow((c1+c2*x0)/(1.0+c3*x0),m2);
@@ -7934,18 +8822,22 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 			}
 			else
 			{
+				// HLG_OETF
+				if (x<=coeff12) x=sqrt(3.0*x);
+				else x=a*log(12.0*x-b)+c;
 			}
 		}
 		else
 		{
-			if (OETF)
+			if (EOTF || OOTF)
 			{
 				// OETF
 				if (x<beta) x*=4.5;
 				else x=alpha*pow(x,0.45)-(alpha-1.0);
 			}
 		}
-		if (x>1.0) x=1.0;
+		x=std::min(std::max(0.0,x),1.0);
+
 		lookupL_16[i]=(uint16_t)round(65535.0*x);
 	}
 
@@ -7961,14 +8853,14 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 			{
 				if (OOTF)
 				{
-					// PQ OOTF
+					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
 					x=pow(x,2.4)/100.0;
 				}
-				if (OETF)
+				if (EOTF)
 				{
-					// PQ OETF
+					// PQ_EOTF-1
 					double x0=pow(x,m1);
 
 					x=pow((c1+c2*x0)/(1.0+c3*x0),m2);
@@ -7976,18 +8868,22 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 			}
 			else
 			{
+				// HLG_OETF
+				if (x<=coeff12) x=sqrt(3.0*x);
+				else x=a*log(12.0*x-b)+c;
 			}
 		}
 		else
 		{
-			if (OETF)
+			if (EOTF || OOTF)
 			{
 				// OETF
 				if (x<beta) x*=4.5;
 				else x=alpha*pow(x,0.45)-(alpha-1.0);
 			}
 		}
-		if (x>1.0) x=1.0;
+		x=std::min(std::max(0.0,x),1.0);
+
 		lookupL_20[i]=(uint16_t)round(65535.0*x);
 	}
 
@@ -8013,6 +8909,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,int _Color,int _Output
 
 void ConvertLinearRGBtoYUV::FreeData(void) 
 {
+	mydelete(vi_PlaneY_HLG);
 	mydelete(vi_RGB64);
 	mydelete(vi_RGB32);
 	mydelete(vi_444);
@@ -8061,15 +8958,15 @@ void ConvertLinearRGBtoYUV::StaticThreadpool(void *ptr)
 		case 3 : Convert_LinearRGBPStoRGB64(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 4 : Convert_LinearRGBPStoRGB64_SSE41(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 5 : Convert_LinearRGBPStoRGB64_AVX(*mt_data_inf,ptrClass->lookupL_20);break;
-		case 6 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OETF); break;
-		case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OETF); break;
-		case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OETF); break;
-		case 9 : Convert_LinearRGBPStoRGB64_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 12 : Convert_LinearRGBPStoRGB64_HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 13 : Convert_LinearRGBPStoRGB64_HLG_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 14 : Convert_LinearRGBPStoRGB64_HLG_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
+		case 6 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 9 : Convert_LinearRGBPStoRGB64_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 12 : Convert_LinearRGBPStoRGB64_HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 13 : Convert_LinearRGBPStoRGB64_HLG_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 14 : Convert_LinearRGBPStoRGB64_HLG_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 15 : Convert_RGB32toYV24(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_8); break;
 		case 16 : Convert_RGB32toYV24_SSE2(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_8); break;
 		case 17 : Convert_RGB32toYV24_AVX(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_8); break;
@@ -8397,15 +9294,15 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 			case 3 : Convert_LinearRGBPStoRGB64(MT_DataGF[0],lookupL_20); break;
 			case 4 : Convert_LinearRGBPStoRGB64_SSE41(MT_DataGF[0],lookupL_20); break;
 			case 5 : Convert_LinearRGBPStoRGB64_AVX(MT_DataGF[0],lookupL_20); break;
-			case 6 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OETF); break;
-			case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OETF); break;
-			case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OETF); break;
-			case 9 : Convert_LinearRGBPStoRGB64_PQ(MT_DataGF[0],OOTF,OETF); break;
-			case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(MT_DataGF[0],OOTF,OETF); break;
-			case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,OETF); break;
-			case 12 : Convert_LinearRGBPStoRGB64_HLG(MT_DataGF[0],OOTF,OETF); break;
-			case 13 : Convert_LinearRGBPStoRGB64_HLG_SSE41(MT_DataGF[0],OOTF,OETF); break;
-			case 14 : Convert_LinearRGBPStoRGB64_HLG_AVX(MT_DataGF[0],OOTF,OETF); break;
+			case 6 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OOTF || EOTF); break;
+			case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OOTF || EOTF); break;
+			case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OOTF || EOTF); break;
+			case 9 : Convert_LinearRGBPStoRGB64_PQ(MT_DataGF[0],OOTF,EOTF); break;
+			case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(MT_DataGF[0],OOTF,EOTF); break;
+			case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,EOTF); break;
+			case 12 : Convert_LinearRGBPStoRGB64_HLG(MT_DataGF[0],OOTF,EOTF); break;
+			case 13 : Convert_LinearRGBPStoRGB64_HLG_SSE41(MT_DataGF[0],OOTF,EOTF); break;
+			case 14 : Convert_LinearRGBPStoRGB64_HLG_AVX(MT_DataGF[0],OOTF,EOTF); break;
 			default : break;
 		}
 	}
@@ -8711,12 +9608,12 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 */
 
 
-ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,
-	float _Wx,float _Wy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
+	uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,
+	float _Bx,float _By,float _Wx,float _Wy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
-		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
+		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
 {
 	UserId=0;
 
@@ -8737,7 +9634,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	const uint32_t vmax=1 << bits_per_pixel;
 
-	vi_original=NULL; vi_422=NULL; vi_444=NULL; vi_RGB64=NULL;
+	vi_original=NULL; vi_422=NULL; vi_444=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
 
 	lookup_Upscale8=(uint16_t *)malloc(256*sizeof(uint16_t));
 	lookup_8to16=(uint32_t *)malloc(256*sizeof(uint32_t));
@@ -8766,8 +9663,9 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 	vi_422 = new VideoInfo(vi);
 	vi_444 = new VideoInfo(vi);
 	vi_RGB64 = new VideoInfo(vi);
+	vi_PlaneY_HLG = new VideoInfo(vi);
 
-	if ((vi_original==NULL) || (vi_422==NULL) || (vi_444==NULL) || (vi_RGB64==NULL))
+	if ((vi_original==NULL) || (vi_422==NULL) || (vi_444==NULL) || (vi_RGB64==NULL) || (vi_PlaneY_HLG==NULL))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -8855,11 +9753,11 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 
 	/*
 	HDR (PQ) :
-	PQ_EOTF -> PQ_OOTF_Inv -> [Capteur]
-	[Capteur] -> PQ_OOTF -> PQ_OETF
+	PQ_EOTF -> PQ_OOTF-1 -> [Capteur]
+	[Capteur] -> PQ_OOTF -> PQ_EOTF-1
 
 	SDR :
-	EOTF -> [Capteur]
+	OETF-1 -> [Capteur]
 	[Capteur] -> OETF
 	*/
 
@@ -8882,7 +9780,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (EOTF)
 				{
-					// PQ EOTF
+					// PQ_EOTF
 					const double x0=pow(x,1.0/m2);
 
 					if (x0<=c1) x=0.0;
@@ -8891,7 +9789,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 
 				if (OOTF)
 				{			
-					// PQ_OOTF_Inv
+					// PQ_OOTF-1
 					if (x>0.0)
 					{
 						x=pow(100.0*x,1.0/2.4);
@@ -8906,9 +9804,9 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (EOTF)
+			if (EOTF || OOTF)
 			{
-				// EOTF
+				// OETF-1
 				if (x<(beta*4.5)) x/=4.5;
 				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
 			}
@@ -8930,7 +9828,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (EOTF)
 				{
-					// PQ EOTF
+					// PQ_EOTF
 					double x0=pow(x,1.0/m2);
 
 					if (x0<=c1) x=0.0;
@@ -8939,7 +9837,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 			
 				if (OOTF)
 				{
-					// PQ_OOTF_Inv
+					// PQ_OOTF-1
 					if (x>0.0)
 					{
 						x=pow(100.0*x,1.0/2.4);
@@ -8954,9 +9852,9 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (EOTF)
+			if (EOTF || OOTF)
 			{
-				// EOTF
+				// OETF-1
 				if (x<(beta*4.5)) x/=4.5;
 				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
 			}
@@ -9004,6 +9902,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 
 void ConvertYUVtoXYZ::FreeData(void) 
 {
+	mydelete(vi_PlaneY_HLG);
 	mydelete(vi_RGB64);
 	mydelete(vi_444);
 	mydelete(vi_422);
@@ -9739,8 +10638,10 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 		{
 			MT_DataGF[i].src1=(void *)(dstr+(MT_DataGF[i].src_Y_h_min*dst_pitch));
 			MT_DataGF[i].src_pitch1=dst_pitch;
+			MT_DataGF[i].src_modulo1=dst_modulo;
 			MT_DataGF[i].dst1=(void *)(dstw+(MT_DataGF[i].dst_Y_h_min*dst_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch;
+			MT_DataGF[i].dst_modulo1=dst_modulo;
 		}
 	}
 	else
@@ -9756,6 +10657,9 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			MT_DataGF[i].dst_pitch1=dst_pitch_R;
 			MT_DataGF[i].dst_pitch2=dst_pitch_G;
 			MT_DataGF[i].dst_pitch3=dst_pitch_B;
+			MT_DataGF[i].dst_modulo1=dst_modulo_R;
+			MT_DataGF[i].dst_modulo2=dst_modulo_G;
+			MT_DataGF[i].dst_modulo3=dst_modulo_B;
 		}
 	}
 
@@ -9894,15 +10798,15 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 */
 
 
-ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	bool _OOTF,bool _OETF,bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
-	float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
+ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
+	uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,float _Gx,
+	float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
 	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),OETF(_OETF),
+	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
 		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),
-		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
+		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
 {
 	UserId=0;
 
@@ -9924,7 +10828,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 	const uint32_t vmax=1 << bits_per_pixel;
 
 	vi_original=NULL; vi_420=NULL; vi_422=NULL; vi_444=NULL;
-	vi_RGB32=NULL; vi_RGB64=NULL;
+	vi_RGB32=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
 
 	lookupRGB_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupRGB_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
@@ -9949,9 +10853,10 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 	vi_444 = new VideoInfo(vi);
 	vi_RGB32 = new VideoInfo(vi);
 	vi_RGB64 = new VideoInfo(vi);
+	vi_PlaneY_HLG = new VideoInfo(vi);
 
 	if ((vi_original==NULL) || (vi_420==NULL) || (vi_422==NULL) || (vi_444==NULL)
-		|| (vi_RGB32==NULL) || (vi_RGB64==NULL))
+		|| (vi_RGB32==NULL) || (vi_RGB64==NULL) || (vi_PlaneY_HLG==NULL))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -10018,12 +10923,12 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 		if (max_threads<threads_number[i]) max_threads=threads_number[i];
 
 	/*
-	HDR :
-	PQ_EOTF -> PQ_OOTF_Inv -> [Capteur]
-	[Capteur] -> PQ_OOTF -> PQ_OETF
+	HDR (PQ) :
+	PQ_EOTF -> PQ_OOTF-1 -> [Capteur]
+	[Capteur] -> PQ_OOTF -> PQ_EOTF-1
 
 	SDR :
-	EOTF -> [Capteur]
+	OETF-1 -> [Capteur]
 	[Capteur] -> OETF
 	*/
 
@@ -10046,14 +10951,14 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (OOTF)
 				{
-					// PQ OOTF
+					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
 					x=pow(x,2.4)/100.0;
 				}
-				if (OETF)
+				if (EOTF)
 				{
-					// PQ OETF
+					// PQ_EOTF-1
 					double x0=pow(x,m1);
 
 					x=pow((c1+c2*x0)/(1.0+c3*x0),m2);
@@ -10065,7 +10970,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (OETF)
+			if (EOTF || OOTF)
 			{
 				// OETF
 				if (x<beta) x*=4.5;
@@ -10087,14 +10992,14 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (OOTF)
 				{
-					// PQ OOTF
+					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
 					x=pow(x,2.4)/100.0;
 				}
-				if (OETF)
+				if (EOTF)
 				{
-					// PQ OETF
+					// PQ EOTF-1
 					double x0=pow(x,m1);
 
 					x=pow((c1+c2*x0)/(1.0+c3*x0),m2);
@@ -10106,7 +11011,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (OETF)
+			if (EOTF || OOTF)
 			{
 				// OETF
 				if (x<beta) x*=4.5;
@@ -10129,14 +11034,14 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (OOTF)
 				{
-					// PQ OOTF
+					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
 					x=pow(x,2.4)/100.0;
 				}
-				if (OETF)
+				if (EOTF)
 				{
-					// PQ OETF
+					// PQ_EOTF-1
 					double x0=pow(x,m1);
 
 					x=pow((c1+c2*x0)/(1.0+c3*x0),m2);
@@ -10148,7 +11053,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (OETF)
+			if (EOTF || OOTF)
 			{
 				// OETF
 				if (x<beta) x*=4.5;
@@ -10181,6 +11086,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,int _Color,int _OutputMode,uint8_t
 
 void ConvertXYZtoYUV::FreeData(void) 
 {
+	mydelete(vi_PlaneY_HLG);
 	mydelete(vi_RGB64);
 	mydelete(vi_RGB32);
 	mydelete(vi_444);
@@ -10232,15 +11138,15 @@ void ConvertXYZtoYUV::StaticThreadpool(void *ptr)
 		case 3 : Convert_LinearRGBPStoRGB64(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 4 : Convert_LinearRGBPStoRGB64_SSE41(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 5 : Convert_LinearRGBPStoRGB64_AVX(*mt_data_inf,ptrClass->lookupL_20);break;
-		case 6 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OETF); break;
-		case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OETF); break;
-		case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OETF); break;
-		case 9 : Convert_LinearRGBPStoRGB64_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 12 : Convert_LinearRGBPStoRGB64_HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 13 : Convert_LinearRGBPStoRGB64_HLG_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 14 : Convert_LinearRGBPStoRGB64_HLG_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
+		case 6 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 9 : Convert_LinearRGBPStoRGB64_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 12 : Convert_LinearRGBPStoRGB64_HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 13 : Convert_LinearRGBPStoRGB64_HLG_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 14 : Convert_LinearRGBPStoRGB64_HLG_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 15 : Convert_RGB32toYV24(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_8); break;
 		case 16 : Convert_RGB32toYV24_SSE2(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_8); break;
 		case 17 : Convert_RGB32toYV24_AVX(*mt_data_inf,ptrClass->dl,ptrClass->lookupRGB_8); break;
@@ -10672,15 +11578,15 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 			case 3 : Convert_LinearRGBPStoRGB64(MT_DataGF[0],lookupL_20); break;
 			case 4 : Convert_LinearRGBPStoRGB64_SSE41(MT_DataGF[0],lookupL_20); break;
 			case 5 : Convert_LinearRGBPStoRGB64_AVX(MT_DataGF[0],lookupL_20); break;
-			case 6 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OETF); break;
-			case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OETF); break;
-			case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OETF); break;
-			case 9 : Convert_LinearRGBPStoRGB64_PQ(MT_DataGF[0],OOTF,OETF); break;
-			case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(MT_DataGF[0],OOTF,OETF); break;
-			case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,OETF); break;
-			case 12 : Convert_LinearRGBPStoRGB64_HLG(MT_DataGF[0],OOTF,OETF); break;
-			case 13 : Convert_LinearRGBPStoRGB64_HLG_SSE41(MT_DataGF[0],OOTF,OETF); break;
-			case 14 : Convert_LinearRGBPStoRGB64_HLG_AVX(MT_DataGF[0],OOTF,OETF); break;
+			case 6 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OOTF || EOTF); break;
+			case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OOTF || EOTF); break;
+			case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OOTF || EOTF); break;
+			case 9 : Convert_LinearRGBPStoRGB64_PQ(MT_DataGF[0],OOTF,EOTF); break;
+			case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(MT_DataGF[0],OOTF,EOTF); break;
+			case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,EOTF); break;
+			case 12 : Convert_LinearRGBPStoRGB64_HLG(MT_DataGF[0],OOTF,EOTF); break;
+			case 13 : Convert_LinearRGBPStoRGB64_HLG_SSE41(MT_DataGF[0],OOTF,EOTF); break;
+			case 14 : Convert_LinearRGBPStoRGB64_HLG_AVX(MT_DataGF[0],OOTF,EOTF); break;
 			default : break;
 		}
 	}
@@ -10986,12 +11892,12 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 */
 
 
-ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
+	uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,
+	float _Wx,float _Wy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fastmode(_fastmode),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
-		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
+		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
 {
 	UserId=0;
 
@@ -11012,6 +11918,8 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	const uint32_t vmax=1 << bits_per_pixel;
 
+	vi_PlaneY_HLG=NULL;
+
 	lookupL_8=(uint8_t *)malloc(256*sizeof(uint8_t));
 	lookupL_8to16=(uint16_t *)malloc(256*sizeof(uint16_t));
 	lookupL_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
@@ -11029,6 +11937,15 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertRGBtoXYZ: Error while allocating the lookup tables!");
+	}
+
+	vi_PlaneY_HLG = new VideoInfo(vi);
+
+	if (vi_PlaneY_HLG==NULL)
+	{
+		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
+		env->ThrowError("ConvertRGBtoXYZ: Error while creating VideoInfo!");
 	}
 
 	if (!ComputeXYZMatrix(Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,
@@ -11054,11 +11971,11 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 
 	/*
 	HDR (PQ) :
-	PQ_EOTF -> PQ_OOTF_Inv -> [Capteur]
-	[Capteur] -> PQ_OOTF -> PQ_OETF
+	PQ_EOTF -> PQ_OOTF-1 -> [Capteur]
+	[Capteur] -> PQ_OOTF -> PQ_EOTF-1
 
 	SDR :
-	EOTF -> [Capteur]
+	OETF-1 -> [Capteur]
 	[Capteur] -> OETF
 	*/
 
@@ -11090,7 +12007,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 
 				if (OOTF)
 				{			
-					// PQ_OOTF_Inv
+					// PQ_OOTF-1
 					if (x>0.0)
 					{
 						x=pow(100.0*x,1.0/2.4);
@@ -11105,9 +12022,9 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (EOTF)
+			if (EOTF || OOTF)
 			{
-				// EOTF
+				// OETF-1
 				if (x<(beta*4.5)) x/=4.5;
 				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
 			}
@@ -11129,7 +12046,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (EOTF)
 				{
-					// PQ EOTF
+					// PQ_EOTF
 					double x0=pow(x,1.0/m2);
 
 					if (x0<=c1) x=0.0;
@@ -11138,7 +12055,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 			
 				if (OOTF)
 				{
-					// PQ_OOTF_Inv
+					// PQ_OOTF-1
 					if (x>0.0)
 					{
 						x=pow(100.0*x,1.0/2.4);
@@ -11153,9 +12070,9 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (EOTF)
+			if (EOTF || OOTF)
 			{
-				// EOTF
+				// OETF-1
 				if (x<(beta*4.5)) x/=4.5;
 				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
 			}
@@ -11175,7 +12092,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (EOTF)
 				{
-					// PQ EOTF
+					// PQ_EOTF
 					double x0=pow(x,1.0/m2);
 
 					if (x0<=c1) x=0.0;
@@ -11184,7 +12101,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 			
 				if (OOTF)
 				{
-					// PQ_OOTF_Inv
+					// PQ_OOTF-1
 					if (x>0.0)
 					{
 						x=pow(100.0*x,1.0/2.4);
@@ -11199,9 +12116,9 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (EOTF)
+			if (EOTF || OOTF)
 			{
-				// EOTF
+				// OETF-1
 				if (x<(beta*4.5)) x/=4.5;
 				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
 			}
@@ -11229,6 +12146,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,int _Color,int _OutputMode,uint8_t
 
 void ConvertRGBtoXYZ::FreeData(void) 
 {
+	mydelete(vi_PlaneY_HLG);
 	myalignedfree(Coeff_XYZ_asm);
 	myfree(lookupXYZ_16);
 	myfree(lookupXYZ_8);
@@ -11288,7 +12206,7 @@ void ConvertRGBtoXYZ::StaticThreadpool(void *ptr)
 		case 17 : Convert_RGBPStoLinearRGBPS_SSE41(*mt_data_inf,ptrClass->lookupL_20); break;
 		case 18 : Convert_RGBPStoLinearRGBPS_SSE2(*mt_data_inf,ptrClass->lookupL_20); break;
 		case 19 : Convert_RGBPStoLinearRGBPS(*mt_data_inf,ptrClass->lookupL_20); break;
-		case 20 : Convert_RGBPStoLinearRGBPS_SDR(*mt_data_inf,ptrClass->EOTF); break;
+		case 20 : Convert_RGBPStoLinearRGBPS_SDR(*mt_data_inf,ptrClass->EOTF || ptrClass->OOTF); break;
 		case 21 : Convert_RGBPStoLinearRGBPS_HLG(*mt_data_inf,ptrClass->EOTF,ptrClass->OOTF); break;
 		case 22 : Convert_RGBPStoLinearRGBPS_PQ(*mt_data_inf,ptrClass->EOTF,ptrClass->OOTF); break;
 #ifdef AVX2_BUILD_POSSIBLE
@@ -11436,6 +12354,9 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			MT_DataGF[i].dst_pitch1=dst_pitch_R;
 			MT_DataGF[i].dst_pitch2=dst_pitch_G;
 			MT_DataGF[i].dst_pitch3=dst_pitch_B;
+			MT_DataGF[i].dst_modulo1=dst_modulo_R;
+			MT_DataGF[i].dst_modulo2=dst_modulo_G;
+			MT_DataGF[i].dst_modulo3=dst_modulo_B;
 		}
 	}
 	else
@@ -11465,6 +12386,9 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 				MT_DataGF[i].dst_pitch1=dst_pitch_R;
 				MT_DataGF[i].dst_pitch2=dst_pitch_G;
 				MT_DataGF[i].dst_pitch3=dst_pitch_B;
+				MT_DataGF[i].dst_modulo1=dst_modulo_R;
+				MT_DataGF[i].dst_modulo2=dst_modulo_G;
+				MT_DataGF[i].dst_modulo3=dst_modulo_B;
 			}
 		}
 	}
@@ -11537,7 +12461,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			case 17 : Convert_RGBPStoLinearRGBPS_SSE41(MT_DataGF[0],lookupL_20); break;
 			case 18 : Convert_RGBPStoLinearRGBPS_SSE2(MT_DataGF[0],lookupL_20); break;
 			case 19 : Convert_RGBPStoLinearRGBPS(MT_DataGF[0],lookupL_20); break;
-			case 20 : Convert_RGBPStoLinearRGBPS_SDR(MT_DataGF[0],EOTF); break;
+			case 20 : Convert_RGBPStoLinearRGBPS_SDR(MT_DataGF[0],EOTF || OOTF); break;
 			case 21 : Convert_RGBPStoLinearRGBPS_HLG(MT_DataGF[0],EOTF,OOTF); break;
 			case 22 : Convert_RGBPStoLinearRGBPS_PQ(MT_DataGF[0],EOTF,OOTF); break;
 #ifdef AVX2_BUILD_POSSIBLE
@@ -11655,15 +12579,15 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 */
 
 
-ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	bool _OOTF,bool _OETF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
+ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
+	uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
 	float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
 	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
-	GenericVideoFilter(_child),Color(_Color),HDRMode(_HDRMode),OOTF(_OOTF),OETF(_OETF),
+	GenericVideoFilter(_child),Color(_Color),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		OutputMode(_OutputMode),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
 		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),
-		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw)
+		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
 {
 	UserId=0;
 
@@ -11684,6 +12608,8 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	const uint32_t vmax=1 << bits_per_pixel;
 
+	vi_PlaneY_HLG=NULL;
+
 	lookupL_8=(uint8_t *)malloc(256*sizeof(uint8_t));
 	lookupL_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 	lookupL_20=(uint16_t *)malloc(16*65536*sizeof(uint16_t));
@@ -11699,6 +12625,15 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
 		env->ThrowError("ConvertXYZtoRGB: Error while allocating the lookup tables!");
+	}
+
+	vi_PlaneY_HLG = new VideoInfo(vi);
+
+	if (vi_PlaneY_HLG==NULL)
+	{
+		FreeData();
+		if (threads>1) poolInterface->DeAllocateAllThreads(true);
+		env->ThrowError("ConvertXYZtoRGB: Error while creating VideoInfo!");
 	}
 
 	if (!ComputeXYZMatrix(Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
@@ -11723,12 +12658,12 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 	threads_number=CreateMTData(MT_Data,threads_number,threads_number,vi.width,vi.height,false,false,false,false);
 
 	/*
-	HDR :
-	PQ_EOTF -> PQ_OOTF_Inv -> [Capteur]
-	[Capteur] -> PQ_OOTF -> PQ_OETF
+	HDR (PQ) :
+	PQ_EOTF -> PQ_OOTF-1 -> [Capteur]
+	[Capteur] -> PQ_OOTF -> PQ_EOTF-1
 
 	SDR :
-	EOTF -> [Capteur]
+	OETF-1 -> [Capteur]
 	[Capteur] -> OETF
 	*/
 
@@ -11751,14 +12686,14 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (OOTF)
 				{
-					// PQ OOTF
+					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
 					x=pow(x,2.4)/100.0;
 				}
-				if (OETF)
+				if (EOTF)
 				{
-					// PQ OETF
+					// PQ_EOTF-1
 					double x0=pow(x,m1);
 
 					x=pow((c1+c2*x0)/(1.0+c3*x0),m2);
@@ -11770,7 +12705,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (OETF)
+			if (OOTF || EOTF)
 			{
 				// OETF
 				if (x<beta) x*=4.5;
@@ -11792,14 +12727,14 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (OOTF)
 				{
-					// PQ OOTF
+					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
 					x=pow(x,2.4)/100.0;
 				}
-				if (OETF)
+				if (EOTF)
 				{
-					// PQ OETF
+					// PQ_EOTF-1
 					double x0=pow(x,m1);
 
 					x=pow((c1+c2*x0)/(1.0+c3*x0),m2);
@@ -11811,7 +12746,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (OETF)
+			if (OOTF || EOTF)
 			{
 				// OETF
 				if (x<beta) x*=4.5;
@@ -11834,14 +12769,14 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 			{
 				if (OOTF)
 				{
-					// PQ OOTF
+					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
 					x=pow(x,2.4)/100.0;
 				}
-				if (OETF)
+				if (EOTF)
 				{
-					// PQ OETF
+					// PQ_EOTF-1
 					double x0=pow(x,m1);
 
 					x=pow((c1+c2*x0)/(1.0+c3*x0),m2);
@@ -11853,7 +12788,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 		}
 		else
 		{
-			if (OETF)
+			if (OOTF || EOTF)
 			{
 				// OETF
 				if (x<beta) x*=4.5;
@@ -11884,6 +12819,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,int _Color,int _OutputMode,uint8_t
 
 void ConvertXYZtoRGB::FreeData(void) 
 {
+	mydelete(vi_PlaneY_HLG);
 	myalignedfree(Coeff_XYZ_asm);
 	myfree(lookupXYZ_16);
 	myfree(lookupXYZ_8);
@@ -11937,22 +12873,22 @@ void ConvertXYZtoRGB::StaticThreadpool(void *ptr)
 		case 12 : Convert_LinearRGBPStoRGB64(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 13 : Convert_LinearRGBPStoRGB64_SSE41(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 14 : Convert_LinearRGBPStoRGB64_AVX(*mt_data_inf,ptrClass->lookupL_20);break;
-		case 15 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OETF); break;
-		case 16 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OETF); break;
-		case 17 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OETF); break;
-		case 18 : Convert_LinearRGBPStoRGB64_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 19 : Convert_LinearRGBPStoRGB64_PQ_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 20 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 21 : Convert_LinearRGBPStoRGB64_HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 22 : Convert_LinearRGBPStoRGB64_HLG_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 23 : Convert_LinearRGBPStoRGB64_HLG_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
+		case 15 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 16 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 17 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 18 : Convert_LinearRGBPStoRGB64_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 19 : Convert_LinearRGBPStoRGB64_PQ_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 20 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 21 : Convert_LinearRGBPStoRGB64_HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 22 : Convert_LinearRGBPStoRGB64_HLG_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 23 : Convert_LinearRGBPStoRGB64_HLG_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 25 : Convert_LinearRGBPStoRGBPS_AVX(*mt_data_inf,ptrClass->lookupL_32); break;
 		case 26 : Convert_LinearRGBPStoRGBPS_SSE41(*mt_data_inf,ptrClass->lookupL_32); break;
 		case 27 : Convert_LinearRGBPStoRGBPS_SSE2(*mt_data_inf,ptrClass->lookupL_32); break;
 		case 28 : Convert_LinearRGBPStoRGBPS(*mt_data_inf,ptrClass->lookupL_32); break;
-		case 29 : Convert_LinearRGBPStoRGBPS_HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 30 : Convert_LinearRGBPStoRGBPS_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->OETF); break;
-		case 31 : Convert_LinearRGBPStoRGBPS_SDR(*mt_data_inf,ptrClass->OETF); break;
+		case 29 : Convert_LinearRGBPStoRGBPS_HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 30 : Convert_LinearRGBPStoRGBPS_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 31 : Convert_LinearRGBPStoRGBPS_SDR(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
 #ifdef AVX2_BUILD_POSSIBLE
 		case 24 : Convert_LinearRGBPStoRGBPS_AVX2(*mt_data_inf,ptrClass->lookupL_32); break;
 #endif
@@ -12313,7 +13249,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 		}
 		else
 		{
-			if (OOTF || OETF)
+			if (OOTF || EOTF)
 			{
 				if (fastmode)
 				{
@@ -12361,7 +13297,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 
 		if (bits_per_pixel==8)
 		{
-			if (OOTF || OETF) f_proc=10;
+			if (OOTF || EOTF) f_proc=10;
 			else f_proc=0;
 		}
 		else f_proc=11;
@@ -12385,22 +13321,22 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 			case 12 : Convert_LinearRGBPStoRGB64(MT_DataGF[0],lookupL_20); break;
 			case 13 : Convert_LinearRGBPStoRGB64_SSE41(MT_DataGF[0],lookupL_20); break;
 			case 14 : Convert_LinearRGBPStoRGB64_AVX(MT_DataGF[0],lookupL_20); break;
-			case 15 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OETF); break;
-			case 16 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OETF); break;
-			case 17 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OETF); break;
-			case 18 : Convert_LinearRGBPStoRGB64_PQ(MT_DataGF[0],OOTF,OETF); break;
-			case 19 : Convert_LinearRGBPStoRGB64_PQ_SSE41(MT_DataGF[0],OOTF,OETF); break;
-			case 20 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,OETF); break;
-			case 21 : Convert_LinearRGBPStoRGB64_HLG(MT_DataGF[0],OOTF,OETF); break;
-			case 22 : Convert_LinearRGBPStoRGB64_HLG_SSE41(MT_DataGF[0],OOTF,OETF); break;
-			case 23 : Convert_LinearRGBPStoRGB64_HLG_AVX(MT_DataGF[0],OOTF,OETF); break;
+			case 15 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OOTF || EOTF); break;
+			case 16 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OOTF || EOTF); break;
+			case 17 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OOTF || EOTF); break;
+			case 18 : Convert_LinearRGBPStoRGB64_PQ(MT_DataGF[0],OOTF,EOTF); break;
+			case 19 : Convert_LinearRGBPStoRGB64_PQ_SSE41(MT_DataGF[0],OOTF,EOTF); break;
+			case 20 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,EOTF); break;
+			case 21 : Convert_LinearRGBPStoRGB64_HLG(MT_DataGF[0],OOTF,EOTF); break;
+			case 22 : Convert_LinearRGBPStoRGB64_HLG_SSE41(MT_DataGF[0],OOTF,EOTF); break;
+			case 23 : Convert_LinearRGBPStoRGB64_HLG_AVX(MT_DataGF[0],OOTF,EOTF); break;
 			case 25 : Convert_LinearRGBPStoRGBPS_AVX(MT_DataGF[0],lookupL_32); break;
 			case 26 : Convert_LinearRGBPStoRGBPS_SSE41(MT_DataGF[0],lookupL_32); break;
 			case 27 : Convert_LinearRGBPStoRGBPS_SSE2(MT_DataGF[0],lookupL_32); break;
 			case 28 : Convert_LinearRGBPStoRGBPS(MT_DataGF[0],lookupL_32); break;
-			case 29 : Convert_LinearRGBPStoRGBPS_HLG(MT_DataGF[0],OOTF,OETF); break;
-			case 30 : Convert_LinearRGBPStoRGBPS_PQ(MT_DataGF[0],OOTF,OETF); break;
-			case 31 : Convert_LinearRGBPStoRGBPS_SDR(MT_DataGF[0],OETF); break;
+			case 29 : Convert_LinearRGBPStoRGBPS_HLG(MT_DataGF[0],OOTF,EOTF); break;
+			case 30 : Convert_LinearRGBPStoRGBPS_PQ(MT_DataGF[0],OOTF,EOTF); break;
+			case 31 : Convert_LinearRGBPStoRGBPS_SDR(MT_DataGF[0],OOTF || EOTF); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 24 : Convert_LinearRGBPStoRGBPS_AVX2(MT_DataGF[0],lookupL_32); break;
 #endif
@@ -13033,16 +13969,17 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 	const uint8_t HDRMode=args[3].AsInt(0);
 	const double HLG_Lb=args[4].AsFloat(0.05f);
 	const double HLG_Lw=args[5].AsFloat(1000.0f);
-	const bool OOTF=args[6].AsBool(true);
-	const bool EOTF=args[7].AsBool(true);
-	const bool fullrange=args[8].AsBool(false);
-	const bool mpeg2c=args[9].AsBool(true);
-	const int threads=args[10].AsInt(0);
-	const bool LogicalCores=args[11].AsBool(true);
-	const bool MaxPhysCores=args[12].AsBool(true);
-	const bool SetAffinity=args[13].AsBool(false);
-	const bool sleep = args[14].AsBool(false);
-	int prefetch=args[15].AsInt(0);
+	const uint8_t HLGColor=args[6].AsInt(0);
+	const bool OOTF=args[7].AsBool(true);
+	const bool EOTF=args[8].AsBool(true);
+	const bool fullrange=args[9].AsBool(false);
+	const bool mpeg2c=args[10].AsBool(true);
+	const int threads=args[11].AsInt(0);
+	const bool LogicalCores=args[12].AsBool(true);
+	const bool MaxPhysCores=args[13].AsBool(true);
+	const bool SetAffinity=args[14].AsBool(false);
+	const bool sleep = args[15].AsBool(false);
+	int prefetch=args[16].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13109,7 +14046,7 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 		}
 	}
 
-	return new ConvertYUVtoLinearRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fullrange,
+	return new ConvertYUVtoLinearRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fullrange,
 		mpeg2c,threads_number,sleep,env);
 }
 
@@ -13149,16 +14086,17 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	const uint8_t HDRMode=args[3].AsInt(0);
 	const double HLG_Lb=args[4].AsFloat(0.05f);
 	const double HLG_Lw=args[5].AsFloat(1000.0f);
-	const bool OOTF=args[6].AsBool(true);
-	const bool EOTF=args[7].AsBool(true);
-	const bool fullrange=args[8].AsBool(false);
-	const bool mpeg2c=args[9].AsBool(true);
-	const int threads=args[18].AsInt(0);
-	const bool LogicalCores=args[19].AsBool(true);
-	const bool MaxPhysCores=args[20].AsBool(true);
-	const bool SetAffinity=args[21].AsBool(false);
-	const bool sleep = args[22].AsBool(false);
-	int prefetch=args[23].AsInt(0);
+	const uint8_t HLGColor=args[6].AsInt(0);
+	const bool OOTF=args[7].AsBool(true);
+	const bool EOTF=args[8].AsBool(true);
+	const bool fullrange=args[9].AsBool(false);
+	const bool mpeg2c=args[10].AsBool(true);
+	const int threads=args[11].AsInt(0);
+	const bool LogicalCores=args[12].AsBool(true);
+	const bool MaxPhysCores=args[21].AsBool(true);
+	const bool SetAffinity=args[22].AsBool(false);
+	const bool sleep = args[23].AsBool(false);
+	int prefetch=args[24].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13175,44 +14113,44 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			Rx=(float)args[10].AsFloat(0.708f);
-			Ry=(float)args[11].AsFloat(0.292f);
-			Gx=(float)args[12].AsFloat(0.170f);
-			Gy=(float)args[13].AsFloat(0.797f);
-			Bx=(float)args[14].AsFloat(0.131f);
-			By=(float)args[15].AsFloat(0.046f);
-			Wx=(float)args[16].AsFloat(0.31271f);
-			Wy=(float)args[17].AsFloat(0.32902f);
+			Rx=(float)args[13].AsFloat(0.708f);
+			Ry=(float)args[14].AsFloat(0.292f);
+			Gx=(float)args[15].AsFloat(0.170f);
+			Gy=(float)args[16].AsFloat(0.797f);
+			Bx=(float)args[17].AsFloat(0.131f);
+			By=(float)args[18].AsFloat(0.046f);
+			Wx=(float)args[19].AsFloat(0.31271f);
+			Wy=(float)args[20].AsFloat(0.32902f);
 			break;
 		case 2 :
-			Rx=(float)args[10].AsFloat(0.640f);
-			Ry=(float)args[11].AsFloat(0.330f);
-			Gx=(float)args[12].AsFloat(0.300f);
-			Gy=(float)args[13].AsFloat(0.600f);
-			Bx=(float)args[14].AsFloat(0.150f);
-			By=(float)args[15].AsFloat(0.060f);
-			Wx=(float)args[16].AsFloat(0.31271f);
-			Wy=(float)args[17].AsFloat(0.32902f);
+			Rx=(float)args[13].AsFloat(0.640f);
+			Ry=(float)args[14].AsFloat(0.330f);
+			Gx=(float)args[15].AsFloat(0.300f);
+			Gy=(float)args[16].AsFloat(0.600f);
+			Bx=(float)args[17].AsFloat(0.150f);
+			By=(float)args[18].AsFloat(0.060f);
+			Wx=(float)args[19].AsFloat(0.31271f);
+			Wy=(float)args[20].AsFloat(0.32902f);
 			break;
 		case 3 :
-			Rx=(float)args[10].AsFloat(0.630f);
-			Ry=(float)args[11].AsFloat(0.340f);
-			Gx=(float)args[12].AsFloat(0.310f);
-			Gy=(float)args[13].AsFloat(0.595f);
-			Bx=(float)args[14].AsFloat(0.155f);
-			By=(float)args[15].AsFloat(0.070f);
-			Wx=(float)args[16].AsFloat(0.31271f);
-			Wy=(float)args[17].AsFloat(0.32902f);
+			Rx=(float)args[13].AsFloat(0.630f);
+			Ry=(float)args[14].AsFloat(0.340f);
+			Gx=(float)args[15].AsFloat(0.310f);
+			Gy=(float)args[16].AsFloat(0.595f);
+			Bx=(float)args[17].AsFloat(0.155f);
+			By=(float)args[18].AsFloat(0.070f);
+			Wx=(float)args[19].AsFloat(0.31271f);
+			Wy=(float)args[20].AsFloat(0.32902f);
 			break;
 		case 4 :
-			Rx=(float)args[10].AsFloat(0.640f);
-			Ry=(float)args[11].AsFloat(0.330f);
-			Gx=(float)args[12].AsFloat(0.290f);
-			Gy=(float)args[13].AsFloat(0.600f);
-			Bx=(float)args[14].AsFloat(0.150f);
-			By=(float)args[15].AsFloat(0.060f);
-			Wx=(float)args[16].AsFloat(0.31271f);
-			Wy=(float)args[17].AsFloat(0.32902f);
+			Rx=(float)args[13].AsFloat(0.640f);
+			Ry=(float)args[14].AsFloat(0.330f);
+			Gx=(float)args[15].AsFloat(0.290f);
+			Gy=(float)args[16].AsFloat(0.600f);
+			Bx=(float)args[17].AsFloat(0.150f);
+			By=(float)args[18].AsFloat(0.060f);
+			Wx=(float)args[19].AsFloat(0.31271f);
+			Wy=(float)args[20].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13274,7 +14212,7 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertYUVtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fullrange,mpeg2c,
+	return new ConvertYUVtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fullrange,mpeg2c,
 		Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,env);
 }
 
@@ -13312,17 +14250,18 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 	const uint8_t HDRMode=args[3].AsInt(0);
 	const double HLG_Lb=args[4].AsFloat(0.05f);
 	const double HLG_Lw=args[5].AsFloat(1000.0f);
-	const bool OOTF=args[6].AsBool(true);
-	const bool OETF=args[7].AsBool(true);
-	const bool fullrange=args[8].AsBool(false);
-	const bool mpeg2c=args[9].AsBool(true);
-	const bool fastmode=args[10].AsBool(true);
-	const int threads=args[11].AsInt(0);
-	const bool LogicalCores=args[12].AsBool(true);
-	const bool MaxPhysCores=args[13].AsBool(true);
-	const bool SetAffinity=args[14].AsBool(false);
-	const bool sleep = args[15].AsBool(false);
-	int prefetch=args[16].AsInt(0);
+	const uint8_t HLGColor=args[6].AsInt(0);
+	const bool OOTF=args[7].AsBool(true);
+	const bool EOTF=args[8].AsBool(true);
+	const bool fullrange=args[9].AsBool(false);
+	const bool mpeg2c=args[10].AsBool(true);
+	const bool fastmode=args[11].AsBool(true);
+	const int threads=args[12].AsInt(0);
+	const bool LogicalCores=args[13].AsBool(true);
+	const bool MaxPhysCores=args[14].AsBool(true);
+	const bool SetAffinity=args[15].AsBool(false);
+	const bool sleep = args[16].AsBool(false);
+	int prefetch=args[17].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13387,7 +14326,7 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 		}
 	}
 
-	return new ConvertLinearRGBtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,OETF,fullrange,
+	return new ConvertLinearRGBtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fullrange,
 		mpeg2c,fastmode,threads_number,sleep,env);
 }
 
@@ -13427,15 +14366,16 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 	const uint8_t HDRMode=args[3].AsInt(0);
 	const double HLG_Lb=args[4].AsFloat(0.05f);
 	const double HLG_Lw=args[5].AsFloat(1000.0f);
-	const bool OOTF=args[6].AsBool(true);
-	const bool EOTF=args[7].AsBool(true);
-	const bool fastmode=args[8].AsBool(true);
-	const int threads=args[17].AsInt(0);
-	const bool LogicalCores=args[18].AsBool(true);
-	const bool MaxPhysCores=args[19].AsBool(true);
-	const bool SetAffinity=args[20].AsBool(false);
-	const bool sleep = args[21].AsBool(false);
-	int prefetch=args[22].AsInt(0);
+	const uint8_t HLGColor=args[6].AsInt(0);
+	const bool OOTF=args[7].AsBool(true);
+	const bool EOTF=args[8].AsBool(true);
+	const bool fastmode=args[9].AsBool(true);
+	const int threads=args[18].AsInt(0);
+	const bool LogicalCores=args[19].AsBool(true);
+	const bool MaxPhysCores=args[20].AsBool(true);
+	const bool SetAffinity=args[21].AsBool(false);
+	const bool sleep = args[22].AsBool(false);
+	int prefetch=args[23].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13452,44 +14392,44 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			Rx=(float)args[9].AsFloat(0.708f);
-			Ry=(float)args[10].AsFloat(0.292f);
-			Gx=(float)args[11].AsFloat(0.170f);
-			Gy=(float)args[12].AsFloat(0.797f);
-			Bx=(float)args[13].AsFloat(0.131f);
-			By=(float)args[14].AsFloat(0.046f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.708f);
+			Ry=(float)args[11].AsFloat(0.292f);
+			Gx=(float)args[12].AsFloat(0.170f);
+			Gy=(float)args[13].AsFloat(0.797f);
+			Bx=(float)args[14].AsFloat(0.131f);
+			By=(float)args[15].AsFloat(0.046f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		case 2 :
-			Rx=(float)args[9].AsFloat(0.640f);
-			Ry=(float)args[10].AsFloat(0.330f);
-			Gx=(float)args[11].AsFloat(0.300f);
-			Gy=(float)args[12].AsFloat(0.600f);
-			Bx=(float)args[13].AsFloat(0.150f);
-			By=(float)args[14].AsFloat(0.060f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.640f);
+			Ry=(float)args[11].AsFloat(0.330f);
+			Gx=(float)args[12].AsFloat(0.300f);
+			Gy=(float)args[13].AsFloat(0.600f);
+			Bx=(float)args[14].AsFloat(0.150f);
+			By=(float)args[15].AsFloat(0.060f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		case 3 :
-			Rx=(float)args[9].AsFloat(0.630f);
-			Ry=(float)args[10].AsFloat(0.340f);
-			Gx=(float)args[11].AsFloat(0.310f);
-			Gy=(float)args[12].AsFloat(0.595f);
-			Bx=(float)args[13].AsFloat(0.155f);
-			By=(float)args[14].AsFloat(0.070f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.630f);
+			Ry=(float)args[11].AsFloat(0.340f);
+			Gx=(float)args[12].AsFloat(0.310f);
+			Gy=(float)args[13].AsFloat(0.595f);
+			Bx=(float)args[14].AsFloat(0.155f);
+			By=(float)args[15].AsFloat(0.070f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		case 4 :
-			Rx=(float)args[9].AsFloat(0.640f);
-			Ry=(float)args[10].AsFloat(0.330f);
-			Gx=(float)args[11].AsFloat(0.290f);
-			Gy=(float)args[12].AsFloat(0.600f);
-			Bx=(float)args[13].AsFloat(0.150f);
-			By=(float)args[14].AsFloat(0.060f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.640f);
+			Ry=(float)args[11].AsFloat(0.330f);
+			Gx=(float)args[12].AsFloat(0.290f);
+			Gy=(float)args[13].AsFloat(0.600f);
+			Bx=(float)args[14].AsFloat(0.150f);
+			By=(float)args[15].AsFloat(0.060f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13551,7 +14491,7 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertRGBtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,
+	return new ConvertRGBtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,
 		threads_number,sleep,env);
 }
 
@@ -13598,17 +14538,18 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	const uint8_t HDRMode=args[3].AsInt(0);
 	const double HLG_Lb=args[4].AsFloat(0.05f);
 	const double HLG_Lw=args[5].AsFloat(1000.0f);
-	const bool OOTF=args[6].AsBool(true);
-	const bool OETF=args[7].AsBool(true);
-	const bool fullrange=args[8].AsBool(false);
-	const bool mpeg2c=args[9].AsBool(true);
-	const bool fastmode=args[10].AsBool(true);
-	const int threads=args[28].AsInt(0);
-	const bool LogicalCores=args[29].AsBool(true);
-	const bool MaxPhysCores=args[30].AsBool(true);
-	const bool SetAffinity=args[31].AsBool(false);
-	const bool sleep = args[32].AsBool(false);
-	int prefetch=args[33].AsInt(0);
+	const uint8_t HLGColor=args[6].AsInt(0);
+	const bool OOTF=args[7].AsBool(true);
+	const bool EOTF=args[8].AsBool(true);
+	const bool fullrange=args[9].AsBool(false);
+	const bool mpeg2c=args[10].AsBool(true);
+	const bool fastmode=args[11].AsBool(true);
+	const int threads=args[29].AsInt(0);
+	const bool LogicalCores=args[30].AsBool(true);
+	const bool MaxPhysCores=args[31].AsBool(true);
+	const bool SetAffinity=args[32].AsBool(false);
+	const bool sleep = args[33].AsBool(false);
+	int prefetch=args[34].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13616,8 +14557,8 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertXYZtoYUV: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	switch(Color)
 	{
-		case 0 : pColor=args[19].AsInt(2); break;
-		default : pColor=args[19].AsInt(0); break;
+		case 0 : pColor=args[20].AsInt(2); break;
+		default : pColor=args[20].AsInt(0); break;
 	}
 	if ((pColor<0) || (pColor>4))
 		env->ThrowError("ConvertXYZtoYUV: [pColor] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
@@ -13630,54 +14571,54 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			Rx=(float)args[11].AsFloat(0.708f);
-			Ry=(float)args[12].AsFloat(0.292f);
-			Gx=(float)args[13].AsFloat(0.170f);
-			Gy=(float)args[14].AsFloat(0.797f);
-			Bx=(float)args[15].AsFloat(0.131f);
-			By=(float)args[16].AsFloat(0.046f);
-			Wx=(float)args[17].AsFloat(0.31271f);
-			Wy=(float)args[18].AsFloat(0.32902f);
+			Rx=(float)args[12].AsFloat(0.708f);
+			Ry=(float)args[13].AsFloat(0.292f);
+			Gx=(float)args[14].AsFloat(0.170f);
+			Gy=(float)args[15].AsFloat(0.797f);
+			Bx=(float)args[16].AsFloat(0.131f);
+			By=(float)args[17].AsFloat(0.046f);
+			Wx=(float)args[18].AsFloat(0.31271f);
+			Wy=(float)args[19].AsFloat(0.32902f);
 			break;
 		case 2 :
-			Rx=(float)args[11].AsFloat(0.640f);
-			Ry=(float)args[12].AsFloat(0.330f);
-			Gx=(float)args[13].AsFloat(0.300f);
-			Gy=(float)args[14].AsFloat(0.600f);
-			Bx=(float)args[15].AsFloat(0.150f);
-			By=(float)args[16].AsFloat(0.060f);
-			Wx=(float)args[17].AsFloat(0.31271f);
-			Wy=(float)args[18].AsFloat(0.32902f);
+			Rx=(float)args[12].AsFloat(0.640f);
+			Ry=(float)args[13].AsFloat(0.330f);
+			Gx=(float)args[14].AsFloat(0.300f);
+			Gy=(float)args[15].AsFloat(0.600f);
+			Bx=(float)args[16].AsFloat(0.150f);
+			By=(float)args[17].AsFloat(0.060f);
+			Wx=(float)args[18].AsFloat(0.31271f);
+			Wy=(float)args[19].AsFloat(0.32902f);
 			break;
 		case 3 :
-			Rx=(float)args[11].AsFloat(0.630f);
-			Ry=(float)args[12].AsFloat(0.340f);
-			Gx=(float)args[13].AsFloat(0.310f);
-			Gy=(float)args[14].AsFloat(0.595f);
-			Bx=(float)args[15].AsFloat(0.155f);
-			By=(float)args[16].AsFloat(0.070f);
-			Wx=(float)args[17].AsFloat(0.31271f);
-			Wy=(float)args[18].AsFloat(0.32902f);
+			Rx=(float)args[12].AsFloat(0.630f);
+			Ry=(float)args[13].AsFloat(0.340f);
+			Gx=(float)args[14].AsFloat(0.310f);
+			Gy=(float)args[15].AsFloat(0.595f);
+			Bx=(float)args[16].AsFloat(0.155f);
+			By=(float)args[17].AsFloat(0.070f);
+			Wx=(float)args[18].AsFloat(0.31271f);
+			Wy=(float)args[19].AsFloat(0.32902f);
 			break;
 		case 4 :
-			Rx=(float)args[11].AsFloat(0.640f);
-			Ry=(float)args[12].AsFloat(0.330f);
-			Gx=(float)args[13].AsFloat(0.290f);
-			Gy=(float)args[14].AsFloat(0.600f);
-			Bx=(float)args[15].AsFloat(0.150f);
-			By=(float)args[16].AsFloat(0.060f);
-			Wx=(float)args[17].AsFloat(0.31271f);
-			Wy=(float)args[18].AsFloat(0.32902f);
+			Rx=(float)args[12].AsFloat(0.640f);
+			Ry=(float)args[13].AsFloat(0.330f);
+			Gx=(float)args[14].AsFloat(0.290f);
+			Gy=(float)args[15].AsFloat(0.600f);
+			Bx=(float)args[16].AsFloat(0.150f);
+			By=(float)args[17].AsFloat(0.060f);
+			Wx=(float)args[18].AsFloat(0.31271f);
+			Wy=(float)args[19].AsFloat(0.32902f);
 			break;
 		default :
-			Rx=(float)args[11].AsFloat(0.640f);
-			Ry=(float)args[12].AsFloat(0.330f);
-			Gx=(float)args[13].AsFloat(0.300f);
-			Gy=(float)args[14].AsFloat(0.600f);
-			Bx=(float)args[15].AsFloat(0.150f);
-			By=(float)args[16].AsFloat(0.060f);
-			Wx=(float)args[17].AsFloat(0.31271f);
-			Wy=(float)args[18].AsFloat(0.32902f);
+			Rx=(float)args[12].AsFloat(0.640f);
+			Ry=(float)args[13].AsFloat(0.330f);
+			Gx=(float)args[14].AsFloat(0.300f);
+			Gy=(float)args[15].AsFloat(0.600f);
+			Bx=(float)args[16].AsFloat(0.150f);
+			By=(float)args[17].AsFloat(0.060f);
+			Wx=(float)args[18].AsFloat(0.31271f);
+			Wy=(float)args[19].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13689,54 +14630,54 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			pRx=(float)args[20].AsFloat(0.708f);
-			pRy=(float)args[21].AsFloat(0.292f);
-			pGx=(float)args[22].AsFloat(0.170f);
-			pGy=(float)args[23].AsFloat(0.797f);
-			pBx=(float)args[24].AsFloat(0.131f);
-			pBy=(float)args[25].AsFloat(0.046f);
-			pWx=(float)args[26].AsFloat(0.31271f);
-			pWy=(float)args[27].AsFloat(0.32902f);
+			pRx=(float)args[21].AsFloat(0.708f);
+			pRy=(float)args[22].AsFloat(0.292f);
+			pGx=(float)args[23].AsFloat(0.170f);
+			pGy=(float)args[24].AsFloat(0.797f);
+			pBx=(float)args[25].AsFloat(0.131f);
+			pBy=(float)args[26].AsFloat(0.046f);
+			pWx=(float)args[27].AsFloat(0.31271f);
+			pWy=(float)args[28].AsFloat(0.32902f);
 			break;
 		case 2 :
-			pRx=(float)args[20].AsFloat(0.640f);
-			pRy=(float)args[21].AsFloat(0.330f);
-			pGx=(float)args[22].AsFloat(0.300f);
-			pGy=(float)args[23].AsFloat(0.600f);
-			pBx=(float)args[24].AsFloat(0.150f);
-			pBy=(float)args[25].AsFloat(0.060f);
-			pWx=(float)args[26].AsFloat(0.31271f);
-			pWy=(float)args[27].AsFloat(0.32902f);
+			pRx=(float)args[21].AsFloat(0.640f);
+			pRy=(float)args[22].AsFloat(0.330f);
+			pGx=(float)args[23].AsFloat(0.300f);
+			pGy=(float)args[24].AsFloat(0.600f);
+			pBx=(float)args[25].AsFloat(0.150f);
+			pBy=(float)args[26].AsFloat(0.060f);
+			pWx=(float)args[27].AsFloat(0.31271f);
+			pWy=(float)args[28].AsFloat(0.32902f);
 			break;
 		case 3 :
-			pRx=(float)args[20].AsFloat(0.630f);
-			pRy=(float)args[21].AsFloat(0.340f);
-			pGx=(float)args[22].AsFloat(0.310f);
-			pGy=(float)args[23].AsFloat(0.595f);
-			pBx=(float)args[24].AsFloat(0.155f);
-			pBy=(float)args[25].AsFloat(0.070f);
-			pWx=(float)args[26].AsFloat(0.31271f);
-			pWy=(float)args[27].AsFloat(0.32902f);
+			pRx=(float)args[21].AsFloat(0.630f);
+			pRy=(float)args[22].AsFloat(0.340f);
+			pGx=(float)args[23].AsFloat(0.310f);
+			pGy=(float)args[24].AsFloat(0.595f);
+			pBx=(float)args[25].AsFloat(0.155f);
+			pBy=(float)args[26].AsFloat(0.070f);
+			pWx=(float)args[27].AsFloat(0.31271f);
+			pWy=(float)args[28].AsFloat(0.32902f);
 			break;
 		case 4 :
-			pRx=(float)args[20].AsFloat(0.640f);
-			pRy=(float)args[21].AsFloat(0.330f);
-			pGx=(float)args[22].AsFloat(0.290f);
-			pGy=(float)args[23].AsFloat(0.600f);
-			pBx=(float)args[24].AsFloat(0.150f);
-			pBy=(float)args[25].AsFloat(0.060f);
-			pWx=(float)args[26].AsFloat(0.31271f);
-			pWy=(float)args[27].AsFloat(0.32902f);
+			pRx=(float)args[21].AsFloat(0.640f);
+			pRy=(float)args[22].AsFloat(0.330f);
+			pGx=(float)args[23].AsFloat(0.290f);
+			pGy=(float)args[24].AsFloat(0.600f);
+			pBx=(float)args[25].AsFloat(0.150f);
+			pBy=(float)args[26].AsFloat(0.060f);
+			pWx=(float)args[27].AsFloat(0.31271f);
+			pWy=(float)args[28].AsFloat(0.32902f);
 			break;
 		default :
-			pRx=(float)args[20].AsFloat(0.640f);
-			pRy=(float)args[21].AsFloat(0.330f);
-			pGx=(float)args[22].AsFloat(0.300f);
-			pGy=(float)args[23].AsFloat(0.600f);
-			pBx=(float)args[24].AsFloat(0.150f);
-			pBy=(float)args[25].AsFloat(0.060f);
-			pWx=(float)args[26].AsFloat(0.31271f);
-			pWy=(float)args[27].AsFloat(0.32902f);
+			pRx=(float)args[21].AsFloat(0.640f);
+			pRy=(float)args[22].AsFloat(0.330f);
+			pGx=(float)args[23].AsFloat(0.300f);
+			pGy=(float)args[24].AsFloat(0.600f);
+			pBx=(float)args[25].AsFloat(0.150f);
+			pBy=(float)args[26].AsFloat(0.060f);
+			pWx=(float)args[27].AsFloat(0.31271f);
+			pWy=(float)args[28].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13798,7 +14739,7 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertXYZtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,OETF,fullrange,
+	return new ConvertXYZtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fullrange,
 		mpeg2c,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
 		threads_number,sleep,env);
 }
@@ -13843,15 +14784,16 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	const uint8_t HDRMode=args[3].AsInt(0);
 	const double HLG_Lb=args[4].AsFloat(0.05f);
 	const double HLG_Lw=args[5].AsFloat(1000.0f);
-	const bool OOTF=args[6].AsBool(true);
-	const bool OETF=args[7].AsBool(true);
-	const bool fastmode=args[8].AsBool(true);
-	const int threads=args[26].AsInt(0);
-	const bool LogicalCores=args[27].AsBool(true);
-	const bool MaxPhysCores=args[28].AsBool(true);
-	const bool SetAffinity=args[29].AsBool(false);
-	const bool sleep = args[30].AsBool(false);
-	int prefetch=args[31].AsInt(0);
+	const uint8_t HLGColor=args[6].AsInt(0);
+	const bool OOTF=args[7].AsBool(true);
+	const bool EOTF=args[8].AsBool(true);
+	const bool fastmode=args[9].AsBool(true);
+	const int threads=args[27].AsInt(0);
+	const bool LogicalCores=args[28].AsBool(true);
+	const bool MaxPhysCores=args[29].AsBool(true);
+	const bool SetAffinity=args[30].AsBool(false);
+	const bool sleep = args[31].AsBool(false);
+	int prefetch=args[32].AsInt(0);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -13859,8 +14801,8 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertXYZtoRGB: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
 	switch(Color)
 	{
-		case 0 : pColor=args[17].AsInt(2); break;
-		default : pColor=args[17].AsInt(0); break;
+		case 0 : pColor=args[18].AsInt(2); break;
+		default : pColor=args[18].AsInt(0); break;
 	}
 	if ((pColor<0) || (pColor>4))
 		env->ThrowError("ConvertXYZtoRGB: [pColor] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
@@ -13874,54 +14816,54 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			Rx=(float)args[9].AsFloat(0.708f);
-			Ry=(float)args[10].AsFloat(0.292f);
-			Gx=(float)args[11].AsFloat(0.170f);
-			Gy=(float)args[12].AsFloat(0.797f);
-			Bx=(float)args[13].AsFloat(0.131f);
-			By=(float)args[14].AsFloat(0.046f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.708f);
+			Ry=(float)args[11].AsFloat(0.292f);
+			Gx=(float)args[12].AsFloat(0.170f);
+			Gy=(float)args[13].AsFloat(0.797f);
+			Bx=(float)args[14].AsFloat(0.131f);
+			By=(float)args[15].AsFloat(0.046f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		case 2 :
-			Rx=(float)args[9].AsFloat(0.640f);
-			Ry=(float)args[10].AsFloat(0.330f);
-			Gx=(float)args[11].AsFloat(0.300f);
-			Gy=(float)args[12].AsFloat(0.600f);
-			Bx=(float)args[13].AsFloat(0.150f);
-			By=(float)args[14].AsFloat(0.060f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.640f);
+			Ry=(float)args[11].AsFloat(0.330f);
+			Gx=(float)args[12].AsFloat(0.300f);
+			Gy=(float)args[13].AsFloat(0.600f);
+			Bx=(float)args[14].AsFloat(0.150f);
+			By=(float)args[15].AsFloat(0.060f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		case 3 :
-			Rx=(float)args[9].AsFloat(0.630f);
-			Ry=(float)args[10].AsFloat(0.340f);
-			Gx=(float)args[11].AsFloat(0.310f);
-			Gy=(float)args[12].AsFloat(0.595f);
-			Bx=(float)args[13].AsFloat(0.155f);
-			By=(float)args[14].AsFloat(0.070f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.630f);
+			Ry=(float)args[11].AsFloat(0.340f);
+			Gx=(float)args[12].AsFloat(0.310f);
+			Gy=(float)args[13].AsFloat(0.595f);
+			Bx=(float)args[14].AsFloat(0.155f);
+			By=(float)args[15].AsFloat(0.070f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		case 4 :
-			Rx=(float)args[9].AsFloat(0.640f);
-			Ry=(float)args[10].AsFloat(0.330f);
-			Gx=(float)args[11].AsFloat(0.290f);
-			Gy=(float)args[12].AsFloat(0.600f);
-			Bx=(float)args[13].AsFloat(0.150f);
-			By=(float)args[14].AsFloat(0.060f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.640f);
+			Ry=(float)args[11].AsFloat(0.330f);
+			Gx=(float)args[12].AsFloat(0.290f);
+			Gy=(float)args[13].AsFloat(0.600f);
+			Bx=(float)args[14].AsFloat(0.150f);
+			By=(float)args[15].AsFloat(0.060f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 		default :
-			Rx=(float)args[9].AsFloat(0.640f);
-			Ry=(float)args[10].AsFloat(0.330f);
-			Gx=(float)args[11].AsFloat(0.300f);
-			Gy=(float)args[12].AsFloat(0.600f);
-			Bx=(float)args[13].AsFloat(0.150f);
-			By=(float)args[14].AsFloat(0.060f);
-			Wx=(float)args[15].AsFloat(0.31271f);
-			Wy=(float)args[16].AsFloat(0.32902f);
+			Rx=(float)args[10].AsFloat(0.640f);
+			Ry=(float)args[11].AsFloat(0.330f);
+			Gx=(float)args[12].AsFloat(0.300f);
+			Gy=(float)args[13].AsFloat(0.600f);
+			Bx=(float)args[14].AsFloat(0.150f);
+			By=(float)args[15].AsFloat(0.060f);
+			Wx=(float)args[16].AsFloat(0.31271f);
+			Wy=(float)args[17].AsFloat(0.32902f);
 			break;
 	}
 
@@ -13933,54 +14875,54 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			pRx=(float)args[18].AsFloat(0.708f);
-			pRy=(float)args[19].AsFloat(0.292f);
-			pGx=(float)args[20].AsFloat(0.170f);
-			pGy=(float)args[21].AsFloat(0.797f);
-			pBx=(float)args[22].AsFloat(0.131f);
-			pBy=(float)args[23].AsFloat(0.046f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[19].AsFloat(0.708f);
+			pRy=(float)args[20].AsFloat(0.292f);
+			pGx=(float)args[21].AsFloat(0.170f);
+			pGy=(float)args[22].AsFloat(0.797f);
+			pBx=(float)args[23].AsFloat(0.131f);
+			pBy=(float)args[24].AsFloat(0.046f);
+			pWx=(float)args[25].AsFloat(0.31271f);
+			pWy=(float)args[26].AsFloat(0.32902f);
 			break;
 		case 2 :
-			pRx=(float)args[18].AsFloat(0.640f);
-			pRy=(float)args[19].AsFloat(0.330f);
-			pGx=(float)args[20].AsFloat(0.300f);
-			pGy=(float)args[21].AsFloat(0.600f);
-			pBx=(float)args[22].AsFloat(0.150f);
-			pBy=(float)args[23].AsFloat(0.060f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[19].AsFloat(0.640f);
+			pRy=(float)args[20].AsFloat(0.330f);
+			pGx=(float)args[21].AsFloat(0.300f);
+			pGy=(float)args[22].AsFloat(0.600f);
+			pBx=(float)args[23].AsFloat(0.150f);
+			pBy=(float)args[24].AsFloat(0.060f);
+			pWx=(float)args[25].AsFloat(0.31271f);
+			pWy=(float)args[26].AsFloat(0.32902f);
 			break;
 		case 3 :
-			pRx=(float)args[18].AsFloat(0.630f);
-			pRy=(float)args[19].AsFloat(0.340f);
-			pGx=(float)args[20].AsFloat(0.310f);
-			pGy=(float)args[21].AsFloat(0.595f);
-			pBx=(float)args[22].AsFloat(0.155f);
-			pBy=(float)args[23].AsFloat(0.070f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[19].AsFloat(0.630f);
+			pRy=(float)args[20].AsFloat(0.340f);
+			pGx=(float)args[21].AsFloat(0.310f);
+			pGy=(float)args[22].AsFloat(0.595f);
+			pBx=(float)args[23].AsFloat(0.155f);
+			pBy=(float)args[24].AsFloat(0.070f);
+			pWx=(float)args[25].AsFloat(0.31271f);
+			pWy=(float)args[26].AsFloat(0.32902f);
 			break;
 		case 4 :
-			pRx=(float)args[18].AsFloat(0.640f);
-			pRy=(float)args[19].AsFloat(0.330f);
-			pGx=(float)args[20].AsFloat(0.290f);
-			pGy=(float)args[21].AsFloat(0.600f);
-			pBx=(float)args[22].AsFloat(0.150f);
-			pBy=(float)args[23].AsFloat(0.060f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[19].AsFloat(0.640f);
+			pRy=(float)args[20].AsFloat(0.330f);
+			pGx=(float)args[21].AsFloat(0.290f);
+			pGy=(float)args[22].AsFloat(0.600f);
+			pBx=(float)args[23].AsFloat(0.150f);
+			pBy=(float)args[24].AsFloat(0.060f);
+			pWx=(float)args[25].AsFloat(0.31271f);
+			pWy=(float)args[26].AsFloat(0.32902f);
 			break;
 		default :
-			pRx=(float)args[18].AsFloat(0.640f);
-			pRy=(float)args[19].AsFloat(0.330f);
-			pGx=(float)args[20].AsFloat(0.300f);
-			pGy=(float)args[21].AsFloat(0.600f);
-			pBx=(float)args[22].AsFloat(0.150f);
-			pBy=(float)args[23].AsFloat(0.060f);
-			pWx=(float)args[24].AsFloat(0.31271f);
-			pWy=(float)args[25].AsFloat(0.32902f);
+			pRx=(float)args[19].AsFloat(0.640f);
+			pRy=(float)args[20].AsFloat(0.330f);
+			pGx=(float)args[21].AsFloat(0.300f);
+			pGy=(float)args[22].AsFloat(0.600f);
+			pBx=(float)args[23].AsFloat(0.150f);
+			pBy=(float)args[24].AsFloat(0.060f);
+			pWx=(float)args[25].AsFloat(0.31271f);
+			pWy=(float)args[26].AsFloat(0.32902f);
 			break;
 	}
 
@@ -14042,7 +14984,7 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertXYZtoRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,OOTF,OETF,
+	return new ConvertXYZtoRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,
 		fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
 		threads_number,sleep,env);
 }
@@ -14227,30 +15169,30 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 	if (!poolInterface->GetThreadPoolInterfaceStatus()) env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool status!");
 
     env->AddFunction("ConvertYUVtoLinearRGB",
-		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertYUVtoLinearRGB, 0);
     env->AddFunction("ConvertLinearRGBtoYUV",
-		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[fastmode]b" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertLinearRGBtoYUV, 0);
 
     env->AddFunction("ConvertYUVtoXYZ",
-		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertYUVtoXYZ, 0);
     env->AddFunction("ConvertXYZtoYUV",
-		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fullrange]b[mpeg2c]b[fastmode]b" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[fastmode]b" \
 		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertXYZtoYUV, 0);
 
     env->AddFunction("ConvertRGBtoXYZ",
-		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[EOTF]b[fastmode]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fastmode]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertRGBtoXYZ, 0);
     env->AddFunction("ConvertXYZtoRGB",
-		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[OOTF]b[OETF]b[fastmode]b" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fastmode]b" \
 		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i",
 		Create_ConvertXYZtoRGB, 0);

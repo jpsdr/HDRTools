@@ -20,8 +20,9 @@ Functions inside this plugin :
 **      ConvertYUVtoLinearRGB       **
 **************************************
 
-ConvertYUVtoLinearRGB(int Color,int OutputMode,bool HLGMode,bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+ConvertYUVtoLinearRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
+     bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,int threads,bool logicalCores,bool MaxPhysCore,
+     bool SetAffinity,bool sleep,int prefetch)
 
 Accepted input : Planar YUV 8 to 16 bits.
 
@@ -51,26 +52,44 @@ Accepted input : Planar YUV 8 to 16 bits.
 
        Default: 0 (int)
 
-   HLGLw -
-      Set the white level in cd/m² for HLG mastering.
-      Has effect only if HDRMode is set to 1 or 2.
-
-       Default: 1000.0 (float)
-
    HLGLb -
       Set the black level in cd/m² for HLG mastering.
       Has effect only if HDRMode is set to 1 or 2.
 
        Default: 0.05 (float)
 
+   HLGLw -
+      Set the white level in cd/m² for HLG mastering.
+      Has effect only if HDRMode is set to 1 or 2.
+
+       Default: 1000.0 (float)
+
+   HLGColor -
+      Set the color space to use for the OOTF HLG function. Values are the same than Color
+
+       Default: 1 (int)
+
    OOTF -
-      Has effect only if Color=0. If set to false, the inv OOTF step will be skipped
-      during the linear convertion.
+      Color = 0 :
+
+        HDRMode = 0 :
+      If set to false, the OOTF-1 step will be skipped during the linear convertion.
+
+      =================
+      Color <> 0 :
+      The OETF-1 SDR step will be skipped if both EOTF and OOTF are false.
 
        Default: true (bool)
 
    EOTF -
+      Color = 0 :
+
+        HDRMode = 0 :
       If set to false, the EOTF step will be skipped during the linear convertion.
+
+      =================
+      Color <> 0 :
+      The OETF-1 SDR step will be skipped if both EOTF and OOTF are false.
 
        Default: true (bool)
 
@@ -139,8 +158,9 @@ will be created and handled, allowing if necessary each people to tune according
 **      ConvertLinearRGBtoYUV       **
 **************************************
 
-ConvertLinearRGBtoYUV(int Color,int OutputMode,bool HLGMode,bool OOTF,bool OETF,bool fullrange,bool mpeg2c,
-     bool fasmode,int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+ConvertLinearRGBtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
+     bool OOTF,bool OETF,bool fullrange,bool mpeg2c,bool fasmode,int threads,bool logicalCores,
+     bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
 Accepted input : RGB32, RGB64 and Planar float RGB.
 
@@ -162,13 +182,26 @@ Accepted input : RGB32, RGB64 and Planar float RGB.
        Default: 0 (int)
 
    OOTF -
-      Has effect only if Color=0. If set to false, the OOTF step will be skipped
-      during the de-linear convertion.
+      Color = 0 :
+
+        HDRMode = 0 :
+      If set to false, the OOTF step will be skipped during the linear convertion.
+
+      =================
+      Color <> 0 :
+      The OETF SDR step will be skipped if both EOTF and OOTF are false.
 
        Default: true (bool)
 
-   OETF -
-      If set to false, the EOTF step will be skipped during the de-linear convertion.
+   EOTF -
+      Color = 0 :
+
+        HDRMode = 0 :
+      If set to false, the EOTF-1 step will be skipped during the linear convertion.
+
+      =================
+      Color <> 0 :
+      The OETF SDR step will be skipped if both EOTF and OOTF are false.
 
        Default: true (bool)
 
@@ -197,7 +230,8 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 **         ConvertYUVtoXYZ          **
 **************************************
 
-ConvertYUVtoXYZ(int Color,int OutputMode,bool HLGMode,bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,
+ConvertYUVtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
+     bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
@@ -217,8 +251,9 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 **         ConvertXYZtoYUV          **
 **************************************
 
-ConvertXYZtoYUV(int Color,int OutputMode,bool HLGMode,bool OOTF,bool OETF,bool fullrange,bool mpeg2c,
-     bool fasmode,float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
+ConvertXYZtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
+     bool OOTF,bool OETF,bool fullrange,bool mpeg2c,bool fasmode,
+     float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
@@ -248,7 +283,8 @@ The others parameters are identical to ConvertLinearRGBtoYUV.
 **         ConvertRGBtoXYZ          **
 **************************************
 
-ConvertRGBtoXYZ(int Color,int OutputMode,bool HLGMode,bool OOTF,bool EOTF,fastmode,
+ConvertRGBtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
+     bool OOTF,bool EOTF,fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
@@ -262,7 +298,8 @@ The parameters are identical to ConvertYUVtoXYZ.
 **         ConvertXYZtoRGB          **
 **************************************
 
-ConvertXYZtoRGB(int Color,int OutputMode,bool HLGMode,bool OOTF,bool OETF,bool fasmode,
+ConvertXYZtoRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
+     bool OOTF,bool OETF,bool fasmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)

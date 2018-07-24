@@ -5,7 +5,7 @@ SDR :
 [Camera sensor] -> Linear R,G,B -> OETF -> Non linear R',G',B' -> Color Matrix -> Y',C'r,C'b
 Y',C'r,C'b -> Inv Color Matrix -> Non linear R',G',B' -> EOTF -> Linear R,G,B
 HDR :
-[Camera sensor] -> Linear R,G,B -> OOTF (PQ/HLG) -> OETF (PQ/HLG) -> Non linear R',G',B' -> Color Matrix -> Y',C'r,C'b
+[Camera sensor] -> Linear R,G,B -> OOTF (PQ/HLG) -> EOTF-1 (PQ/HLG) -> Non linear R',G',B' -> Color Matrix -> Y',C'r,C'b
 Y',C'r,C'b -> Inv Color Matrix -> Non linear R',G',B' -> EOTF (PQ/HLG) -> Inv OOTF (PQ/HLG) -> Linear R,G,B
 
 We can thought that at the level of Linear R,G,B, we have directly the "original" light information.
@@ -72,12 +72,16 @@ Accepted input : Planar YUV 8 to 16 bits.
    OOTF -
       Color = 0 :
 
-        HDRMode = 0 :
+        HDRMode = 0, 1, 2 :
       If set to false, the OOTF-1 step will be skipped during the linear convertion.
+      The output will be the linear displayed data (Fd) instead of the linear scene data.
+
+      If both EOTF and OOTF are false output will be standard RGB.
 
       =================
       Color <> 0 :
-      The OETF-1 SDR step will be skipped if both EOTF and OOTF are false.
+      The OETF-1 SDR step will be skipped if both EOTF and OOTF are false =>
+      Output will be standard RGB.
 
        Default: true (bool)
 
@@ -86,10 +90,16 @@ Accepted input : Planar YUV 8 to 16 bits.
 
         HDRMode = 0 :
       If set to false, the EOTF step will be skipped during the linear convertion.
+      The output will not be consistant with anything standard.
+
+        HDRMode = 1 or 2 : No effect.
+
+      If both EOTF and OOTF are false output will be standard RGB.
 
       =================
       Color <> 0 :
-      The OETF-1 SDR step will be skipped if both EOTF and OOTF are false.
+      The OETF-1 SDR step will be skipped if both EOTF and OOTF are false =>
+      Output will be standard RGB.
 
        Default: true (bool)
 
@@ -184,12 +194,16 @@ Accepted input : RGB32, RGB64 and Planar float RGB.
    OOTF -
       Color = 0 :
 
-        HDRMode = 0 :
+        HDRMode = 0, 1, 2 :
       If set to false, the OOTF step will be skipped during the linear convertion.
+      Can be used if the input is linear displayed data (Fd) instead of linear scene data.
+
+      If both EOTF and OOTF are false, correct ouput if input is standard RGB.
 
       =================
       Color <> 0 :
-      The OETF SDR step will be skipped if both EOTF and OOTF are false.
+      The OETF SDR step will be skipped if both EOTF and OOTF are false =>
+      Correct output if input is standard RGB.
 
        Default: true (bool)
 
@@ -198,10 +212,16 @@ Accepted input : RGB32, RGB64 and Planar float RGB.
 
         HDRMode = 0 :
       If set to false, the EOTF-1 step will be skipped during the linear convertion.
+      The output will not be consistant with anything standard.
+
+        HDRMode = 1 or 2 : no effect.
+
+      If both EOTF and OOTF are false, correct ouput if input is standard RGB.
 
       =================
       Color <> 0 :
-      The OETF SDR step will be skipped if both EOTF and OOTF are false.
+      The OETF SDR step will be skipped if both EOTF and OOTF are false =>
+      Correct output if input is standard RGB.
 
        Default: true (bool)
 

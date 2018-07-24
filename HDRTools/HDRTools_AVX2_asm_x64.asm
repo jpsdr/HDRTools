@@ -8,6 +8,7 @@ data_f_1048575 real4 8 dup(1048575.0)
 data_dw_1048575 dword 8 dup(1048575)
 data_dw_0 dword 8 dup(0)
 
+data_w_128 word 16 dup(128)
 data_w_32 word 16 dup(32)
 data_w_8 word 16 dup(8)
 
@@ -342,6 +343,101 @@ Scale_20_RGB_AVX2_2:
 JPSDR_HDRTools_Scale_20_RGB_AVX2 endp
 
 
+;JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX2 proc src:dword,dst:dword,w:dword,h:dword,
+;	src_pitch:dword,dst_pitch:dword
+; src = rcx
+; dst = rdx
+; w = r8d
+; h = r9d
+JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX2 proc public frame
+
+src_pitch equ qword ptr[rbp+48]
+dst_pitch equ qword ptr[rbp+56]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	push r14
+	.pushreg r14
+	.endprolog
+
+	vmovdqa ymm1,YMMWORD ptr data_w_128
+
+	xor rbx,rbx
+	mov rsi,rcx
+	mov rdi,rdx
+	mov ebx,r8d
+	mov r10,src_pitch
+	mov r11,dst_pitch
+	shr ebx,2
+	mov rdx,32
+	mov r12,16
+	mov r13,2
+	mov r14,1
+	xor rcx,rcx
+
+Convert_RGB64_16toRGB64_8_AVX2_1:
+	mov ecx,ebx
+	xor rax,rax
+	or ecx,ecx
+	jz Convert_RGB64_16toRGB64_8_AVX2_3
+	
+Convert_RGB64_16toRGB64_8_AVX2_2:
+	vmovdqa ymm0,YMMWORD ptr[rsi+rax]
+	vpaddusw ymm0,ymm0,ymm1
+	vpsrlw ymm0,ymm0,8
+	vmovdqa YMMWORD ptr[rdi+rax],ymm0
+	add rax,rdx
+	loop Convert_RGB64_16toRGB64_8_AVX2_2
+	
+Convert_RGB64_16toRGB64_8_AVX2_3:
+	test r8d,r13d
+	jz short Convert_RGB64_16toRGB64_8_AVX2_4
+
+	vmovdqa xmm0,XMMWORD ptr[rsi+rax]
+	vpaddusw xmm0,xmm0,xmm1
+	vpsrlw xmm0,xmm0,8
+	vmovdqa XMMWORD ptr[rdi+rax],xmm0
+	add rax,r12
+
+Convert_RGB64_16toRGB64_8_AVX2_4:
+	test r8d,r14d
+	jz short Convert_RGB64_16toRGB64_8_AVX2_5
+	
+	vmovq xmm0,qword ptr[rsi+rax]
+	vpaddusw xmm0,xmm0,xmm1
+	vpsrlw xmm0,xmm0,8
+	vmovq qword ptr[rdi+rax],xmm0
+	
+Convert_RGB64_16toRGB64_8_AVX2_5:
+	add rsi,r10
+	add rdi,r11
+	dec r9d
+	jnz short Convert_RGB64_16toRGB64_8_AVX2_1
+	
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rdi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX2 endp
+
+
 ;JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX2 proc src:dword,dst:dword,w:dword,h:dword,
 ;	src_pitch:dword,dst_pitch:dword
 ; src = rcx
@@ -587,7 +683,7 @@ Convert_16_RGB64_HLG_OOTF_AVX2_2:
 	vmulps ymm2,ymm2,ymm0
 	vcvtps2dq ymm2,ymm2
 	vextracti128 xmm3,ymm2,1
-	vpackssdw xmm2,xmm2,xmm3
+	vpackusdw xmm2,xmm2,xmm3
 	vmovdqa XMMWORD ptr[rdi+2*rax],xmm2
 	
 	add rax,rdx
@@ -604,7 +700,7 @@ Convert_16_RGB64_HLG_OOTF_AVX2_3:
 	vcvtdq2ps xmm2,xmm2
 	vmulps xmm2,xmm2,xmm0
 	vcvtps2dq xmm2,xmm2
-	vpackssdw xmm2,xmm2,xmm2
+	vpackusdw xmm2,xmm2,xmm2
 	vmovq qword ptr[rdi+2*rax],xmm2
 	
 Convert_16_RGB64_HLG_OOTF_AVX2_4:

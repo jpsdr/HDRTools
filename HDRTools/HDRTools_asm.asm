@@ -14,9 +14,14 @@ data_f_1048575 real4 8 dup(1048575.0)
 data_f_65535 real4 8 dup(65535.0)
 data_dw_1048575 dword 8 dup(1048575)
 data_dw_0 dword 8 dup(0)
+data_dw_128 dword 8 dup(128)
+data_dw_32 dword 8 dup(32)
+data_dw_8 dword 8 dup(8)
 
+data_HLG_8 word 16 dup(0FF00h)
 data_HLG_10 dword 8 dup(0FFC00h)
-data_HLG_12 dword 8 dup(0FFC000h)
+data_HLG_12 dword 8 dup(0FFF000h)
+data_w_128 word 16 dup(128)
 data_w_32 word 16 dup(32)
 data_w_8 word 16 dup(8)
 
@@ -5955,10 +5960,10 @@ Convert_RGB32toPlaneY16_SSE2_2:
 	packuswb xmm0,xmm1
 	punpcklbw xmm2,xmm0
 	
+	movdqa XMMWORD ptr[edi],xmm2
+	
 	add dst,16
 	add esi,32
-	
-	movdqa XMMWORD ptr[edi],xmm2
 	
 	mov edi,lookup
 	
@@ -6004,10 +6009,10 @@ Convert_RGB32toPlaneY16_SSE2_3:
 	packuswb xmm0,xmm1
 	punpcklbw xmm2,xmm0
 	
+	movq qword ptr[edi],xmm2
+
 	add dst,8
 	add esi,16
-	
-	movq qword ptr[edi],xmm2
 	
 	mov edi,lookup
 	
@@ -6036,10 +6041,10 @@ Convert_RGB32toPlaneY16_SSE2_4:
 	packuswb xmm0,xmm1
 	punpcklbw xmm2,xmm0
 	
+	movd dword ptr[edi],xmm2
+
 	add dst,4
 	add esi,8
-	
-	movd dword ptr[edi],xmm2
 	
 	mov edi,lookup
 	
@@ -6061,12 +6066,12 @@ Convert_RGB32toPlaneY16_SSE2_5:
 	packuswb xmm0,xmm1
 	punpcklbw xmm2,xmm0
 	
+	pextrw eax,xmm2,0
+
+	mov word ptr[edi],ax
+
 	add dst,2
 	add esi,4
-	
-	pextrw eax,xmm2,0
-	
-	mov word ptr[edi],ax
 	
 Convert_RGB32toPlaneY16_SSE2_6:	
 	mov edi,dst
@@ -6176,10 +6181,10 @@ Convert_RGB32toPlaneY16_AVX_2:
 	vpackuswb xmm0,xmm0,xmm1
 	vpunpcklbw xmm0,xmm1,xmm0
 	
+	vmovdqa XMMWORD ptr[edi],xmm0
+	
 	add dst,16
 	add esi,32
-	
-	vmovdqa XMMWORD ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6224,10 +6229,10 @@ Convert_RGB32toPlaneY16_AVX_3:
 	vpackuswb xmm0,xmm0,xmm1
 	vpunpcklbw xmm0,xmm1,xmm0
 	
+	vmovq qword ptr[edi],xmm0
+	
 	add dst,8
 	add esi,16
-	
-	vmovq qword ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6255,10 +6260,10 @@ Convert_RGB32toPlaneY16_AVX_4:
 	vpackuswb xmm0,xmm0,xmm1
 	vpunpcklbw xmm0,xmm1,xmm0
 	
+	vmovd dword ptr[edi],xmm0
+	
 	add dst,4
 	add esi,8
-	
-	vmovd dword ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6279,12 +6284,12 @@ Convert_RGB32toPlaneY16_AVX_5:
 	vpackuswb xmm0,xmm0,xmm1
 	vpunpcklbw xmm0,xmm1,xmm0
 	
-	add dst,2
-	add esi,4
-	
 	vpextrw eax,xmm0,0
 	
 	mov word ptr[edi],ax
+	
+	add dst,2
+	add esi,4
 	
 Convert_RGB32toPlaneY16_AVX_6:	
 	mov edi,dst
@@ -6303,6 +6308,458 @@ Convert_RGB32toPlaneY16_AVX_6:
 JPSDR_HDRTools_Convert_RGB32toPlaneY16_AVX endp
 
 
+JPSDR_HDRTools_Convert_RGB64toPlaneY16_SSE41 proc src:dword,dst:dword,w:dword,h:dword,
+	lookup:dword,src_modulo:dword,dst_modulo:dword
+
+	public JPSDR_HDRTools_Convert_RGB64toPlaneY16_SSE41
+
+	local i,w0:dword
+
+	push esi
+	push edi
+	push ebx
+
+	pxor xmm0,xmm0
+	pxor xmm1,xmm1
+	movdqa xmm2,XMMWORD ptr data_HLG_8
+	movdqa xmm3,XMMWORD ptr data_dw_128
+
+	mov eax,w
+	shr eax,3
+	mov w0,eax
+	
+	mov esi,src
+
+Convert_RGB64toPlaneY16_SSE41_1:
+	mov edi,lookup
+	
+	mov eax,w0
+	or eax,eax
+	jz Convert_RGB64toPlaneY16_SSE41_3
+	
+	mov i,eax
+Convert_RGB64toPlaneY16_SSE41_2:
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm0,eax,0
+	movzx edx,word ptr[esi+8]
+	movzx ecx,word ptr[esi+10]
+	movzx ebx,word ptr[esi+12] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm0,eax,1
+	movzx edx,word ptr[esi+16]
+	movzx ecx,word ptr[esi+18]
+	movzx ebx,word ptr[esi+20] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm0,eax,2
+	movzx edx,word ptr[esi+24]
+	movzx ecx,word ptr[esi+26]
+	movzx ebx,word ptr[esi+28] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm0,eax,3
+
+	movzx edx,word ptr[esi+32]
+	movzx ecx,word ptr[esi+34]
+	movzx ebx,word ptr[esi+36] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm1,eax,0
+	movzx edx,word ptr[esi+40]
+	movzx ecx,word ptr[esi+42]
+	movzx ebx,word ptr[esi+44] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm1,eax,1
+	movzx edx,word ptr[esi+48]
+	movzx ecx,word ptr[esi+50]
+	movzx ebx,word ptr[esi+52] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm1,eax,2
+	movzx edx,word ptr[esi+56]
+	movzx ecx,word ptr[esi+58]
+	movzx ebx,word ptr[esi+60] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
+	pinsrd xmm1,eax,3
+	
+	psrad xmm0,8
+	psrad xmm1,8
+	paddd xmm0,xmm3
+	paddd xmm1,xmm3
+	packusdw xmm0,xmm1
+	pand xmm0,xmm2
+	
+	movdqa XMMWORD ptr[edi],xmm0
+	
+	add dst,16
+	add esi,64
+	
+	mov edi,lookup
+	
+	dec i
+	jnz Convert_RGB64toPlaneY16_SSE41_2
+	
+Convert_RGB64toPlaneY16_SSE41_3:
+	test w,4
+	jz Convert_RGB64toPlaneY16_SSE41_4
+
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm0,eax,0
+	movzx edx,word ptr[esi+8]
+	movzx ecx,word ptr[esi+10]
+	movzx ebx,word ptr[esi+12] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm0,eax,1
+	movzx edx,word ptr[esi+16]
+	movzx ecx,word ptr[esi+18]
+	movzx ebx,word ptr[esi+20] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm0,eax,2
+	movzx edx,word ptr[esi+24]
+	movzx ecx,word ptr[esi+26]
+	movzx ebx,word ptr[esi+28] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
+	pinsrd xmm0,eax,3
+	
+	psrad xmm0,8
+	paddd xmm0,xmm3
+	packusdw xmm0,xmm0
+	pand xmm0,xmm2
+	
+	movq qword ptr[edi],xmm0
+	
+	add dst,8
+	add esi,32
+	
+	mov edi,lookup	
+	
+Convert_RGB64toPlaneY16_SSE41_4:	
+	test w,2
+	jz Convert_RGB64toPlaneY16_SSE41_5
+	
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	pinsrd xmm0,eax,0
+	movzx edx,word ptr[esi+8]
+	movzx ecx,word ptr[esi+10]
+	movzx ebx,word ptr[esi+12] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
+	pinsrd xmm0,eax,1
+	
+	psrad xmm0,8
+	paddd xmm0,xmm3
+	packusdw xmm0,xmm0
+	pand xmm0,xmm2
+	
+	movd dword ptr[edi],xmm0
+	
+	add dst,4
+	add esi,16
+	
+	mov edi,lookup
+	
+Convert_RGB64toPlaneY16_SSE41_5:
+	test w,1
+	jz short Convert_RGB64toPlaneY16_SSE41_6
+
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
+	pinsrd xmm0,eax,0
+	
+	psrad xmm0,8
+	paddd xmm0,xmm3
+	packusdw xmm0,xmm0
+	pand xmm0,xmm2
+	
+	pextrw eax,xmm0,0
+	mov word ptr[edi],ax
+	
+	add dst,2
+	add esi,8
+	
+Convert_RGB64toPlaneY16_SSE41_6:
+	mov edi,dst
+	add esi,src_modulo
+	add edi,dst_modulo
+	mov dst,edi
+	dec h
+	jnz Convert_RGB64toPlaneY16_SSE41_1
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB64toPlaneY16_SSE41 endp
+
+
+JPSDR_HDRTools_Convert_RGB64toPlaneY16_AVX proc src:dword,dst:dword,w:dword,h:dword,
+	lookup:dword,src_modulo:dword,dst_modulo:dword
+
+	public JPSDR_HDRTools_Convert_RGB64toPlaneY16_AVX
+
+	local i,w0:dword
+
+	push esi
+	push edi
+	push ebx
+
+	vpxor xmm1,xmm1,xmm1
+	vpxor xmm0,xmm0,xmm0
+	vmovdqa xmm2,XMMWORD ptr data_HLG_8
+	vmovdqa xmm3,XMMWORD ptr data_dw_128
+
+	mov eax,w
+	shr eax,3
+	mov w0,eax
+	
+	mov esi,src
+
+Convert_RGB64toPlaneY16_AVX_1:
+	mov edi,lookup
+	
+	mov eax,w0
+	or eax,eax
+	jz Convert_RGB64toPlaneY16_AVX_3
+	
+	mov i,eax
+Convert_RGB64toPlaneY16_AVX_2:
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,0
+	movzx edx,word ptr[esi+8]
+	movzx ecx,word ptr[esi+10]
+	movzx ebx,word ptr[esi+12] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,1
+	movzx edx,word ptr[esi+16]
+	movzx ecx,word ptr[esi+18]
+	movzx ebx,word ptr[esi+20] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,2
+	movzx edx,word ptr[esi+24]
+	movzx ecx,word ptr[esi+26]
+	movzx ebx,word ptr[esi+28] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,3
+
+	movzx edx,word ptr[esi+32]
+	movzx ecx,word ptr[esi+34]
+	movzx ebx,word ptr[esi+36] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm1,xmm1,eax,0
+	movzx edx,word ptr[esi+40]
+	movzx ecx,word ptr[esi+42]
+	movzx ebx,word ptr[esi+44] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm1,xmm1,eax,1
+	movzx edx,word ptr[esi+48]
+	movzx ecx,word ptr[esi+50]
+	movzx ebx,word ptr[esi+52] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm1,xmm1,eax,2
+	movzx edx,word ptr[esi+56]
+	movzx ecx,word ptr[esi+58]
+	movzx ebx,word ptr[esi+60] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
+	vpinsrd xmm1,xmm1,eax,3
+	
+	vpsrad xmm0,xmm0,8
+	vpsrad xmm1,xmm1,8
+	vpaddd xmm0,xmm0,xmm3
+	vpaddd xmm1,xmm1,xmm3
+	vpackusdw xmm0,xmm0,xmm1
+	vpand xmm0,xmm0,xmm2
+	
+	vmovdqa XMMWORD ptr[edi],xmm0
+	
+	add dst,16
+	add esi,64
+	
+	mov edi,lookup
+	
+	dec i
+	jnz Convert_RGB64toPlaneY16_AVX_2
+	
+Convert_RGB64toPlaneY16_AVX_3:
+	test w,4
+	jz Convert_RGB64toPlaneY16_AVX_4
+
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,0
+	movzx edx,word ptr[esi+8]
+	movzx ecx,word ptr[esi+10]
+	movzx ebx,word ptr[esi+12] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,1
+	movzx edx,word ptr[esi+16]
+	movzx ecx,word ptr[esi+18]
+	movzx ebx,word ptr[esi+20] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,2
+	movzx edx,word ptr[esi+24]
+	movzx ecx,word ptr[esi+26]
+	movzx ebx,word ptr[esi+28] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
+	vpinsrd xmm0,xmm0,eax,3
+	
+	vpsrad xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm3
+	vpackusdw xmm0,xmm0,xmm0
+	vpand xmm0,xmm0,xmm2
+	
+	vmovq qword ptr[edi],xmm0
+	
+	add dst,8
+	add esi,32
+	
+	mov edi,lookup	
+	
+Convert_RGB64toPlaneY16_AVX_4:	
+	test w,2
+	jz Convert_RGB64toPlaneY16_AVX_5
+	
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	vpinsrd xmm0,xmm0,eax,0
+	movzx edx,word ptr[esi+8]
+	movzx ecx,word ptr[esi+10]
+	movzx ebx,word ptr[esi+12] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
+	vpinsrd xmm0,xmm0,eax,1
+	
+	vpsrad xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm3
+	vpackusdw xmm0,xmm0,xmm0
+	vpand xmm0,xmm0,xmm2
+	
+	vmovd dword ptr[edi],xmm0
+	
+	add dst,4
+	add esi,16
+	
+	mov edi,lookup
+	
+Convert_RGB64toPlaneY16_AVX_5:
+	test w,1
+	jz short Convert_RGB64toPlaneY16_AVX_6
+
+	movzx edx,word ptr[esi]
+	movzx ecx,word ptr[esi+2]
+	movzx ebx,word ptr[esi+4] ; ebx=R ecx=G edx=B
+	mov eax,dword ptr[edi+4*ebx]
+	add eax,dword ptr[edi+4*ecx+262144]
+	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
+	vpinsrd xmm0,xmm0,eax,0
+	
+	vpsrad xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm3
+	vpackusdw xmm0,xmm0,xmm0
+	vpand xmm0,xmm0,xmm2
+	
+	vpextrw eax,xmm0,0
+	mov word ptr[edi],ax
+
+	add dst,2
+	add esi,8
+	
+Convert_RGB64toPlaneY16_AVX_6:
+	mov edi,dst
+	add esi,src_modulo
+	add edi,dst_modulo
+	mov dst,edi
+	dec h
+	jnz Convert_RGB64toPlaneY16_AVX_1
+
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB64toPlaneY16_AVX endp
+
+
 JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41 proc src:dword,dst:dword,w:dword,h:dword,
 	lookup:dword,src_modulo:dword,dst_modulo:dword
 
@@ -6317,7 +6774,7 @@ JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41 proc src:dword,dst:dword,w:dword
 	pxor xmm1,xmm1
 	pxor xmm0,xmm0
 	movdqa xmm2,XMMWORD ptr data_HLG_10
-	movdqa xmm3,XMMWORD ptr data_w_32
+	movdqa xmm3,XMMWORD ptr data_dw_32
 
 	mov eax,w
 	shr eax,2
@@ -6361,19 +6818,20 @@ Convert_10_RGB64toPlaneY32_SSE41_2:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	pinsrd xmm0,eax,3
 	
 	psrad xmm0,8
+	paddd xmm0,xmm3
 	packusdw xmm0,xmm1
-	paddusw xmm0,xmm3
 	punpcklwd xmm0,xmm1
 	pslld xmm0,4
 	pand xmm0,xmm2
 	
+	movdqa XMMWORD ptr[edi],xmm0
+	
 	add dst,16
 	add esi,32
-	
-	movdqa XMMWORD ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6397,19 +6855,20 @@ Convert_10_RGB64toPlaneY32_SSE41_3:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	pinsrd xmm0,eax,1
 	
 	psrad xmm0,8
+	paddd xmm0,xmm3
 	packusdw xmm0,xmm1
-	paddusw xmm0,xmm3
 	punpcklwd xmm0,xmm1
 	pslld xmm0,4
 	pand xmm0,xmm2
 	
+	movq qword ptr[edi],xmm0
+	
 	add dst,8
 	add esi,16
-	
-	movq qword ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6423,21 +6882,20 @@ Convert_10_RGB64toPlaneY32_SSE41_4:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	pinsrd xmm0,eax,0
 	
 	psrad xmm0,8
+	paddd xmm0,xmm3
 	packusdw xmm0,xmm1
-	paddusw xmm0,xmm3
 	punpcklwd xmm0,xmm1
 	pslld xmm0,4
 	pand xmm0,xmm2
 	
-	add dst,4
-	add esi,8
-	
 	movd dword ptr[edi],xmm0
 	
-	mov edi,lookup
+	add dst,4
+	add esi,8
 	
 Convert_10_RGB64toPlaneY32_SSE41_5:
 	mov edi,dst
@@ -6470,7 +6928,7 @@ JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_AVX proc src:dword,dst:dword,w:dword,h
 	vpxor xmm1,xmm1,xmm1
 	vpxor xmm0,xmm0,xmm0
 	vmovdqa xmm2,XMMWORD ptr data_HLG_10
-	vmovdqa xmm3,XMMWORD ptr data_w_32
+	vmovdqa xmm3,XMMWORD ptr data_dw_32
 
 	mov eax,w
 	shr eax,2
@@ -6514,19 +6972,20 @@ Convert_10_RGB64toPlaneY32_AVX_2:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	vpinsrd xmm0,xmm0,eax,3
 	
 	vpsrad xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm3
 	vpackusdw xmm0,xmm0,xmm1
-	vpaddusw xmm0,xmm0,xmm3
 	vpunpcklwd xmm0,xmm0,xmm1
 	vpslld xmm0,xmm0,4
 	vpand xmm0,xmm0,xmm2
 	
+	vmovdqa XMMWORD ptr[edi],xmm0
+	
 	add dst,16
 	add esi,32
-	
-	vmovdqa XMMWORD ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6550,19 +7009,20 @@ Convert_10_RGB64toPlaneY32_AVX_3:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	vpinsrd xmm0,xmm0,eax,1
 	
 	vpsrad xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm3
 	vpackusdw xmm0,xmm0,xmm1
-	vpaddusw xmm0,xmm0,xmm3
 	vpunpcklwd xmm0,xmm0,xmm1
 	vpslld xmm0,xmm0,4
 	vpand xmm0,xmm0,xmm2
 	
+	vmovq qword ptr[edi],xmm0
+	
 	add dst,8
 	add esi,16
-	
-	vmovq qword ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6576,21 +7036,20 @@ Convert_10_RGB64toPlaneY32_AVX_4:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	vpinsrd xmm0,xmm0,eax,0
 	
 	vpsrad xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm3
 	vpackusdw xmm0,xmm0,xmm1
-	vpaddusw xmm0,xmm0,xmm3
 	vpunpcklwd xmm0,xmm0,xmm1
 	vpslld xmm0,xmm0,4
 	vpand xmm0,xmm0,xmm2
 	
-	add dst,4
-	add esi,8
-	
 	vmovd dword ptr[edi],xmm0
 	
-	mov edi,lookup
+	add dst,4
+	add esi,8
 	
 Convert_10_RGB64toPlaneY32_AVX_5:
 	mov edi,dst
@@ -6623,7 +7082,7 @@ JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_SSE41 proc src:dword,dst:dword,w:dword
 	pxor xmm1,xmm1
 	pxor xmm0,xmm0
 	movdqa xmm2,XMMWORD ptr data_HLG_12
-	movdqa xmm3,XMMWORD ptr data_w_8
+	movdqa xmm3,XMMWORD ptr data_dw_8
 
 	mov eax,w
 	shr eax,2
@@ -6667,19 +7126,20 @@ Convert_12_RGB64toPlaneY32_SSE41_2:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	pinsrd xmm0,eax,3
 	
 	psrad xmm0,8
+	paddd xmm0,xmm3
 	packusdw xmm0,xmm1
-	paddusw xmm0,xmm3
 	punpcklwd xmm0,xmm1
 	pslld xmm0,8
 	pand xmm0,xmm2
 	
+	movdqa XMMWORD ptr[edi],xmm0
+	
 	add dst,16
 	add esi,32
-	
-	movdqa XMMWORD ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6703,19 +7163,20 @@ Convert_12_RGB64toPlaneY32_SSE41_3:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	pinsrd xmm0,eax,1
 	
 	psrad xmm0,8
+	paddd xmm0,xmm3
 	packusdw xmm0,xmm1
-	paddusw xmm0,xmm3
 	punpcklwd xmm0,xmm1
 	pslld xmm0,8
 	pand xmm0,xmm2
 	
+	movq qword ptr[edi],xmm0
+	
 	add dst,8
 	add esi,16
-	
-	movq qword ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6729,21 +7190,20 @@ Convert_12_RGB64toPlaneY32_SSE41_4:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	pinsrd xmm0,eax,0
 	
 	psrad xmm0,8
+	paddd xmm0,xmm3
 	packusdw xmm0,xmm1
-	paddusw xmm0,xmm3
 	punpcklwd xmm0,xmm1
 	pslld xmm0,8
 	pand xmm0,xmm2
 	
-	add dst,4
-	add esi,8
-	
 	movd dword ptr[edi],xmm0
 	
-	mov edi,lookup
+	add dst,4
+	add esi,8
 	
 Convert_12_RGB64toPlaneY32_SSE41_5:
 	mov edi,dst
@@ -6776,7 +7236,7 @@ JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_AVX proc src:dword,dst:dword,w:dword,h
 	vpxor xmm1,xmm1,xmm1
 	vpxor xmm0,xmm0,xmm0
 	vmovdqa xmm2,XMMWORD ptr data_HLG_12
-	vmovdqa xmm3,XMMWORD ptr data_w_8
+	vmovdqa xmm3,XMMWORD ptr data_dw_8
 
 	mov eax,w
 	shr eax,2
@@ -6820,19 +7280,20 @@ Convert_12_RGB64toPlaneY32_AVX_2:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	vpinsrd xmm0,xmm0,eax,3
 	
 	vpsrad xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm3
 	vpackusdw xmm0,xmm0,xmm1
-	vpaddusw xmm0,xmm0,xmm3
 	vpunpcklwd xmm0,xmm0,xmm1
 	vpslld xmm0,xmm0,8
 	vpand xmm0,xmm0,xmm2
 	
+	vmovdqa XMMWORD ptr[edi],xmm0
+	
 	add dst,16
 	add esi,32
-	
-	vmovdqa XMMWORD ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6856,19 +7317,20 @@ Convert_12_RGB64toPlaneY32_AVX_3:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	vpinsrd xmm0,xmm0,eax,1
 	
 	vpsrad xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm3
 	vpackusdw xmm0,xmm0,xmm1
-	vpaddusw xmm0,xmm0,xmm3
 	vpunpcklwd xmm0,xmm0,xmm1
 	vpslld xmm0,xmm0,8
 	vpand xmm0,xmm0,xmm2
 	
+	vmovq qword ptr[edi],xmm0
+	
 	add dst,8
 	add esi,16
-	
-	vmovq qword ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -6882,21 +7344,20 @@ Convert_12_RGB64toPlaneY32_AVX_4:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	vpinsrd xmm0,xmm0,eax,0
 	
 	vpsrad xmm0,xmm0,8
+	vpaddd xmm0,xmm0,xmm3
 	vpackusdw xmm0,xmm0,xmm1
-	vpaddusw xmm0,xmm0,xmm3
 	vpunpcklwd xmm0,xmm0,xmm1
 	vpslld xmm0,xmm0,8
 	vpand xmm0,xmm0,xmm2
 	
-	add dst,4
-	add esi,8
-	
 	vmovd dword ptr[edi],xmm0
 	
-	mov edi,lookup
+	add dst,4
+	add esi,8
 	
 Convert_12_RGB64toPlaneY32_AVX_5:
 	mov edi,dst
@@ -6971,16 +7432,17 @@ Convert_16_RGB64toPlaneY32_SSE41_2:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	pinsrd xmm0,eax,3
 	
 	psrad xmm0,8
 	packusdw xmm0,xmm1
 	punpcklwd xmm0,xmm1
 	
+	movdqa XMMWORD ptr[edi],xmm0
+	
 	add dst,16
 	add esi,32
-	
-	movdqa XMMWORD ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -7004,16 +7466,17 @@ Convert_16_RGB64toPlaneY32_SSE41_3:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	pinsrd xmm0,eax,1
 	
 	psrad xmm0,8
 	packusdw xmm0,xmm1
 	punpcklwd xmm0,xmm1
 	
+	movq qword ptr[edi],xmm0
+	
 	add dst,8
 	add esi,16
-	
-	movq qword ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -7027,18 +7490,17 @@ Convert_16_RGB64toPlaneY32_SSE41_4:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	pinsrd xmm0,eax,0
 	
 	psrad xmm0,8
 	packusdw xmm0,xmm1
 	punpcklwd xmm0,xmm1
 	
-	add dst,4
-	add esi,8
-	
 	movd dword ptr[edi],xmm0
 	
-	mov edi,lookup
+	add dst,4
+	add esi,8
 	
 Convert_16_RGB64toPlaneY32_SSE41_5:
 	mov edi,dst
@@ -7113,16 +7575,17 @@ Convert_16_RGB64toPlaneY32_AVX_2:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	vpinsrd xmm0,xmm0,eax,3
 	
 	vpsrad xmm0,xmm0,8
 	vpackusdw xmm0,xmm0,xmm1
 	vpunpcklwd xmm0,xmm0,xmm1
 	
+	vmovdqa XMMWORD ptr[edi],xmm0
+	
 	add dst,16
 	add esi,32
-	
-	vmovdqa XMMWORD ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -7146,16 +7609,17 @@ Convert_16_RGB64toPlaneY32_AVX_3:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	vpinsrd xmm0,xmm0,eax,1
 	
 	vpsrad xmm0,xmm0,8
 	vpackusdw xmm0,xmm0,xmm1
 	vpunpcklwd xmm0,xmm0,xmm1
 	
+	vmovq qword ptr[edi],xmm0
+	
 	add dst,8
 	add esi,16
-	
-	vmovq qword ptr[edi],xmm0
 	
 	mov edi,lookup
 	
@@ -7169,18 +7633,17 @@ Convert_16_RGB64toPlaneY32_AVX_4:
 	mov eax,dword ptr[edi+4*ebx]
 	add eax,dword ptr[edi+4*ecx+262144]
 	add eax,dword ptr[edi+4*edx+524288]
+	mov edi,dst
 	vpinsrd xmm0,xmm0,eax,0
 	
 	vpsrad xmm0,xmm0,8
 	vpackusdw xmm0,xmm0,xmm1
 	vpunpcklwd xmm0,xmm0,xmm1
 	
-	add dst,4
-	add esi,8
-	
 	vmovd dword ptr[edi],xmm0
 	
-	mov edi,lookup
+	add dst,4
+	add esi,8
 	
 Convert_16_RGB64toPlaneY32_AVX_5:
 	mov edi,dst
@@ -7197,6 +7660,116 @@ Convert_16_RGB64toPlaneY32_AVX_5:
 	ret
 
 JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_AVX endp
+
+
+JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_SSE2 proc src:dword,dst:dword,w:dword,h:dword,
+	src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_SSE2
+
+	push esi
+	push edi
+	push ebx
+
+	movdqa xmm1,XMMWORD ptr data_w_128
+
+	mov esi,src
+	mov edi,dst
+	mov ebx,w
+	shr ebx,1
+	mov edx,16
+
+Convert_RGB64_16toRGB64_8_SSE2_1:
+	mov ecx,ebx
+	xor eax,eax
+	or ecx,ecx
+	jz short Convert_RGB64_16toRGB64_8_SSE2_3
+	
+Convert_RGB64_16toRGB64_8_SSE2_2:
+	movdqa xmm0,XMMWORD ptr[esi+eax]
+	paddusw xmm0,xmm1
+	psrlw xmm0,8
+	movdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,edx
+	loop Convert_RGB64_16toRGB64_8_SSE2_2
+	
+	test w,1
+	jz short Convert_RGB64_16toRGB64_8_SSE2_4
+	
+Convert_RGB64_16toRGB64_8_SSE2_3:
+	movq xmm0,qword ptr[esi+eax]
+	paddusw xmm0,xmm1
+	psrlw xmm0,8
+	movq qword ptr[edi+eax],xmm0
+	
+Convert_RGB64_16toRGB64_8_SSE2_4:
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_RGB64_16toRGB64_8_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX proc src:dword,dst:dword,w:dword,h:dword,
+	src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX
+
+	push esi
+	push edi
+	push ebx
+
+	vmovdqa xmm1,XMMWORD ptr data_w_128
+
+	mov esi,src
+	mov edi,dst
+	mov ebx,w
+	shr ebx,1
+	mov edx,16
+
+Convert_RGB64_16toRGB64_8_AVX_1:
+	mov ecx,ebx
+	xor eax,eax
+	or ecx,ecx
+	jz short Convert_RGB64_16toRGB64_8_AVX_3
+	
+Convert_RGB64_16toRGB64_8_AVX_2:
+	vmovdqa xmm0,XMMWORD ptr[esi+eax]
+	vpaddusw xmm0,xmm0,xmm1
+	vpsrlw xmm0,xmm0,8
+	vmovdqa XMMWORD ptr[edi+eax],xmm0
+	add eax,edx
+	loop Convert_RGB64_16toRGB64_8_AVX_2
+
+Convert_RGB64_16toRGB64_8_AVX_3:
+	test w,1
+	jz short Convert_RGB64_16toRGB64_8_AVX_4
+	
+	vmovq xmm0,qword ptr[esi+eax]
+	vpaddusw xmm0,xmm0,xmm1
+	vpsrlw xmm0,xmm0,8
+	vmovq qword ptr[edi+eax],xmm0
+	
+Convert_RGB64_16toRGB64_8_AVX_4:
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_RGB64_16toRGB64_8_AVX_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX endp	
 
 
 JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_SSE2 proc src:dword,dst:dword,w:dword,h:dword,
@@ -7872,9 +8445,9 @@ Convert_RGBPStoPlaneY32D_AVX_2:
 JPSDR_HDRTools_Convert_RGBPStoPlaneY32D_AVX endp
 
 
-JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE2 proc dst:dword,srcY:dword,w:dword,h:dword,dst_pitch:dword,src_pitchY:dword
+JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41 proc dst:dword,srcY:dword,w:dword,h:dword,dst_pitch:dword,src_pitchY:dword
 
-	public JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE2
+	public JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41
 
 	push esi
 	push edi
@@ -7887,13 +8460,13 @@ JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE2 proc dst:dword,srcY:dword,w:dword,
 	mov edx,8
 	pxor xmm4,xmm4
 	
-Convert_16_RGB64_HLG_OOTF_SSE2_1:
+Convert_16_RGB64_HLG_OOTF_SSE41_1:
 	mov ecx,ebx
 	or ecx,ecx
-	jz short Convert_16_RGB64_HLG_OOTF_SSE2_3
+	jz short Convert_16_RGB64_HLG_OOTF_SSE41_3
 	
 	xor eax,eax
-Convert_16_RGB64_HLG_OOTF_SSE2_2:
+Convert_16_RGB64_HLG_OOTF_SSE41_2:
 	movss xmm0,dword ptr[esi+eax]
 	movss xmm1,dword ptr[esi+eax+4]
 	shufps xmm0,xmm0,0
@@ -7908,15 +8481,15 @@ Convert_16_RGB64_HLG_OOTF_SSE2_2:
 	mulps xmm3,xmm1
 	cvtps2dq xmm2,xmm2
 	cvtps2dq xmm3,xmm3
-	packssdw xmm2,xmm3
+	packusdw xmm2,xmm3
 	movdqa XMMWORD ptr[edi+2*eax],xmm2
 	
 	add eax,edx
-	loop Convert_16_RGB64_HLG_OOTF_SSE2_2
+	loop Convert_16_RGB64_HLG_OOTF_SSE41_2
 	
-Convert_16_RGB64_HLG_OOTF_SSE2_3:
+Convert_16_RGB64_HLG_OOTF_SSE41_3:
 	test w,1
-	jz short Convert_16_RGB64_HLG_OOTF_SSE2_4
+	jz short Convert_16_RGB64_HLG_OOTF_SSE41_4
 	
 	movss xmm0,dword ptr[esi+eax]
 	shufps xmm0,xmm0,0
@@ -7925,14 +8498,14 @@ Convert_16_RGB64_HLG_OOTF_SSE2_3:
 	cvtdq2ps xmm2,xmm2
 	mulps xmm2,xmm0
 	cvtps2dq xmm2,xmm2
-	packssdw xmm2,xmm2
+	packusdw xmm2,xmm2
 	movq qword ptr[edi+2*eax],xmm2
 	
-Convert_16_RGB64_HLG_OOTF_SSE2_4:
+Convert_16_RGB64_HLG_OOTF_SSE41_4:
 	add edi,dst_pitch
 	add esi,src_pitchY
 	dec h
-	jnz Convert_16_RGB64_HLG_OOTF_SSE2_1
+	jnz Convert_16_RGB64_HLG_OOTF_SSE41_1
 	
 	pop ebx
 	pop edi
@@ -7940,7 +8513,7 @@ Convert_16_RGB64_HLG_OOTF_SSE2_4:
 
 	ret
 
-JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE2 endp
+JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41 endp
 
 
 JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX proc dst:dword,srcY:dword,w:dword,h:dword,dst_pitch:dword,src_pitchY:dword
@@ -7978,7 +8551,7 @@ Convert_16_RGB64_HLG_OOTF_AVX_2:
 	vmulps ymm2,ymm2,ymm0
 	vcvtps2dq ymm2,ymm2
 	vextractf128 xmm3,ymm2,1
-	vpackssdw xmm2,xmm2,xmm3
+	vpackusdw xmm2,xmm2,xmm3
 	vmovdqa XMMWORD ptr[edi+2*eax],xmm2
 	
 	add eax,edx
@@ -7995,7 +8568,7 @@ Convert_16_RGB64_HLG_OOTF_AVX_3:
 	vcvtdq2ps xmm2,xmm2
 	vmulps xmm2,xmm2,xmm0
 	vcvtps2dq xmm2,xmm2
-	vpackssdw xmm2,xmm2,xmm2
+	vpackusdw xmm2,xmm2,xmm2
 	vmovq qword ptr[edi+2*eax],xmm2
 	
 Convert_16_RGB64_HLG_OOTF_AVX_4:
@@ -8024,7 +8597,7 @@ JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_SSE2 proc dstR:dword,dstG:dword,dstB:dword
 	push edi
 	push ebx
 	
-	mov esi,srcY
+	mov edi,srcY
 	mov ebx,w4
 	mov edx,16
 	
@@ -8037,15 +8610,15 @@ Convert_RGBPS_HLG_OOTF_SSE2_2:
 	
 	movaps xmm1,XMMWORD ptr[esi+eax]
 	mulps xmm1,xmm0
-	movaps XMMWORD ptr[esi+eax],xmm0
+	movaps XMMWORD ptr[esi+eax],xmm1
 	mov esi,dstG
 	movaps xmm1,XMMWORD ptr[esi+eax]
 	mulps xmm1,xmm0
-	movaps XMMWORD ptr[esi+eax],xmm0
+	movaps XMMWORD ptr[esi+eax],xmm1
 	mov esi,dstB
 	movaps xmm1,XMMWORD ptr[esi+eax]
 	mulps xmm1,xmm0
-	movaps XMMWORD ptr[esi+eax],xmm0
+	movaps XMMWORD ptr[esi+eax],xmm1
 	
 	add eax,edx
 	loop Convert_RGBPS_HLG_OOTF_SSE2_2
@@ -8082,7 +8655,7 @@ JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_AVX proc dstR:dword,dstG:dword,dstB:dword,
 	push edi
 	push ebx
 	
-	mov esi,srcY
+	mov edi,srcY
 	mov ebx,w8
 	mov edx,32
 	
@@ -8094,13 +8667,13 @@ Convert_RGBPS_HLG_OOTF_AVX_2:
 	vmovaps ymm0,YMMWORD ptr[edi+eax]
 	
 	vmulps ymm1,ymm0,YMMWORD ptr[esi+eax]
-	vmovaps YMMWORD ptr[esi+eax],ymm0
+	vmovaps YMMWORD ptr[esi+eax],ymm1
 	mov esi,dstG
 	vmulps ymm1,ymm0,YMMWORD ptr[esi+eax]
-	vmovaps YMMWORD ptr[esi+eax],ymm0
+	vmovaps YMMWORD ptr[esi+eax],ymm1
 	mov esi,dstB
 	vmulps ymm1,ymm0,YMMWORD ptr[esi+eax]
-	vmovaps YMMWORD ptr[esi+eax],ymm0
+	vmovaps YMMWORD ptr[esi+eax],ymm1
 	
 	add eax,edx
 	loop Convert_RGBPS_HLG_OOTF_AVX_2
@@ -8129,6 +8702,131 @@ Convert_RGBPS_HLG_OOTF_AVX_2:
 
 JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_AVX endp
 
+
+JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_SSE2 proc dstR:dword,dstG:dword,dstB:dword,srcY:dword,w4:dword,h:dword,
+	dst_pitchR:dword,dst_pitchG:dword,dst_pitchB:dword,src_pitchY:dword
+
+	public JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_SSE2
+
+	push esi
+	push edi
+	push ebx
+	
+	movaps xmm2,XMMWORD ptr data_f_1
+	
+	mov edi,srcY
+	mov ebx,w4
+	mov edx,16
+	
+Convert_RGBPS_HLG_OOTF_Scale_SSE2_1:
+	mov ecx,ebx
+	xor eax,eax
+Convert_RGBPS_HLG_OOTF_Scale_SSE2_2:
+	mov esi,dstR
+	movaps xmm0,XMMWORD ptr[edi+eax]
+	
+	movaps xmm1,XMMWORD ptr[esi+eax]
+	mulps xmm1,xmm0
+	minps xmm1,xmm2
+	movaps XMMWORD ptr[esi+eax],xmm1
+	mov esi,dstG
+	movaps xmm1,XMMWORD ptr[esi+eax]
+	mulps xmm1,xmm0
+	minps xmm1,xmm2
+	movaps XMMWORD ptr[esi+eax],xmm1
+	mov esi,dstB
+	movaps xmm1,XMMWORD ptr[esi+eax]
+	mulps xmm1,xmm0
+	minps xmm1,xmm2
+	movaps XMMWORD ptr[esi+eax],xmm1
+	
+	add eax,edx
+	loop Convert_RGBPS_HLG_OOTF_Scale_SSE2_2
+	
+	mov esi,dstR
+	add esi,dst_pitchR
+	mov dstR,esi
+	mov esi,dstG
+	add esi,dst_pitchG
+	mov dstG,esi
+	mov esi,dstB
+	add esi,dst_pitchB
+	mov dstB,esi
+	add edi,src_pitchY
+	dec h
+	
+	jnz short Convert_RGBPS_HLG_OOTF_Scale_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_SSE2 endp
+
+	
+JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX proc dstR:dword,dstG:dword,dstB:dword,srcY:dword,w8:dword,h:dword,
+	dst_pitchR:dword,dst_pitchG:dword,dst_pitchB:dword,src_pitchY:dword
+
+	public JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX
+
+	push esi
+	push edi
+	push ebx
+	
+	vmovaps ymm2,YMMWORD ptr data_f_1
+	
+	mov edi,srcY
+	mov ebx,w8
+	mov edx,32
+	
+Convert_RGBPS_HLG_OOTF_Scale_AVX_1:
+	mov ecx,ebx
+	xor eax,eax
+Convert_RGBPS_HLG_OOTF_Scale_AVX_2:
+	mov esi,dstR
+	vmovaps ymm0,YMMWORD ptr[edi+eax]
+	
+	vmulps ymm1,ymm0,YMMWORD ptr[esi+eax]
+	vminps ymm1,ymm1,ymm2
+	vmovaps YMMWORD ptr[esi+eax],ymm1
+	mov esi,dstG
+	vmulps ymm1,ymm0,YMMWORD ptr[esi+eax]
+	vminps ymm1,ymm1,ymm2
+	vmovaps YMMWORD ptr[esi+eax],ymm1
+	mov esi,dstB
+	vmulps ymm1,ymm0,YMMWORD ptr[esi+eax]
+	vminps ymm1,ymm1,ymm2
+	vmovaps YMMWORD ptr[esi+eax],ymm1
+	
+	add eax,edx
+	loop Convert_RGBPS_HLG_OOTF_Scale_AVX_2
+	
+	mov esi,dstR
+	add esi,dst_pitchR
+	mov dstR,esi
+	mov esi,dstG
+	add esi,dst_pitchG
+	mov dstG,esi
+	mov esi,dstB
+	add esi,dst_pitchB
+	mov dstB,esi
+	add edi,src_pitchY
+	dec h
+	
+	jnz short Convert_RGBPS_HLG_OOTF_Scale_AVX_1
+	
+	vzeroupper
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX endp
+	
 	
 ;***************************************************
 ;**           XYZ/HDR/SDR functions               **

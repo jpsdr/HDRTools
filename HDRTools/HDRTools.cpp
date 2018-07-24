@@ -194,6 +194,10 @@ extern "C" void JPSDR_HDRTools_Convert_RGB32toPlaneY16_SSE2(const void *src,void
 	const int16_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
 extern "C" void JPSDR_HDRTools_Convert_RGB32toPlaneY16_AVX(const void *src,void *dst,int32_t w,int32_t h,
 	const int16_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_RGB64toPlaneY16_SSE41(const void *src,void *dst,int32_t w,int32_t h,
+	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
+extern "C" void JPSDR_HDRTools_Convert_RGB64toPlaneY16_AVX(const void *src,void *dst,int32_t w,int32_t h,
+	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
 extern "C" void JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41(const void *src,void *dst,int32_t w,int32_t h,
 	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
 extern "C" void JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_AVX(const void *src,void *dst,int32_t w,int32_t h,
@@ -207,6 +211,10 @@ extern "C" void JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_SSE41(const void *src,
 extern "C" void JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_AVX(const void *src,void *dst,int32_t w,int32_t h,
 	const int32_t *lookup, ptrdiff_t src_modulo,ptrdiff_t dst_modulo);
 
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_SSE2(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
 extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_SSE2(const void *src,void *dst,int32_t w,int32_t h,
 	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
 extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX(const void *src,void *dst,int32_t w,int32_t h,
@@ -238,7 +246,7 @@ extern "C" void JPSDR_HDRTools_Convert_RGBPStoPlaneY32D_AVX(const void *srcR,con
 	void *dst,int32_t w8,int32_t h,ptrdiff_t src_pitchR,ptrdiff_t src_pitchG,ptrdiff_t src_pitchB,
 	ptrdiff_t dst_pitch,float *Coeff_R,float *Coeff_G,float *Coeff_B);
 
-extern "C" void JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE2(void *dst,void *srcY,int32_t w,int32_t h,
+extern "C" void JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(void *dst,void *srcY,int32_t w,int32_t h,
 	ptrdiff_t dst_pitch,ptrdiff_t src_pitchY);
 extern "C" void JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(void *dst,void *srcY,int32_t w,int32_t h,
 	ptrdiff_t dst_pitch,ptrdiff_t src_pitchY);
@@ -246,6 +254,10 @@ extern "C" void JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(void *dst,void *src
 extern "C" void JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_SSE2(void *dstR,void *dstG,void *dstB,void *srcY,
 	int32_t w4,int32_t h,ptrdiff_t dst_pitchR,ptrdiff_t dst_pitchG,ptrdiff_t dst_pitchB,ptrdiff_t src_pitchY);
 extern "C" void JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_AVX(void *dstR,void *dstG,void *dstB,void *srcY,
+	int32_t w8,int32_t h,ptrdiff_t dst_pitchR,ptrdiff_t dst_pitchG,ptrdiff_t dst_pitchB,ptrdiff_t src_pitchY);
+extern "C" void JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_SSE2(void *dstR,void *dstG,void *dstB,void *srcY,
+	int32_t w4,int32_t h,ptrdiff_t dst_pitchR,ptrdiff_t dst_pitchG,ptrdiff_t dst_pitchB,ptrdiff_t src_pitchY);
+extern "C" void JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX(void *dstR,void *dstG,void *dstB,void *srcY,
 	int32_t w8,int32_t h,ptrdiff_t dst_pitchR,ptrdiff_t dst_pitchG,ptrdiff_t dst_pitchB,ptrdiff_t src_pitchY);
 
 extern "C" void JPSDR_HDRTools_Scale_20_XYZ_SSE2(const void *src,void *dst,int32_t w4,int32_t h,
@@ -273,6 +285,8 @@ extern "C" void JPSDR_HDRTools_Convert_XYZ_SDRtoHDR_32_AVX(const void *src,void 
 	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *Coeff);
 
 #ifdef AVX2_BUILD_POSSIBLE
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX2(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
 extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX2(const void *src,void *dst,int32_t w,int32_t h,
 	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
 extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_12_AVX2(const void *src,void *dst,int32_t w,int32_t h,
@@ -6021,6 +6035,30 @@ static void Convert_RGB32toPlaneY16(void *src1, void *dst1,const int32_t w,const
 }
 
 
+static void Convert_RGB64toPlaneY16(void *src1, void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t dst_pitch,int32_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		uint16_t *dst=(uint16_t *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const int32_t y=((lookup[src[j].r]+lookup[(uint32_t)(src[j].g)+65536]+lookup[(uint32_t)(src[j].b)+131072])>>8)+128;
+
+			dst[j]=((uint16_t)std::max((int32_t)0,std::min((int32_t)65535,y)))&0xFF00;
+		}
+
+		src_+=src_pitch;
+		dst_+=dst_pitch;
+	}
+}
+
+
 static void Convert_10_RGB64toPlaneY32(void *src1, void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
 	const ptrdiff_t dst_pitch,int32_t *lookup)
 {
@@ -6060,7 +6098,7 @@ static void Convert_12_RGB64toPlaneY32(void *src1, void *dst1,const int32_t w,co
 		{
 			const int32_t y=((lookup[src[j].r]+lookup[(uint32_t)(src[j].g)+65536]+lookup[(uint32_t)(src[j].b)+131072])>>8)+8;
 
-			dst[j]=(((uint32_t)std::max((int32_t)0,std::min((int32_t)65535,y)))<<8)&0x00FFC000;
+			dst[j]=(((uint32_t)std::max((int32_t)0,std::min((int32_t)65535,y)))<<8)&0x00FFF000;
 		}
 
 		src_+=src_pitch;
@@ -6127,7 +6165,7 @@ static void Convert_RGBPStoPlaneY32(void *src1,void *src2,void *src3,void *dst1,
 			float *dst=(float *)dst_;
 		
 			for(int32_t j=0; j<w; j++)
-				dst[j]=lookupY[(int32_t)round((Coeff_R*srcR[j]+Coeff_R*srcR[j]+Coeff_R*srcR[j])*1048575.0f)];
+				dst[j]=lookupY[(int32_t)round((Coeff_R*srcR[j]+Coeff_G*srcG[j]+Coeff_B*srcB[j])*1048575.0f)];
 
 			srcR_+=src_pitchR;
 			srcG_+=src_pitchG;
@@ -6145,7 +6183,11 @@ static void Convert_RGBPStoPlaneY32(void *src1,void *src2,void *src3,void *dst1,
 			float *dst=(float *)dst_;
 		
 			for(int32_t j=0; j<w; j++)
-				dst[j]=pow(Coeff_R*srcR[j]+Coeff_R*srcR[j]+Coeff_R*srcR[j],lb);
+			{
+				const float y=Coeff_R*srcR[j]+Coeff_G*srcG[j]+Coeff_B*srcB[j];
+
+				dst[j]=(y==0.0f)?0.0f:pow(y,lb);
+			}
 
 			srcR_+=src_pitchR;
 			srcG_+=src_pitchG;
@@ -6193,7 +6235,7 @@ static void Convert_RGBPStoPlaneY32_SSE2(void *src1,void *src2,void *src3,void *
 			float *dst=(float *)dst_;
 
 			for(int32_t j=0; j<w; j++)
-				dst[j]=pow(dst[j],lb);
+				if (dst[j]!=0.0f) dst[j]=pow(dst[j],lb);
 
 			dst_+=dst_pitch;
 		}
@@ -6238,7 +6280,7 @@ static void Convert_RGBPStoPlaneY32_AVX(void *src1,void *src2,void *src3,void *d
 			float *dst=(float *)dst_;
 
 			for(int32_t j=0; j<w; j++)
-				dst[j]=pow(dst[j],lb);
+				if (dst[j]!=0.0f) dst[j]=pow(dst[j],lb);
 
 			dst_+=dst_pitch;
 		}
@@ -6263,6 +6305,103 @@ static void Convert_RGB32_HLG_OOTF(void *src1,void *src2,void *dst1,const int32_
 		{
 			const uint16_t y=srcY[j];
 
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_8_RGB64_HLG_OOTF(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint16_t *srcY=(uint16_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint16_t y=srcY[j];
+			const uint16_t b=(uint16_t)(std::min((uint32_t)src[j].b+128,(uint32_t)65535)>>8);
+			const uint16_t g=(uint16_t)(std::min((uint32_t)src[j].g+128,(uint32_t)65535)>>8);
+			const uint16_t r=(uint16_t)(std::min((uint32_t)src[j].r+128,(uint32_t)65535)>>8);
+			
+			dst[j].b=lookup[y | b];
+			dst[j].g=lookup[y | g];
+			dst[j].r=lookup[y | r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_8_RGB64_HLG_OOTF_SSE2(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_SSE2(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint16_t *srcY=(uint16_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint16_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_8_RGB64_HLG_OOTF_AVX(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint16_t *srcY=(uint16_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint16_t y=srcY[j];
+			
 			dst[j].b=lookup[y | src[j].b];
 			dst[j].g=lookup[y | src[j].g];
 			dst[j].r=lookup[y | src[j].r];
@@ -6485,9 +6624,9 @@ static void Convert_16_RGB64_HLG_OOTF(void *dst1,void *src1,const int32_t w,cons
 		{
 			const float y=srcY[j];
 			
-			dst[j].b=(uint16_t)round(y*dst[j].b);
-			dst[j].g=(uint16_t)round(y*dst[j].g);
-			dst[j].r=(uint16_t)round(y*dst[j].r);
+			dst[j].b=(uint16_t)std::min((int32_t)round(y*dst[j].b),(int32_t)65535);
+			dst[j].g=(uint16_t)std::min((int32_t)round(y*dst[j].g),(int32_t)65535);
+			dst[j].r=(uint16_t)std::min((int32_t)round(y*dst[j].r),(int32_t)65535);
 			dst[j].alpha=0;
 		}
 
@@ -6529,7 +6668,71 @@ static void Convert_RGBPS_HLG_OOTF(void *dst1,void *dst2,void *dst3,void *src1,c
 }
 
 
+static void Convert_RGBPS_HLG_OOTF_Scale(void *dst1,void *dst2,void *dst3,void *src1,const int32_t w,const int32_t h,
+	const ptrdiff_t dst_pitchR,const ptrdiff_t dst_pitchG,const ptrdiff_t dst_pitchB,const ptrdiff_t src_pitchY)
+{
+	uint8_t *dstR_=(uint8_t *)dst1;
+	uint8_t *dstG_=(uint8_t *)dst2;
+	uint8_t *dstB_=(uint8_t *)dst3;
+	const uint8_t *srcY_=(uint8_t *)src1;
+	
+	for(int32_t i=0; i<h; i++)
+	{
+		float *dstR=(float *)dstR_;
+		float *dstG=(float *)dstG_;
+		float *dstB=(float *)dstB_;
+		const float *srcY=(const float *)srcY_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const float y=srcY[j];
+			
+			dstR[j]=std::min(dstR[j]*y,1.0f);
+			dstG[j]=std::min(dstG[j]*y,1.0f);
+			dstB[j]=std::min(dstB[j]*y,1.0f);
+		}
+
+		dstR_+=dst_pitchR;
+		dstG_+=dst_pitchG;
+		dstB_+=dst_pitchB;
+		srcY_+=src_pitchY;
+	}
+}
+
+
 #ifdef AVX2_BUILD_POSSIBLE
+static void Convert_8_RGB64_HLG_OOTF_AVX2(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX2(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint16_t *srcY=(uint16_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint16_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
 static void Convert_10_RGB64_HLG_OOTF_AVX2(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
 	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
 {
@@ -6593,6 +6796,1041 @@ static void Convert_12_RGB64_HLG_OOTF_AVX2(void *src1,void *src2,void *dst1,cons
 	}
 }
 #endif
+
+
+static void Convert_RGB32HLGtoLinearRGB32(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
+	bool SSE2_Enable,bool AVX_Enable,const uint8_t *lookupOETF,int16_t *lookupRGB,void *lookupOOTF,void *lookupinvOOTF)
+{
+	void *srcRGB32=mt_data_inf.src1;
+	void *dstRGB32=mt_data_inf.dst1;
+	void *srcY=mt_data_inf.src4;
+	void *dstY=mt_data_inf.dst4;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+	const ptrdiff_t src_pitch=mt_data_inf.src_pitch1,src_pitchY=mt_data_inf.src_pitch4;
+	const ptrdiff_t dst_pitch=mt_data_inf.dst_pitch1,dst_pitchY=mt_data_inf.dst_pitch4;
+	const ptrdiff_t src_modulo=mt_data_inf.src_modulo1,src_moduloY=mt_data_inf.src_modulo4;
+	const ptrdiff_t dst_modulo=mt_data_inf.dst_modulo1,dst_moduloY=mt_data_inf.dst_modulo4;
+
+	const bool RGB32_al16=((((size_t)srcRGB32) & 0x0F)==0) && ((((size_t)dstRGB32) & 0x0F)==0)
+		&& ((abs(src_pitch) & 0x0F)==0) && ((abs(dst_pitch) & 0x0F)==0);
+	const bool PlaneY_al16=((((size_t)srcY) & 0x0F)==0) && ((((size_t)dstY) & 0x0F)==0)
+		&& ((abs(src_pitchY) & 0x0F)==0) && ((abs(dst_pitchY) & 0x0F)==0);
+
+	JPSDR_HDRTools_LookupRGB32(srcRGB32,dstRGB32,w,h,src_modulo,dst_modulo,lookupOETF);
+
+	if ((!(OOTF || EOTF)) || ((!normalize) && (OOTF && EOTF))) return;
+
+	if (AVX_Enable && RGB32_al16 && PlaneY_al16)
+		JPSDR_HDRTools_Convert_RGB32toPlaneY16_AVX(dstRGB32,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+	else
+	{
+		if (SSE2_Enable && RGB32_al16 && PlaneY_al16)
+			JPSDR_HDRTools_Convert_RGB32toPlaneY16_SSE2(dstRGB32,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+		else Convert_RGB32toPlaneY16(dstRGB32,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+	}
+
+	Convert_RGB32_HLG_OOTF(dstRGB32,dstY,dstRGB32,w,h,dst_pitch,dst_pitchY,dst_pitch,(const uint8_t *)lookupOOTF);
+
+	if (!OOTF) return;
+
+	if (AVX_Enable && RGB32_al16 && PlaneY_al16)
+		JPSDR_HDRTools_Convert_RGB32toPlaneY16_AVX(dstRGB32,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+	else
+	{
+		if (SSE2_Enable && RGB32_al16 && PlaneY_al16)
+			JPSDR_HDRTools_Convert_RGB32toPlaneY16_SSE2(dstRGB32,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+		else Convert_RGB32toPlaneY16(dstRGB32,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+	}
+	Convert_RGB32_HLG_OOTF(dstRGB32,dstY,dstRGB32,w,h,dst_pitch,dst_pitchY,dst_pitch,(const uint8_t *)lookupinvOOTF);
+}
+
+
+static void Convert_RGB64HLGtoLinearRGB64(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
+	uint8_t bits_per_pixel,bool SSE2_Enable,bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,const uint16_t *lookupOETF,
+	int32_t *lookupRGB,void *lookupOOTF,void *lookupinvOOTF)
+{
+	void *srcRGB64=mt_data_inf.src1;
+	void *dstRGB64=mt_data_inf.dst1;
+	void *srcY=mt_data_inf.src4;
+	void *dstY=mt_data_inf.dst4;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+	const ptrdiff_t src_pitch=mt_data_inf.src_pitch1,src_pitchY=mt_data_inf.src_pitch4;
+	const ptrdiff_t dst_pitch=mt_data_inf.dst_pitch1,dst_pitchY=mt_data_inf.dst_pitch4;
+	const ptrdiff_t src_modulo=mt_data_inf.src_modulo1,src_moduloY=mt_data_inf.src_modulo4;
+	const ptrdiff_t dst_modulo=mt_data_inf.dst_modulo1,dst_moduloY=mt_data_inf.dst_modulo4;
+
+	const bool RGB64_al32=((((size_t)srcRGB64) & 0x1F)==0) && ((((size_t)dstRGB64) & 0x1F)==0)
+		&& ((abs(src_pitch) & 0x1F)==0) && ((abs(dst_pitch) & 0x1F)==0);
+	const bool PlaneY_al32=((((size_t)srcY) & 0x1F)==0) && ((((size_t)dstY) & 0x1F)==0)
+		&& ((abs(src_pitchY) & 0x1F)==0) && ((abs(dst_pitchY) & 0x1F)==0);
+	const bool RGB64_al16=((((size_t)srcRGB64) & 0x0F)==0) && ((((size_t)dstRGB64) & 0x0F)==0)
+		&& ((abs(src_pitch) & 0x0F)==0) && ((abs(dst_pitch) & 0x0F)==0);
+	const bool PlaneY_al16=((((size_t)srcY) & 0x0F)==0) && ((((size_t)dstY) & 0x0F)==0)
+		&& ((abs(src_pitchY) & 0x0F)==0) && ((abs(dst_pitchY) & 0x0F)==0);
+
+	JPSDR_HDRTools_LookupRGB64(srcRGB64,dstRGB64,w,h,src_modulo,dst_modulo,lookupOETF);
+
+	if ((!(OOTF || EOTF)) || ((!normalize) && (OOTF && EOTF))) return;
+
+	switch(bits_per_pixel)
+	{
+		case 8 :
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+				JPSDR_HDRTools_Convert_RGB64toPlaneY16_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_RGB64toPlaneY16_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else Convert_RGB64toPlaneY16(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				Convert_8_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					(const uint16_t *)lookupOOTF);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					Convert_8_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupOOTF);
+				else
+				{
+					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_8_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupOOTF);
+					else Convert_8_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupOOTF);
+				}
+			}
+
+			if (!OOTF) return;
+
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+				JPSDR_HDRTools_Convert_RGB64toPlaneY16_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_RGB64toPlaneY16_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else Convert_RGB64toPlaneY16(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				Convert_8_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					(const uint16_t *)lookupinvOOTF);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					Convert_8_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupinvOOTF);
+				else
+				{
+					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_8_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+					else Convert_8_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+				}
+			}
+			break;
+
+		case 10 :
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+				JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else Convert_10_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				Convert_10_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					(const uint16_t *)lookupOOTF);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					Convert_10_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupOOTF);
+				else
+				{
+					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_10_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupOOTF);
+					else Convert_10_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupOOTF);
+				}
+			}
+
+			if (!OOTF) return;
+
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+				JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else Convert_10_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				Convert_10_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					(const uint16_t *)lookupinvOOTF);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					Convert_10_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupinvOOTF);
+				else
+				{
+					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_10_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+					else Convert_10_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+				}
+			}
+			break;
+
+		case 12 :
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+				JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else Convert_12_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				Convert_12_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					(const uint16_t *)lookupOOTF);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					Convert_12_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupOOTF);
+				else
+				{
+					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_12_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupOOTF);
+					else Convert_12_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupOOTF);
+				}
+			}
+
+			if (!OOTF) return;
+
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+				JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else Convert_12_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				Convert_12_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					(const uint16_t *)lookupinvOOTF);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					Convert_12_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupinvOOTF);
+				else
+				{
+					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_12_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+					else Convert_12_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+				}
+			}
+			break;
+
+		default :
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+			{
+				JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				JPSDR_HDRTools_Lookup_Planar32(dstY,dstY,w,h,dst_moduloY,dst_moduloY,lookupOOTF);
+			}
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+				{
+					JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+					JPSDR_HDRTools_Lookup_Planar32(dstY,dstY,w,h,dst_moduloY,dst_moduloY,lookupOOTF);
+				}
+				else Convert_16_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,dst_moduloY,lookupRGB,(float *)lookupOOTF);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al32 && PlaneY_al32)
+					JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+				else
+				{
+					if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+						JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					else Convert_16_RGB64_HLG_OOTF(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+				}
+			}
+
+			if (!OOTF) return;
+
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+			{
+				JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				JPSDR_HDRTools_Lookup_Planar32(dstY,dstY,w,h,dst_moduloY,dst_moduloY,lookupinvOOTF);
+			}
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+				{
+					JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+					JPSDR_HDRTools_Lookup_Planar32(dstY,dstY,w,h,dst_moduloY,dst_moduloY,lookupinvOOTF);
+				}
+				else Convert_16_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,dst_moduloY,lookupRGB,(float *)lookupinvOOTF);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al32 && PlaneY_al32)
+					JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+				else
+				{
+					if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+						JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					else Convert_16_RGB64_HLG_OOTF(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+				}
+			}
+
+			break;
+	}
+}
+
+
+static void Convert_RGB64HLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
+	bool SSE2_Enable,bool AVX_Enable,const float *lookupOETF,uint8_t HLGColor,void *lookupOOTF,void *lookupinvOOTF,float HLG_Lw)
+{
+	void *srcRGB64=mt_data_inf.src1;
+	void *dstR32=mt_data_inf.dst1;
+	void *dstG32=mt_data_inf.dst2;
+	void *dstB32=mt_data_inf.dst3;
+	void *srcY=mt_data_inf.src4;
+	void *dstY=mt_data_inf.dst4;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t w8=(w+7)>>3,w4=(w+3)>>2;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+	const ptrdiff_t src_pitch=mt_data_inf.src_pitch1,src_modulo=mt_data_inf.src_modulo1;
+	const ptrdiff_t src_pitchY=mt_data_inf.src_pitch4,src_moduloY=mt_data_inf.src_modulo4;
+	const ptrdiff_t dst_pitch_R=mt_data_inf.dst_pitch1,dst_moduloR=mt_data_inf.dst_modulo1;
+	const ptrdiff_t dst_pitch_G=mt_data_inf.dst_pitch2,dst_moduloG=mt_data_inf.dst_modulo2;
+	const ptrdiff_t dst_pitch_B=mt_data_inf.dst_pitch3,dst_moduloB=mt_data_inf.dst_modulo3;
+	const ptrdiff_t dst_pitchY=mt_data_inf.dst_pitch4,dst_moduloY=mt_data_inf.dst_modulo4;
+
+	const uint8_t *src_=(uint8_t *)mt_data_inf.src1;
+	uint8_t *dstR_=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dstG_=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dstB_=(uint8_t *)mt_data_inf.dst3;
+
+	const bool PlaneY_al32=((((size_t)srcY) & 0x1F)==0) && ((((size_t)dstY) & 0x1F)==0)
+		&& ((abs(src_pitchY) & 0x1F)==0) && ((abs(dst_pitchY) & 0x1F)==0);
+	const bool PlaneY_al16=((((size_t)srcY) & 0x0F)==0) && ((((size_t)dstY) & 0x0F)==0)
+		&& ((abs(src_pitchY) & 0x0F)==0) && ((abs(dst_pitchY) & 0x0F)==0);
+	const bool R32_al32=((((size_t)dstR32) & 0x1F)==0) && ((abs(dst_pitch_R) & 0x1F)==0);
+	const bool G32_al32=((((size_t)dstG32) & 0x1F)==0) && ((abs(dst_pitch_G) & 0x1F)==0);
+	const bool B32_al32=((((size_t)dstB32) & 0x1F)==0) && ((abs(dst_pitch_B) & 0x1F)==0);
+	const bool R32_al16=((((size_t)dstR32) & 0x0F)==0) && ((abs(dst_pitch_R) & 0x0F)==0);
+	const bool G32_al16=((((size_t)dstG32) & 0x0F)==0) && ((abs(dst_pitch_G) & 0x0F)==0);
+	const bool B32_al16=((((size_t)dstB32) & 0x0F)==0) && ((abs(dst_pitch_B) & 0x0F)==0);
+
+	for (int32_t i=0; i<h; i++)
+	{
+		const uint16_t *src=(uint16_t *)src_;
+		float *dstR=(float *)dstR_,*dstG=(float *)dstG_,*dstB=(float *)dstB_;
+		uint32_t x=0;
+
+		for (int32_t j=0; j<w; j++)
+		{
+			dstB[j]=lookupOETF[src[x++]];
+			dstG[j]=lookupOETF[src[x++]];
+			dstR[j]=lookupOETF[src[x++]];
+			x++;
+		}
+		src_+=src_pitch;
+		dstR_+=dst_pitch_R;
+		dstG_+=dst_pitch_G;
+		dstB_+=dst_pitch_B;
+	}
+
+	if ((!(OOTF || EOTF)) || ((!normalize) && (OOTF && EOTF))) return;
+
+	float lb;
+
+	lb=1.2f+0.42f*log10(HLG_Lw/1000.0f);
+
+	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+		Convert_RGBPStoPlaneY32_AVX(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
+			dst_pitchY,dst_moduloY,HLGColor,true,(float *)lookupOOTF,lb-1.0f);
+	else
+	{
+		if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+			Convert_RGBPStoPlaneY32_SSE2(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
+				dst_pitchY,dst_moduloY,HLGColor,true,(float *)lookupOOTF,lb-1.0f);
+		else
+			Convert_RGBPStoPlaneY32(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
+				dst_pitchY,HLGColor,true,(float *)lookupOOTF,lb-1.0f);
+	}
+
+	if (normalize)
+	{
+		if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+			JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX(dstR32,dstG32,dstB32,dstY,w8,h,dst_pitch_R,dst_pitch_G,
+				dst_pitch_B,dst_pitchY);
+		else
+		{
+			if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+				JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_SSE2(dstR32,dstG32,dstB32,dstY,w4,h,dst_pitch_R,dst_pitch_G,
+					dst_pitch_B,dst_pitchY);
+			else Convert_RGBPS_HLG_OOTF_Scale(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,dst_pitchY);
+		}
+	}
+	else
+	{
+		if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+			JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_AVX(dstR32,dstG32,dstB32,dstY,w8,h,dst_pitch_R,dst_pitch_G,
+				dst_pitch_B,dst_pitchY);
+		else
+		{
+			if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+				JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_SSE2(dstR32,dstG32,dstB32,dstY,w4,h,dst_pitch_R,dst_pitch_G,
+					dst_pitch_B,dst_pitchY);
+			else Convert_RGBPS_HLG_OOTF(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,dst_pitchY);
+		}
+	}
+
+	if (!OOTF) return;
+
+	lb=1.2f+0.42f*log10(10000.0f/1000.0f);
+
+	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+		Convert_RGBPStoPlaneY32_AVX(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
+			dst_pitchY,dst_moduloY,HLGColor,true,(float *)lookupinvOOTF,(1.0f-lb)/lb);
+	else
+	{
+		if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+			Convert_RGBPStoPlaneY32_SSE2(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
+				dst_pitchY,dst_moduloY,HLGColor,true,(float *)lookupinvOOTF,(1.0f-lb)/lb);
+		else
+			Convert_RGBPStoPlaneY32(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
+				dst_pitchY,HLGColor,true,(float *)lookupinvOOTF,(1.0f-lb)/lb);
+	}
+
+	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+		JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX(dstR32,dstG32,dstB32,dstY,w8,h,dst_pitch_R,dst_pitch_G,
+			dst_pitch_B,dst_pitchY);
+	else
+	{
+		if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+			JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_SSE2(dstR32,dstG32,dstB32,dstY,w4,h,dst_pitch_R,dst_pitch_G,
+				dst_pitch_B,dst_pitchY);
+		else Convert_RGBPS_HLG_OOTF_Scale(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,dst_pitchY);
+	}
+}
+
+
+static void Convert_LinearRGB32toRGB32HLG(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
+	bool SSE2_Enable,bool AVX_Enable,const uint8_t *lookupOETF,int16_t *lookupRGB,void *lookupOOTF,void *lookupinvOOTF)
+{
+	void *srcRGB32=mt_data_inf.src1;
+	void *dstRGB32=mt_data_inf.dst1;
+	void *srcY=mt_data_inf.src4;
+	void *dstY=mt_data_inf.dst4;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+	const ptrdiff_t src_pitch=mt_data_inf.src_pitch1,src_pitchY=mt_data_inf.src_pitch4;
+	const ptrdiff_t dst_pitch=mt_data_inf.dst_pitch1,dst_pitchY=mt_data_inf.dst_pitch4;
+	const ptrdiff_t src_modulo=mt_data_inf.src_modulo1,src_moduloY=mt_data_inf.src_modulo4;
+	const ptrdiff_t dst_modulo=mt_data_inf.dst_modulo1,dst_moduloY=mt_data_inf.dst_modulo4;
+
+	const bool RGB32_al16=((((size_t)srcRGB32) & 0x0F)==0) && ((((size_t)dstRGB32) & 0x0F)==0)
+		&& ((abs(src_pitch) & 0x0F)==0) && ((abs(dst_pitch) & 0x0F)==0);
+	const bool PlaneY_al16=((((size_t)srcY) & 0x0F)==0) && ((((size_t)dstY) & 0x0F)==0)
+		&& ((abs(src_pitchY) & 0x0F)==0) && ((abs(dst_pitchY) & 0x0F)==0);
+
+	if (!(OOTF || EOTF)) return;
+
+	if ((!normalize) && (OOTF && EOTF))
+	{
+		JPSDR_HDRTools_LookupRGB32(srcRGB32,dstRGB32,w,h,src_modulo,dst_modulo,lookupOETF);
+		return;
+	}
+
+	if (OOTF)
+	{
+		if (AVX_Enable && RGB32_al16 && PlaneY_al16)
+			JPSDR_HDRTools_Convert_RGB32toPlaneY16_AVX(dstRGB32,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+		else
+		{
+			if (SSE2_Enable && RGB32_al16 && PlaneY_al16)
+				JPSDR_HDRTools_Convert_RGB32toPlaneY16_SSE2(dstRGB32,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+			else Convert_RGB32toPlaneY16(dstRGB32,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+		}
+		Convert_RGB32_HLG_OOTF(dstRGB32,dstY,dstRGB32,w,h,dst_pitch,dst_pitchY,dst_pitch,(const uint8_t *)lookupOOTF);
+	}
+
+	if (AVX_Enable && RGB32_al16 && PlaneY_al16)
+		JPSDR_HDRTools_Convert_RGB32toPlaneY16_AVX(dstRGB32,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+	else
+	{
+		if (SSE2_Enable && RGB32_al16 && PlaneY_al16)
+			JPSDR_HDRTools_Convert_RGB32toPlaneY16_SSE2(dstRGB32,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+		else Convert_RGB32toPlaneY16(dstRGB32,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+	}
+	Convert_RGB32_HLG_OOTF(dstRGB32,dstY,dstRGB32,w,h,dst_pitch,dst_pitchY,dst_pitch,(const uint8_t *)lookupinvOOTF);
+
+	JPSDR_HDRTools_LookupRGB32(srcRGB32,dstRGB32,w,h,src_modulo,dst_modulo,lookupOETF);
+}
+
+
+static void Convert_LinearRGB64toRGB64HLG(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
+	uint8_t bits_per_pixel,bool SSE2_Enable,bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,const uint16_t *lookupOETF,
+	int32_t *lookupRGB,void *lookupOOTF,void *lookupinvOOTF)
+{
+	void *srcRGB64=mt_data_inf.src1;
+	void *dstRGB64=mt_data_inf.dst1;
+	void *srcY=mt_data_inf.src4;
+	void *dstY=mt_data_inf.dst4;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+	const ptrdiff_t src_pitch=mt_data_inf.src_pitch1,src_pitchY=mt_data_inf.src_pitch4;
+	const ptrdiff_t dst_pitch=mt_data_inf.dst_pitch1,dst_pitchY=mt_data_inf.dst_pitch4;
+	const ptrdiff_t src_modulo=mt_data_inf.src_modulo1,src_moduloY=mt_data_inf.src_modulo4;
+	const ptrdiff_t dst_modulo=mt_data_inf.dst_modulo1,dst_moduloY=mt_data_inf.dst_modulo4;
+
+	const bool RGB64_al32=((((size_t)srcRGB64) & 0x1F)==0) && ((((size_t)dstRGB64) & 0x1F)==0)
+		&& ((abs(src_pitch) & 0x1F)==0) && ((abs(dst_pitch) & 0x1F)==0);
+	const bool PlaneY_al32=((((size_t)srcY) & 0x1F)==0) && ((((size_t)dstY) & 0x1F)==0)
+		&& ((abs(src_pitchY) & 0x1F)==0) && ((abs(dst_pitchY) & 0x1F)==0);
+	const bool RGB64_al16=((((size_t)srcRGB64) & 0x0F)==0) && ((((size_t)dstRGB64) & 0x0F)==0)
+		&& ((abs(src_pitch) & 0x0F)==0) && ((abs(dst_pitch) & 0x0F)==0);
+	const bool PlaneY_al16=((((size_t)srcY) & 0x0F)==0) && ((((size_t)dstY) & 0x0F)==0)
+		&& ((abs(src_pitchY) & 0x0F)==0) && ((abs(dst_pitchY) & 0x0F)==0);
+
+	JPSDR_HDRTools_LookupRGB64(srcRGB64,dstRGB64,w,h,src_modulo,dst_modulo,lookupOETF);
+
+	if (!(OOTF || EOTF)) return;
+
+	if ((!normalize) && (OOTF && EOTF))
+	{
+		JPSDR_HDRTools_LookupRGB64(srcRGB64,dstRGB64,w,h,src_modulo,dst_modulo,lookupOETF);
+		return;
+	}
+
+	switch(bits_per_pixel)
+	{
+		case 10 :
+			if (OOTF)
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else
+				{
+					if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+						JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+					else Convert_10_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+				}
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+					Convert_10_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupOOTF);
+				else
+#endif
+				{
+					if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_10_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupOOTF);
+					else
+					{
+						if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+							Convert_10_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupOOTF);
+						else Convert_10_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupOOTF);
+					}
+				}
+			}
+
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+				JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else Convert_10_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				Convert_10_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					(const uint16_t *)lookupinvOOTF);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					Convert_10_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupinvOOTF);
+				else
+				{
+					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_10_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+					else Convert_10_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+				}
+			}
+			JPSDR_HDRTools_LookupRGB64(srcRGB64,dstRGB64,w,h,src_modulo,dst_modulo,lookupOETF);
+			break;
+
+		case 12 :
+			if (OOTF)
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else
+				{
+					if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+						JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+					else Convert_12_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+				}
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+					Convert_12_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupOOTF);
+				else
+#endif
+				{
+					if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_12_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupOOTF);
+					else
+					{
+						if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+							Convert_12_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupOOTF);
+						else Convert_12_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupOOTF);
+					}
+				}
+			}
+
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+				JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+					JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				else Convert_12_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				Convert_12_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					(const uint16_t *)lookupinvOOTF);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+					Convert_12_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+						(const uint16_t *)lookupinvOOTF);
+				else
+				{
+					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_12_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+					else Convert_12_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+							(const uint16_t *)lookupinvOOTF);
+				}
+			}
+			JPSDR_HDRTools_LookupRGB64(srcRGB64,dstRGB64,w,h,src_modulo,dst_modulo,lookupOETF);
+			break;
+
+		default :
+			if (OOTF)
+			{
+				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+				{
+					JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+					JPSDR_HDRTools_Lookup_Planar32(dstY,dstY,w,h,dst_moduloY,dst_moduloY,lookupOOTF);
+				}
+				else
+				{
+					if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+					{
+						JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+						JPSDR_HDRTools_Lookup_Planar32(dstY,dstY,w,h,dst_moduloY,dst_moduloY,lookupOOTF);
+					}
+					else Convert_16_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,dst_moduloY,lookupRGB,(float *)lookupOOTF);
+				}
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+					JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+				else
+#endif
+				{
+					if (AVX_Enable && RGB64_al32 && PlaneY_al32)
+						JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					else
+					{
+						if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+							JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+						else Convert_16_RGB64_HLG_OOTF(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					}
+				}
+			}
+
+			if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+			{
+				JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_AVX(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+				JPSDR_HDRTools_Lookup_Planar32(dstY,dstY,w,h,dst_moduloY,dst_moduloY,lookupinvOOTF);
+			}
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+				{
+					JPSDR_HDRTools_Convert_16_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
+					JPSDR_HDRTools_Lookup_Planar32(dstY,dstY,w,h,dst_moduloY,dst_moduloY,lookupinvOOTF);
+				}
+				else Convert_16_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,dst_moduloY,lookupRGB,(float *)lookupinvOOTF);
+			}
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+			else
+#endif
+			{
+				if (AVX_Enable && RGB64_al32 && PlaneY_al32)
+					JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+				else
+				{
+					if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+						JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					else Convert_16_RGB64_HLG_OOTF(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+				}
+			}
+			JPSDR_HDRTools_LookupRGB64(srcRGB64,dstRGB64,w,h,src_modulo,dst_modulo,lookupOETF);
+			break;
+	}
+}
+
+
+static void Convert_LinearRGBPStoRGB64HLG(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
+	bool SSE2_Enable,bool SSE41_Enable,bool AVX_Enable,const uint16_t *lookupOETF,uint8_t HLGColor,void *lookupOOTF,
+	void *lookupinvOOTF,float HLG_Lw,bool fastmode)
+{
+	void *srcR32=mt_data_inf.src1;
+	void *srcG32=mt_data_inf.src2;
+	void *srcB32=mt_data_inf.src3;
+	void *dstRGB64=mt_data_inf.dst1;
+	void *srcY=mt_data_inf.src4;
+	void *dstY=mt_data_inf.dst4;
+	const int32_t w=mt_data_inf.dst_Y_w;
+	const int32_t w8=(w+7)>>3,w4=(w+3)>>2;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+	const ptrdiff_t src_pitch_R=mt_data_inf.src_pitch1,src_moduloR=mt_data_inf.src_modulo1;
+	const ptrdiff_t src_pitch_G=mt_data_inf.src_pitch2,src_moduloG=mt_data_inf.src_modulo2;
+	const ptrdiff_t src_pitch_B=mt_data_inf.src_pitch3,src_moduloB=mt_data_inf.src_modulo3;
+	const ptrdiff_t src_pitchY=mt_data_inf.src_pitch4,src_moduloY=mt_data_inf.src_modulo4;
+	const ptrdiff_t dst_pitch=mt_data_inf.dst_pitch1,dst_modulo=mt_data_inf.dst_modulo1;
+	const ptrdiff_t dst_pitchY=mt_data_inf.dst_pitch4,dst_moduloY=mt_data_inf.dst_modulo4;
+
+	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
+	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
+	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
+	uint8_t *dst_=(uint8_t *)mt_data_inf.dst1;
+
+	const int32_t wx4=w << 2;
+	const int32_t wR=(int32_t)((src_pitch_R-wx4) >> 2);
+	const int32_t wG=(int32_t)((src_pitch_G-wx4) >> 2);
+	const int32_t wB=(int32_t)((src_pitch_B-wx4) >> 2);
+
+	const bool PlaneY_al32=((((size_t)srcY) & 0x1F)==0) && ((((size_t)dstY) & 0x1F)==0)
+		&& ((abs(src_pitchY) & 0x1F)==0) && ((abs(dst_pitchY) & 0x1F)==0);
+	const bool PlaneY_al16=((((size_t)srcY) & 0x0F)==0) && ((((size_t)dstY) & 0x0F)==0)
+		&& ((abs(src_pitchY) & 0x0F)==0) && ((abs(dst_pitchY) & 0x0F)==0);
+	const bool R32_al32=((((size_t)srcR32) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0);
+	const bool G32_al32=((((size_t)srcG32) & 0x1F)==0) && ((abs(src_pitch_G) & 0x1F)==0);
+	const bool B32_al32=((((size_t)srcB32) & 0x1F)==0) && ((abs(src_pitch_B) & 0x1F)==0);
+	const bool R32_al16=((((size_t)srcR32) & 0x0F)==0) && ((abs(src_pitch_R) & 0x0F)==0);
+	const bool G32_al16=((((size_t)srcG32) & 0x0F)==0) && ((abs(src_pitch_G) & 0x0F)==0);
+	const bool B32_al16=((((size_t)srcB32) & 0x0F)==0) && ((abs(src_pitch_B) & 0x0F)==0);
+	const bool dstRGB64_al32=((((size_t)dstRGB64) & 0x1F)==0) && ((abs(dst_pitch) & 0x1F)==0);
+	const bool dstRGB64_al16=((((size_t)dstRGB64) & 0x0F)==0) && ((abs(dst_pitch) & 0x0F)==0);
+
+	if (wR>0)
+	{
+		for(int32_t i=0; i<h; i++)
+		{
+			float *srcR=(float *)(srcR_+wx4);
+
+			std::fill_n(srcR,wR,0.0f);
+			srcR_+=src_pitch_R;
+		}
+	}
+	if (wG>0)
+	{
+		for(int32_t i=0; i<h; i++)
+		{
+			float *srcG=(float *)(srcG_+wx4);
+
+			std::fill_n(srcG,wG,0.0f);
+			srcG_+=src_pitch_G;
+		}
+	}
+	if (wB>0)
+	{
+		for(int32_t i=0; i<h; i++)
+		{
+			float *srcB=(float *)(srcB_+wx4);
+
+			std::fill_n(srcB,wB,0.0f);
+			srcB_+=src_pitch_B;
+		}
+	}
+
+	srcR_=(uint8_t *)mt_data_inf.src1;
+	srcG_=(uint8_t *)mt_data_inf.src2;
+	srcB_=(uint8_t *)mt_data_inf.src3;
+	
+	if ((!(OOTF || EOTF)) || ((!normalize) && (OOTF && EOTF)))
+	{
+		if (AVX_Enable && R32_al32 && G32_al32 && B32_al32)
+			JPSDR_HDRTools_Convert_LinearRGBPStoRGB64_AVX(srcR32,srcG32,srcB32,dstRGB64,w,h,lookupOETF,
+				src_moduloR,src_moduloG,src_moduloB,dst_modulo);
+		else
+		{
+			if (SSE41_Enable && R32_al16 && G32_al16 && B32_al16)
+				JPSDR_HDRTools_Convert_LinearRGBPStoRGB64_SSE41(srcR32,srcG32,srcB32,dstRGB64,w,h,lookupOETF,
+					src_moduloR,src_moduloG,src_moduloB,dst_modulo);
+			else
+			{
+				for(int32_t i=0; i<h; i++)
+				{
+					uint32_t x=0;
+					const float *srcR=(const float *)srcR_;
+					const float *srcG=(const float *)srcG_;
+					const float *srcB=(const float *)srcB_;
+					uint16_t *dst=(uint16_t *)dst_;
+
+					for(int32_t j=0; j<w; j++)
+					{
+						int32_t r=(int32_t)round(srcR[j]*1048575.0f);
+						int32_t g=(int32_t)round(srcG[j]*1048575.0f);
+						int32_t b=(int32_t)round(srcB[j]*1048575.0f);
+
+						r=std::min(1048575,std::max(0,r));
+						g=std::min(1048575,std::max(0,g));
+						b=std::min(1048575,std::max(0,b));
+
+						dst[x++]=lookupOETF[b];
+						dst[x++]=lookupOETF[g];
+						dst[x++]=lookupOETF[r];
+						dst[x++]=0;
+					}
+					srcR_+=src_pitch_R;
+					srcG_+=src_pitch_G;
+					srcB_+=src_pitch_B;
+					dst_+=dst_pitch;
+				}
+			}
+		}
+		return;
+	}
+
+	float lb;
+
+	if (OOTF)
+	{
+		lb=1.2f+0.42f*log10(10000.0f/1000.0f);
+
+		if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+			Convert_RGBPStoPlaneY32_AVX(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
+				dst_pitchY,dst_moduloY,HLGColor,fastmode,(float *)lookupOOTF,lb-1.0f);
+		else
+		{
+			if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+				Convert_RGBPStoPlaneY32_SSE2(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
+					dst_pitchY,dst_moduloY,HLGColor,fastmode,(float *)lookupOOTF,lb-1.0f);
+			else
+				Convert_RGBPStoPlaneY32(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
+					dst_pitchY,HLGColor,fastmode,(float *)lookupOOTF,lb-1.0f);
+		}
+
+		if (normalize)
+		{
+			if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+				JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX(srcR32,srcG32,srcB32,dstY,w8,h,src_pitch_R,src_pitch_G,
+					src_pitch_B,dst_pitchY);
+			else
+			{
+				if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+					JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_SSE2(srcR32,srcG32,srcB32,dstY,w4,h,src_pitch_R,src_pitch_G,
+						src_pitch_B,dst_pitchY);
+				else Convert_RGBPS_HLG_OOTF_Scale(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,dst_pitchY);
+			}
+		}
+		else
+		{
+			if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+				JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_AVX(srcR32,srcG32,srcB32,dstY,w8,h,src_pitch_R,src_pitch_G,
+					src_pitch_B,dst_pitchY);
+			else
+			{
+				if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+					JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_SSE2(srcR32,srcG32,srcB32,dstY,w4,h,src_pitch_R,src_pitch_G,
+						src_pitch_B,dst_pitchY);
+				else Convert_RGBPS_HLG_OOTF(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,dst_pitchY);
+			}
+		}
+	}
+	else
+	{
+		if (normalize)
+		{
+			float Coeffn=10000.0f/HLG_Lw;
+
+			if (AVX_Enable && R32_al32 && G32_al32 && B32_al32)
+			{
+				JPSDR_HDRTools_Scale_HLG_AVX(srcR32,srcR32,w8,h,src_pitch_R,src_pitch_R,&Coeffn);
+				JPSDR_HDRTools_Scale_HLG_AVX(srcG32,srcG32,w8,h,src_pitch_G,src_pitch_G,&Coeffn);
+				JPSDR_HDRTools_Scale_HLG_AVX(srcB32,srcB32,w8,h,src_pitch_B,src_pitch_B,&Coeffn);
+			}
+			else
+			{
+				if (SSE2_Enable && R32_al16 && G32_al16 && B32_al16)
+				{
+					JPSDR_HDRTools_Scale_HLG_SSE2(srcR32,srcR32,w4,h,src_pitch_R,src_pitch_R,&Coeffn);
+					JPSDR_HDRTools_Scale_HLG_SSE2(srcG32,srcG32,w4,h,src_pitch_G,src_pitch_G,&Coeffn);
+					JPSDR_HDRTools_Scale_HLG_SSE2(srcB32,srcB32,w4,h,src_pitch_B,src_pitch_B,&Coeffn);
+				}
+				else
+				{
+					for(int32_t i=0; i<h; i++)
+					{
+						float *srcR=(float *)srcR_;
+
+						for(int32_t j=0; j<w; j++)
+							srcR[j]=std::min(srcR[j]*Coeffn,1.0f);
+
+						srcR_+=src_pitch_R;
+					}
+					for(int32_t i=0; i<h; i++)
+					{
+						float *srcG=(float *)srcG_;
+
+						for(int32_t j=0; j<w; j++)
+							srcG[j]=std::min(srcG[j]*Coeffn,1.0f);
+
+						srcG_+=src_pitch_G;
+					}
+					for(int32_t i=0; i<h; i++)
+					{
+						float *srcB=(float *)srcB_;
+
+						for(int32_t j=0; j<w; j++)
+							srcB[j]=std::min(srcB[j]*Coeffn,1.0f);
+
+						srcB_+=src_pitch_B;
+					}
+
+					srcR_=(uint8_t *)mt_data_inf.src1;
+					srcG_=(uint8_t *)mt_data_inf.src2;
+					srcB_=(uint8_t *)mt_data_inf.src3;
+				}
+			}
+		}
+	}
+
+	lb=1.2f+0.42f*log10(HLG_Lw/1000.0f);
+
+	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+		Convert_RGBPStoPlaneY32_AVX(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
+			dst_pitchY,dst_moduloY,HLGColor,fastmode,(float *)lookupinvOOTF,(1.0f-lb)/lb);
+	else
+	{
+		if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+			Convert_RGBPStoPlaneY32_SSE2(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
+				dst_pitchY,dst_moduloY,HLGColor,fastmode,(float *)lookupinvOOTF,(1.0f-lb)/lb);
+		else
+			Convert_RGBPStoPlaneY32(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
+				dst_pitchY,HLGColor,fastmode,(float *)lookupinvOOTF,(1.0f-lb)/lb);
+	}
+
+	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
+		JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX(srcR32,srcG32,srcB32,dstY,w8,h,src_pitch_R,src_pitch_G,
+			src_pitch_B,dst_pitchY);
+	else
+	{
+		if (SSE2_Enable && PlaneY_al16 && R32_al16 && G32_al16 && B32_al16)
+			JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_SSE2(srcR32,srcG32,srcB32,dstY,w4,h,src_pitch_R,src_pitch_G,
+				src_pitch_B,dst_pitchY);
+		else Convert_RGBPS_HLG_OOTF_Scale(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,dst_pitchY);
+	}
+
+	if (AVX_Enable && R32_al32 && G32_al32 && B32_al32)
+		JPSDR_HDRTools_Convert_LinearRGBPStoRGB64_AVX(srcR32,srcG32,srcB32,dstRGB64,w,h,lookupOETF,
+			src_moduloR,src_moduloG,src_moduloB,dst_modulo);
+	else
+	{
+		if (SSE41_Enable && R32_al16 && G32_al16 && B32_al16)
+			JPSDR_HDRTools_Convert_LinearRGBPStoRGB64_SSE41(srcR32,srcG32,srcB32,dstRGB64,w,h,lookupOETF,
+				src_moduloR,src_moduloG,src_moduloB,dst_modulo);
+		else
+		{
+			for(int32_t i=0; i<h; i++)
+			{
+				uint32_t x=0;
+				const float *srcR=(const float *)srcR_;
+				const float *srcG=(const float *)srcG_;
+				const float *srcB=(const float *)srcB_;
+				uint16_t *dst=(uint16_t *)dst_;
+
+				for(int32_t j=0; j<w; j++)
+				{
+					int32_t r=(int32_t)round(srcR[j]*1048575.0f);
+					int32_t g=(int32_t)round(srcG[j]*1048575.0f);
+					int32_t b=(int32_t)round(srcB[j]*1048575.0f);
+
+					r=std::min(1048575,std::max(0,r));
+					g=std::min(1048575,std::max(0,g));
+					b=std::min(1048575,std::max(0,b));
+
+					dst[x++]=lookupOETF[b];
+					dst[x++]=lookupOETF[g];
+					dst[x++]=lookupOETF[r];
+					dst[x++]=0;
+				}
+				srcR_+=src_pitch_R;
+				srcG_+=src_pitch_G;
+				srcB_+=src_pitch_B;
+				dst_+=dst_pitch;
+			}
+		}
+	}
+}
 
 
 /*
@@ -7532,7 +8770,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
 	vi_original=NULL; vi_422=NULL; vi_444=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
-	lookupHLG_RGB_8=NULL; lookupHLG_RGB_16=NULL; lookupHLG_Y=NULL; lookupHLG_OOTF=NULL;
+	lookupHLG_RGB_8=NULL; lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
 
 	lookup_Upscale8=(uint16_t *)malloc(256*sizeof(uint16_t));
 	lookup_8to16=(uint32_t *)malloc(256*sizeof(uint32_t));
@@ -7554,8 +8792,6 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 		env->ThrowError("ConvertYUVtoLinearRGB: Error while allocating the lookup tables!");
 	}
 
-	bool _ootf=false;
-
 	if (HLG_Mode)
 	{
 		lookupHLG_RGB_8=(int16_t *)malloc(3*256*sizeof(int16_t));
@@ -7566,14 +8802,77 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 			{
 				case 1 :
 				case 2 :
-					if (OutputMode==1) lookupHLG_Y=(float *)malloc(65536*sizeof(float));
-					else lookupHLG_Y=(float *)malloc(1048576*sizeof(float));
+					if (OutputMode==1)
+					{
+						switch(bits_per_pixel)
+						{
+							case 8 :
+								lookupHLG_OOTF=(void *)malloc(256*256*sizeof(uint16_t));
+								lookupHLG_inv_OOTF=(void *)malloc(256*256*sizeof(uint16_t));
+								break;
+							case 10 :
+								lookupHLG_OOTF=(void *)malloc(1024*1024*sizeof(uint16_t));
+								lookupHLG_inv_OOTF=(void *)malloc(1024*1024*sizeof(uint16_t));
+								break;
+							case 12 :
+								lookupHLG_OOTF=(void *)malloc(4096*4096*sizeof(uint16_t));
+								lookupHLG_inv_OOTF=(void *)malloc(4096*4096*sizeof(uint16_t));
+								break;
+							default :
+								lookupHLG_OOTF=(void *)malloc(65536*sizeof(float));
+								lookupHLG_inv_OOTF=(void *)malloc(65536*sizeof(float));
+								break;
+						}
+					}
+					else
+					{
+						lookupHLG_OOTF=(void *)malloc(1048576*sizeof(float));
+						lookupHLG_inv_OOTF=(void *)malloc(1048576*sizeof(float));
+					}
 					break;
-				default : lookupHLG_Y=(float *)malloc(1048576*sizeof(float)); break;
+				default :
+					lookupHLG_OOTF=(void *)malloc(1048576*sizeof(float));
+					lookupHLG_inv_OOTF=(void *)malloc(1048576*sizeof(float));
+					break;
 			}
 		}
 		else
 		{
+			switch(pixelsize)
+			{
+				case 1 :
+					lookupHLG_OOTF=(void *)malloc(256*256*sizeof(uint8_t));
+					lookupHLG_inv_OOTF=(void *)malloc(256*256*sizeof(uint8_t));
+					break;
+				case 2 :
+					switch(bits_per_pixel)
+					{
+						case 10 :
+							lookupHLG_OOTF=(void *)malloc(1024*1024*sizeof(uint16_t));
+							lookupHLG_inv_OOTF=(void *)malloc(1024*1024*sizeof(uint16_t));
+							break;
+						case 12 :
+							lookupHLG_OOTF=(void *)malloc(4096*4096*sizeof(uint16_t));
+							lookupHLG_inv_OOTF=(void *)malloc(4096*4096*sizeof(uint16_t));
+							break;
+						default :
+							lookupHLG_OOTF=(void *)malloc(65536*sizeof(float));
+							lookupHLG_inv_OOTF=(void *)malloc(65536*sizeof(float));
+							break;
+					}
+					break;
+				default :
+					lookupHLG_OOTF=(void *)malloc(1048576*sizeof(float));
+					lookupHLG_inv_OOTF=(void *)malloc(1048576*sizeof(float));
+					break;
+			}
+		}
+
+		if ((lookupHLG_RGB_8==NULL) || (lookupHLG_RGB_16==NULL) || (lookupHLG_OOTF==NULL) || (lookupHLG_inv_OOTF==NULL))
+		{
+			FreeData();
+			if (threads>1) poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertYUVtoLinearRGB: Error while allocating the HLG lookup tables!");
 		}
 	}
 
@@ -7680,11 +8979,314 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 	const double c2=18.8515625;
 	const double c3=18.6875;
 
-	const double lambda=1.2+log10(HLG_Lw/1000.0);
-	const double alphaHLG=HLG_Lw-HLG_Lb;
-	const double betaHLG=HLG_Lb;
 	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a),a_1=1.0/a;
 	const double coeff3=1.0/3.0,coeff12=1.0/12.0;
+
+	if (HLG_Mode)
+	{
+		Compute_Lookup_HLG_8(HLGColor,lookupHLG_RGB_8);
+		Compute_Lookup_HLG_16(HLGColor,lookupHLG_RGB_16);
+		vi_PlaneY_HLG->pixel_type=VideoInfo::CS_Y8;
+
+		double lambda,l;
+		uint8_t *lk_8;
+		uint16_t *lk_16;
+		float *lk_f;
+
+		const double Coeff_HLG=(HDRMode==1)?(HLG_Lw/10000.0):1.0;
+
+		if (OutputMode!=0)
+		{
+			switch(pixelsize)
+			{
+				case 1 :
+				case 2 :
+					if (OutputMode==1)
+					{
+						switch(bits_per_pixel)
+						{
+							case 8 : 
+								lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+								l=lambda-1.0;
+
+								lk_16=(uint16_t *)lookupHLG_OOTF;
+								for(uint32_t i=0; i<256; i++)
+								{
+									const double y=256.0*pow(((double)i)/255.0,l)*Coeff_HLG;
+									const uint32_t offs=i<<8;
+
+									for(uint32_t j=0; j<256; j++)
+										lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+								}
+
+								lambda=1.2+0.42*log10(10000.0/1000.0);
+								l=(1.0-lambda)/lambda;
+
+								lk_16=(uint16_t *)lookupHLG_inv_OOTF;
+								for(uint32_t i=0; i<256; i++)
+								{
+									const double y=(i==0)?0.0:256.0*pow(((double)i)/255.0,l);
+									const uint32_t offs=i<<8;
+
+									for(uint32_t j=0; j<256; j++)
+										lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+								}
+
+								vi_PlaneY_HLG->width*=2;
+								break;
+							case 10 :
+								lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+								l=lambda-1.0;
+
+								lk_16=(uint16_t *)lookupHLG_OOTF;
+								for(uint32_t i=0; i<1024; i++)
+								{
+									const double y=64.0*pow(((double)i)/1023.0,l)*Coeff_HLG;
+									const uint32_t offs=i<<10;
+
+									for(uint32_t j=0; j<1024; j++)
+										lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+								}
+
+								lambda=1.2+0.42*log10(10000.0/1000.0);
+								l=(1.0-lambda)/lambda;
+
+								lk_16=(uint16_t *)lookupHLG_inv_OOTF;
+								for(uint32_t i=0; i<1024; i++)
+								{
+									const double y=(i==0)?0.0:64.0*pow(((double)i)/1023.0,l);
+									const uint32_t offs=i<<10;
+
+									for(uint32_t j=0; j<1024; j++)
+										lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+								}
+
+								vi_PlaneY_HLG->width*=4;
+								break;
+							case 12 :
+								lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+								l=lambda-1.0;
+
+								lk_16=(uint16_t *)lookupHLG_OOTF;
+								for(uint32_t i=0; i<4096; i++)
+								{
+									const double y=16.0*pow(((double)i)/4095.0,l)*Coeff_HLG;
+									const uint32_t offs=i<<12;
+
+									for(uint32_t j=0; j<4096; j++)
+										lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+								}
+
+								lambda=1.2+0.42*log10(10000.0/1000.0);
+								l=(1.0-lambda)/lambda;
+
+								lk_16=(uint16_t *)lookupHLG_inv_OOTF;
+								for(uint32_t i=0; i<4096; i++)
+								{
+									const double y=(i==0)?0.0:16.0*pow(((double)i)/4095.0,l);
+									const uint32_t offs=i<<12;
+
+									for(uint32_t j=0; j<4096; j++)
+										lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+								}
+
+								vi_PlaneY_HLG->width*=4;
+								break;
+							default :
+								lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+								l=lambda-1.0;
+
+								lk_f=(float *)lookupHLG_OOTF;
+								for(uint32_t i=0; i<65536; i++)
+									lk_f[i]=(float)(pow(((double)i)/65535.0,l)*Coeff_HLG);
+
+								lambda=1.2+0.42*log10(10000.0/1000.0);
+								l=(1.0-lambda)/lambda;
+
+								lk_f=(float *)lookupHLG_inv_OOTF;
+								lk_f[0]=0.0f;
+								for(uint32_t i=1; i<65536; i++)
+									lk_f[i]=(float)pow(((double)i)/65535.0,l);
+
+								vi_PlaneY_HLG->width*=4;
+								break;
+						}
+					}
+					else
+					{
+						lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+						l=lambda-1.0;
+
+						lk_f=(float *)lookupHLG_OOTF;
+						for(uint32_t i=0; i<1048576; i++)
+							lk_f[i]=(float)(pow(((double)i)/1048575.0,l)*Coeff_HLG);
+
+						lambda=1.2+0.42*log10(10000.0/1000.0);
+						l=(1.0-lambda)/lambda;
+
+						lk_f=(float *)lookupHLG_inv_OOTF;
+						lk_f[0]=0.0f;
+						for(uint32_t i=1; i<1048576; i++)
+							lk_f[i]=(float)pow(((double)i)/1048575.0,l);
+
+						vi_PlaneY_HLG->width*=4;
+					}
+					break;
+				default :
+					lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+					l=lambda-1.0;
+
+					lk_f=(float *)lookupHLG_OOTF;
+					for(uint32_t i=0; i<1048576; i++)
+						lk_f[i]=(float)(pow(((double)i)/1048575.0,l)*Coeff_HLG);
+
+					lambda=1.2+0.42*log10(10000.0/1000.0);
+					l=(1.0-lambda)/lambda;
+
+					lk_f=(float *)lookupHLG_inv_OOTF;
+					lk_f[0]=0.0f;
+					for(uint32_t i=1; i<1048576; i++)
+						lk_f[i]=(float)pow(((double)i)/1048575.0,l);
+
+					vi_PlaneY_HLG->width*=4;
+					break;
+			}
+		}
+		else
+		{
+			switch(pixelsize)
+			{
+				case 1 :
+					lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+					l=lambda-1.0;
+
+					lk_8=(uint8_t *)lookupHLG_OOTF;
+					for(uint32_t i=0; i<256; i++)
+					{
+						const double y=pow(((double)i)/255.0,l)*Coeff_HLG;
+						const uint32_t offs=i<<8;
+
+						for(uint32_t j=0; j<256; j++)
+							lk_8[offs+j]=(uint8_t)std::min((int16_t)round(j*y),(int16_t)255);
+					}
+
+					lambda=1.2+0.42*log10(10000.0/1000.0);
+					l=(1.0-lambda)/lambda;
+
+					lk_8=(uint8_t *)lookupHLG_inv_OOTF;
+					for(uint32_t i=0; i<256; i++)
+					{
+						const double y=(i==0)?0.0:pow(((double)i)/255.0,l);
+						const uint32_t offs=i<<8;
+
+						for(uint32_t j=0; j<256; j++)
+							lk_8[offs+j]=(uint8_t)std::min((int16_t)round(j*y),(int16_t)255);
+					}
+
+					vi_PlaneY_HLG->width*=2;
+					break;
+				case 2 :
+					switch(bits_per_pixel)
+					{
+						case 10 :
+							lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+							l=lambda-1.0;
+
+							lk_16=(uint16_t *)lookupHLG_OOTF;
+							for(uint32_t i=0; i<1024; i++)
+							{
+								const double y=64.0*pow(((double)i)/1023.0,l)*Coeff_HLG;
+								const uint32_t offs=i<<10;
+
+								for(uint32_t j=0; j<1024; j++)
+									lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+							}
+
+							lambda=1.2+0.42*log10(10000.0/1000.0);
+							l=(1.0-lambda)/lambda;
+
+							lk_16=(uint16_t *)lookupHLG_inv_OOTF;
+							for(uint32_t i=0; i<1024; i++)
+							{
+								const double y=(i==0)?0.0:64.0*pow(((double)i)/1023.0,l);
+								const uint32_t offs=i<<10;
+
+								for(uint32_t j=0; j<1024; j++)
+									lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+							}
+
+							vi_PlaneY_HLG->width*=4;
+							break;
+						case 12 :
+							lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+							l=lambda-1.0;
+
+							lk_16=(uint16_t *)lookupHLG_OOTF;
+							for(uint32_t i=0; i<4096; i++)
+							{
+								const double y=16.0*pow(((double)i)/4095.0,l)*Coeff_HLG;
+								const uint32_t offs=i<<12;
+
+								for(uint32_t j=0; j<4096; j++)
+									lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+							}
+
+							lambda=1.2+0.42*log10(10000.0/1000.0);
+							l=(1.0-lambda)/lambda;
+
+							lk_16=(uint16_t *)lookupHLG_inv_OOTF;
+							for(uint32_t i=0; i<4096; i++)
+							{
+								const double y=(i==0)?0.0:16.0*pow(((double)i)/4095.0,l);
+								const uint32_t offs=i<<12;
+
+								for(uint32_t j=0; j<4096; j++)
+									lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+							}
+
+							vi_PlaneY_HLG->width*=4;
+							break;
+						default :
+							lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+							l=lambda-1.0;
+
+							lk_f=(float *)lookupHLG_OOTF;
+							for(uint32_t i=0; i<65536; i++)
+								lk_f[i]=(float)(pow(((double)i)/65535.0,l)*Coeff_HLG);
+
+							lambda=1.2+0.42*log10(10000.0/1000.0);
+							l=(1.0-lambda)/lambda;
+
+							lk_f=(float *)lookupHLG_inv_OOTF;
+							lk_f[0]=0.0f;
+							for(uint32_t i=1; i<65536; i++)
+								lk_f[i]=(float)pow(((double)i)/65535.0,l);
+
+							vi_PlaneY_HLG->width*=4;
+							break;
+					}
+					break;
+				default :
+					lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+					l=lambda-1.0;
+
+					lk_f=(float *)lookupHLG_OOTF;
+					for(uint32_t i=0; i<1048576; i++)
+						lk_f[i]=(float)(pow(((double)i)/1048575.0,l)*Coeff_HLG);
+
+					lambda=1.2+0.42*log10(10000.0/1000.0);
+					l=(1.0-lambda)/lambda;
+
+					lk_f=(float *)lookupHLG_inv_OOTF;
+					lk_f[0]=0.0f;
+					for(uint32_t i=1; i<1048576; i++)
+						lk_f[i]=(float)pow(((double)i)/1048575.0,l);
+
+					vi_PlaneY_HLG->width*=4;
+					break;
+			}
+		}
+	}
 
 	for (uint16_t i=0; i<256; i++)
 	{
@@ -7716,14 +9318,17 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 			}
 			else
 			{
-				// HLG_OETF-1
-				if (x<=0.5) x=coeff3*x*x;
-				else x=coeff12*(exp((x-c)*a_1)+b);
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF-1
+					if (x<=0.5) x=coeff3*x*x;
+					else x=coeff12*(exp((x-c)*a_1)+b);
+				}
 			}
 		}
 		else
 		{
-			if (EOTF)
+			if (EOTF || OOTF)
 			{
 				// OETF-1
 				if (x<(beta*4.5)) x/=4.5;
@@ -7767,14 +9372,17 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 			}
 			else
 			{
-				// HLG_OETF-1
-				if (x<=0.5) x=coeff3*x*x;
-				else x=coeff12*(exp((x-c)*a_1)+b);
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF-1
+					if (x<=0.5) x=coeff3*x*x;
+					else x=coeff12*(exp((x-c)*a_1)+b);
+				}
 			}
 		}
 		else
 		{
-			if (EOTF)
+			if (EOTF || OOTF)
 			{
 				// OETF-1
 				if (x<(beta*4.5)) x/=4.5;
@@ -7830,8 +9438,8 @@ void ConvertYUVtoLinearRGB::FreeData(void)
 	mydelete(vi_444);
 	mydelete(vi_422);
 	mydelete(vi_original);
+	myfree(lookupHLG_inv_OOTF);
 	myfree(lookupHLG_OOTF);
-	myfree(lookupHLG_Y);
 	myfree(lookupHLG_RGB_16);
 	myfree(lookupHLG_RGB_8);
 	myfree(lookupL_32);
@@ -7905,11 +9513,21 @@ void ConvertYUVtoLinearRGB::StaticThreadpool(void *ptr)
 		case 31 : Convert_RGB32toLinearRGB32(*mt_data_inf,ptrClass->lookupL_8); break;
 		case 32 : Convert_RGB64toLinearRGB64(*mt_data_inf,ptrClass->lookupL_16); break;
 		case 33 : Convert_RGB64toLinearRGBPS(*mt_data_inf,ptrClass->lookupL_32); break;
+		case 34 : Convert_RGB32HLGtoLinearRGB32(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
+					  ptrClass->SSE2_Enable,ptrClass->AVX_Enable,ptrClass->lookupL_8,ptrClass->lookupHLG_RGB_8,
+					  ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
+		case 35 : Convert_RGB64HLGtoLinearRGB64(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
+					  ptrClass->bits_per_pixel,ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,
+					  ptrClass->AVX2_Enable,ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,
+					  ptrClass->lookupHLG_inv_OOTF); break;
+		case 36 : Convert_RGB64HLGtoLinearRGBPS(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
+					  ptrClass->SSE2_Enable,ptrClass->AVX_Enable,ptrClass->lookupL_32,ptrClass->HLGColor,ptrClass->lookupHLG_OOTF,
+					  ptrClass->lookupHLG_inv_OOTF,(float)ptrClass->HLG_Lw); break;
 #ifdef AVX2_BUILD_POSSIBLE
 		case 4 : Convert_Progressive_8_YV12toYV16_AVX2(*mt_data_inf); break;
 		case 11 : Convert_Progressive_16_YV12toYV16_AVX2(*mt_data_inf); break;
 #endif
-		default : ;
+		default : break;
 	}
 }
 
@@ -7918,7 +9536,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 {
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = env->NewVideoFrame(vi,64);
-	PVideoFrame tmp1,tmp2,tmp3;
+	PVideoFrame tmp1,tmp2,tmp3,tmp4;
 
 	const uint8_t *srcY,*srcU,*srcV;
 	ptrdiff_t src_pitch_Y,src_pitch_U,src_pitch_V;
@@ -7936,6 +9554,10 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 	const uint8_t *tmp3r,*tmp3r0;
 	uint8_t *tmp3w,*tmp3w0;
 	ptrdiff_t tmp3_pitch,tmp3_pitch0,tmp3_modulo0;
+
+	const uint8_t *tmp4r;
+	uint8_t *tmp4w;
+	ptrdiff_t tmp4_pitch,tmp4_modulo;
 
 	const uint8_t *dstr;
 	uint8_t *dstw,*dstw0;
@@ -8030,6 +9652,16 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 		dst_modulo_R = dst_pitch_R - dst->GetRowSize(PLANAR_R);
 		dst_modulo_G = dst_pitch_G - dst->GetRowSize(PLANAR_R);
 		dst_modulo_B = dst_pitch_B - dst->GetRowSize(PLANAR_R);
+	}
+
+	if (HLG_Mode)
+	{
+		tmp4 = env->NewVideoFrame(*vi_PlaneY_HLG,64);
+
+		tmp4r = tmp4->GetReadPtr();
+		tmp4w = tmp4->GetWritePtr();
+		tmp4_pitch = tmp4->GetPitch();
+		tmp4_modulo = tmp4_pitch - tmp4->GetRowSize();
 	}
 
 	dstr = dst->GetReadPtr();
@@ -8552,11 +10184,17 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 		for(uint8_t i=0; i<threads_number[2]; i++)
 		{
 			MT_DataGF[i].src1=(void *)(dstr+(MT_DataGF[i].src_Y_h_min*dst_pitch));
+			MT_DataGF[i].src4=(void *)(tmp4r+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].src_pitch1=dst_pitch;
+			MT_DataGF[i].src_pitch4=tmp4_pitch;
 			MT_DataGF[i].src_modulo1=dst_modulo;
+			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(dstw+(MT_DataGF[i].dst_Y_h_min*dst_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch;
+			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=dst_modulo;
+			MT_DataGF[i].dst_modulo4=tmp4_modulo;
 		}
 	}
 	else
@@ -8564,17 +10202,23 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 		for(uint8_t i=0; i<threads_number[2]; i++)
 		{
 			MT_DataGF[i].src1=(void *)(tmp3r0+(MT_DataGF[i].src_Y_h_min*tmp3_pitch0));
+			MT_DataGF[i].src4=(void *)(tmp4r+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].src_pitch1=tmp3_pitch0;
+			MT_DataGF[i].src_pitch4=tmp4_pitch;
 			MT_DataGF[i].src_modulo1=tmp3_modulo0;
+			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(dstRw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_R));
 			MT_DataGF[i].dst2=(void *)(dstGw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_G));
 			MT_DataGF[i].dst3=(void *)(dstBw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_B));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch_R;
 			MT_DataGF[i].dst_pitch2=dst_pitch_G;
 			MT_DataGF[i].dst_pitch3=dst_pitch_B;
+			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=dst_modulo_R;
 			MT_DataGF[i].dst_modulo2=dst_modulo_G;
 			MT_DataGF[i].dst_modulo3=dst_modulo_B;
+			MT_DataGF[i].dst_modulo4=tmp4_modulo;
 		}
 	}
 
@@ -8584,6 +10228,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 		else f_proc=32;
 	}
 	else f_proc=33;
+	if (HLG_Mode) f_proc+=3;
 
 	if (threads_number[2]>1)
 	{
@@ -8601,6 +10246,12 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 			case 31 : Convert_RGB32toLinearRGB32(MT_DataGF[0],lookupL_8); break;
 			case 32 : Convert_RGB64toLinearRGB64(MT_DataGF[0],lookupL_16); break;
 			case 33 : Convert_RGB64toLinearRGBPS(MT_DataGF[0],lookupL_32); break;
+			case 34 : Convert_RGB32HLGtoLinearRGB32(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,
+						  AVX_Enable,lookupL_8,lookupHLG_RGB_8,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
+			case 35 : Convert_RGB64HLGtoLinearRGB64(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),bits_per_pixel,SSE2_Enable,
+						  SSE41_Enable,AVX_Enable,AVX2_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
+			case 36 : Convert_RGB64HLGtoLinearRGBPS(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,AVX_Enable,lookupL_32,
+						  HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,(float)HLG_Lw); break;
 			default : break;
 		}
 	}
@@ -8643,9 +10294,11 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	pixelsize = (uint8_t)vi.ComponentSize(); // AVS16
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	const uint32_t vmax=1 << bits_per_pixel;
+	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
 	vi_original=NULL; vi_420=NULL; vi_422=NULL; vi_444=NULL;
 	vi_RGB32=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
+	lookupHLG_RGB_8=NULL; lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
 
 	lookupRGB_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupRGB_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
@@ -8661,13 +10314,56 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 		env->ThrowError("ConvertLinearRGBtoYUV: Error while allocating the lookup tables!");
 	}
 
+	if (HLG_Mode)
+	{
+		lookupHLG_RGB_8=(int16_t *)malloc(3*256*sizeof(int16_t));
+		lookupHLG_RGB_16=(int32_t *)malloc(3*65536*sizeof(int32_t));
+
+		switch(pixelsize)
+		{
+			case 1 :
+				lookupHLG_OOTF=(void *)malloc(256*256*sizeof(uint8_t));
+				lookupHLG_inv_OOTF=(void *)malloc(256*256*sizeof(uint8_t));
+				break;
+			case 2 :
+				switch(bits_per_pixel)
+				{
+					case 10 :
+						lookupHLG_OOTF=(void *)malloc(1024*1024*sizeof(uint16_t));
+						lookupHLG_inv_OOTF=(void *)malloc(1024*1024*sizeof(uint16_t));
+						break;
+					case 12 :
+						lookupHLG_OOTF=(void *)malloc(4096*4096*sizeof(uint16_t));
+						lookupHLG_inv_OOTF=(void *)malloc(4096*4096*sizeof(uint16_t));
+						break;
+					default :
+						lookupHLG_OOTF=(void *)malloc(65536*sizeof(float));
+						lookupHLG_inv_OOTF=(void *)malloc(65536*sizeof(float));
+						break;
+				}
+				break;
+			default :
+				lookupHLG_OOTF=(void *)malloc(1048576*sizeof(float));
+				lookupHLG_inv_OOTF=(void *)malloc(1048576*sizeof(float));
+				break;
+		}
+
+		if ((lookupHLG_RGB_8==NULL) || (lookupHLG_RGB_16==NULL) || (lookupHLG_OOTF==NULL) || (lookupHLG_inv_OOTF==NULL))
+		{
+			FreeData();
+			if (threads>1) poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertYUVtoLinearRGB: Error while allocating the HLG lookup tables!");
+		}
+	}
+
+
 	vi_original = new VideoInfo(vi);
 	vi_420 = new VideoInfo(vi);
 	vi_422 = new VideoInfo(vi);
 	vi_444 = new VideoInfo(vi);
 	vi_RGB32 = new VideoInfo(vi);
 	vi_RGB64 = new VideoInfo(vi);
-	vi_PlaneY_HLG = new VideoInfo(vi);
+	if (HLG_Mode) vi_PlaneY_HLG = new VideoInfo(vi);
 
 	if ((vi_original==NULL) || (vi_420==NULL) || (vi_422==NULL) || (vi_444==NULL)
 		|| (vi_RGB32==NULL) || (vi_RGB64==NULL) || (vi_PlaneY_HLG==NULL))
@@ -8747,12 +10443,155 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	const double c2=18.8515625;
 	const double c3=18.6875;
 
-	const double lambda=1.2+log10(HLG_Lw/1000.0);
-	const double alphaHLG=HLG_Lw-HLG_Lb;
-	const double betaHLG=HLG_Lb;
 	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a);
 	const double coeff12=1.0/12.0;
 	
+	if (HLG_Mode)
+	{
+		Compute_Lookup_HLG_8(HLGColor,lookupHLG_RGB_8);
+		Compute_Lookup_HLG_16(HLGColor,lookupHLG_RGB_16);
+		vi_PlaneY_HLG->pixel_type=VideoInfo::CS_Y8;
+
+		double lambda,l;
+		uint8_t *lk_8;
+		uint16_t *lk_16;
+		float *lk_f;
+
+		const double Coeff_HLG=(HDRMode==1)?(10000.0/HLG_Lw):1.0;
+
+		switch(pixelsize)
+		{
+			case 1 :
+				lambda=1.2+0.42*log10(10000.0/1000.0);
+				l=lambda-1.0;
+
+				lk_8=(uint8_t *)lookupHLG_OOTF;
+				for(uint32_t i=0; i<256; i++)
+				{
+					const double y=pow(((double)i)/255.0,l)*Coeff_HLG;
+					const uint32_t offs=i<<8;
+
+					for(uint32_t j=0; j<256; j++)
+						lk_8[offs+j]=(uint8_t)std::min((int16_t)round(j*y),(int16_t)255);
+				}
+
+				lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+				l=(1.0-lambda)/lambda;
+
+				lk_8=(uint8_t *)lookupHLG_inv_OOTF;
+				for(uint32_t i=0; i<256; i++)
+				{
+					const double y=(i==0)?0.0:pow(((double)i)/255.0,l);
+					const uint32_t offs=i<<8;
+
+					for(uint32_t j=0; j<256; j++)
+						lk_8[offs+j]=(uint8_t)std::min((int16_t)round(j*y),(int16_t)255);
+				}
+
+				vi_PlaneY_HLG->width*=2;
+				break;
+			case 2 :
+				switch(bits_per_pixel)
+				{
+					case 10 :
+						lambda=1.2+0.42*log10(10000.0/1000.0);
+						l=lambda-1.0;
+
+						lk_16=(uint16_t *)lookupHLG_OOTF;
+						for(uint32_t i=0; i<1024; i++)
+						{
+							const double y=64.0*pow(((double)i)/1023.0,l)*Coeff_HLG;
+							const uint32_t offs=i<<10;
+
+							for(uint32_t j=0; j<1024; j++)
+								lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+						}
+
+						lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+						l=(1.0-lambda)/lambda;
+
+						lk_16=(uint16_t *)lookupHLG_inv_OOTF;
+						for(uint32_t i=0; i<1024; i++)
+						{
+							const double y=(i==0)?0.0:64.0*pow(((double)i)/1023.0,l);
+							const uint32_t offs=i<<10;
+
+							for(uint32_t j=0; j<1024; j++)
+								lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+						}
+
+						vi_PlaneY_HLG->width*=4;
+						break;
+					case 12 :
+						lambda=1.2+0.42*log10(10000.0/1000.0);
+						l=lambda-1.0;
+
+						lk_16=(uint16_t *)lookupHLG_OOTF;
+						for(uint32_t i=0; i<4096; i++)
+						{
+							const double y=16.0*pow(((double)i)/4095.0,l)*Coeff_HLG;
+							const uint32_t offs=i<<12;
+
+							for(uint32_t j=0; j<4096; j++)
+								lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+						}
+
+						lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+						l=(1.0-lambda)/lambda;
+
+						lk_16=(uint16_t *)lookupHLG_inv_OOTF;
+						for(uint32_t i=0; i<4096; i++)
+						{
+							const double y=(i==0)?0.0:16.0*pow(((double)i)/4095.0,l);
+							const uint32_t offs=i<<12;
+
+							for(uint32_t j=0; j<4096; j++)
+								lk_16[offs+j]=(uint16_t)std::min((int32_t)round(j*y),(int32_t)65535);
+						}
+
+						vi_PlaneY_HLG->width*=4;
+						break;
+					default :
+						lambda=1.2+0.42*log10(10000.0/1000.0);
+						l=lambda-1.0;
+
+						lk_f=(float *)lookupHLG_OOTF;
+						for(uint32_t i=0; i<65536; i++)
+							lk_f[i]=(float)(pow(((double)i)/65535.0,l)*Coeff_HLG);
+
+						lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+						l=(1.0-lambda)/lambda;
+
+						lk_f=(float *)lookupHLG_inv_OOTF;
+						lk_f[0]=0.0f;
+						for(uint32_t i=1; i<65536; i++)
+							lk_f[i]=(float)pow(((double)i)/65535.0,l);
+
+						vi_PlaneY_HLG->width*=4;
+						break;
+				}
+				break;
+			default :
+				lambda=1.2+0.42*log10(10000.0/1000.0);
+				l=lambda-1.0;
+
+				lk_f=(float *)lookupHLG_OOTF;
+				for(uint32_t i=0; i<1048576; i++)
+					lk_f[i]=(float)(pow(((double)i)/1048575.0,l)*Coeff_HLG);
+
+				lambda=1.2+0.42*log10(HLG_Lw/1000.0);
+				l=(1.0-lambda)/lambda;
+
+				lk_f=(float *)lookupHLG_inv_OOTF;
+				lk_f[0]=0.0f;
+				for(uint32_t i=1; i<1048576; i++)
+					lk_f[i]=(float)pow(((double)i)/1048575.0,l);
+
+				vi_PlaneY_HLG->width*=4;
+				break;
+		}
+	}
+
 	for (uint16_t i=0; i<256; i++)
 	{
 		double x=((double)i)/255.0;
@@ -8778,9 +10617,12 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 			}
 			else
 			{
-				// HLG_OETF
-				if (x<=coeff12) x=sqrt(3.0*x);
-				else x=a*log(12.0*x-b)+c;
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF
+					if (x<=coeff12) x=sqrt(3.0*x);
+					else x=a*log(12.0*x-b)+c;
+				}
 			}
 		}
 		else
@@ -8822,9 +10664,12 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 			}
 			else
 			{
-				// HLG_OETF
-				if (x<=coeff12) x=sqrt(3.0*x);
-				else x=a*log(12.0*x-b)+c;
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF
+					if (x<=coeff12) x=sqrt(3.0*x);
+					else x=a*log(12.0*x-b)+c;
+				}
 			}
 		}
 		else
@@ -8868,9 +10713,12 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 			}
 			else
 			{
-				// HLG_OETF
-				if (x<=coeff12) x=sqrt(3.0*x);
-				else x=a*log(12.0*x-b)+c;
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF
+					if (x<=coeff12) x=sqrt(3.0*x);
+					else x=a*log(12.0*x-b)+c;
+				}
 			}
 		}
 		else
@@ -8895,6 +10743,11 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 
+	SSE2_Enable=false;
+	SSE41_Enable=false;
+	AVX_Enable=false;
+	AVX2_Enable=false;
+
 	if (max_threads>1)
 	{
 		if (!poolInterface->GetUserId(UserId))
@@ -8916,6 +10769,10 @@ void ConvertLinearRGBtoYUV::FreeData(void)
 	mydelete(vi_422);
 	mydelete(vi_420);
 	mydelete(vi_original);
+	myfree(lookupHLG_inv_OOTF);
+	myfree(lookupHLG_OOTF);
+	myfree(lookupHLG_RGB_16);
+	myfree(lookupHLG_RGB_8);
 	myfree(lookupL_20);
 	myfree(lookupL_16);
 	myfree(lookupL_8);
@@ -8998,7 +10855,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 {
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst=env->NewVideoFrame(vi,64);
-	PVideoFrame tmp1,tmp2,tmp3;
+	PVideoFrame tmp1,tmp2,tmp3,tmp4;
 
 	int32_t h;
 
@@ -9019,6 +10876,10 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 	uint8_t *tmp3Yw,*tmp3Uw,*tmp3Vw;
 	ptrdiff_t tmp3_pitch_Y,tmp3_pitch_U,tmp3_pitch_V;
 	ptrdiff_t tmp3_modulo_Y,tmp3_modulo_U,tmp3_modulo_V;
+
+	const uint8_t *tmp4r;
+	uint8_t *tmp4w;
+	ptrdiff_t tmp4_pitch,tmp4_modulo;
 
 	uint8_t *dstYw,*dstUw,*dstVw;
 	ptrdiff_t dst_pitch_Y,dst_pitch_U,dst_pitch_V;
@@ -9133,6 +10994,16 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 		default : break;
 	}
 
+	if (HLG_Mode)
+	{
+		tmp4 = env->NewVideoFrame(*vi_PlaneY_HLG,64);
+
+		tmp4r = tmp4->GetReadPtr();
+		tmp4w = tmp4->GetWritePtr();
+		tmp4_pitch = tmp4->GetPitch();
+		tmp4_modulo = tmp4_pitch - tmp4->GetRowSize();
+	}
+
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
 	int8_t nPool=-1;
@@ -9206,15 +11077,21 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 			MT_DataGF[i].src1=(void *)(srcRw+(MT_DataGF[i].src_Y_h_min*src_pitch_R));
 			MT_DataGF[i].src2=(void *)(srcGw+(MT_DataGF[i].src_Y_h_min*src_pitch_G));
 			MT_DataGF[i].src3=(void *)(srcBw+(MT_DataGF[i].src_Y_h_min*src_pitch_B));
+			MT_DataGF[i].src4=(void *)(tmp4r+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].src_pitch1=src_pitch_R;
 			MT_DataGF[i].src_pitch2=src_pitch_G;
 			MT_DataGF[i].src_pitch3=src_pitch_B;
+			MT_DataGF[i].src_pitch4=tmp4_pitch;
 			MT_DataGF[i].src_modulo1=src_modulo_R;
 			MT_DataGF[i].src_modulo2=src_modulo_G;
 			MT_DataGF[i].src_modulo3=src_modulo_B;
+			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(tmp1w+(MT_DataGF[i].dst_Y_h_min*tmp1_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=tmp1_pitch;
+			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=tmp1_modulo;
+			MT_DataGF[i].dst_modulo4=tmp4_modulo;
 		}
 
 		if (fastmode)
@@ -9265,11 +11142,17 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 		for(uint8_t i=0; i<threads_number[0]; i++)
 		{
 			MT_DataGF[i].src1=(void *)(srcw+(MT_DataGF[i].src_Y_h_min*src_pitch));
+			MT_DataGF[i].src4=(void *)(tmp4r+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].src_pitch1=src_pitch;
+			MT_DataGF[i].src_pitch4=tmp4_pitch;
 			MT_DataGF[i].src_modulo1=src_modulo;
+			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(srcw+(MT_DataGF[i].dst_Y_h_min*src_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=src_pitch;
+			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=src_modulo;
+			MT_DataGF[i].dst_modulo4=tmp4_modulo;
 		}
 
 		if (bits_per_pixel==8) f_proc=1;
@@ -9770,6 +11653,9 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	const double c2=18.8515625;
 	const double c3=18.6875;
 
+	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a),a_1=1.0/a;
+	const double coeff3=1.0/3.0,coeff12=1.0/12.0;
+
 	for (uint16_t i=0; i<256; i++)
 	{
 		double x=((double)i)/255.0;
@@ -9800,6 +11686,12 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF-1
+					if (x<=0.5) x=coeff3*x*x;
+					else x=coeff12*(exp((x-c)*a_1)+b);
+				}
 			}
 		}
 		else
@@ -9848,6 +11740,12 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF-1
+					if (x<=0.5) x=coeff3*x*x;
+					else x=coeff12*(exp((x-c)*a_1)+b);
+				}
 			}
 		}
 		else
@@ -10940,6 +12838,9 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	const double c1=0.8359375;
 	const double c2=18.8515625;
 	const double c3=18.6875;
+
+	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a);
+	const double coeff12=1.0/12.0;
 	
 	for (uint16_t i=0; i<256; i++)
 	{
@@ -10966,6 +12867,12 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF
+					if (x<=coeff12) x=sqrt(3.0*x);
+					else x=a*log(12.0*x-b)+c;
+				}
 			}
 		}
 		else
@@ -11007,6 +12914,12 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF
+					if (x<=coeff12) x=sqrt(3.0*x);
+					else x=a*log(12.0*x-b)+c;
+				}
 			}
 		}
 		else
@@ -11049,6 +12962,12 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF
+					if (x<=coeff12) x=sqrt(3.0*x);
+					else x=a*log(12.0*x-b)+c;
+				}
 			}
 		}
 		else
@@ -11988,6 +13907,9 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	const double c2=18.8515625;
 	const double c3=18.6875;
 
+	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a),a_1=1.0/a;
+	const double coeff3=1.0/3.0,coeff12=1.0/12.0;
+
 	for (uint16_t i=0; i<256; i++)
 	{
 		double x=((double)i)/255.0;
@@ -12018,6 +13940,12 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF-1
+					if (x<=0.5) x=coeff3*x*x;
+					else x=coeff12*(exp((x-c)*a_1)+b);
+				}
 			}
 		}
 		else
@@ -12066,6 +13994,12 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF-1
+					if (x<=0.5) x=coeff3*x*x;
+					else x=coeff12*(exp((x-c)*a_1)+b);
+				}
 			}
 		}
 		else
@@ -12112,6 +14046,12 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF-1
+					if (x<=0.5) x=coeff3*x*x;
+					else x=coeff12*(exp((x-c)*a_1)+b);
+				}
 			}
 		}
 		else
@@ -12676,6 +14616,9 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	const double c2=18.8515625;
 	const double c3=18.6875;
 	
+	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a);
+	const double coeff12=1.0/12.0;
+
 	for (uint16_t i=0; i<256; i++)
 	{
 		double x=((double)i)/255.0;
@@ -12701,6 +14644,12 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF
+					if (x<=coeff12) x=sqrt(3.0*x);
+					else x=a*log(12.0*x-b)+c;
+				}
 			}
 		}
 		else
@@ -12742,6 +14691,12 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF
+					if (x<=coeff12) x=sqrt(3.0*x);
+					else x=a*log(12.0*x-b)+c;
+				}
 			}
 		}
 		else
@@ -12784,6 +14739,12 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 			else
 			{
+				if (EOTF || OOTF)
+				{
+					// HLG_OETF
+					if (x<=coeff12) x=sqrt(3.0*x);
+					else x=a*log(12.0*x-b)+c;
+				}
 			}
 		}
 		else

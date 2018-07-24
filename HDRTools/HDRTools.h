@@ -72,8 +72,8 @@ private:
 	int32_t *lookupRGB_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16;
-	float *lookupL_32,*lookupHLG_Y;
-	void *lookupHLG_OOTF;
+	float *lookupL_32;
+	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 

@@ -12,6 +12,7 @@ data_f_1048575 real4 8 dup(1048575.0)
 data_dw_1048575 dword 8 dup(1048575)
 data_dw_0 dword 8 dup(0)
 
+data_w_128 word 16 dup(128)
 data_w_32 word 16 dup(32)
 data_w_8 word 16 dup(8)
 
@@ -286,6 +287,72 @@ Scale_20_RGB_AVX2_2:
 JPSDR_HDRTools_Scale_20_RGB_AVX2 endp
 
 
+JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX2 proc src:dword,dst:dword,w:dword,h:dword,
+	src_pitch:dword,dst_pitch:dword
+
+	public JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX2
+
+	push esi
+	push edi
+	push ebx
+
+	vmovdqa ymm1,YMMWORD ptr data_w_128
+
+	mov esi,src
+	mov edi,dst
+	mov ebx,w
+	shr ebx,2
+	mov edx,32
+
+Convert_RGB64_16toRGB64_8_AVX2_1:
+	mov ecx,ebx
+	xor eax,eax
+	or ecx,ecx
+	jz short Convert_RGB64_16toRGB64_8_AVX2_3
+	
+Convert_RGB64_16toRGB64_8_AVX2_2:
+	vmovdqa ymm0,YMMWORD ptr[esi+eax]
+	vpaddusw ymm0,ymm0,ymm1
+	vpsrlw ymm0,ymm0,8
+	vmovdqa YMMWORD ptr[edi+eax],ymm0
+	add eax,edx
+	loop Convert_RGB64_16toRGB64_8_AVX2_2
+
+Convert_RGB64_16toRGB64_8_AVX2_3:
+	test w,2
+	jz short Convert_RGB64_16toRGB64_8_AVX2_4
+	
+	vmovdqa xmm0,XMMWORD ptr[esi+eax]
+	vpaddusw xmm0,xmm0,xmm1
+	vpsrlw xmm0,xmm0,8
+	vmovdqa XMMWORD ptr[edi+eax],xmm0
+	
+	add eax,16
+
+Convert_RGB64_16toRGB64_8_AVX2_4:
+	test w,1
+	jz short Convert_RGB64_16toRGB64_8_AVX2_5
+	
+	vmovq xmm0,qword ptr[esi+eax]
+	vpaddusw xmm0,xmm0,xmm1
+	vpsrlw xmm0,xmm0,8
+	vmovq qword ptr[edi+eax],xmm0
+	
+Convert_RGB64_16toRGB64_8_AVX2_5:
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_RGB64_16toRGB64_8_AVX2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX2 endp	
+
+
 JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX2 proc src:dword,dst:dword,w:dword,h:dword,
 	src_pitch:dword,dst_pitch:dword
 
@@ -453,7 +520,7 @@ Convert_16_RGB64_HLG_OOTF_AVX2_2:
 	vmulps ymm2,ymm2,ymm0
 	vcvtps2dq ymm2,ymm2
 	vextracti128 xmm3,ymm2,1
-	vpackssdw xmm2,xmm2,xmm3
+	vpackusdw xmm2,xmm2,xmm3
 	vmovdqa XMMWORD ptr[edi+2*eax],xmm2
 	
 	add eax,edx
@@ -470,7 +537,7 @@ Convert_16_RGB64_HLG_OOTF_AVX2_3:
 	vcvtdq2ps xmm2,xmm2
 	vmulps xmm2,xmm2,xmm0
 	vcvtps2dq xmm2,xmm2
-	vpackssdw xmm2,xmm2,xmm2
+	vpackusdw xmm2,xmm2,xmm2
 	vmovq qword ptr[edi+2*eax],xmm2
 	
 Convert_16_RGB64_HLG_OOTF_AVX2_4:

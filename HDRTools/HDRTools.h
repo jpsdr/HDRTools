@@ -68,15 +68,13 @@ private:
 	double HLG_Lb,HLG_Lw;
 	uint16_t *lookup_Upscale8;
 	uint32_t *lookup_Upscale16,*lookup_8to16;
-	int16_t *lookupRGB_8,*lookupHLG_RGB_8;
+	int16_t *lookupRGB_8;
 	int32_t *lookupRGB_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16;
 	float *lookupL_32;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
-
-
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;
 	uint8_t pixelsize; // AVS16
@@ -205,12 +203,13 @@ public:
 private:
 	uint8_t Color,OutputMode,HDRMode,HLGColor;
 	bool OOTF,mpeg2c,fullrange,fastmode,EOTF;
-	bool sleep;
+	bool sleep,HLG_Mode;
 	double HLG_Lb,HLG_Lw;
 	int16_t *lookupRGB_8;
-	int32_t *lookupRGB_16;
+	int32_t *lookupRGB_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_20;
+	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;

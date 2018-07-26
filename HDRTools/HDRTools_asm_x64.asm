@@ -13,6 +13,7 @@ data_dw_0 dword 8 dup(0)
 data_dw_128 dword 8 dup(128)
 data_dw_32 dword 8 dup(32)
 data_dw_8 dword 8 dup(8)
+data_dw_RGB32 dword 8 dup(00FFFFFFh)
 
 data_HLG_8 word 16 dup(0FF00h)
 data_HLG_10 dword 8 dup(0FFC00h)
@@ -22,6 +23,115 @@ data_w_32 word 16 dup(32)
 data_w_8 word 16 dup(8)
 
 .code
+
+;JPSDR_HDRTools_LookupRGB32_RGB32HLG proc src:dword,dst:dword,w:dword,h:dword,src_modulo:dword,dst_modulo:dword,lookup:dword
+; src = rcx
+; dst = rdx
+; w = r8d
+; h = r9d
+
+JPSDR_HDRTools_LookupRGB32_RGB32HLG proc public frame
+
+src_modulo equ qword ptr[rbp+48]
+dst_modulo equ qword ptr[rbp+56]
+lookup equ qword ptr[rbp+64]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	.endprolog
+
+	cld
+	mov rsi,rcx
+	mov rdi,rdx
+	mov r10,src_modulo
+	mov r11,dst_modulo
+	mov rdx,lookup
+	mov rbx,00FFFFFFh
+	xor rcx,rcx
+	xor rax,rax
+	
+LookupRGB32_RGB32HLG_1:
+	mov ecx,r8d
+LookupRGB32_RGB32HLG_2:
+	lodsd
+	and rax,rbx
+	mov eax,dword ptr[rdx+4*rax]
+	stosd
+	loop LookupRGB32_RGB32HLG_2
+	
+	add rsi,r10
+	add rdi,r11
+	dec r9d
+	jnz short LookupRGB32_RGB32HLG_1
+	
+	pop rbx
+	pop rsi
+	pop rdi
+	pop rbp
+	
+	ret
+	
+JPSDR_HDRTools_LookupRGB32_RGB32HLG endp
+
+
+;JPSDR_HDRTools_LookupRGB32_RGB64HLG proc src:dword,dst:dword,w:dword,h:dword,src_modulo:dword,dst_modulo:dword,lookup:dword
+; src = rcx
+; dst = rdx
+; w = r8d
+; h = r9d
+
+JPSDR_HDRTools_LookupRGB32_RGB64HLG proc public frame
+
+src_modulo equ qword ptr[rbp+48]
+dst_modulo equ qword ptr[rbp+56]
+lookup equ qword ptr[rbp+64]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	.endprolog
+
+	cld
+	mov rsi,rcx
+	mov rdi,rdx
+	mov r10,src_modulo
+	mov r11,dst_modulo
+	mov rdx,lookup
+	xor rcx,rcx
+	xor rax,rax
+	
+LookupRGB32_RGB64HLG_1:
+	mov ecx,r8d
+LookupRGB32_RGB64HLG_2:
+	lodsd
+	mov rax,qword ptr[rdx+8*rax]
+	stosq
+	xor rax,rax
+	loop LookupRGB32_RGB64HLG_2
+	
+	add rsi,r10
+	add rdi,r11
+	dec r9d
+	jnz short LookupRGB32_RGB64HLG_1
+	
+	pop rsi
+	pop rdi
+	pop rbp
+	
+	ret
+	
+JPSDR_HDRTools_LookupRGB32_RGB64HLG endp
 
 
 ;JPSDR_HDRTools_LookupRGB32 proc src:dword,dst:dword,w:dword,h:dword,src_modulo:dword,dst_modulo:dword,lookup:dword
@@ -6836,6 +6946,219 @@ JPSDR_HDRTools_Convert_PlanarXYZtoRGB_32_AVX endp
 ;***************************************************
 
 
+;JPSDR_HDRTools_Convert_RGB64toRGB32_SSE2 proc src:dword,dst:dword,w:dword,h:dword,src_pitch:dword,dst_pitch:dword
+; src = rcx
+; dst = rdx
+; w = r8d
+; h = r9d
+
+JPSDR_HDRTools_Convert_RGB64toRGB32_SSE2 proc public frame
+
+src_pitch equ qword ptr[rbp+48]
+dst_pitch equ qword ptr[rbp+56]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	push r14
+	.pushreg r14
+	.endprolog
+
+	mov rsi,rcx
+	mov rdi,rdx
+	mov r10,src_pitch
+	mov r11,dst_pitch
+	xor rcx,rcx
+	xor rbx,rbx
+	
+	mov ebx,r8d
+	shr ebx,2
+	
+	movdqa xmm2,XMMWORD ptr data_w_128
+	movdqa xmm3,XMMWORD ptr data_dw_RGB32
+	
+	mov rdx,16
+	mov r12,8
+	mov r13,2
+	mov r14,1
+	
+	
+Convert_RGB64toRGB32_SSE2_1:
+	mov ecx,ebx
+	or ecx,ecx
+	jz short Convert_RGB64toRGB32_SSE2_3
+	
+	xor rax,rax	
+Convert_RGB64toRGB32_SSE2_2:
+	movdqa xmm0,XMMWORD ptr[rsi+2*rax]
+	movdqa xmm1,XMMWORD ptr[rsi+2*rax+16]
+	paddusw xmm0,xmm2
+	paddusw xmm1,xmm2
+	psrlw xmm0,8
+	psrlw xmm1,8
+	packuswb xmm0,xmm1
+	pand xmm0,xmm3
+	movdqa XMMWORD ptr[rdi+rax],xmm0
+	add rax,rdx
+	loop Convert_RGB64toRGB32_SSE2_2
+	
+Convert_RGB64toRGB32_SSE2_3:
+	test r8d,r13d
+	jz short Convert_RGB64toRGB32_SSE2_4
+	
+	movdqa xmm0,XMMWORD ptr[rsi+2*rax]
+	paddusw xmm0,xmm2
+	psrlw xmm0,8
+	packuswb xmm0,xmm0
+	pand xmm0,xmm3
+	movq qword ptr[rdi+rax],xmm0
+	add rax,r12
+	
+Convert_RGB64toRGB32_SSE2_4:
+	test r8d,r14d
+	jz short Convert_RGB64toRGB32_SSE2_5
+
+	movq xmm0,qword ptr[rsi+2*rax]
+	paddusw xmm0,xmm2
+	psrlw xmm0,8
+	packuswb xmm0,xmm0
+	pand xmm0,xmm3
+	movd dword ptr[rdi+rax],xmm0
+	
+Convert_RGB64toRGB32_SSE2_5:
+	add rsi,r10
+	add rdi,r11
+	dec r9d
+	jnz Convert_RGB64toRGB32_SSE2_1
+	
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rdi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB64toRGB32_SSE2 endp
+
+
+;JPSDR_HDRTools_Convert_RGB64toRGB32_AVX proc src:dword,dst:dword,w:dword,h:dword,src_pitch:dword,dst_pitch:dword
+; src = rcx
+; dst = rdx
+; w = r8d
+; h = r9d
+
+JPSDR_HDRTools_Convert_RGB64toRGB32_AVX proc public frame
+
+src_pitch equ qword ptr[rbp+48]
+dst_pitch equ qword ptr[rbp+56]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	push r14
+	.pushreg r14
+	.endprolog
+
+	mov rsi,rcx
+	mov rdi,rdx
+	mov r10,src_pitch
+	mov r11,dst_pitch
+	xor rcx,rcx
+	xor rbx,rbx
+	
+	mov ebx,r8d
+	shr ebx,2
+	
+	vmovdqa xmm2,XMMWORD ptr data_w_128
+	vmovdqa xmm3,XMMWORD ptr data_dw_RGB32
+	
+	mov rdx,16
+	mov r12,8
+	mov r13,2
+	mov r14,1
+	
+	
+Convert_RGB64toRGB32_AVX_1:
+	mov ecx,ebx
+	or ecx,ecx
+	jz short Convert_RGB64toRGB32_AVX_3
+	
+	xor rax,rax	
+Convert_RGB64toRGB32_AVX_2:
+	vpaddusw xmm0,xmm2,XMMWORD ptr[rsi+2*rax]
+	vpaddusw xmm1,xmm2,XMMWORD ptr[rsi+2*rax+16]
+	vpsrlw xmm0,xmm0,8
+	vpsrlw xmm1,xmm1,8
+	vpackuswb xmm0,xmm0,xmm1
+	vpand xmm0,xmm0,xmm3
+	vmovdqa XMMWORD ptr[rdi+rax],xmm0
+	add rax,rdx
+	loop Convert_RGB64toRGB32_AVX_2
+	
+Convert_RGB64toRGB32_AVX_3:
+	test r8d,r13d
+	jz short Convert_RGB64toRGB32_AVX_4
+	
+	vpaddusw xmm0,xmm2,XMMWORD ptr[rsi+2*rax]
+	vpsrlw xmm0,xmm0,8
+	vpackuswb xmm0,xmm0,xmm0
+	vpand xmm0,xmm0,xmm3
+	vmovq qword ptr[rdi+rax],xmm0
+	add rax,r12
+	
+Convert_RGB64toRGB32_AVX_4:
+	test r8d,r14d
+	jz short Convert_RGB64toRGB32_AVX_5
+
+	vmovq xmm0,qword ptr[rsi+2*rax]
+	vpaddusw xmm0,xmm0,xmm2
+	vpsrlw xmm0,xmm0,8
+	vpackuswb xmm0,xmm0,xmm0
+	vpand xmm0,xmm0,xmm3
+	vmovd dword ptr[rdi+rax],xmm0
+	
+Convert_RGB64toRGB32_AVX_5:
+	add rsi,r10
+	add rdi,r11
+	dec r9d
+	jnz short Convert_RGB64toRGB32_AVX_1
+	
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rdi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB64toRGB32_AVX endp
+
+
 ;JPSDR_HDRTools_Convert_RGB32toPlaneY16_SSE2 proc src:dword,dst:dword,w:dword,h:dword,
 ;	lookup:dword,src_modulo:dword,dst_modulo:dword
 ; src = rcx
@@ -9338,7 +9661,7 @@ Coeff equ qword ptr[rbp+64]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
+	mov rbx,32
 	xor rcx,rcx
 	
 Scale_HLG_AVX_1:

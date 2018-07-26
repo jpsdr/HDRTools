@@ -13,6 +13,19 @@ Unfortunately not. The R,G,B provided by the Camera sensor are linked to chromat
 (things like white color T°, etc...). So, the more appropriate color space closest to the "original"
 light information seems the XYZ color space.
 
+In the Document directory i've put a pdf file describing how things work,
+with detailled explainations and formula.
+
+Note about HDR HLG :
+For speed-up :
+8 bits input use 3D lookup (startup is slow).
+10 and 12 bits use 2D lookup (startup is slow).
+So general tip use : If your source filter provide 16 bits data,
+but your input data are 10 or 12 bits, adding ConvertBits(10)
+(or ConvertBit(12)) will speed-up things.
+If you can configure the source filter to directly provide
+10 or 12 bit data, it will be even better.
+
 Functions inside this plugin :
 
 
@@ -53,13 +66,13 @@ Accepted input : Planar YUV 8 to 16 bits.
        Default: 0 (int)
 
    HLGLb -
-      Set the black level in cd/m² for HLG mastering.
+      Set the black level in cd/m² for HLG mastering linear display value (Fd).
       Has effect only if HDRMode is set to 1 or 2.
 
        Default: 0.05 (float)
 
    HLGLw -
-      Set the white level in cd/m² for HLG mastering.
+      Set the white level in cd/m² for HLG mastering linear display value (Fd).
       Has effect only if HDRMode is set to 1 or 2.
 
        Default: 1000.0 (float)
@@ -169,7 +182,7 @@ will be created and handled, allowing if necessary each people to tune according
 **************************************
 
 ConvertLinearRGBtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
-     bool OOTF,bool OETF,bool fullrange,bool mpeg2c,bool fasmode,int threads,bool logicalCores,
+     bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,bool fastmode,int threads,bool logicalCores,
      bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
 Accepted input : RGB32, RGB64 and Planar float RGB.
@@ -196,7 +209,7 @@ Accepted input : RGB32, RGB64 and Planar float RGB.
 
         HDRMode = 0, 1, 2 :
       If set to false, the OOTF step will be skipped during the linear convertion.
-      Can be used if the input is linear displayed data (Fd) instead of linear scene data.
+      Use this setting if the input is linear displayed data (Fd) instead of linear scene data.
 
       If both EOTF and OOTF are false, correct ouput if input is standard RGB.
 
@@ -272,7 +285,7 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 **************************************
 
 ConvertXYZtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
-     bool OOTF,bool OETF,bool fullrange,bool mpeg2c,bool fasmode,
+     bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,bool fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
@@ -304,7 +317,7 @@ The others parameters are identical to ConvertLinearRGBtoYUV.
 **************************************
 
 ConvertRGBtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
-     bool OOTF,bool EOTF,fastmode,
+     bool OOTF,bool EOTF,bool fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
@@ -319,7 +332,7 @@ The parameters are identical to ConvertYUVtoXYZ.
 **************************************
 
 ConvertXYZtoRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
-     bool OOTF,bool OETF,bool fasmode,
+     bool OOTF,bool EOTF,bool fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
@@ -409,6 +422,13 @@ The others parameters are identical to  ConvertYUVtoLinearRGB.
 
 *************************************************************
 
+Note :
+======
+ConvertXYZ_HDRtoSDR is a simple scalar function, i've made just to see what result it produces.
+Don't have expectations on this plugin, but if by luck it works for you...
+
+*************************************************************
+
 Note about Chromaticity parameters
 ==================================
 On HDR stream, SEI mastering parameters provide the chromaticity parameters used.
@@ -443,3 +463,37 @@ Min : 0.05
 
 Remark :
 15635 16450 are the standard D65 white point value, no need in these case to put them.
+
+
+*************************************************************
+
+
+Some example use
+================
+
+BT.2020 to BT.709 convertion, do the following :
+ConvertYUVtoXYZ(Color=1)
+ConvertXYZtoYUV(pColor=1)
+
+----------------------------------
+
+BT.709 to BT.2020 convertion, do the following :
+ConvertYUVtoXYZ()
+ConvertXYZtoYUV(Color=1,pColor=2)
+
+----------------------------------
+
+HDR HLG (with mastering Lw at 1500 and HLG mastering display colorspace BT.2020) to HDR PQ convertion :
+ConvertYUVtoLinearRGB(Color=0,HDRMode=1,HLGLw=1500,OOTF=false)
+ConvertLinearRGBtoYUV(Color=0,OOTF=false)
+
+Note : If input data is 10 or 12 bits, but the source filter provide 16 bits data,
+adding ConvertBits(10) (or ConvertBits(12)) before ConvertYUVtoLinearRGB will speed-up things.
+
+----------------------------------
+
+HDR PQ to HDR HLG (with mastering Lw at 1200 and HLG mastering display colorspace BT.709) convertion :
+ConvertYUVtoLinearRGB(Color=0,OOTF=false)
+ConvertLinearRGBtoYUV(Color=0,HDRMode=1,HLGLw=1200,HLGColor=2,OOTF=false)
+
+Note : In this case, there is no speed-up for lowering input from 16 to 10 or 12 bits.

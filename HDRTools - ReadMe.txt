@@ -429,6 +429,27 @@ Don't have expectations on this plugin, but if by luck it works for you...
 
 *************************************************************
 
+Note about linear values :
+==========================
+
+For ConvertYUVtoxxx functions, the output is :
+
+For HDR data (Color=0), HDRMode=(0 or 1),
+the output (R,G,B stage) is normalized for 1.0=10000 cd/m² (or 255 or 65535).
+
+For SDR data (Color<>0),
+the output (R,G,B stage) is normalized for 1.0=100 cd/m² (or 255 or 65535).
+
+For ConvertxxxtoYUV functions, the input is :
+
+For HDR data (Color=0), HDRMode=(0 or 1),
+the input (R,G,B stage) is normalized for 1.0=10000 cd/m² (or 255 or 65535).
+
+For SDR data (Color<>0),
+the input (R,G,B stage) is normalized for 1.0=100 cd/m² (or 255 or 65535).
+
+*************************************************************
+
 Note about Chromaticity parameters
 ==================================
 On HDR stream, SEI mastering parameters provide the chromaticity parameters used.

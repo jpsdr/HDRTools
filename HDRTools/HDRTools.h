@@ -112,15 +112,16 @@ private:
 	uint8_t Color,OutputMode,HDRMode,HLGColor;
 	bool OOTF,mpeg2c,fullrange,EOTF;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
-	bool sleep;
+	bool sleep,HLG_Mode;
 	double HLG_Lb,HLG_Lw;
 	uint16_t *lookup_Upscale8;
 	uint32_t *lookup_Upscale16,*lookup_8to16;
 	int16_t *lookupRGB_8,*lookupXYZ_8;
-	int32_t *lookupRGB_16,*lookupXYZ_16;
+	int32_t *lookupRGB_16,*lookupXYZ_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16;
 	float *lookupL_32;
+	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	float Coeff_XYZ[9],*Coeff_XYZ_asm;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
@@ -160,14 +161,15 @@ private:
 	uint8_t Color,OutputMode,HDRMode,HLGColor;
 	bool OOTF,EOTF,fastmode;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
-	bool sleep;
+	bool sleep,HLG_Mode;
 	double HLG_Lb,HLG_Lw;
 	int16_t *lookupXYZ_8;
-	int32_t *lookupXYZ_16;
+	int32_t *lookupXYZ_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_8to16;
 	float *lookupL_32,*lookupL_8to32,*lookupL_20;
 	float Coeff_XYZ[9],*Coeff_XYZ_asm;
+	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	VideoInfo *vi_PlaneY_HLG;
@@ -250,13 +252,14 @@ private:
 	bool OOTF,mpeg2c,fullrange,fastmode,EOTF;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
-	bool sleep;
+	bool sleep,HLG_Mode;
 	double HLG_Lb,HLG_Lw;
 	int16_t *lookupRGB_8,*lookupXYZ_8;
-	int32_t *lookupRGB_16,*lookupXYZ_16;
+	int32_t *lookupRGB_16,*lookupXYZ_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_20;
 	float Coeff_XYZ[9],*Coeff_XYZ_asm;
+	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;
@@ -297,13 +300,14 @@ private:
 	bool OOTF,fastmode,EOTF;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
-	bool sleep;
+	bool sleep,HLG_Mode;
 	double HLG_Lb,HLG_Lw;
 	int16_t *lookupXYZ_8;
-	int32_t *lookupXYZ_16;
+	int32_t *lookupXYZ_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_20;
 	float Coeff_XYZ[9],*Coeff_XYZ_asm,*lookupL_32;
+	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	VideoInfo *vi_PlaneY_HLG;

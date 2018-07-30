@@ -19,12 +19,8 @@ with detailled explainations and formula.
 Note about HDR HLG :
 For speed-up :
 8 bits input use 3D lookup (startup is slow).
-10 and 12 bits use 2D lookup (startup is slow).
-So general tip use : If your source filter provide 16 bits data,
-but your input data are 10 or 12 bits, adding ConvertBits(10)
-(or ConvertBit(12)) will speed-up things.
-If you can configure the source filter to directly provide
-10 or 12 bit data, it will be even better.
+10 and 12 bits use 2D lookup (startup is slow),
+but there is a resolution loss noticeable effect on low values.
 
 Functions inside this plugin :
 

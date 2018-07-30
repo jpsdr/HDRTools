@@ -7275,7 +7275,32 @@ static void Convert_LinearRGBPStoRGB64HLG(const MT_Data_Info_HDRTools &mt_data_i
 					dst_pitchY,HLGColor,fastmode,(float *)lookupOOTF,lb-1.0f);
 		}
 
-		if (normalize)
+		if ((!fastmode) && normalize)
+		{
+			float Coeffn=10000.0f/HLG_Lw;
+
+			if (AVX_Enable && PlaneY_al32) JPSDR_HDRTools_Scale_HLG_AVX(dstY,dstY,w8,h,dst_pitchY,dst_pitchY,&Coeffn);
+			else
+			{
+				if (SSE2_Enable && PlaneY_al16) JPSDR_HDRTools_Scale_HLG_SSE2(dstY,dstY,w4,h,dst_pitchY,dst_pitchY,&Coeffn);
+				else
+				{
+					uint8_t *dstY_=(uint8_t *)dstY;
+
+					for(int32_t i=0; i<h; i++)
+					{
+						float *dstF=(float *)dstY_;
+
+						for(int32_t j=0; j<w; j++)
+							dstF[j]=std::min(dstF[j]*Coeffn,1.0f);
+
+						dstY_+=dst_pitchY;
+					}
+				}
+			}
+		}
+
+		if (normalize && fastmode)
 		{
 			if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 				JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX(srcR32,srcG32,srcB32,dstY,w8,h,src_pitch_R,src_pitch_G,
@@ -7658,7 +7683,32 @@ static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 				dst_pitchY,HLGColor,fastmode,(float *)lookupOOTF,lb-1.0f);
 	}
 
-	if (normalize)
+	if ((!fastmode) && normalize)
+	{
+		float Coeffn=HLG_Lw/10000.0f;
+
+		if (AVX_Enable && PlaneY_al32) JPSDR_HDRTools_Scale_HLG_AVX(dstY,dstY,w8,h,dst_pitchY,dst_pitchY,&Coeffn);
+		else
+		{
+			if (SSE2_Enable && PlaneY_al16) JPSDR_HDRTools_Scale_HLG_SSE2(dstY,dstY,w4,h,dst_pitchY,dst_pitchY,&Coeffn);
+			else
+			{
+				uint8_t *dstY_=(uint8_t *)dstY;
+
+				for(int32_t i=0; i<h; i++)
+				{
+					float *dstF=(float *)dstY_;
+
+					for(int32_t j=0; j<w; j++)
+						dstF[j]=std::min(dstF[j]*Coeffn,1.0f);
+
+					dstY_+=dst_pitchY;
+				}
+			}
+		}
+	}
+
+	if (normalize && fastmode)
 	{
 		if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 			JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX(dstR32,dstG32,dstB32,dstY,w8,h,dst_pitch_R,dst_pitch_G,
@@ -7988,7 +8038,32 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 					dst_pitchY,HLGColor,fastmode,(float *)lookupOOTF,lb-1.0f);
 		}
 
-		if (normalize)
+		if ((!fastmode) && normalize)
+		{
+			float Coeffn=10000.0f/HLG_Lw;
+
+			if (AVX_Enable && PlaneY_al32) JPSDR_HDRTools_Scale_HLG_AVX(dstY,dstY,w8,h,dst_pitchY,dst_pitchY,&Coeffn);
+			else
+			{
+				if (SSE2_Enable && PlaneY_al16) JPSDR_HDRTools_Scale_HLG_SSE2(dstY,dstY,w4,h,dst_pitchY,dst_pitchY,&Coeffn);
+				else
+				{
+					uint8_t *dstY_=(uint8_t *)dstY;
+
+					for(int32_t i=0; i<h; i++)
+					{
+						float *dstF=(float *)dstY_;
+
+						for(int32_t j=0; j<w; j++)
+							dstF[j]=std::min(dstF[j]*Coeffn,1.0f);
+
+						dstY_+=dst_pitchY;
+					}
+				}
+			}
+		}
+
+		if (normalize && fastmode)
 		{
 			if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 				JPSDR_HDRTools_Convert_RGBPS_HLG_OOTF_Scale_AVX(srcR32,srcG32,srcB32,dstY,w8,h,src_pitch_R,src_pitch_G,
@@ -10874,7 +10949,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 			MT_DataGF[i].src_modulo1=dst_modulo;
 			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(dstw+(MT_DataGF[i].dst_Y_h_min*dst_pitch));
-			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch;
 			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=dst_modulo;
@@ -10894,7 +10969,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 			MT_DataGF[i].dst1=(void *)(dstRw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_R));
 			MT_DataGF[i].dst2=(void *)(dstGw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_G));
 			MT_DataGF[i].dst3=(void *)(dstBw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_B));
-			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch_R;
 			MT_DataGF[i].dst_pitch2=dst_pitch_G;
 			MT_DataGF[i].dst_pitch3=dst_pitch_B;
@@ -11504,11 +11579,6 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 
-	SSE2_Enable=false;
-	SSE41_Enable=false;
-	AVX_Enable=false;
-	AVX2_Enable=false;
-
 	if (max_threads>1)
 	{
 		if (!poolInterface->GetUserId(UserId))
@@ -11851,7 +11921,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 			MT_DataGF[i].src_modulo3=src_modulo_B;
 			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(tmp1w+(MT_DataGF[i].dst_Y_h_min*tmp1_pitch));
-			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=tmp1_pitch;
 			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=tmp1_modulo;
@@ -11904,7 +11974,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 			MT_DataGF[i].src_modulo1=src_modulo;
 			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(srcw+(MT_DataGF[i].dst_Y_h_min*src_pitch));
-			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=src_pitch;
 			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=src_modulo;
@@ -14018,7 +14088,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			MT_DataGF[i].src_modulo1=dst_modulo;
 			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(dstw+(MT_DataGF[i].dst_Y_h_min*dst_pitch));
-			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch;
 			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=dst_modulo;
@@ -14038,7 +14108,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			MT_DataGF[i].dst1=(void *)(dstRw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_R));
 			MT_DataGF[i].dst2=(void *)(dstGw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_G));
 			MT_DataGF[i].dst3=(void *)(dstBw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_B));
-			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch_R;
 			MT_DataGF[i].dst_pitch2=dst_pitch_G;
 			MT_DataGF[i].dst_pitch3=dst_pitch_B;
@@ -15203,7 +15273,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 			MT_DataGF[i].src_modulo3=src_modulo_B;
 			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(tmp1w+(MT_DataGF[i].dst_Y_h_min*tmp1_pitch));
-			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=tmp1_pitch;
 			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=tmp1_modulo;
@@ -15250,11 +15320,17 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 		for(uint8_t i=0; i<threads_number[0]; i++)
 		{
 			MT_DataGF[i].src1=(void *)(srcw+(MT_DataGF[i].src_Y_h_min*src_pitch));
+			MT_DataGF[i].src4=(void *)(tmp4r+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].src_pitch1=src_pitch;
+			MT_DataGF[i].src_pitch4=tmp4_pitch;
 			MT_DataGF[i].src_modulo1=src_modulo;
+			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(srcw+(MT_DataGF[i].dst_Y_h_min*src_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=src_pitch;
+			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=src_modulo;
+			MT_DataGF[i].dst_modulo4=tmp4_modulo;
 		}
 
 		if (bits_per_pixel==8) f_proc=1;
@@ -16969,7 +17045,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			MT_DataGF[i].dst1=(void *)(dstRw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_R));
 			MT_DataGF[i].dst2=(void *)(dstGw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_G));
 			MT_DataGF[i].dst3=(void *)(dstBw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_B));
-			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch_R;
 			MT_DataGF[i].dst_pitch2=dst_pitch_G;
 			MT_DataGF[i].dst_pitch3=dst_pitch_B;
@@ -16993,7 +17069,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 				MT_DataGF[i].src_modulo1=src_modulo;
 				MT_DataGF[i].src_modulo4=tmp4_modulo;
 				MT_DataGF[i].dst1=(void *)(dstw+(MT_DataGF[i].dst_Y_h_min*dst_pitch));
-				MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+				MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 				MT_DataGF[i].dst_pitch1=dst_pitch;
 				MT_DataGF[i].dst_pitch4=tmp4_pitch;
 				MT_DataGF[i].dst_modulo1=dst_modulo;
@@ -17013,7 +17089,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 				MT_DataGF[i].dst1=(void *)(dstRw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_R));
 				MT_DataGF[i].dst2=(void *)(dstGw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_G));
 				MT_DataGF[i].dst3=(void *)(dstBw+(MT_DataGF[i].dst_Y_h_min*dst_pitch_B));
-				MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+				MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 				MT_DataGF[i].dst_pitch1=dst_pitch_R;
 				MT_DataGF[i].dst_pitch2=dst_pitch_G;
 				MT_DataGF[i].dst_pitch3=dst_pitch_B;
@@ -18154,7 +18230,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 				MT_DataGF[i].src_modulo3=src_modulo_B;
 				MT_DataGF[i].src_modulo4=tmp4_modulo;
 				MT_DataGF[i].dst1=(void *)(dstw0+(MT_DataGF[i].dst_Y_h_min*dst_pitch0));
-				MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
+				MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 				MT_DataGF[i].dst_pitch1=dst_pitch0;
 				MT_DataGF[i].dst_pitch4=tmp4_pitch;
 				MT_DataGF[i].dst_modulo1=dst_modulo0;
@@ -18270,11 +18346,17 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 		for(uint8_t i=0; i<threads_number; i++)
 		{
 			MT_DataGF[i].src1=(void *)(srcw+(MT_DataGF[i].src_Y_h_min*src_pitch));
+			MT_DataGF[i].src4=(void *)(tmp4r+(MT_DataGF[i].src_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].src_pitch1=src_pitch;
+			MT_DataGF[i].src_pitch4=tmp4_pitch;
 			MT_DataGF[i].src_modulo1=src_modulo;
+			MT_DataGF[i].src_modulo4=tmp4_modulo;
 			MT_DataGF[i].dst1=(void *)(dstw+(MT_DataGF[i].dst_Y_h_min*dst_pitch));
+			MT_DataGF[i].dst4=(void *)(tmp4w+(MT_DataGF[i].dst_Y_h_min*tmp4_pitch));
 			MT_DataGF[i].dst_pitch1=dst_pitch;
+			MT_DataGF[i].dst_pitch4=tmp4_pitch;
 			MT_DataGF[i].dst_modulo1=dst_modulo;
+			MT_DataGF[i].dst_modulo4=tmp4_modulo;
 		}
 
 		if (HLG_Mode)
@@ -19080,8 +19162,8 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	const bool EOTF=args[8].AsBool(true);
 	const bool fullrange=args[9].AsBool(false);
 	const bool mpeg2c=args[10].AsBool(true);
-	const int threads=args[11].AsInt(0);
-	const bool LogicalCores=args[12].AsBool(true);
+	const int threads=args[19].AsInt(0);
+	const bool LogicalCores=args[20].AsBool(true);
 	const bool MaxPhysCores=args[21].AsBool(true);
 	const bool SetAffinity=args[22].AsBool(false);
 	const bool sleep = args[23].AsBool(false);
@@ -19102,44 +19184,44 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	{
 		case 0 :
 		case 1 :
-			Rx=(float)args[13].AsFloat(0.708f);
-			Ry=(float)args[14].AsFloat(0.292f);
-			Gx=(float)args[15].AsFloat(0.170f);
-			Gy=(float)args[16].AsFloat(0.797f);
-			Bx=(float)args[17].AsFloat(0.131f);
-			By=(float)args[18].AsFloat(0.046f);
-			Wx=(float)args[19].AsFloat(0.31271f);
-			Wy=(float)args[20].AsFloat(0.32902f);
+			Rx=(float)args[11].AsFloat(0.708f);
+			Ry=(float)args[12].AsFloat(0.292f);
+			Gx=(float)args[13].AsFloat(0.170f);
+			Gy=(float)args[14].AsFloat(0.797f);
+			Bx=(float)args[15].AsFloat(0.131f);
+			By=(float)args[16].AsFloat(0.046f);
+			Wx=(float)args[17].AsFloat(0.31271f);
+			Wy=(float)args[18].AsFloat(0.32902f);
 			break;
 		case 2 :
-			Rx=(float)args[13].AsFloat(0.640f);
-			Ry=(float)args[14].AsFloat(0.330f);
-			Gx=(float)args[15].AsFloat(0.300f);
-			Gy=(float)args[16].AsFloat(0.600f);
-			Bx=(float)args[17].AsFloat(0.150f);
-			By=(float)args[18].AsFloat(0.060f);
-			Wx=(float)args[19].AsFloat(0.31271f);
-			Wy=(float)args[20].AsFloat(0.32902f);
+			Rx=(float)args[11].AsFloat(0.640f);
+			Ry=(float)args[12].AsFloat(0.330f);
+			Gx=(float)args[13].AsFloat(0.300f);
+			Gy=(float)args[14].AsFloat(0.600f);
+			Bx=(float)args[15].AsFloat(0.150f);
+			By=(float)args[16].AsFloat(0.060f);
+			Wx=(float)args[17].AsFloat(0.31271f);
+			Wy=(float)args[18].AsFloat(0.32902f);
 			break;
 		case 3 :
-			Rx=(float)args[13].AsFloat(0.630f);
-			Ry=(float)args[14].AsFloat(0.340f);
-			Gx=(float)args[15].AsFloat(0.310f);
-			Gy=(float)args[16].AsFloat(0.595f);
-			Bx=(float)args[17].AsFloat(0.155f);
-			By=(float)args[18].AsFloat(0.070f);
-			Wx=(float)args[19].AsFloat(0.31271f);
-			Wy=(float)args[20].AsFloat(0.32902f);
+			Rx=(float)args[11].AsFloat(0.630f);
+			Ry=(float)args[12].AsFloat(0.340f);
+			Gx=(float)args[13].AsFloat(0.310f);
+			Gy=(float)args[14].AsFloat(0.595f);
+			Bx=(float)args[15].AsFloat(0.155f);
+			By=(float)args[16].AsFloat(0.070f);
+			Wx=(float)args[17].AsFloat(0.31271f);
+			Wy=(float)args[18].AsFloat(0.32902f);
 			break;
 		case 4 :
-			Rx=(float)args[13].AsFloat(0.640f);
-			Ry=(float)args[14].AsFloat(0.330f);
-			Gx=(float)args[15].AsFloat(0.290f);
-			Gy=(float)args[16].AsFloat(0.600f);
-			Bx=(float)args[17].AsFloat(0.150f);
-			By=(float)args[18].AsFloat(0.060f);
-			Wx=(float)args[19].AsFloat(0.31271f);
-			Wy=(float)args[20].AsFloat(0.32902f);
+			Rx=(float)args[11].AsFloat(0.640f);
+			Ry=(float)args[12].AsFloat(0.330f);
+			Gx=(float)args[13].AsFloat(0.290f);
+			Gy=(float)args[14].AsFloat(0.600f);
+			Bx=(float)args[15].AsFloat(0.150f);
+			By=(float)args[16].AsFloat(0.060f);
+			Wx=(float)args[17].AsFloat(0.31271f);
+			Wy=(float)args[18].AsFloat(0.32902f);
 			break;
 	}
 

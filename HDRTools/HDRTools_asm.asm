@@ -2618,7 +2618,7 @@ Convert_12_YV24toRGB64_AVX_2:
 	jnz Convert_12_YV24toRGB64_AVX_2
 	
 Convert_12_YV24toRGB64_AVX_3:	
-	test eax,1
+	test w,1
 	jz short Convert_12_YV24toRGB64_AVX_4
 	
 	mov esi,src_y

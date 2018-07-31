@@ -104,6 +104,45 @@ LookupRGB32_RGB64HLG_2:
 JPSDR_HDRTools_LookupRGB32_RGB64HLG endp
 
 
+JPSDR_HDRTools_LookupRGB32_RGB64HLGb proc src:dword,dst:dword,w:dword,h:dword,src_modulo:dword,dst_modulo:dword,lookup:dword
+
+	public JPSDR_HDRTools_LookupRGB32_RGB64HLGb
+	
+	push ebx
+	push edi
+	push esi
+	
+	cld
+	mov edx,lookup
+	mov esi,src
+	mov edi,dst
+	
+LookupRGB32_RGB64HLGb_1:
+	mov ecx,w
+LookupRGB32_RGB64HLGb_2:
+	lodsd
+	and eax,00FFFFFFh
+	mov ebx,eax
+	mov eax,dword ptr[edx+8*eax]
+	stosd
+	mov eax,dword ptr[edx+8*ebx+4]
+	stosd
+	loop LookupRGB32_RGB64HLGb_2
+	
+	add esi,src_modulo
+	add edi,dst_modulo
+	dec h
+	jnz short LookupRGB32_RGB64HLGb_1
+	
+	pop esi
+	pop edi
+	pop ebx
+	
+	ret
+	
+JPSDR_HDRTools_LookupRGB32_RGB64HLGb endp
+
+
 JPSDR_HDRTools_LookupRGB32 proc src:dword,dst:dword,w:dword,h:dword,src_modulo:dword,dst_modulo:dword,lookup:dword
 
 	public JPSDR_HDRTools_LookupRGB32

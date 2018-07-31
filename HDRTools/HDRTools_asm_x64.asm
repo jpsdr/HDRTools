@@ -134,6 +134,64 @@ LookupRGB32_RGB64HLG_2:
 JPSDR_HDRTools_LookupRGB32_RGB64HLG endp
 
 
+;JPSDR_HDRTools_LookupRGB32_RGB64HLGb proc src:dword,dst:dword,w:dword,h:dword,src_modulo:dword,dst_modulo:dword,lookup:dword
+; src = rcx
+; dst = rdx
+; w = r8d
+; h = r9d
+
+JPSDR_HDRTools_LookupRGB32_RGB64HLGb proc public frame
+
+src_modulo equ qword ptr[rbp+48]
+dst_modulo equ qword ptr[rbp+56]
+lookup equ qword ptr[rbp+64]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	.endprolog
+
+	cld
+	mov rsi,rcx
+	mov rdi,rdx
+	mov r10,src_modulo
+	mov r11,dst_modulo
+	mov rdx,lookup
+	mov rbx,00FFFFFFh
+	xor rcx,rcx
+	xor rax,rax
+	
+LookupRGB32_RGB64HLGb_1:
+	mov ecx,r8d
+LookupRGB32_RGB64HLGb_2:
+	lodsd
+	and rax,rbx
+	mov rax,qword ptr[rdx+8*rax]
+	stosq
+	xor rax,rax
+	loop LookupRGB32_RGB64HLGb_2
+	
+	add rsi,r10
+	add rdi,r11
+	dec r9d
+	jnz short LookupRGB32_RGB64HLGb_1
+	
+	pop rbx
+	pop rsi
+	pop rdi
+	pop rbp
+	
+	ret
+	
+JPSDR_HDRTools_LookupRGB32_RGB64HLGb endp
+
+
 ;JPSDR_HDRTools_LookupRGB32 proc src:dword,dst:dword,w:dword,h:dword,src_modulo:dword,dst_modulo:dword,lookup:dword
 ; src = rcx
 ; dst = rdx

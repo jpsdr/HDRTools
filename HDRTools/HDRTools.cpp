@@ -14335,6 +14335,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 
 	vi_original=NULL; vi_420=NULL; vi_422=NULL; vi_444=NULL;
 	vi_RGB32=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
+	lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
 
 	lookupRGB_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupRGB_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
@@ -15742,6 +15743,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
 	vi_PlaneY_HLG=NULL;
+	lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
 
 	lookupL_8=(uint8_t *)malloc(256*sizeof(uint8_t));
 	lookupL_8to16=(uint16_t *)malloc(256*sizeof(uint16_t));
@@ -15773,15 +15775,10 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			{
 				case 1 :
 					if (OutputMode==1)
-					{
 						lookupHLG_OOTF=(void *)malloc(256*256*256*sizeof(RGB64BMP));
-						alloc_inv_ootf=false;
-					}
 					else
-					{
 						lookupHLG_OOTF=(void *)malloc(256*256*256*3*sizeof(float));
-						alloc_inv_ootf=false;
-					}
+					alloc_inv_ootf=false;
 					break;
 				case 2 :
 					if (OutputMode==1)
@@ -17391,6 +17388,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
 	vi_PlaneY_HLG=NULL;
+	lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
 
 	lookupL_8=(uint8_t *)malloc(256*sizeof(uint8_t));
 	lookupL_16=(uint16_t *)malloc(65536*sizeof(uint16_t));

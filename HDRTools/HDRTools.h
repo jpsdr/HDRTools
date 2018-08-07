@@ -24,7 +24,7 @@
 #include "avisynth.h"
 #include "ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 0.3.1 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 0.4.0 JPSDR"
 
 
 typedef struct _dataLookUp
@@ -329,21 +329,20 @@ private:
 };
 
 
-class ConvertXYZ_HDRtoSDR : public GenericVideoFilter
+class ConvertXYZ_Scale_HDRtoSDR : public GenericVideoFilter
 {
 public:
-	ConvertXYZ_HDRtoSDR(PClip _child,float _MinMastering,float _MaxMastering,float _Coeff_X,
-		float _Coeff_Y,float _Coeff_Z,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
-	virtual ~ConvertXYZ_HDRtoSDR();
+	ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X,float _Coeff_Y,float _Coeff_Z,uint8_t _threads,
+		bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertXYZ_Scale_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
 	int __stdcall SetCacheHints(int cachehints, int frame_range);
 
 private:
-	float MinMastering,MaxMastering;
 	bool sleep;
-	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	float Coeff_X,Coeff_Y,Coeff_Z;
+	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;
@@ -363,12 +362,12 @@ private:
 };
 
 
-class ConvertXYZ_SDRtoHDR : public GenericVideoFilter
+class ConvertXYZ_Scale_SDRtoHDR : public GenericVideoFilter
 {
 public:
-	ConvertXYZ_SDRtoHDR(PClip _child,float _Coeff_X,float _Coeff_Y,float _Coeff_Z,
+	ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X,float _Coeff_Y,float _Coeff_Z,
 		uint8_t _threads, bool _sleep,IScriptEnvironment* env);
-	virtual ~ConvertXYZ_SDRtoHDR();
+	virtual ~ConvertXYZ_Scale_SDRtoHDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
 	int __stdcall SetCacheHints(int cachehints, int frame_range);
@@ -376,8 +375,90 @@ public:
 private:
 	float MinMastering,MaxMastering;
 	bool sleep;
-	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	float Coeff_X,Coeff_Y,Coeff_Z;
+	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
+
+class ConvertXYZ_Hable_HDRtoSDR : public GenericVideoFilter
+{
+public:
+	ConvertXYZ_Hable_HDRtoSDR(PClip _child,double _exp_X,double _w_X,double _a_X,double _b_X,double _c_X,
+		double _d_X,double _e_X,double _f_X,double _exp_Y,double _w_Y,double _a_Y,double _b_Y,double _c_Y,
+		double _d_Y,double _e_Y,double _f_Y,double _exp_Z,double _w_Z,double _a_Z,double _b_Z,double _c_Z,
+		double _d_Z,double _e_Z,double _f_Z,
+		float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
+		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertXYZ_Hable_HDRtoSDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	bool sleep,fastmode;
+	double exp_X,w_X,a_X,b_X,c_X,d_X,e_X,f_X;
+	double exp_Y,w_Y,a_Y,b_Y,c_Y,d_Y,e_Y,f_Y;
+	double exp_Z,w_Z,a_Z,b_Z,c_Z,d_Z,e_Z,f_Z;
+	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
+	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
+	float *lookupX_32,*lookupY_32,*lookupZ_32;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
+
+class ConvertRGB_Hable_HDRtoSDR : public GenericVideoFilter
+{
+public:
+	ConvertRGB_Hable_HDRtoSDR(PClip _child,double _exp_R,double _w_R,double _a_R,double _b_R,double _c_R,
+		double _d_R,double _e_R,double _f_R,double _exp_G,double _w_G,double _a_G,double _b_G,double _c_G,
+		double _d_G,double _e_G,double _f_G,double _exp_B,double _w_B,double _a_B,double _b_B,double _c_B,
+		double _d_B,double _e_B,double _f_B,
+		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertRGB_Hable_HDRtoSDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	bool sleep,fastmode;
+	double exp_R,w_R,a_R,b_R,c_R,d_R,e_R,f_R;
+	double exp_G,w_G,a_G,b_G,c_G,d_G,e_G,f_G;
+	double exp_B,w_B,a_B,b_B,c_B,d_B,e_B,f_B;
+	uint16_t *lookupR_16,*lookupG_16,*lookupB_16;
+	float *lookupR_32,*lookupG_32,*lookupB_32;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;

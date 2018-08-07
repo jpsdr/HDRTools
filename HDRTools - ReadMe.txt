@@ -345,29 +345,16 @@ Accepted input : RGB32, RGB64 and Planar float RGB.
 The others parameters are identical to ConvertXYZtoYUV.
 
 
-**************************************
-**       ConvertXYZ_HDRtoSDR        **
-**************************************
+********************************************
+**       ConvertXYZ_Scale_HDRtoSDR        **
+********************************************
 
-ConvertXYZ_HDRtoSDR(int MinMastering, int MaxMastering,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch,
-     float Coeff_X, float Coeff_X, float Coeff_X)
+ConvertXYZ_Scale_HDRtoSDR(float Coeff_X, float Coeff_Y, float Coeff_Z,
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
 Accepted input : RGB64 and Planar float RGB.
 
 For now, it's just a linear scalling, just for testing. Formula is just Out_X=Coeff_X*In_X (etc...).
-
-   MinMastering -
-      Min mastering level found in the SEI mastering parameters of HDR streams.
-      Not used.
-
-       Default: 0 (int)
-
-   MaxMastering -
-      Max mastering level found in the SEI mastering parameters of HDR streams.
-      Not used.
-
-       Default: 1000 (int)
 
    Coeff_X -
       Linear scalar value used on X plane.
@@ -384,14 +371,14 @@ For now, it's just a linear scalling, just for testing. Formula is just Out_X=Co
       
        Default: Coeff_X (float)
 
-The others parameters are identical to  ConvertYUVtoLinearRGB.
+The others parameters are identical to ConvertYUVtoLinearRGB.
 
 
-**************************************
-**       ConvertXYZ_SDRtoHDR        **
-**************************************
+********************************************
+**       ConvertXYZ_Scale_SDRtoHDR        **
+********************************************
 
-ConvertXYZ_SDRtoHDR(float Coeff_X, float Coeff_X, float Coeff_X,
+ConvertXYZ_Scale_SDRtoHDR(float Coeff_X, float Coeff_X, float Coeff_X,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
 Accepted input : RGB64 and Planar float RGB.
@@ -413,8 +400,142 @@ Produce linear scalling. Formula is just Out_X=In_X/Coeff_X (etc...).
       
        Default: Coeff_X (float)
 
-The others parameters are identical to  ConvertYUVtoLinearRGB.
+The others parameters are identical to ConvertYUVtoLinearRGB.
 
+
+********************************************
+**       ConvertXYZ_Hable_HDRtoSDR        **
+********************************************
+
+ConvertXYZ_Hable_HDRtoSDR(float exposure_X,float whitescale_X,float a_x,float b_x,float c_x,
+     float d_X,float e_x,float f_x,float exposure_Y,float whitescale_Y,float a_Y,float b_Y,float c_Y,
+     float d_Y,float e_Y,float f_Y,float exposure_Z,float whitescale_Z,float a_Z,float b_Z,float c_Z,
+     float d_Z,float e_Z,float f_Z,int pColor,float pRx,float pRy,float pGx,float pGy,
+     float pBx,float pBy,bool fastmode,
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     
+Accepted input : RGB64 and Planar float RGB.
+
+Hable tonemap, you can have different parameters for each plane, if you want.
+
+   exposure_X -
+      Exposure value used on X plane.
+      
+       Default: 2.0 (float)
+
+   whitescale_X -
+      White scale value used on X plane.
+      
+       Default: 11.2 (float)
+
+   a_X -
+      a value used on X plane.
+      
+       Default: 0.15 (float)
+
+   b_X -
+      b value used on X plane.
+      
+       Default: 0.5 (float)
+
+   c_X -
+      c value used on X plane.
+      
+       Default: 0.1 (float)
+
+   d_X -
+      d value used on X plane.
+      
+       Default: 0.2 (float)
+
+   e_X -
+      e value used on X plane.
+      
+       Default: 0.02 (float)
+
+   f_X -
+      f value used on X plane.
+      
+       Default: 0.3 (float)
+
+   exposure_Y,whitescale_Y,a_Y,b_Y,c_Y,d_Y,e_Y,f_Y
+      Values used on Y plane.
+
+       Default : exposure_X,whitescale_X,a_X,b_X,c_X,d_X,e_X,f_X (float)
+
+   exposure_Z,whitescale_Z,a_Z,b_Z,c_Z,d_Z,e_Z,f_Z
+      Values used on Z plane.
+
+       Default : exposure_X,whitescale_X,a_X,b_X,c_X,d_X,e_X,f_X (float)
+
+The others parameters are identical to ConvertXYZtoRGB.
+
+
+********************************************
+**       ConvertRGB_Hable_HDRtoSDR        **
+********************************************
+
+ConvertXYZ_Hable_HDRtoSDR(float exposure_R,float whitescale_R,float a_R,float b_R,float c_R,
+     float d_R,float e_R,float f_R,float exposure_G,float whitescale_G,float a_G,float b_G,float c_G,
+     float d_G,float e_G,float f_G,float exposure_B,float whitescale_B,float a_B,float b_B,float c_B,
+     float d_B,float e_B,float f_B,bool fastmode,
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     
+Accepted input : RGB64 and Planar float RGB.
+
+Hable tonemap, you can have different parameters for each plane, if you want.
+
+   exposure_R -
+      Exposure value used on R plane.
+      
+       Default: 2.0 (float)
+
+   whitescale_R -
+      White scale value used on R plane.
+      
+       Default: 11.2 (float)
+
+   a_R -
+      a value used on R plane.
+      
+       Default: 0.15 (float)
+
+   b_R -
+      b value used on R plane.
+      
+       Default: 0.5 (float)
+
+   c_R -
+      c value used on R plane.
+      
+       Default: 0.1 (float)
+
+   d_R -
+      d value used on R plane.
+      
+       Default: 0.2 (float)
+
+   e_R -
+      e value used on R plane.
+      
+       Default: 0.02 (float)
+
+   f_R -
+      f value used on R plane.
+      
+       Default: 0.3 (float)
+
+   exposure_G,whitescale_G,a_G,b_G,c_G,d_G,e_G,f_G
+      Values used on G plane.
+
+       Default : exposure_R,whitescale_R,a_R,b_R,c_R,d_R,e_R,f_R (float)
+
+   exposure_B,whitescale_B,a_B,b_B,c_B,d_B,e_B,f_B
+      Values used on B plane.
+
+       Default : exposure_R,whitescale_R,a_R,b_R,c_R,d_R,e_R,f_R (float)
+
+The others parameters are identical to ConvertLinearRGBtoYUV.
 
 *************************************************************
 

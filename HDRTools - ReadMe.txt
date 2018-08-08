@@ -378,7 +378,7 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 **       ConvertXYZ_Scale_SDRtoHDR        **
 ********************************************
 
-ConvertXYZ_Scale_SDRtoHDR(float Coeff_X, float Coeff_X, float Coeff_X,
+ConvertXYZ_Scale_SDRtoHDR(float Coeff_X, float Coeff_Y, float Coeff_Z,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
 Accepted input : RGB64 and Planar float RGB.
@@ -537,11 +537,175 @@ Hable tonemap, you can have different parameters for each plane, if you want.
 
 The others parameters are identical to ConvertLinearRGBtoYUV.
 
+
+********************************************
+**       ConvertXYZ_Mobius_HDRtoSDR       **
+********************************************
+
+ConvertXYZ_Mobius_HDRtoSDR(float exposure_X,float transition_X,float peak_X,
+     float exposure_Y,float transition_Y,float peak_Y,float exposure_Z,float transition_Z,float peak_Z,
+     int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,bool fastmode,
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     
+Accepted input : RGB64 and Planar float RGB.
+
+Mobius tonemap, you can have different parameters for each plane, if you want.
+
+   exposure_X -
+      Exposure value used on X plane.
+      
+       Default: 2.0 (float)
+
+   transition_X -
+      Transition value used on X plane.
+      
+       Default: 0.3 (float)
+
+   peak_X -
+      Peak value used on X plane.
+      
+       Default: 1.0 (float)
+
+   exposure_Y,transition_Y,peak_Y
+      Values used on Y plane.
+
+       Default : exposure_X,transition_X,peak_X (float)
+
+   exposure_Z,transition_Z,peak_Z
+      Values used on Z plane.
+
+       Default : exposure_X,transition_X,peak_X (float)
+
+The others parameters are identical to ConvertXYZtoRGB.
+
+
+********************************************
+**       ConvertRGB_Mobius_HDRtoSDR       **
+********************************************
+
+ConvertRGB_Mobius_HDRtoSDR(float exposure_R,float transition_R,float peak_R,
+     float exposure_G,float transition_G,float peak_G,float exposure_B,float transition_B,
+     float peak_B,bool fastmode,
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     
+Accepted input : RGB64 and Planar float RGB.
+
+Mobius tonemap, you can have different parameters for each plane, if you want.
+
+   exposure_R -
+      Exposure value used on R plane.
+      
+       Default: 2.0 (float)
+
+   transition_R -
+      Transition value used on R plane.
+      
+       Default: 0.3 (float)
+
+   peak_R -
+      Peak value used on R plane.
+      
+       Default: 1.0 (float)
+
+   exposure_G,transition_G,peak_G
+      Values used on G plane.
+
+       Default : exposure_R,transition_R,peak_R (float)
+
+   exposure_B,transition_B,peak_B
+      Values used on B plane.
+
+       Default : exposure_R,transition_R,peak_R (float)
+
+The others parameters are identical to ConvertLinearRGBtoYUV.
+
+
+********************************************
+**      ConvertXYZ_Reinhard_HDRtoSDR      **
+********************************************
+
+ConvertXYZ_Reinhard_HDRtoSDR(float exposure_X,float contrast_X,float peak_X,
+     float exposure_Y,float contrast_Y,float peak_Y,float exposure_Z,float contrast_Z,float peak_Z,
+     int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,bool fastmode,
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     
+Accepted input : RGB64 and Planar float RGB.
+
+Reinhard tonemap, you can have different parameters for each plane, if you want.
+
+   exposure_X -
+      Exposure value used on X plane.
+      
+       Default: 2.0 (float)
+
+   contrast_X -
+      Contrast value used on X plane.
+      
+       Default: 0.5 (float)
+
+   peak_X -
+      Peak value used on X plane.
+      
+       Default: 1.0 (float)
+
+   exposure_Y,contrast_Y,peak_Y
+      Values used on Y plane.
+
+       Default : exposure_X,contrast_X,peak_X (float)
+
+   exposure_Z,contrast_Z,peak_Z
+      Values used on Z plane.
+
+       Default : exposure_X,contrast_X,peak_X (float)
+
+The others parameters are identical to ConvertXYZtoRGB.
+
+
+********************************************
+**      ConvertRGB_Reinhard_HDRtoSDR      **
+********************************************
+
+ConvertRGB_Reinhard_HDRtoSDR(float exposure_R,float contrast_R,float peak_R,
+     float exposure_G,float contrast_G,float peak_G,float exposure_B,float contrast_B,
+     float peak_B,bool fastmode,
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     
+Accepted input : RGB64 and Planar float RGB.
+
+Reinhard tonemap, you can have different parameters for each plane, if you want.
+
+   exposure_R -
+      Exposure value used on R plane.
+      
+       Default: 2.0 (float)
+
+   contrast_R -
+      Contrast value used on R plane.
+      
+       Default: 0.5 (float)
+
+   peak_R -
+      Peak value used on R plane.
+      
+       Default: 1.0 (float)
+
+   exposure_G,contrast_G,peak_G
+      Values used on G plane.
+
+       Default : exposure_R,contrast_R,peak_R (float)
+
+   exposure_B,contrast_B,peak_B
+      Values used on B plane.
+
+       Default : exposure_R,contrast_R,peak_R (float)
+
+The others parameters are identical to ConvertLinearRGBtoYUV.
+
 *************************************************************
 
 Note :
 ======
-ConvertXYZ_HDRtoSDR is a simple scalar function, i've made just to see what result it produces.
+ConvertXYZ_Scalar_HDRtoSDR is a simple scalar function, i've made just to see what result it produces.
 Don't have expectations on this plugin, but if by luck it works for you...
 
 *************************************************************
@@ -624,9 +788,6 @@ ConvertXYZtoYUV(Color=1,pColor=2)
 HDR HLG (with mastering Lw at 1500 and HLG mastering display colorspace BT.2020) to HDR PQ convertion :
 ConvertYUVtoLinearRGB(Color=0,HDRMode=1,HLGLw=1500,OOTF=false)
 ConvertLinearRGBtoYUV(Color=0,OOTF=false)
-
-Note : If input data is 10 or 12 bits, but the source filter provide 16 bits data,
-adding ConvertBits(10) (or ConvertBits(12)) before ConvertYUVtoLinearRGB will speed-up things.
 
 ----------------------------------
 

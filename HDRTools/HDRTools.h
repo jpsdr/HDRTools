@@ -476,3 +476,159 @@ private:
 
 	void FreeData(void);
 };
+
+
+class ConvertXYZ_Mobius_HDRtoSDR : public GenericVideoFilter
+{
+public:
+	ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_X,double _trans_X,double _peak_X,
+		double _exp_Y,double _trans_Y,double _peak_Y,double _exp_Z,double _trans_Z,double _peak_Z,
+		float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
+		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertXYZ_Mobius_HDRtoSDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	bool sleep,fastmode;
+	double exp_X,trans_X,peak_X;
+	double exp_Y,trans_Y,peak_Y;
+	double exp_Z,trans_Z,peak_Z;
+	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
+	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
+	float *lookupX_32,*lookupY_32,*lookupZ_32;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
+
+class ConvertRGB_Mobius_HDRtoSDR : public GenericVideoFilter
+{
+public:
+	ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_R,double _trans_R,double _peak_R,
+		double _exp_G,double _trans_G,double _peak_G,double _exp_B,double _trans_B,double _peak_B,
+		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertRGB_Mobius_HDRtoSDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	bool sleep,fastmode;
+	double exp_R,trans_R,peak_R;
+	double exp_G,trans_G,peak_G;
+	double exp_B,trans_B,peak_B;
+	uint16_t *lookupR_16,*lookupG_16,*lookupB_16;
+	float *lookupR_32,*lookupG_32,*lookupB_32;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
+
+class ConvertXYZ_Reinhard_HDRtoSDR : public GenericVideoFilter
+{
+public:
+	ConvertXYZ_Reinhard_HDRtoSDR(PClip _child,double _exp_X,double _contr_X,double _peak_X,
+		double _exp_Y,double _contr_Y,double _peak_Y,double _exp_Z,double _contr_Z,double _peak_Z,
+		float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
+		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertXYZ_Reinhard_HDRtoSDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	bool sleep,fastmode;
+	double exp_X,contr_X,peak_X;
+	double exp_Y,contr_Y,peak_Y;
+	double exp_Z,contr_Z,peak_Z;
+	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
+	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
+	float *lookupX_32,*lookupY_32,*lookupZ_32;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
+
+class ConvertRGB_Reinhard_HDRtoSDR : public GenericVideoFilter
+{
+public:
+	ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _exp_R,double _contr_R,double _peak_R,
+		double _exp_G,double _contr_G,double _peak_G,double _exp_B,double _contr_B,double _peak_B,
+		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertRGB_Reinhard_HDRtoSDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	bool sleep,fastmode;
+	double exp_R,contr_R,peak_R;
+	double exp_G,contr_G,peak_G;
+	double exp_B,contr_B,peak_B;
+	uint16_t *lookupR_16,*lookupG_16,*lookupB_16;
+	float *lookupR_32,*lookupG_32,*lookupB_32;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};

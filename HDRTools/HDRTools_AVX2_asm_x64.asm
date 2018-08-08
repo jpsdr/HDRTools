@@ -242,6 +242,7 @@ Coeff equ qword ptr[rbp+72]
 	vmovss xmm2,dword ptr[rsi]
 	vshufps xmm2,xmm2,xmm2,0
 	vinsertf128 ymm2,ymm2,xmm2,1
+	
 	vmovdqa ymm3,YMMWORD ptr data_dw_1048575
 	vmovdqa ymm4,YMMWORD ptr data_dw_0
 	vmulps ymm2,ymm2,YMMWORD ptr data_f_1048575

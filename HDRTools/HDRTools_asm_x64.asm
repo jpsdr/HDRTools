@@ -10851,6 +10851,7 @@ Coeff equ qword ptr[rbp+72]
 	mov rsi,Coeff
 	movss xmm2,dword ptr[rsi]
 	shufps xmm2,xmm2,0
+	
 	movaps xmm3,XMMWORD ptr data_f_1048575
 	movaps xmm4,XMMWORD ptr data_f_0
 	mulps xmm2,xmm3
@@ -10919,6 +10920,7 @@ Coeff equ qword ptr[rbp+72]
 	mov rsi,Coeff
 	movss xmm2,dword ptr[rsi]
 	shufps xmm2,xmm2,0
+	
 	movdqa xmm3,XMMWORD ptr data_dw_1048575
 	movdqa xmm4,XMMWORD ptr data_dw_0
 	mulps xmm2,XMMWORD ptr data_f_1048575
@@ -10993,11 +10995,6 @@ Coeff equ qword ptr[rbp+72]
 	vmovaps ymm3,YMMWORD ptr data_f_1048575
 	vmovaps ymm4,YMMWORD ptr data_f_0
 	vmulps ymm2,ymm2,ymm3
-	
-	
-	vmovdqa ymm3,YMMWORD ptr data_dw_1048575
-	vmovdqa ymm4,YMMWORD ptr data_dw_0
-	vmulps ymm2,ymm2,YMMWORD ptr data_f_1048575
 	
 	mov rsi,rcx
 	mov r10,src_pitch

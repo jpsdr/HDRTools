@@ -202,6 +202,7 @@ JPSDR_HDRTools_Scale_20_XYZ_AVX2 proc src:dword,dst:dword,w8:dword,h:dword,src_p
 	vmovss xmm2,dword ptr[esi]
 	vshufps xmm2,xmm2,xmm2,0
 	vinsertf128 ymm2,ymm2,xmm2,1
+	
 	vmovdqa ymm3,YMMWORD ptr data_dw_1048575
 	vmovdqa ymm4,YMMWORD ptr data_dw_0
 	vmulps ymm2,ymm2,YMMWORD ptr data_f_1048575

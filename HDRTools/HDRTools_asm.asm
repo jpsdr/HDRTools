@@ -9112,6 +9112,7 @@ JPSDR_HDRTools_Scale_20_XYZ_SSE2 proc src:dword,dst:dword,w4:dword,h:dword,src_p
 	mov esi,Coeff
 	movss xmm2,dword ptr[esi]
 	shufps xmm2,xmm2,0
+	
 	movaps xmm3,XMMWORD ptr data_f_1048575
 	movaps xmm4,XMMWORD ptr data_f_0
 	mulps xmm2,xmm3
@@ -9165,6 +9166,7 @@ JPSDR_HDRTools_Scale_20_XYZ_SSE41 proc src:dword,dst:dword,w4:dword,h:dword,src_
 	mov esi,Coeff
 	movss xmm2,dword ptr[esi]
 	shufps xmm2,xmm2,0
+	
 	movdqa xmm3,XMMWORD ptr data_dw_1048575
 	movdqa xmm4,XMMWORD ptr data_dw_0
 	mulps xmm2,XMMWORD ptr data_f_1048575
@@ -9220,6 +9222,7 @@ JPSDR_HDRTools_Scale_20_XYZ_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pi
 	vmovss xmm2,dword ptr[esi]
 	vshufps xmm2,xmm2,xmm2,0
 	vinsertf128 ymm2,ymm2,xmm2,1
+	
 	vmovaps ymm3,YMMWORD ptr data_f_1048575
 	vmovaps ymm4,YMMWORD ptr data_f_0
 	vmulps ymm2,ymm2,ymm3

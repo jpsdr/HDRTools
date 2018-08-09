@@ -10042,13 +10042,9 @@ static void Convert_RGB_HDRtoSDR_Mobius(const MT_Data_Info_HDRTools &mt_data_inf
 
 		for(int32_t j=0; j<w; j++)
 		{
-			if (srcR[j]<=coeff1) dstR[j]=srcR[j];
-			else
-			{
-				const float r0=srcR[j]*expo;
+			const float r0=srcR[j]*expo;
 
-				dstR[j]=coeff2*(r0+coeff3)/(r0+coeff4);
-			}
+			dstR[j]=(r0<=coeff1)?r0:coeff2*(r0+coeff3)/(r0+coeff4);
 		}
 		srcR_+=src_pitch_R;
 		dstR_+=dst_pitch_R;
@@ -10070,13 +10066,9 @@ static void Convert_RGB_HDRtoSDR_Mobius(const MT_Data_Info_HDRTools &mt_data_inf
 
 		for(int32_t j=0; j<w; j++)
 		{
-			if (srcG[j]<=coeff1) dstG[j]=srcG[j];
-			else
-			{
-				const float g0=srcG[j]*expo;
+			const float g0=srcG[j]*expo;
 
-				dstG[j]=coeff2*(g0+coeff3)/(g0+coeff4);
-			}
+			dstG[j]=(g0<=coeff1)?g0:coeff2*(g0+coeff3)/(g0+coeff4);
 		}
 		srcG_+=src_pitch_G;
 		dstG_+=dst_pitch_G;
@@ -10098,13 +10090,9 @@ static void Convert_RGB_HDRtoSDR_Mobius(const MT_Data_Info_HDRTools &mt_data_inf
 
 		for(int32_t j=0; j<w; j++)
 		{
-			if (srcB[j]<=coeff1) dstB[j]=srcB[j];
-			else
-			{
-				const float b0=srcB[j]*expo;
+			const float b0=srcB[j]*expo;
 
-				dstB[j]=coeff2*(b0+coeff3)/(b0+coeff4);
-			}
+			dstB[j]=(b0<=coeff1)?b0:coeff2*(b0+coeff3)/(b0+coeff4);
 		}
 		srcB_+=src_pitch_B;
 		dstB_+=dst_pitch_B;
@@ -10150,13 +10138,9 @@ static void Convert_XYZ_HDRtoSDR_Mobius(const MT_Data_Info_HDRTools &mt_data_inf
 
 		for(int32_t j=0; j<w; j++)
 		{
-			if (srcX[j]<=coeff1) dstX[j]=srcX[j];
-			else
-			{
-				const float x0=srcX[j]*expo;
+			const float x0=srcX[j]*expo;
 
-				dstX[j]=coeff2*(x0+coeff3)/(x0+coeff4);
-			}
+			dstX[j]=(x0<=coeff1)?x0:coeff2*(x0+coeff3)/(x0+coeff4);
 		}
 		srcX_+=src_pitch_X;
 		dstX_+=dst_pitch_X;
@@ -10178,13 +10162,9 @@ static void Convert_XYZ_HDRtoSDR_Mobius(const MT_Data_Info_HDRTools &mt_data_inf
 
 		for(int32_t j=0; j<w; j++)
 		{
-			if (srcY[j]<=coeff1) dstY[j]=srcY[j];
-			else
-			{
-				const float y0=srcY[j]*expo;
+			const float y0=srcY[j]*expo;
 
-				dstY[j]=coeff2*(y0+coeff3)/(y0+coeff4);
-			}
+			dstY[j]=(y0<=coeff1)?y0:coeff2*(y0+coeff3)/(y0+coeff4);
 		}
 		srcY_+=src_pitch_Y;
 		dstY_+=dst_pitch_Y;
@@ -10206,13 +10186,9 @@ static void Convert_XYZ_HDRtoSDR_Mobius(const MT_Data_Info_HDRTools &mt_data_inf
 
 		for(int32_t j=0; j<w; j++)
 		{
-			if (srcZ[j]<=coeff1) dstZ[j]=srcZ[j];
-			else
-			{
-				const float z0=srcZ[j]*expo;
+			const float z0=srcZ[j]*expo;
 
-				dstZ[j]=coeff2*(z0+coeff3)/(z0+coeff4);
-			}
+			dstZ[j]=(z0<=coeff1)?z0:coeff2*(z0+coeff3)/(z0+coeff4);
 		}
 		srcZ_+=src_pitch_Z;
 		dstZ_+=dst_pitch_Z;

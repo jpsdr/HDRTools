@@ -25564,7 +25564,7 @@ AVSValue __cdecl Create_ConvertXYZ_Reinhard_HDRtoSDR(AVSValue args, void* user_d
 		env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: Input format must be RGB64 or RGBPS");
 
 
-	const double exp_X=args[1].AsFloat(2.0f);
+	const double exp_X=args[1].AsFloat(1.5f);
 	const double contr_X=args[2].AsFloat(0.5f);
 	const double peak_X=args[3].AsFloat(1.0f);
 
@@ -25726,7 +25726,7 @@ AVSValue __cdecl Create_ConvertRGB_Reinhard_HDRtoSDR(AVSValue args, void* user_d
 		env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: Input format must be RGB64 or RGBPS");
 
 
-	const double exp_R=args[1].AsFloat(2.0f);
+	const double exp_R=args[1].AsFloat(1.5f);
 	const double contr_R=args[2].AsFloat(0.5f);
 	const double peak_R=args[3].AsFloat(1.0f);
 

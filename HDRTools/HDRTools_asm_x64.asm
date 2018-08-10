@@ -542,6 +542,7 @@ JPSDR_HDRTools_Move8to16 proc public frame
 	.pushreg rdi
 	.endprolog
 	
+	cld
 	mov rdi,rcx
 	xor rax,rax	
 	xor rcx,rcx

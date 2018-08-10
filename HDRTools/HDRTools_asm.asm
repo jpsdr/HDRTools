@@ -396,6 +396,7 @@ JPSDR_HDRTools_Move8to16 proc dst:dword,src:dword,w:dword
 	push esi
 	push edi
 	
+	cld
 	xor eax,eax
 	mov ecx,w		
 	mov edi,dst

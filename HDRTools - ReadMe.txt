@@ -1,6 +1,6 @@
 Some general information first.
 
-The recording process is the following :
+The recording process is the following:
 SDR :
 [Camera sensor] -> Linear R,G,B -> OETF -> Non linear R',G',B' -> Color Matrix -> Y',C'r,C'b
 Y',C'r,C'b -> Inv Color Matrix -> Non linear R',G',B' -> EOTF -> Linear R,G,B
@@ -16,13 +16,22 @@ light information seems the XYZ color space.
 In the Document directory i've put a pdf file describing how things work,
 with detailled explainations and formula.
 
-Note about HDR HLG :
-For speed-up :
+Note about HDR HLG:
+For speed-up:
 8 bits input use 3D lookup (startup is slow).
 10 and 12 bits use 2D lookup (startup is slow),
 but there is a resolution loss noticeable effect on low values.
 
-Functions inside this plugin :
+Note about YV12/YV16/YV24 input/ouput:
+For ConvertYUVtoxxx functions, convertion to YV24 if input is not YV24 is "quick".
+If you want a true correct precise/perfect convertion, i would avise you to use
+a resampler and feed directly to YV24.
+For ConvertxxxtoYUV functions, if you choose an ouput different from YV24, same
+remark, convertion is "quick".
+If you want a true correct precise/perfect convertion, i would avise you
+to ouput to YV24, and use a resampler to achieve the real output format you want.
+
+Functions inside this plugin:
 
 
 **************************************
@@ -33,31 +42,31 @@ ConvertYUVtoLinearRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HL
      bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,int threads,bool logicalCores,bool MaxPhysCore,
      bool SetAffinity,bool sleep,int prefetch)
 
-Accepted input : Planar YUV 8 to 16 bits.
+Accepted input: Planar YUV 8 to 16 bits.
 
    Color -
       Set the color mode of the data.
-         0 : BT2100
-         1 : BT2020
-         2 : BT709
-         3 : BT601_525
-         4 : BT601_625
+         0: BT2100
+         1: BT2020
+         2: BT709
+         3: BT601_525
+         4: BT601_625
 
        Default: 2 (int)
 
    OutputMode -
       Set the output data mode.
-         0 : No change : Input 8 Bits -> Output : RGB32, Input > 8 Bits -> Output : RGB64
-	 1 : The ouput will be RGB64
-	 2 : The ouput will be RGBPS (Planar RGB float)
+         0: No change : Input 8 Bits -> Output : RGB32, Input > 8 Bits -> Output : RGB64
+	 1: The ouput will be RGB64
+	 2: The ouput will be RGBPS (Planar RGB float)
 
        Default: 0 (int)
 
    HDRMode -
       Has effect only if Color=0.
-         0 : PQ mode.
-         1 : HLG normalized 10000 cd/m� mode.
-         2 : HLG not normalized.
+         0: PQ mode.
+         1: HLG normalized 10000 cd/m� mode.
+         2: HLG not normalized.
 
        Default: 0 (int)
 
@@ -79,34 +88,34 @@ Accepted input : Planar YUV 8 to 16 bits.
        Default: 1 (int)
 
    OOTF -
-      Color = 0 :
+      Color = 0:
 
-        HDRMode = 0, 1, 2 :
+        HDRMode = 0, 1, 2:
       If set to false, the OOTF-1 step will be skipped during the linear convertion.
       The output will be the linear displayed data (Fd) instead of the linear scene data.
 
       If both EOTF and OOTF are false output will be standard RGB.
 
       =================
-      Color <> 0 :
+      Color <> 0:
       The OETF-1 SDR step will be skipped if both EOTF and OOTF are false =>
       Output will be standard RGB.
 
        Default: true (bool)
 
    EOTF -
-      Color = 0 :
+      Color = 0:
 
-        HDRMode = 0 :
+        HDRMode = 0:
       If set to false, the EOTF step will be skipped during the linear convertion.
       The output will not be consistant with anything standard.
 
-        HDRMode = 1 or 2 : No effect.
+        HDRMode = 1 or 2: No effect.
 
       If both EOTF and OOTF are false output will be standard RGB.
 
       =================
-      Color <> 0 :
+      Color <> 0:
       The OETF-1 SDR step will be skipped if both EOTF and OOTF are false =>
       Output will be standard RGB.
 
@@ -128,7 +137,7 @@ Accepted input : Planar YUV 8 to 16 bits.
       Controls how many threads will be used for processing. If set to 0, threads will
       be set equal to the number of detected logical or physical cores,according logicalCores parameter.
 
-      Default:  0  (int)
+      Default: 0  (int)
 
    logicalCores -
       If threads is set to 0, it will specify if the number of threads will be the number
@@ -181,49 +190,49 @@ ConvertLinearRGBtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb, float HL
      bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,bool fastmode,int threads,bool logicalCores,
      bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
-Accepted input : RGB32, RGB64 and Planar float RGB.
+Accepted input: RGB32, RGB64 and Planar float RGB.
 
    Color -
       Set the color mode of the data.
-         0 : BT2100
-         1 : BT2020
-         2 : BT709
-         3 : BT601_525
-         4 : BT601_625
+         0: BT2100
+         1: BT2020
+         2: BT709
+         3: BT601_525
+         4: BT601_625
 
        Default: 2 (int)
 
    OutputMode -
       Set the output data mode. IF input is 8 bits output is 8 bits, 16 bits otherwise.
-         0 : YV24
-	 1 : YV16
-	 2 : YV12
+         0: YV24
+	 1: YV16
+	 2: YV12
        Default: 0 (int)
 
    OOTF -
-      Color = 0 :
+      Color = 0:
 
-        HDRMode = 0, 1, 2 :
+        HDRMode = 0, 1, 2:
       If set to false, the OOTF step will be skipped during the linear convertion.
       Use this setting if the input is linear displayed data (Fd) instead of linear scene data.
 
       If both EOTF and OOTF are false, correct ouput if input is standard RGB.
 
       =================
-      Color <> 0 :
+      Color <> 0:
       The OETF SDR step will be skipped if both EOTF and OOTF are false =>
       Correct output if input is standard RGB.
 
        Default: true (bool)
 
    EOTF -
-      Color = 0 :
+      Color = 0:
 
-        HDRMode = 0 :
+        HDRMode = 0:
       If set to false, the EOTF-1 step will be skipped during the linear convertion.
       The output will not be consistant with anything standard.
 
-        HDRMode = 1 or 2 : no effect.
+        HDRMode = 1 or 2: no effect.
 
       If both EOTF and OOTF are false, correct ouput if input is standard RGB.
 
@@ -264,7 +273,7 @@ ConvertYUVtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,in
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
-Accepted input : Planar YUV 8 to 16 bits.
+Accepted input: Planar YUV 8 to 16 bits.
 The output will be tagged RGB even if data is XYZ.
 
    Rx,Ry,Gx,Gy,Bx,By,Wx,Wy -
@@ -286,7 +295,7 @@ ConvertXYZtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,in
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
-Accepted input : RGB32, RGB64 and Planar float RGB.
+Accepted input: RGB32, RGB64 and Planar float RGB.
 
    pColor -
       Color mode used in YUV/RGBtoXYZ.
@@ -317,7 +326,7 @@ ConvertRGBtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,in
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
-Accepted input : RGB32, RGB64 and Planar float RGB.
+Accepted input: RGB32, RGB64 and Planar float RGB.
 The output will be tagged RGB even if data is XYZ.
 
 The parameters are identical to ConvertYUVtoXYZ.
@@ -333,12 +342,12 @@ ConvertXYZtoRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,in
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
 
-Accepted input : RGB32, RGB64 and Planar float RGB.
+Accepted input: RGB32, RGB64 and Planar float RGB.
 
    OutputMode -
       Set the output data mode.
-         0 : No change
-	 1 : Input 8 to 16 bits : no change, Input Planar float RGB -> Outpout RGB64.
+         0: No change
+	 1: Input 8 to 16 bits : no change, Input Planar float RGB -> Outpout RGB64.
        Default: 0 (int)
 
 
@@ -352,7 +361,7 @@ The others parameters are identical to ConvertXYZtoYUV.
 ConvertXYZ_Scale_HDRtoSDR(float Coeff_X, float Coeff_Y, float Coeff_Z,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
-Accepted input : RGB64 and Planar float RGB.
+Accepted input: RGB64 and Planar float RGB.
 
 For now, it's just a linear scalling, just for testing. Formula is just Out_X=Coeff_X*In_X (etc...).
 
@@ -381,7 +390,7 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 ConvertXYZ_Scale_SDRtoHDR(float Coeff_X, float Coeff_Y, float Coeff_Z,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
-Accepted input : RGB64 and Planar float RGB.
+Accepted input: RGB64 and Planar float RGB.
 
 Produce linear scalling. Formula is just Out_X=In_X/Coeff_X (etc...).
 
@@ -414,7 +423,7 @@ ConvertXYZ_Hable_HDRtoSDR(float exposure_X,float whitescale_X,float a_x,float b_
      float pBx,float pBy,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
-Accepted input : RGB64 and Planar float RGB.
+Accepted input: RGB64 and Planar float RGB.
 
 Hable tonemap, you can have different parameters for each plane, if you want.
 
@@ -461,12 +470,12 @@ Hable tonemap, you can have different parameters for each plane, if you want.
    exposure_Y,whitescale_Y,a_Y,b_Y,c_Y,d_Y,e_Y,f_Y
       Values used on Y plane.
 
-       Default : exposure_X,whitescale_X,a_X,b_X,c_X,d_X,e_X,f_X (float)
+       Default: exposure_X,whitescale_X,a_X,b_X,c_X,d_X,e_X,f_X (float)
 
    exposure_Z,whitescale_Z,a_Z,b_Z,c_Z,d_Z,e_Z,f_Z
       Values used on Z plane.
 
-       Default : exposure_X,whitescale_X,a_X,b_X,c_X,d_X,e_X,f_X (float)
+       Default: exposure_X,whitescale_X,a_X,b_X,c_X,d_X,e_X,f_X (float)
 
 The others parameters are identical to ConvertXYZtoRGB.
 
@@ -481,7 +490,7 @@ ConvertXYZ_Hable_HDRtoSDR(float exposure_R,float whitescale_R,float a_R,float b_
      float d_B,float e_B,float f_B,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
-Accepted input : RGB64 and Planar float RGB.
+Accepted input: RGB64 and Planar float RGB.
 
 Hable tonemap, you can have different parameters for each plane, if you want.
 
@@ -528,12 +537,12 @@ Hable tonemap, you can have different parameters for each plane, if you want.
    exposure_G,whitescale_G,a_G,b_G,c_G,d_G,e_G,f_G
       Values used on G plane.
 
-       Default : exposure_R,whitescale_R,a_R,b_R,c_R,d_R,e_R,f_R (float)
+       Default: exposure_R,whitescale_R,a_R,b_R,c_R,d_R,e_R,f_R (float)
 
    exposure_B,whitescale_B,a_B,b_B,c_B,d_B,e_B,f_B
       Values used on B plane.
 
-       Default : exposure_R,whitescale_R,a_R,b_R,c_R,d_R,e_R,f_R (float)
+       Default: exposure_R,whitescale_R,a_R,b_R,c_R,d_R,e_R,f_R (float)
 
 The others parameters are identical to ConvertLinearRGBtoYUV.
 
@@ -547,7 +556,7 @@ ConvertXYZ_Mobius_HDRtoSDR(float exposure_X,float transition_X,float peak_X,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
-Accepted input : RGB64 and Planar float RGB.
+Accepted input: RGB64 and Planar float RGB.
 
 Mobius tonemap, you can have different parameters for each plane, if you want.
 
@@ -569,12 +578,12 @@ Mobius tonemap, you can have different parameters for each plane, if you want.
    exposure_Y,transition_Y,peak_Y
       Values used on Y plane.
 
-       Default : exposure_X,transition_X,peak_X (float)
+       Default: exposure_X,transition_X,peak_X (float)
 
    exposure_Z,transition_Z,peak_Z
       Values used on Z plane.
 
-       Default : exposure_X,transition_X,peak_X (float)
+       Default: exposure_X,transition_X,peak_X (float)
 
 The others parameters are identical to ConvertXYZtoRGB.
 
@@ -588,7 +597,7 @@ ConvertRGB_Mobius_HDRtoSDR(float exposure_R,float transition_R,float peak_R,
      float peak_B,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
-Accepted input : RGB64 and Planar float RGB.
+Accepted input: RGB64 and Planar float RGB.
 
 Mobius tonemap, you can have different parameters for each plane, if you want.
 
@@ -610,12 +619,12 @@ Mobius tonemap, you can have different parameters for each plane, if you want.
    exposure_G,transition_G,peak_G
       Values used on G plane.
 
-       Default : exposure_R,transition_R,peak_R (float)
+       Default: exposure_R,transition_R,peak_R (float)
 
    exposure_B,transition_B,peak_B
       Values used on B plane.
 
-       Default : exposure_R,transition_R,peak_R (float)
+       Default: exposure_R,transition_R,peak_R (float)
 
 The others parameters are identical to ConvertLinearRGBtoYUV.
 
@@ -629,7 +638,7 @@ ConvertXYZ_Reinhard_HDRtoSDR(float exposure_X,float contrast_X,float peak_X,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
-Accepted input : RGB64 and Planar float RGB.
+Accepted input: RGB64 and Planar float RGB.
 
 Reinhard tonemap, you can have different parameters for each plane, if you want.
 
@@ -651,12 +660,12 @@ Reinhard tonemap, you can have different parameters for each plane, if you want.
    exposure_Y,contrast_Y,peak_Y
       Values used on Y plane.
 
-       Default : exposure_X,contrast_X,peak_X (float)
+       Default: exposure_X,contrast_X,peak_X (float)
 
    exposure_Z,contrast_Z,peak_Z
       Values used on Z plane.
 
-       Default : exposure_X,contrast_X,peak_X (float)
+       Default: exposure_X,contrast_X,peak_X (float)
 
 The others parameters are identical to ConvertXYZtoRGB.
 
@@ -670,7 +679,7 @@ ConvertRGB_Reinhard_HDRtoSDR(float exposure_R,float contrast_R,float peak_R,
      float peak_B,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
      
-Accepted input : RGB64 and Planar float RGB.
+Accepted input: RGB64 and Planar float RGB.
 
 Reinhard tonemap, you can have different parameters for each plane, if you want.
 
@@ -692,12 +701,12 @@ Reinhard tonemap, you can have different parameters for each plane, if you want.
    exposure_G,contrast_G,peak_G
       Values used on G plane.
 
-       Default : exposure_R,contrast_R,peak_R (float)
+       Default: exposure_R,contrast_R,peak_R (float)
 
    exposure_B,contrast_B,peak_B
       Values used on B plane.
 
-       Default : exposure_R,contrast_R,peak_R (float)
+       Default: exposure_R,contrast_R,peak_R (float)
 
 The others parameters are identical to ConvertLinearRGBtoYUV.
 
@@ -713,7 +722,7 @@ Don't have expectations on this plugin, but if by luck it works for you...
 Note about linear values :
 ==========================
 
-For ConvertYUVtoxxx functions, the output is :
+For ConvertYUVtoxxx functions, the output is:
 
 For HDR data (Color=0), HDRMode=(0 or 1),
 the output (R,G,B stage) is normalized for 1.0=10000 cd/m� (or 255 or 65535).
@@ -721,7 +730,7 @@ the output (R,G,B stage) is normalized for 1.0=10000 cd/m� (or 255 or 65535).
 For SDR data (Color<>0),
 the output (R,G,B stage) is normalized for 1.0=100 cd/m� (or 255 or 65535).
 
-For ConvertxxxtoYUV functions, the input is :
+For ConvertxxxtoYUV functions, the input is:
 
 For HDR data (Color=0), HDRMode=(0 or 1),
 the input (R,G,B stage) is normalized for 1.0=10000 cd/m� (or 255 or 65535).
@@ -744,7 +753,7 @@ In that case, you'll have in the DGI file this line (for exemple) :
 
 MASTERING 13250 34500 7500 3000 34000 16000 15635 16450 40000000 50
 
-The values are the following :
+The values are the following:
 
 MASTERING GreenX GreenY BlueX BlueY RedX RedY WhiteX WhiteY MaxMasteringLevel MinMasteringLevel
 
@@ -752,16 +761,16 @@ The GreenX GreenY BlueX BlueY RedX RedY WhiteX WhiteY are by 0.00002 steps.
 The MaxMasteringLevel MinMasteringLevel are by 0.0001 steps.
 
 In our exemple, it will result :
-Gx : 0.265
-Gy : 0.690
-Bx : 0.150
-By : 0.060
-Rx : 0.680
-Ry : 0.320
-Wx : 0.3127
-Wy : 0.3290
-Max : 4000
-Min : 0.05
+Gx: 0.265
+Gy: 0.690
+Bx: 0.150
+By: 0.060
+Rx: 0.680
+Ry: 0.320
+Wx: 0.3127
+Wy: 0.3290
+Max: 4000
+Min: 0.05
 
 Remark :
 15635 16450 are the standard D65 white point value, no need in these case to put them.
@@ -773,26 +782,26 @@ Remark :
 Some example use
 ================
 
-BT.2020 to BT.709 convertion, do the following :
+BT.2020 to BT.709 convertion, do the following:
 ConvertYUVtoXYZ(Color=1)
 ConvertXYZtoYUV(pColor=1)
 
 ----------------------------------
 
-BT.709 to BT.2020 convertion, do the following :
+BT.709 to BT.2020 convertion, do the following:
 ConvertYUVtoXYZ()
 ConvertXYZtoYUV(Color=1,pColor=2)
 
 ----------------------------------
 
-HDR HLG (with mastering Lw at 1500 and HLG mastering display colorspace BT.2020) to HDR PQ convertion :
+HDR HLG (with mastering Lw at 1500 and HLG mastering display colorspace BT.2020) to HDR PQ convertion:
 ConvertYUVtoLinearRGB(Color=0,HDRMode=1,HLGLw=1500,OOTF=false)
 ConvertLinearRGBtoYUV(Color=0,OOTF=false)
 
 ----------------------------------
 
-HDR PQ to HDR HLG (with mastering Lw at 1200 and HLG mastering display colorspace BT.709) convertion :
+HDR PQ to HDR HLG (with mastering Lw at 1200 and HLG mastering display colorspace BT.709) convertion:
 ConvertYUVtoLinearRGB(Color=0,OOTF=false)
 ConvertLinearRGBtoYUV(Color=0,HDRMode=1,HLGLw=1200,HLGColor=2,OOTF=false)
 
-Note : In this case, there is no speed-up for lowering input from 16 to 10 or 12 bits.
+Note: In this case, there is no speed-up for lowering input from 16 to 10 or 12 bits.

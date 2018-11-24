@@ -484,7 +484,7 @@ The others parameters are identical to ConvertXYZtoRGB.
 **       ConvertRGB_Hable_HDRtoSDR        **
 ********************************************
 
-ConvertXYZ_Hable_HDRtoSDR(float exposure_R,float whitescale_R,float a_R,float b_R,float c_R,
+ConvertRGB_Hable_HDRtoSDR(float exposure_R,float whitescale_R,float a_R,float b_R,float c_R,
      float d_R,float e_R,float f_R,float exposure_G,float whitescale_G,float a_G,float b_G,float c_G,
      float d_G,float e_G,float f_G,float exposure_B,float whitescale_B,float a_B,float b_B,float c_B,
      float d_B,float e_B,float f_B,bool fastmode,

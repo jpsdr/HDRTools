@@ -40,7 +40,7 @@ Functions inside this plugin:
 
 ConvertYUVtoLinearRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
      bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,int threads,bool logicalCores,bool MaxPhysCore,
-     bool SetAffinity,bool sleep,int prefetch)
+     bool SetAffinity,bool sleep,int prefetch,int ThreadLevel)
 
 Accepted input: Planar YUV 8 to 16 bits.
 
@@ -178,6 +178,19 @@ Accepted input: Planar YUV 8 to 16 bits.
 
       Default: 0
 
+  ThreadLevel -
+      This parameter will set the priority level of the threads created for the processing (internal
+      multithreading). No effect if threads=1.
+      1 : Idle level.
+      2 : Lowest level.
+      3 : Below level.
+      4 : Normal level.
+      5 : Above level.
+      6 : Highest level.
+      7 : Time critical level (WARNING !!! use this level at your own risk)
+
+      Default : 6
+
 The logicalCores, MaxPhysCore, SetAffinity and sleep are parameters to specify how the pool of thread
 will be created and handled, allowing if necessary each people to tune according his configuration.
 
@@ -188,7 +201,7 @@ will be created and handled, allowing if necessary each people to tune according
 
 ConvertLinearRGBtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
      bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,bool fastmode,int threads,bool logicalCores,
-     bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch,int ThreadLevel)
 
 Accepted input: RGB32, RGB64 and Planar float RGB.
 
@@ -271,7 +284,8 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 ConvertYUVtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
      bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
 
 Accepted input: Planar YUV 8 to 16 bits.
 The output will be tagged RGB even if data is XYZ.
@@ -293,7 +307,8 @@ ConvertXYZtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,in
      bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,bool fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
 
 Accepted input: RGB32, RGB64 and Planar float RGB.
 
@@ -324,7 +339,8 @@ The others parameters are identical to ConvertLinearRGBtoYUV.
 ConvertRGBtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
      bool OOTF,bool EOTF,bool fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
 
 Accepted input: RGB32, RGB64 and Planar float RGB.
 The output will be tagged RGB even if data is XYZ.
@@ -340,7 +356,8 @@ ConvertXYZtoRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,in
      bool OOTF,bool EOTF,bool fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
 
 Accepted input: RGB32, RGB64 and Planar float RGB.
 
@@ -359,7 +376,8 @@ The others parameters are identical to ConvertXYZtoYUV.
 ********************************************
 
 ConvertXYZ_Scale_HDRtoSDR(float Coeff_X, float Coeff_Y, float Coeff_Z,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
      
 Accepted input: RGB64 and Planar float RGB.
 
@@ -388,7 +406,8 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 ********************************************
 
 ConvertXYZ_Scale_SDRtoHDR(float Coeff_X, float Coeff_Y, float Coeff_Z,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
      
 Accepted input: RGB64 and Planar float RGB.
 
@@ -421,7 +440,8 @@ ConvertXYZ_Hable_HDRtoSDR(float exposure_X,float whitescale_X,float a_x,float b_
      float d_Y,float e_Y,float f_Y,float exposure_Z,float whitescale_Z,float a_Z,float b_Z,float c_Z,
      float d_Z,float e_Z,float f_Z,int pColor,float pRx,float pRy,float pGx,float pGy,
      float pBx,float pBy,bool fastmode,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
      
 Accepted input: RGB64 and Planar float RGB.
 
@@ -488,7 +508,8 @@ ConvertRGB_Hable_HDRtoSDR(float exposure_R,float whitescale_R,float a_R,float b_
      float d_R,float e_R,float f_R,float exposure_G,float whitescale_G,float a_G,float b_G,float c_G,
      float d_G,float e_G,float f_G,float exposure_B,float whitescale_B,float a_B,float b_B,float c_B,
      float d_B,float e_B,float f_B,bool fastmode,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
      
 Accepted input: RGB64 and Planar float RGB.
 
@@ -554,7 +575,8 @@ The others parameters are identical to ConvertLinearRGBtoYUV.
 ConvertXYZ_Mobius_HDRtoSDR(float exposure_X,float transition_X,float peak_X,
      float exposure_Y,float transition_Y,float peak_Y,float exposure_Z,float transition_Z,float peak_Z,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,bool fastmode,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
      
 Accepted input: RGB64 and Planar float RGB.
 
@@ -595,7 +617,8 @@ The others parameters are identical to ConvertXYZtoRGB.
 ConvertRGB_Mobius_HDRtoSDR(float exposure_R,float transition_R,float peak_R,
      float exposure_G,float transition_G,float peak_G,float exposure_B,float transition_B,
      float peak_B,bool fastmode,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
      
 Accepted input: RGB64 and Planar float RGB.
 
@@ -636,7 +659,8 @@ The others parameters are identical to ConvertLinearRGBtoYUV.
 ConvertXYZ_Reinhard_HDRtoSDR(float exposure_X,float contrast_X,float peak_X,
      float exposure_Y,float contrast_Y,float peak_Y,float exposure_Z,float contrast_Z,float peak_Z,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,bool fastmode,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
      
 Accepted input: RGB64 and Planar float RGB.
 
@@ -677,7 +701,8 @@ The others parameters are identical to ConvertXYZtoRGB.
 ConvertRGB_Reinhard_HDRtoSDR(float exposure_R,float contrast_R,float peak_R,
      float exposure_G,float contrast_G,float peak_G,float exposure_B,float contrast_B,
      float peak_B,bool fastmode,
-     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,int prefetch)
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
      
 Accepted input: RGB64 and Planar float RGB.
 

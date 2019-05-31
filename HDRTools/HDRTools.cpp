@@ -13011,7 +13011,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 
 	if (max_threads>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while requesting threadpool !");
 	}
 
@@ -14416,7 +14416,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 
 	if (max_threads>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -16150,7 +16150,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 
 	if (max_threads>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertYUVtoXYZ: Error with the TheadPool while requesting threadpool !");
 	}
 
@@ -17674,7 +17674,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 
 	if (max_threads>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertXYZtoYUV: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -19553,7 +19553,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertRGBtoXYZ: Error with the TheadPool while requesting threadpool !");
 	}
 
@@ -20619,7 +20619,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertXYZtoRGB: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -21168,7 +21168,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -21457,7 +21457,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_SDRtoHDR::GetFrame(int n, IScriptEnvironm
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertXYZ_SDRtoHDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -21802,7 +21802,7 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -22167,7 +22167,7 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertRGB_Hable_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -22547,7 +22547,7 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -22916,7 +22916,7 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -23292,7 +23292,7 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -23657,7 +23657,7 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,NoneThreadLevel,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
 			env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	

@@ -3,7 +3,7 @@ Some general information first.
 The recording process is the following:
 SDR :
 [Camera sensor] -> Linear R,G,B -> OETF -> Non linear R',G',B' -> Color Matrix -> Y',C'r,C'b
-Y',C'r,C'b -> Inv Color Matrix -> Non linear R',G',B' -> EOTF -> Linear R,G,B
+Y',C'r,C'b -> Inv Color Matrix -> Non linear R',G',B' -> OETF-1 -> Linear R,G,B
 HDR :
 [Camera sensor] -> Linear R,G,B -> OOTF (PQ/HLG) -> EOTF-1 (PQ/HLG) -> Non linear R',G',B' -> Color Matrix -> Y',C'r,C'b
 Y',C'r,C'b -> Inv Color Matrix -> Non linear R',G',B' -> EOTF (PQ/HLG) -> Inv OOTF (PQ/HLG) -> Linear R,G,B
@@ -38,7 +38,7 @@ Functions inside this plugin:
 **      ConvertYUVtoLinearRGB       **
 **************************************
 
-ConvertYUVtoLinearRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
+ConvertYUVtoLinearRGB(int Color,int OutputMode,int HDRMode,float HLGLb,float HLGLw,int HLGColor,
      bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,int threads,bool logicalCores,bool MaxPhysCore,
      bool SetAffinity,bool sleep,int prefetch,int ThreadLevel)
 
@@ -98,8 +98,8 @@ Accepted input: Planar YUV 8 to 16 bits.
 
       =================
       Color <> 0:
-      The OETF-1 SDR step will be skipped if both EOTF and OOTF are false =>
-      Output will be standard RGB.
+      If EOTF is false, nothing is done whatever OOTF => Output will be standard RGB.
+      If OOTF is false and EOTF is true, the output will be the linear displayed data (Fd).
 
        Default: true (bool)
 
@@ -116,8 +116,8 @@ Accepted input: Planar YUV 8 to 16 bits.
 
       =================
       Color <> 0:
-      The OETF-1 SDR step will be skipped if both EOTF and OOTF are false =>
-      Output will be standard RGB.
+      If EOTF is false, nothing is done whatever OOTF => Output will be standard RGB.
+      If OOTF is false, and EOTF is true, the output will be the linear displayed data (Fd).
 
        Default: true (bool)
 
@@ -233,8 +233,9 @@ Accepted input: RGB32, RGB64 and Planar float RGB.
 
       =================
       Color <> 0:
-      The OETF SDR step will be skipped if both EOTF and OOTF are false =>
-      Correct output if input is standard RGB.
+      If EOTF is false, nothing is done whatever OOTF, correct ouput if input is standard RGB.
+      OOTF is false and EOTF is true :
+      Use this setting if the input is linear displayed data (Fd) instead of linear scene data.
 
        Default: true (bool)
 
@@ -251,8 +252,9 @@ Accepted input: RGB32, RGB64 and Planar float RGB.
 
       =================
       Color <> 0 :
-      The OETF SDR step will be skipped if both EOTF and OOTF are false =>
-      Correct output if input is standard RGB.
+      If EOTF is false, nothing is done whatever OOTF, correct ouput if input is standard RGB.
+      OOTF is false and EOTF is true :
+      Use this setting if the input is linear displayed data (Fd) instead of linear scene data.
 
        Default: true (bool)
 
@@ -281,14 +283,21 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 **         ConvertYUVtoXYZ          **
 **************************************
 
-ConvertYUVtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
-     bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,
+ConvertYUVtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb,float HLGLw,float Crosstalk,
+     int HLGColor,bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
      int prefetch,int ThreadLevel)
 
 Accepted input: Planar YUV 8 to 16 bits.
 The output will be tagged RGB even if data is XYZ.
+
+   Crosstalk -
+      Coeff for the crosstalk R,G,B matrix (for Method C of BT2446). Value 0.0 to 0.33.
+      Will apply a crosstalk matrix on RGB before XYZ matrix convertion.
+      Avoid value over 0.3 in 8 bits mode. 0.0 means no crosstalk between R,G,B.
+
+       Default: 0.0 (float)
 
    Rx,Ry,Gx,Gy,Bx,By,Wx,Wy -
       These parameters allow to configure the chromaticity coordinates Red point, Green point, Blue point
@@ -303,14 +312,22 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 **         ConvertXYZtoYUV          **
 **************************************
 
-ConvertXYZtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
-     bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,bool fastmode,
+ConvertXYZtoYUV(int Color,int OutputMode,int HDRMode,float HLGLb,float HLGLw,float Crosstalk,
+     int HLGColor,bool OOTF,bool EOTF,bool fullrange,bool mpeg2c,bool fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
      int prefetch,int ThreadLevel)
 
 Accepted input: RGB32, RGB64 and Planar float RGB.
+
+   Crosstalk -
+      Coeff for the crosstalk R,G,B matrix (for Method C of BT2446). Value 0.0 to 0.33.
+      Will apply a reverse crosstalk matrix on RGB after XYZ matrix convertion.
+      The value must be the same than used on YUVtoXYZ.
+      Avoid value over 0.3 in 8 bits mode. 0.0 means no crosstalk between R,G,B.
+
+       Default: 0.0 (float)
 
    pColor -
       Color mode used in YUV/RGBtoXYZ.
@@ -336,8 +353,8 @@ The others parameters are identical to ConvertLinearRGBtoYUV.
 **         ConvertRGBtoXYZ          **
 **************************************
 
-ConvertRGBtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
-     bool OOTF,bool EOTF,bool fastmode,
+ConvertRGBtoXYZ(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,float Crosstalk,
+     int HLGColor,bool OOTF,bool EOTF,bool fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
      int prefetch,int ThreadLevel)
@@ -352,8 +369,8 @@ The parameters are identical to ConvertYUVtoXYZ.
 **         ConvertXYZtoRGB          **
 **************************************
 
-ConvertXYZtoRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,int HLGColor,
-     bool OOTF,bool EOTF,bool fastmode,
+ConvertXYZtoRGB(int Color,int OutputMode,int HDRMode,float HLGLb, float HLGLw,float Crosstalk,
+     int HLGColor,bool OOTF,bool EOTF,bool fastmode,
      float Rx,float Ry,float Gx,float Gy,float Bx,float By,float Wx,float Wy,
      int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,float pWx,float pWy,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
@@ -735,12 +752,23 @@ Reinhard tonemap, you can have different parameters for each plane, if you want.
 
 The others parameters are identical to ConvertLinearRGBtoYUV.
 
+
 *************************************************************
 
 Note :
 ======
 ConvertXYZ_Scalar_HDRtoSDR is a simple scalar function, i've made just to see what result it produces.
 Don't have expectations on this plugin, but if by luck it works for you...
+
+*************************************************************
+
+Note about pColor (and pRx,...)  parameters :
+=============================================
+These parameters are here just to know the input range value in 8-16 bits mode, because contrary
+to RGB where range value is always [0.0,1.0], for XYZ the range value can vary according
+the chromaticity parameters and white point value.
+They have no other effect than setting, for example, in 8 bits, for X 0=0.0, 255=0.96.
+These parameters have no effect in float mode.
 
 *************************************************************
 

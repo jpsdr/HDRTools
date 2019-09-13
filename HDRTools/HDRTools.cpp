@@ -3325,7 +3325,8 @@ static void Convert_LinearRGBPStoRGB64_AVX(const MT_Data_Info_HDRTools &mt_data_
 }
 
 
-static void Convert_LinearRGBPStoRGB64_SDR(const MT_Data_Info_HDRTools &mt_data_inf,const bool OETF)
+static void Convert_LinearRGBPStoRGB64_SDR(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,
+	const bool EOTF)
 {
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3341,6 +3342,7 @@ static void Convert_LinearRGBPStoRGB64_SDR(const MT_Data_Info_HDRTools &mt_data_
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
 	const double alpha_1=alpha-1.0,coeff_p=0.45,coeff_m=4.5;
+	const double coeff_p2=1.0/2.404;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3352,16 +3354,25 @@ static void Convert_LinearRGBPStoRGB64_SDR(const MT_Data_Info_HDRTools &mt_data_
 
 		for(int32_t j=0; j<w; j++)
 		{
-			double rd=srcR[j],gd=srcG[j],bd=srcB[j];
+			double rd=(double)srcR[j],gd=(double)srcG[j],bd=(double)srcB[j];
 
-			if (OETF)
+			if (EOTF)
 			{
-				if (rd<beta) rd*=coeff_m;
-				else rd=alpha*pow(rd,coeff_p)-alpha_1;
-				if (gd<beta) gd*=coeff_m;
-				else gd=alpha*pow(gd,coeff_p)-alpha_1;
-				if (bd<beta) bd*=coeff_m;
-				else bd=alpha*pow(bd,coeff_p)-alpha_1;
+				if (OOTF)
+				{
+					if (rd<beta) rd*=coeff_m;
+					else rd=alpha*pow(rd,coeff_p)-alpha_1;
+					if (gd<beta) gd*=coeff_m;
+					else gd=alpha*pow(gd,coeff_p)-alpha_1;
+					if (bd<beta) bd*=coeff_m;
+					else bd=alpha*pow(bd,coeff_p)-alpha_1;
+				}
+				else
+				{
+					rd=pow(rd,coeff_p2);
+					gd=pow(gd,coeff_p2);
+					bd=pow(bd,coeff_p2);
+				}
 			}
 
 			int32_t r=(int32_t)round(rd*65535.0);
@@ -3385,7 +3396,8 @@ static void Convert_LinearRGBPStoRGB64_SDR(const MT_Data_Info_HDRTools &mt_data_
 }
 
 
-static void Convert_LinearRGBPStoRGB64_SDR_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const bool OETF)
+static void Convert_LinearRGBPStoRGB64_SDR_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,
+	const bool EOTF)
 {
 	uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3403,6 +3415,7 @@ static void Convert_LinearRGBPStoRGB64_SDR_SSE41(const MT_Data_Info_HDRTools &mt
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
 	const double alpha_1=alpha-1.0,coeff_p=0.45,coeff_m=4.5;
+	const double coeff_p2=1.0/2.404;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3412,16 +3425,25 @@ static void Convert_LinearRGBPStoRGB64_SDR_SSE41(const MT_Data_Info_HDRTools &mt
 
 		for(int32_t j=0; j<w; j++)
 		{
-			double rd=srcR[j],gd=srcG[j],bd=srcB[j];
+			double rd=(double)srcR[j],gd=(double)srcG[j],bd=(double)srcB[j];
 
-			if (OETF)
+			if (EOTF)
 			{
-				if (rd<beta) rd*=coeff_m;
-				else rd=alpha*pow(rd,coeff_p)-alpha_1;
-				if (gd<beta) gd*=coeff_m;
-				else gd=alpha*pow(gd,coeff_p)-alpha_1;
-				if (bd<beta) bd*=coeff_m;
-				else bd=alpha*pow(bd,coeff_p)-alpha_1;
+				if (OOTF)
+				{
+					if (rd<beta) rd*=coeff_m;
+					else rd=alpha*pow(rd,coeff_p)-alpha_1;
+					if (gd<beta) gd*=coeff_m;
+					else gd=alpha*pow(gd,coeff_p)-alpha_1;
+					if (bd<beta) bd*=coeff_m;
+					else bd=alpha*pow(bd,coeff_p)-alpha_1;
+				}
+				else
+				{
+					rd=pow(rd,coeff_p2);
+					gd=pow(gd,coeff_p2);
+					bd=pow(bd,coeff_p2);
+				}
 			}
 
 			srcR[j]=(float)rd;
@@ -3441,7 +3463,8 @@ static void Convert_LinearRGBPStoRGB64_SDR_SSE41(const MT_Data_Info_HDRTools &mt
 }
 
 
-static void Convert_LinearRGBPStoRGB64_SDR_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const bool OETF)
+static void Convert_LinearRGBPStoRGB64_SDR_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,
+	const bool EOTF)
 {
 	uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3459,6 +3482,7 @@ static void Convert_LinearRGBPStoRGB64_SDR_AVX(const MT_Data_Info_HDRTools &mt_d
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
 	const double alpha_1=alpha-1.0,coeff_p=0.45,coeff_m=4.5;
+	const double coeff_p2=1.0/2.404;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3468,16 +3492,25 @@ static void Convert_LinearRGBPStoRGB64_SDR_AVX(const MT_Data_Info_HDRTools &mt_d
 
 		for(int32_t j=0; j<w; j++)
 		{
-			double rd=srcR[j],gd=srcG[j],bd=srcB[j];
+			double rd=(double)srcR[j],gd=(double)srcG[j],bd=(double)srcB[j];
 
-			if (OETF)
+			if (EOTF)
 			{
-				if (rd<beta) rd*=coeff_m;
-				else rd=alpha*pow(rd,coeff_p)-alpha_1;
-				if (gd<beta) gd*=coeff_m;
-				else gd=alpha*pow(gd,coeff_p)-alpha_1;
-				if (bd<beta) bd*=coeff_m;
-				else bd=alpha*pow(bd,coeff_p)-alpha_1;
+				if (OOTF)
+				{
+					if (rd<beta) rd*=coeff_m;
+					else rd=alpha*pow(rd,coeff_p)-alpha_1;
+					if (gd<beta) gd*=coeff_m;
+					else gd=alpha*pow(gd,coeff_p)-alpha_1;
+					if (bd<beta) bd*=coeff_m;
+					else bd=alpha*pow(bd,coeff_p)-alpha_1;
+				}
+				else
+				{
+					rd=pow(rd,coeff_p2);
+					gd=pow(gd,coeff_p2);
+					bd=pow(bd,coeff_p2);
+				}
 			}
 
 			srcR[j]=(float)rd;
@@ -3497,7 +3530,8 @@ static void Convert_LinearRGBPStoRGB64_SDR_AVX(const MT_Data_Info_HDRTools &mt_d
 }
 
 
-static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
+static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,
+	const bool EOTF)
 {
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3518,7 +3552,7 @@ static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_i
 	const double c2=18.8515625;
 	const double c3=18.6875;
 	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.404,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3530,7 +3564,7 @@ static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_i
 
 		for(int32_t j=0; j<w; j++)
 		{
-			double rd=srcR[j],gd=srcG[j],bd=srcB[j],x0;
+			double rd=(double)srcR[j],gd=(double)srcG[j],bd=(double)srcB[j],x0;
 
 			if (OOTF)
 			{
@@ -3579,7 +3613,8 @@ static void Convert_LinearRGBPStoRGB64_PQ(const MT_Data_Info_HDRTools &mt_data_i
 }
 
 
-static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
+static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,
+	const bool EOTF)
 {
 	uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3602,7 +3637,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_
 	const double c2=18.8515625;
 	const double c3=18.6875;
 	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.404,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3612,7 +3647,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_
 
 		for(int32_t j=0; j<w; j++)
 		{
-			double rd=srcR[j],gd=srcG[j],bd=srcB[j],x0;
+			double rd=(double)srcR[j],gd=(double)srcG[j],bd=(double)srcB[j],x0;
 
 			if (OOTF)
 			{
@@ -3657,7 +3692,8 @@ static void Convert_LinearRGBPStoRGB64_PQ_SSE41(const MT_Data_Info_HDRTools &mt_
 }
 
 
-static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
+static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,
+	const bool EOTF)
 {
 	uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -3680,7 +3716,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_da
 	const double c2=18.8515625;
 	const double c3=18.6875;
 	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.404,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -3690,7 +3726,7 @@ static void Convert_LinearRGBPStoRGB64_PQ_AVX(const MT_Data_Info_HDRTools &mt_da
 
 		for(int32_t j=0; j<w; j++)
 		{
-			double rd=srcR[j],gd=srcG[j],bd=srcB[j],x0;
+			double rd=(double)srcR[j],gd=(double)srcG[j],bd=(double)srcB[j],x0;
 
 			if (OOTF)
 			{
@@ -4661,7 +4697,9 @@ static void Convert_RGBPStoLinearRGBPS_AVX2(const MT_Data_Info_HDRTools &mt_data
 }
 #endif
 
-static void Convert_RGBPStoLinearRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_inf,const bool OETF)
+
+static void Convert_RGBPStoLinearRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,
+	const bool EOTF)
 {
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -4682,6 +4720,7 @@ static void Convert_RGBPStoLinearRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_
 	const double alpha=1.09929682680944,alpha_inv=1.0/alpha;
 	const double alpha_1=alpha-1.0,coeff_p=1.0/0.45,coeff_m=1.0/4.5;
 	const double beta=0.018053968510807*4.5;
+	const float coeff_p2=2.404f;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -4693,34 +4732,46 @@ static void Convert_RGBPStoLinearRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_
 		float *dstG=(float *)dstG_;
 		float *dstB=(float *)dstB_;
 
-		if (OETF)
+		if (EOTF)
 		{
-			for(int32_t j=0; j<w; j++)
+			if (OOTF)
 			{
-				double x=srcR[j];
+				for(int32_t j=0; j<w; j++)
+				{
+					double x=(double)srcR[j];
 
-				if (x<beta) x*=coeff_m;
-				else x=pow(((x+alpha_1))*alpha_inv,coeff_p);
-				if (x>1.0) x=1.0;
-				dstR[j]=(float)x;
+					if (x<beta) x*=coeff_m;
+					else x=pow(((x+alpha_1))*alpha_inv,coeff_p);
+					if (x>1.0) x=1.0;
+					dstR[j]=(float)x;
+				}
+				for(int32_t j=0; j<w; j++)
+				{
+					double x=(double)srcG[j];
+
+					if (x<beta) x*=coeff_m;
+					else x=pow(((x+alpha_1))*alpha_inv,coeff_p);
+					if (x>1.0) x=1.0;
+					dstG[j]=(float)x;
+				}
+				for(int32_t j=0; j<w; j++)
+				{
+					double x=(double)srcB[j];
+
+					if (x<beta) x*=coeff_m;
+					else x=pow(((x+alpha_1))*alpha_inv,coeff_p);
+					if (x>1.0) x=1.0;
+					dstB[j]=(float)x;
+				}
 			}
-			for(int32_t j=0; j<w; j++)
+			else
 			{
-				double x=srcG[j];
-
-				if (x<beta) x*=coeff_m;
-				else x=pow(((x+alpha_1))*alpha_inv,coeff_p);
-				if (x>1.0) x=1.0;
-				dstG[j]=(float)x;
-			}
-			for(int32_t j=0; j<w; j++)
-			{
-				double x=srcB[j];
-
-				if (x<beta) x*=coeff_m;
-				else x=pow(((x+alpha_1))*alpha_inv,coeff_p);
-				if (x>1.0) x=1.0;
-				dstB[j]=(float)x;
+				for(int32_t j=0; j<w; j++)
+					dstR[j]=pow(srcR[j],coeff_p2);
+				for(int32_t j=0; j<w; j++)
+					dstG[j]=pow(srcG[j],coeff_p2);
+				for(int32_t j=0; j<w; j++)
+					dstB[j]=pow(srcB[j],coeff_p2);
 			}
 		}
 		else
@@ -4760,7 +4811,7 @@ static void Convert_RGBPStoLinearRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 
 	const double alpha=1.09929682680944,alpha_1=alpha-1.0,alpha_inv=1.0/alpha;
 	const double alpha2=1.0/(4.5*59.5208),beta2=0.018053968510807*4.5;
-	const double coeff_p1=1.0/2.4,coeff_p2=1.0/0.45,coeff_m=1.0/59.5208,coeff_100=100.0;
+	const double coeff_p1=1.0/2.404,coeff_p2=1.0/0.45,coeff_m=1.0/59.5208,coeff_100=100.0;
 
 	const double m1=1.0/0.1593017578125;
 	const double m2=1.0/78.84375;
@@ -4783,7 +4834,7 @@ static void Convert_RGBPStoLinearRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 		{
 			for(int32_t j=0; j<w; j++)
 			{
-				double x=srcR[j];
+				double x=(double)srcR[j];
 
 				if (EOTF)
 				{
@@ -4806,7 +4857,7 @@ static void Convert_RGBPStoLinearRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 			}
 			for(int32_t j=0; j<w; j++)
 			{
-				double x=srcG[j];
+				double x=(double)srcG[j];
 
 				if (EOTF)
 				{
@@ -4829,134 +4880,7 @@ static void Convert_RGBPStoLinearRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 			}
 			for(int32_t j=0; j<w; j++)
 			{
-				double x=srcB[j];
-
-				if (EOTF)
-				{
-					const double x0=pow(x,m2);
-
-					if (x0<=c1) x=0.0;
-					else x=pow((x0-c1)/(c2-c3*x0),m1);
-				}
-				if (OOTF)
-				{
-					if (x>0.0)
-					{
-						x=pow(coeff_100*x,coeff_p1);
-						if (x<=beta2) x*=alpha2;
-						else x=pow(((x+alpha_1))*alpha_inv,coeff_p2)*coeff_m;
-					}
-				}
-				if (x>1.0) x=1.0;
-				dstB[j]=(float)x;
-			}
-		}
-		else
-		{
-			memcpy(dstR_,srcR_,w<<2);
-			memcpy(dstG_,srcG_,w<<2);
-			memcpy(dstB_,srcB_,w<<2);
-		}
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
-		dstR_+=dst_pitch_R;
-		dstG_+=dst_pitch_G;
-		dstB_+=dst_pitch_B;
-	}
-}
-
-
-static void Convert_RGBPStoLinearRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_inf,const bool EOTF,const bool OOTF)
-{
-	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
-	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
-	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
-	uint8_t *dstR_=(uint8_t *)mt_data_inf.dst1;
-	uint8_t *dstG_=(uint8_t *)mt_data_inf.dst2;
-	uint8_t *dstB_=(uint8_t *)mt_data_inf.dst3;
-	const int32_t w=mt_data_inf.src_Y_w;
-	const int32_t h_min=mt_data_inf.src_Y_h_min;
-	const int32_t h_max=mt_data_inf.src_Y_h_max;
-	const ptrdiff_t src_pitch_R=mt_data_inf.src_pitch1;
-	const ptrdiff_t src_pitch_G=mt_data_inf.src_pitch2;
-	const ptrdiff_t src_pitch_B=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_R=mt_data_inf.dst_pitch1;
-	const ptrdiff_t dst_pitch_G=mt_data_inf.dst_pitch2;
-	const ptrdiff_t dst_pitch_B=mt_data_inf.dst_pitch3;
-
-	const double alpha=1.09929682680944,alpha_1=alpha-1.0,alpha_inv=1.0/alpha;
-	const double alpha2=1.0/(4.5*59.5208),beta2=0.018053968510807*4.5;
-	const double coeff_p1=1.0/2.4,coeff_p2=1.0/0.45,coeff_m=1.0/59.5208,coeff_100=100.0;
-
-	const double m1=1.0/0.1593017578125;
-	const double m2=1.0/78.84375;
-	const double c1=0.8359375;
-	const double c2=18.8515625;
-	const double c3=18.6875;
-
-
-	for(int32_t i=h_min; i<h_max; i++)
-	{
-		uint32_t x=0;
-		const float *srcR=(const float *)srcR_;
-		const float *srcG=(const float *)srcG_;
-		const float *srcB=(const float *)srcB_;
-		float *dstR=(float *)dstR_;
-		float *dstG=(float *)dstG_;
-		float *dstB=(float *)dstB_;
-
-		if (EOTF || OOTF)
-		{
-			for(int32_t j=0; j<w; j++)
-			{
-				double x=srcR[j];
-
-				if (EOTF)
-				{
-					const double x0=pow(x,m2);
-
-					if (x0<=c1) x=0.0;
-					else x=pow((x0-c1)/(c2-c3*x0),m1);
-				}
-				if (OOTF)
-				{
-					if (x>0.0)
-					{
-						x=pow(coeff_100*x,coeff_p1);
-						if (x<=beta2) x*=alpha2;
-						else x=pow(((x+alpha_1))*alpha_inv,coeff_p2)*coeff_m;
-					}
-				}
-				if (x>1.0) x=1.0;
-				dstR[j]=(float)x;
-			}
-			for(int32_t j=0; j<w; j++)
-			{
-				double x=srcG[j];
-
-				if (EOTF)
-				{
-					const double x0=pow(x,m2);
-
-					if (x0<=c1) x=0.0;
-					else x=pow((x0-c1)/(c2-c3*x0),m1);
-				}
-				if (OOTF)
-				{
-					if (x>0.0)
-					{
-						x=pow(coeff_100*x,coeff_p1);
-						if (x<=beta2) x*=alpha2;
-						else x=pow(((x+alpha_1))*alpha_inv,coeff_p2)*coeff_m;
-					}
-				}
-				if (x>1.0) x=1.0;
-				dstG[j]=(float)x;
-			}
-			for(int32_t j=0; j<w; j++)
-			{
-				double x=srcB[j];
+				double x=(double)srcB[j];
 
 				if (EOTF)
 				{
@@ -5531,7 +5455,8 @@ static void Convert_LinearRGBPStoRGBPS_AVX2(const MT_Data_Info_HDRTools &mt_data
 #endif
 
 
-static void Convert_LinearRGBPStoRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_inf,const bool OETF)
+static void Convert_LinearRGBPStoRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,
+	const bool EOTF)
 {
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
 	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
@@ -5551,6 +5476,7 @@ static void Convert_LinearRGBPStoRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_
 
 	const double alpha=1.09929682680944,beta=0.018053968510807;
 	const double alpha_1=alpha-1.0,coeff_p=0.45,coeff_m=4.5;
+	const float coeff_p2=(float)(1.0/2.404);
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -5562,34 +5488,46 @@ static void Convert_LinearRGBPStoRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_
 		float *dstG=(float *)dstG_;
 		float *dstB=(float *)dstB_;
 
-		if (OETF)
+		if (EOTF)
 		{
-			for(int32_t j=0; j<w; j++)
+			if (OOTF)
 			{
-				double x=srcR[j];
+				for(int32_t j=0; j<w; j++)
+				{
+					double x=(double)srcR[j];
 
-				if (x<beta) x*=coeff_m;
-				else x=alpha*pow(x,coeff_p)-alpha_1;
-				if (x>1.0) x=1.0;
-				dstR[j]=(float)x;
+					if (x<beta) x*=coeff_m;
+					else x=alpha*pow(x,coeff_p)-alpha_1;
+					if (x>1.0) x=1.0;
+					dstR[j]=(float)x;
+				}
+				for(int32_t j=0; j<w; j++)
+				{
+					double x=(double)srcG[j];
+
+					if (x<beta) x*=coeff_m;
+					else x=alpha*pow(x,coeff_p)-alpha_1;
+					if (x>1.0) x=1.0;
+					dstG[j]=(float)x;
+				}
+				for(int32_t j=0; j<w; j++)
+				{
+					double x=(double)srcB[j];
+
+					if (x<beta) x*=coeff_m;
+					else x=alpha*pow(x,coeff_p)-alpha_1;
+					if (x>1.0) x=1.0;
+					dstB[j]=(float)x;
+				}
 			}
-			for(int32_t j=0; j<w; j++)
+			else
 			{
-				double x=srcG[j];
-
-				if (x<beta) x*=coeff_m;
-				else x=alpha*pow(x,coeff_p)-alpha_1;
-				if (x>1.0) x=1.0;
-				dstG[j]=(float)x;
-			}
-			for(int32_t j=0; j<w; j++)
-			{
-				double x=srcB[j];
-
-				if (x<beta) x*=coeff_m;
-				else x=alpha*pow(x,coeff_p)-alpha_1;
-				if (x>1.0) x=1.0;
-				dstB[j]=(float)x;
+				for(int32_t j=0; j<w; j++)
+					dstR[j]=pow(srcR[j],coeff_p2);
+				for(int32_t j=0; j<w; j++)
+					dstG[j]=pow(srcG[j],coeff_p2);
+				for(int32_t j=0; j<w; j++)
+					dstB[j]=pow(srcB[j],coeff_p2);
 			}
 		}
 		else
@@ -5633,7 +5571,7 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 	const double c2=18.8515625;
 	const double c3=18.6875;
 	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
+	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.404,coeff_a=1.0;
 
 	for(int32_t i=h_min; i<h_max; i++)
 	{
@@ -5649,7 +5587,7 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 		{
 			for(int32_t j=0; j<w; j++)
 			{
-				double x=srcR[j];
+				double x=(double)srcR[j];
 
 				if (OOTF)
 				{
@@ -5670,7 +5608,7 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 			}
 			for(int32_t j=0; j<w; j++)
 			{
-				double x=srcG[j];
+				double x=(double)srcG[j];
 
 				if (OOTF)
 				{
@@ -5691,7 +5629,7 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 			}
 			for(int32_t j=0; j<w; j++)
 			{
-				double x=srcB[j];
+				double x=(double)srcB[j];
 
 				if (OOTF)
 				{
@@ -5726,127 +5664,6 @@ static void Convert_LinearRGBPStoRGBPS_PQ(const MT_Data_Info_HDRTools &mt_data_i
 		dstB_+=dst_pitch_B;
 	}
 }
-
-
-static void Convert_LinearRGBPStoRGBPS_HLG(const MT_Data_Info_HDRTools &mt_data_inf,const bool OOTF,const bool EOTF)
-{
-	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
-	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
-	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
-	uint8_t *dstR_=(uint8_t *)mt_data_inf.dst1;
-	uint8_t *dstG_=(uint8_t *)mt_data_inf.dst2;
-	uint8_t *dstB_=(uint8_t *)mt_data_inf.dst3;
-	const ptrdiff_t src_pitch_R=mt_data_inf.src_pitch1;
-	const ptrdiff_t src_pitch_G=mt_data_inf.src_pitch2;
-	const ptrdiff_t src_pitch_B=mt_data_inf.src_pitch3;
-	const ptrdiff_t dst_pitch_R=mt_data_inf.dst_pitch1;
-	const ptrdiff_t dst_pitch_G=mt_data_inf.dst_pitch2;
-	const ptrdiff_t dst_pitch_B=mt_data_inf.dst_pitch3;
-	const int32_t w=mt_data_inf.src_Y_w;
-	const int32_t h_min=mt_data_inf.src_Y_h_min;
-	const int32_t h_max=mt_data_inf.src_Y_h_max;
-
-	const double alpha=1.09929682680944;
-	const double m1=0.1593017578125;
-	const double m2=78.84375;
-	const double c1=0.8359375;
-	const double c2=18.8515625;
-	const double c3=18.6875;
-	const double coeff_m=59.5208,alpha2=4.5*coeff_m,beta2=0.018053968510807/coeff_m;
-	const double alpha_1=alpha-1.0,coeff_100=0.01,coeff_p1=0.45,coeff_p2=2.4,coeff_a=1.0;
-
-	for(int32_t i=h_min; i<h_max; i++)
-	{
-		uint32_t x=0;
-		const float *srcR=(const float *)srcR_;
-		const float *srcG=(const float *)srcG_;
-		const float *srcB=(const float *)srcB_;
-		float *dstR=(float *)dstR_;
-		float *dstG=(float *)dstG_;
-		float *dstB=(float *)dstB_;
-
-		if (OOTF || EOTF)
-		{
-			for(int32_t j=0; j<w; j++)
-			{
-				double x=srcR[j];
-
-				if (OOTF)
-				{
-					if (x<=beta2) x*=alpha2;
-					else x=pow(coeff_m*x,coeff_p1)*alpha-alpha_1;
-					x=pow(x,coeff_p2)*coeff_100;
-				}
-
-				if (EOTF)
-				{
-					double x0=pow(x,m1);
-
-					x=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
-				}
-				if (x>1.0) x=1.0;
-
-				dstR[j]=(float)x;
-			}
-			for(int32_t j=0; j<w; j++)
-			{
-				double x=srcG[j];
-
-				if (OOTF)
-				{
-					if (x<=beta2) x*=alpha2;
-					else x=pow(coeff_m*x,coeff_p1)*alpha-alpha_1;
-					x=pow(x,coeff_p2)*coeff_100;
-				}
-
-				if (EOTF)
-				{
-					double x0=pow(x,m1);
-
-					x=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
-				}
-				if (x>1.0) x=1.0;
-
-				dstG[j]=(float)x;
-			}
-			for(int32_t j=0; j<w; j++)
-			{
-				double x=srcB[j];
-
-				if (OOTF)
-				{
-					if (x<=beta2) x*=alpha2;
-					else x=pow(coeff_m*x,coeff_p1)*alpha-alpha_1;
-					x=pow(x,coeff_p2)*coeff_100;
-				}
-
-				if (EOTF)
-				{
-					double x0=pow(x,m1);
-
-					x=pow((c1+c2*x0)/(coeff_a+c3*x0),m2);
-				}
-				if (x>1.0) x=1.0;
-
-				dstB[j]=(float)x;
-			}
-		}
-		else
-		{
-			memcpy(dstR_,srcR_,w<<2);
-			memcpy(dstG_,srcG_,w<<2);
-			memcpy(dstB_,srcB_,w<<2);
-		}
-
-		srcR_+=src_pitch_R;
-		srcG_+=src_pitch_G;
-		srcB_+=src_pitch_B;
-		dstR_+=dst_pitch_R;
-		dstG_+=dst_pitch_G;
-		dstB_+=dst_pitch_B;
-	}
-}
-
 
 
 /*
@@ -12011,6 +11828,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 
 	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a),a_1=1.0/a;
 	const double coeff3=1.0/3.0,coeff12=1.0/12.0;
+	const double coeff_p=2.404,coeff_ip=1.0/coeff_p;
 
 	if (HLG_Mode)
 	{
@@ -12639,7 +12457,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 					// PQ_OOTF-1
 					if (x>0.0)
 					{
-						x=pow(100.0*x,1.0/2.4);
+						x=pow(100.0*x,coeff_ip);
 						if (x<=alpha2*beta2) x/=alpha2;
 						else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45)/59.5208;
 					}
@@ -12657,11 +12475,15 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF-1
-				if (x<(beta*4.5)) x/=4.5;
-				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				if (OOTF)
+				{
+					// OETF-1
+					if (x<(beta*4.5)) x/=4.5;
+					else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				}
+				else x=pow(x,coeff_p); // EOTF
 			}
 		}
 		x=std::min(std::max(0.0,x),1.0);
@@ -12693,7 +12515,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 					// PQ_OOTF-1
 					if (x>0.0)
 					{
-						x=pow(100.0*x,1.0/2.4);
+						x=pow(100.0*x,coeff_ip);
 						if (x<=alpha2*beta2) x/=alpha2;
 						else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45)/59.5208;
 					}
@@ -12711,11 +12533,15 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF-1
-				if (x<(beta*4.5)) x/=4.5;
-				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				if (OOTF)
+				{
+					// OETF-1
+					if (x<(beta*4.5)) x/=4.5;
+					else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				}
+				else x=pow(x,coeff_p); // EOTF
 			}
 		}
 		x=std::min(std::max(0.0,x),1.0);
@@ -13756,6 +13582,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 
 	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a);
 	const double coeff12=1.0/12.0;
+	const double coeff_p=2.404,coeff_ip=1.0/coeff_p;
 	
 	if (HLG_Mode)
 	{
@@ -14008,7 +13835,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
-					x=pow(x,2.4)/100.0;
+					x=pow(x,coeff_p)/100.0;
 				}
 				if (EOTF)
 				{
@@ -14030,11 +13857,15 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-			// OETF
-				if (x<beta) x*=4.5;
-				else x=alpha*pow(x,0.45)-(alpha-1.0);
+				if (OOTF)
+				{
+					// OETF
+					if (x<beta) x*=4.5;
+					else x=alpha*pow(x,0.45)-(alpha-1.0);
+				}
+				else x=pow(x,coeff_ip); // EOTF-1
 			}
 		}
 		x=std::min(std::max(0.0,x),1.0);
@@ -14055,7 +13886,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
-					x=pow(x,2.4)/100.0;
+					x=pow(x,coeff_p)/100.0;
 				}
 				if (EOTF)
 				{
@@ -14077,11 +13908,15 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF
-				if (x<beta) x*=4.5;
-				else x=alpha*pow(x,0.45)-(alpha-1.0);
+				if (OOTF)
+				{
+					// OETF
+					if (x<beta) x*=4.5;
+					else x=alpha*pow(x,0.45)-(alpha-1.0);
+				}
+				else x=pow(x,coeff_ip); // EOTF-1
 			}
 		}
 		x=std::min(std::max(0.0,x),1.0);
@@ -14104,7 +13939,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
-					x=pow(x,2.4)/100.0;
+					x=pow(x,coeff_p)/100.0;
 				}
 				if (EOTF)
 				{
@@ -14126,11 +13961,15 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF
-				if (x<beta) x*=4.5;
-				else x=alpha*pow(x,0.45)-(alpha-1.0);
+				if (OOTF)
+				{
+					// OETF
+					if (x<beta) x*=4.5;
+					else x=alpha*pow(x,0.45)-(alpha-1.0);
+				}
+				else x=pow(x,coeff_ip); // EOTF-1
 			}
 		}
 		x=std::min(std::max(0.0,x),1.0);
@@ -14212,9 +14051,9 @@ void ConvertLinearRGBtoYUV::StaticThreadpool(void *ptr)
 		case 3 : Convert_LinearRGBPStoRGB64(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 4 : Convert_LinearRGBPStoRGB64_SSE41(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 5 : Convert_LinearRGBPStoRGB64_AVX(*mt_data_inf,ptrClass->lookupL_20);break;
-		case 6 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
-		case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
-		case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 6 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 9 : Convert_LinearRGBPStoRGB64_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
@@ -14571,9 +14410,9 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 			case 3 : Convert_LinearRGBPStoRGB64(MT_DataGF[0],lookupL_20); break;
 			case 4 : Convert_LinearRGBPStoRGB64_SSE41(MT_DataGF[0],lookupL_20); break;
 			case 5 : Convert_LinearRGBPStoRGB64_AVX(MT_DataGF[0],lookupL_20); break;
-			case 6 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OOTF || EOTF); break;
-			case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OOTF || EOTF); break;
-			case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OOTF || EOTF); break;
+			case 6 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OOTF,EOTF); break;
+			case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OOTF,EOTF); break;
+			case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OOTF,EOTF); break;
 			case 9 : Convert_LinearRGBPStoRGB64_PQ(MT_DataGF[0],OOTF,EOTF); break;
 			case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(MT_DataGF[0],OOTF,EOTF); break;
 			case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,EOTF); break;
@@ -14887,12 +14726,13 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 */
 
 
-ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,
-	float _Bx,float _By,float _Wx,float _Wy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,
+	double _HLG_Lw,double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,
+	float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
+	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
-		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
+		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor),Crosstalk(_Crosstalk)
 {
 	UserId=0;
 
@@ -14930,11 +14770,15 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	lookupXYZ_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupXYZ_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
 	Coeff_XYZ_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
+	lookupCrosstalk_8=(int16_t *)malloc(9*256*sizeof(int16_t));
+	lookupCrosstalk_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
+	Coeff_Crosstalk_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
 
 	if ((lookup_Upscale8==NULL) || (lookup_8to16==NULL) || (lookup_Upscale16==NULL)
 		|| (lookupRGB_8==NULL) || (lookupRGB_16==NULL) || (lookupL_8==NULL)
 		|| (lookupL_16==NULL) || (lookupXYZ_8==NULL) || (lookupXYZ_16==NULL)
-		|| (lookupL_32==NULL) || (Coeff_XYZ_asm==NULL))
+		|| (lookupL_32==NULL) || (Coeff_XYZ_asm==NULL) || (lookupCrosstalk_8==NULL)
+		|| (lookupCrosstalk_16==NULL) || (Coeff_Crosstalk_asm==NULL))
 	{
 		FreeData();
 		env->ThrowError("ConvertYUVtoXYZ: Error while allocating the lookup tables!");
@@ -15139,6 +14983,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 
 	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a),a_1=1.0/a;
 	const double coeff3=1.0/3.0,coeff12=1.0/12.0;
+	const double coeff_p=2.404,coeff_ip=1.0/coeff_p;
 	
 	if (HLG_Mode)
 	{
@@ -15767,7 +15612,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF-1
 					if (x>0.0)
 					{
-						x=pow(100.0*x,1.0/2.4);
+						x=pow(100.0*x,coeff_ip);
 						if (x<=alpha2*beta2) x/=alpha2;
 						else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45)/59.5208;
 					}
@@ -15785,11 +15630,15 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF-1
-				if (x<(beta*4.5)) x/=4.5;
-				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				if (OOTF)
+				{
+					// OETF-1
+					if (x<(beta*4.5)) x/=4.5;
+					else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				}
+				else x=pow(x,coeff_p);  // EOTF
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -15821,7 +15670,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF-1
 					if (x>0.0)
 					{
-						x=pow(100.0*x,1.0/2.4);
+						x=pow(100.0*x,coeff_ip);
 						if (x<=alpha2*beta2) x/=alpha2;
 						else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45)/59.5208;
 					}
@@ -15839,11 +15688,15 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF-1
-				if (x<(beta*4.5)) x/=4.5;
-				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				if (OOTF)
+				{
+					// OETF-1
+					if (x<(beta*4.5)) x/=4.5;
+					else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				}
+				else x=pow(x,coeff_p);  // EOTF
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -15875,6 +15728,60 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 
+	Coeff_Crosstalk[0]=(float)(1.0-2.0*Crosstalk);
+	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
+	Coeff_Crosstalk[8]=Coeff_Crosstalk[0];
+	Coeff_Crosstalk[1]=(float)Crosstalk;
+	Coeff_Crosstalk[2]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[3]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[5]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[6]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[7]=Coeff_Crosstalk[1];
+
+	Coeff_Crosstalk_asm[0]=Coeff_Crosstalk[0]; Coeff_Crosstalk_asm[1]=Coeff_Crosstalk[3];
+	Coeff_Crosstalk_asm[2]=Coeff_Crosstalk[6]; Coeff_Crosstalk_asm[3]=0.0f;
+	Coeff_Crosstalk_asm[4]=Coeff_Crosstalk_asm[0]; Coeff_Crosstalk_asm[5]=Coeff_Crosstalk_asm[1];
+	Coeff_Crosstalk_asm[6]=Coeff_Crosstalk_asm[2]; Coeff_Crosstalk_asm[7]=0.0f;
+
+	Coeff_Crosstalk_asm[8]=Coeff_Crosstalk[1]; Coeff_Crosstalk_asm[9]=Coeff_Crosstalk[4];
+	Coeff_Crosstalk_asm[10]=Coeff_Crosstalk[7]; Coeff_Crosstalk_asm[11]=0.0f;
+	Coeff_Crosstalk_asm[12]=Coeff_Crosstalk_asm[8]; Coeff_Crosstalk_asm[13]=Coeff_Crosstalk_asm[9];
+	Coeff_Crosstalk_asm[14]=Coeff_Crosstalk_asm[10]; Coeff_Crosstalk_asm[15]=0.0f;
+
+	Coeff_Crosstalk_asm[16]=Coeff_Crosstalk[2]; Coeff_Crosstalk_asm[17]=Coeff_Crosstalk[5];
+	Coeff_Crosstalk_asm[18]=Coeff_Crosstalk[8]; Coeff_Crosstalk_asm[19]=0.0f;
+	Coeff_Crosstalk_asm[20]=Coeff_Crosstalk_asm[16]; Coeff_Crosstalk_asm[21]=Coeff_Crosstalk_asm[17];
+	Coeff_Crosstalk_asm[22]=Coeff_Crosstalk_asm[18]; Coeff_Crosstalk_asm[23]=0.0f;
+
+	for(uint16_t i=0; i<256; i++)
+	{
+		double x=((double)i)/255.0;
+
+		lookupCrosstalk_8[i]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[0]);
+		lookupCrosstalk_8[i+256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[1]);
+		lookupCrosstalk_8[i+2*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[2]);
+		lookupCrosstalk_8[i+3*256]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[3]);
+		lookupCrosstalk_8[i+4*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[4]);
+		lookupCrosstalk_8[i+5*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[5]);
+		lookupCrosstalk_8[i+6*256]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[6]);
+		lookupCrosstalk_8[i+7*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[7]);
+		lookupCrosstalk_8[i+8*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[8]);
+	}
+	for(uint32_t i=0; i<65536; i++)
+	{
+		double x=((double)i)/65535.0;
+
+		lookupCrosstalk_16[i]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[0]);
+		lookupCrosstalk_16[i+65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[1]);
+		lookupCrosstalk_16[i+2*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[2]);
+		lookupCrosstalk_16[i+3*65536]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[3]);
+		lookupCrosstalk_16[i+4*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[4]);
+		lookupCrosstalk_16[i+5*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[5]);
+		lookupCrosstalk_16[i+6*65536]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[6]);
+		lookupCrosstalk_16[i+7*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[7]);
+		lookupCrosstalk_16[i+8*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[8]);
+	}
+
 	if (max_threads>1)
 	{
 		if (!poolInterface->GetUserId(UserId))
@@ -15897,6 +15804,9 @@ void ConvertYUVtoXYZ::FreeData(void)
 	myfree(lookupHLG_inv_OOTF);
 	myfree(lookupHLG_OOTF);
 	myfree(lookupHLG_RGB_16);
+	myalignedfree(Coeff_Crosstalk_asm);
+	myfree(lookupCrosstalk_16);
+	myfree(lookupCrosstalk_8);
 	myalignedfree(Coeff_XYZ_asm);
 	myfree(lookupXYZ_16);
 	myfree(lookupXYZ_8);
@@ -15988,6 +15898,15 @@ void ConvertYUVtoXYZ::StaticThreadpool(void *ptr)
 		case 45 : Convert_RGB64HLGtoLinearRGBPS(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
 					  ptrClass->SSE2_Enable,ptrClass->AVX_Enable,ptrClass->lookupL_32,ptrClass->HLGColor,ptrClass->lookupHLG_OOTF,
 					  ptrClass->lookupHLG_inv_OOTF,(float)ptrClass->HLG_Lw); break;
+		case 46 : Convert_RGB32toXYZ(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 47 : Convert_RGB32toXYZ_SSE2(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 48 : Convert_RGB32toXYZ_AVX(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 49 : Convert_RGB64toXYZ(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 50 : Convert_RGB64toXYZ_SSE41(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 51 : Convert_RGB64toXYZ_AVX(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 52 : Convert_RGBPStoXYZ(*mt_data_inf,ptrClass->Coeff_Crosstalk); break;
+		case 53 : Convert_RGBPStoXYZ_SSE2(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
+		case 54 : Convert_RGBPStoXYZ_AVX(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
 #ifdef AVX2_BUILD_POSSIBLE
 		case 4 : Convert_Progressive_8_YV12toYV16_AVX2(*mt_data_inf); break;
 		case 11 : Convert_Progressive_16_YV12toYV16_AVX2(*mt_data_inf); break;
@@ -16789,6 +16708,36 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 		}
 	}
 
+	// Apply Crosstalk if there is
+	if (Crosstalk!=0.0)
+	{
+		if (threads_number[2]>1)
+		{
+			for(uint8_t i=0; i<threads_number[2]; i++)
+				MT_ThreadGF[i].f_process=f_proc+12;
+			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+
+			for(uint8_t i=0; i<threads_number[2]; i++)
+				MT_ThreadGF[i].f_process=0;
+		}
+		else
+		{
+			switch(f_proc+12)
+			{
+				case 46 : Convert_RGB32toXYZ(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 47 : Convert_RGB32toXYZ_SSE2(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 48 : Convert_RGB32toXYZ_AVX(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 49 : Convert_RGB64toXYZ(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 50 : Convert_RGB64toXYZ_SSE41(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 51 : Convert_RGB64toXYZ_AVX(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 52 : Convert_RGBPStoXYZ(MT_DataGF[0],Coeff_Crosstalk); break;
+				case 53 : Convert_RGBPStoXYZ_SSE2(MT_DataGF[0],Coeff_Crosstalk_asm); break;
+				case 54 : Convert_RGBPStoXYZ_AVX(MT_DataGF[0],Coeff_Crosstalk_asm); break;
+				default : break;
+			}
+		}
+	}
+
 	if (threads_number[2]>1)
 	{
 		for(uint8_t i=0; i<threads_number[2]; i++)
@@ -16829,14 +16778,14 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 
 
 ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,float _Gx,
-	float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
+	double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,
+	float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
 	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
 		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),
-		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
+		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor),Crosstalk(_Crosstalk)
 {
 	UserId=0;
 
@@ -16870,9 +16819,13 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	lookupXYZ_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupXYZ_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
 	Coeff_XYZ_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
+	lookupCrosstalk_8=(int16_t *)malloc(9*256*sizeof(int16_t));
+	lookupCrosstalk_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
+	Coeff_Crosstalk_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
 
 	if ((lookupRGB_8==NULL) || (lookupRGB_16==NULL) || (lookupL_8==NULL) || (lookupL_16==NULL)
-		|| (lookupL_20==NULL) || (lookupXYZ_8==NULL) || (lookupXYZ_16==NULL) || (Coeff_XYZ_asm==NULL))
+		|| (lookupL_20==NULL) || (lookupXYZ_8==NULL) || (lookupXYZ_16==NULL) || (Coeff_XYZ_asm==NULL)
+		|| (lookupCrosstalk_8==NULL) || (lookupCrosstalk_16==NULL) || (Coeff_Crosstalk_asm==NULL))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -17004,6 +16957,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 
 	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a);
 	const double coeff12=1.0/12.0;
+	const double coeff_p=2.404,coeff_ip=1.0/coeff_p;
 	
 	if (HLG_Mode)
 	{
@@ -17256,7 +17210,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
-					x=pow(x,2.4)/100.0;
+					x=pow(x,coeff_p)/100.0;
 				}
 				if (EOTF)
 				{
@@ -17278,11 +17232,15 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF
-				if (x<beta) x*=4.5;
-				else x=alpha*pow(x,0.45)-(alpha-1.0);
+				if (OOTF)
+				{
+					// OETF
+					if (x<beta) x*=4.5;
+					else x=alpha*pow(x,0.45)-(alpha-1.0);
+				}
+				else x=pow(x,coeff_ip); // EOTF-1
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -17303,7 +17261,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
-					x=pow(x,2.4)/100.0;
+					x=pow(x,coeff_p)/100.0;
 				}
 				if (EOTF)
 				{
@@ -17325,11 +17283,15 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF
-				if (x<beta) x*=4.5;
-				else x=alpha*pow(x,0.45)-(alpha-1.0);
+				if (OOTF)
+				{
+					// OETF
+					if (x<beta) x*=4.5;
+					else x=alpha*pow(x,0.45)-(alpha-1.0);
+				}
+				else x=pow(x,coeff_ip); // EOTF-1
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -17351,7 +17313,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
-					x=pow(x,2.4)/100.0;
+					x=pow(x,coeff_p)/100.0;
 				}
 				if (EOTF)
 				{
@@ -17373,11 +17335,15 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF
-				if (x<beta) x*=4.5;
-				else x=alpha*pow(x,0.45)-(alpha-1.0);
+				if (OOTF)
+				{
+					// OETF
+					if (x<beta) x*=4.5;
+					else x=alpha*pow(x,0.45)-(alpha-1.0);
+				}
+				else x=pow(x,coeff_ip); // EOTF-1
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -17391,6 +17357,60 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+
+	Coeff_Crosstalk[0]=(float)((1.0-Crosstalk)/(1.0-3.0*Crosstalk));
+	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
+	Coeff_Crosstalk[8]=Coeff_Crosstalk[0];
+	Coeff_Crosstalk[1]=(float)(-Crosstalk/(1.0-3.0*Crosstalk));
+	Coeff_Crosstalk[2]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[3]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[5]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[6]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[7]=Coeff_Crosstalk[1];
+
+	Coeff_Crosstalk_asm[0]=Coeff_Crosstalk[0]; Coeff_Crosstalk_asm[1]=Coeff_Crosstalk[3];
+	Coeff_Crosstalk_asm[2]=Coeff_Crosstalk[6]; Coeff_Crosstalk_asm[3]=0.0f;
+	Coeff_Crosstalk_asm[4]=Coeff_Crosstalk_asm[0]; Coeff_Crosstalk_asm[5]=Coeff_Crosstalk_asm[1];
+	Coeff_Crosstalk_asm[6]=Coeff_Crosstalk_asm[2]; Coeff_Crosstalk_asm[7]=0.0f;
+
+	Coeff_Crosstalk_asm[8]=Coeff_Crosstalk[1]; Coeff_Crosstalk_asm[9]=Coeff_Crosstalk[4];
+	Coeff_Crosstalk_asm[10]=Coeff_Crosstalk[7]; Coeff_Crosstalk_asm[11]=0.0f;
+	Coeff_Crosstalk_asm[12]=Coeff_Crosstalk_asm[8]; Coeff_Crosstalk_asm[13]=Coeff_Crosstalk_asm[9];
+	Coeff_Crosstalk_asm[14]=Coeff_Crosstalk_asm[10]; Coeff_Crosstalk_asm[15]=0.0f;
+
+	Coeff_Crosstalk_asm[16]=Coeff_Crosstalk[2]; Coeff_Crosstalk_asm[17]=Coeff_Crosstalk[5];
+	Coeff_Crosstalk_asm[18]=Coeff_Crosstalk[8]; Coeff_Crosstalk_asm[19]=0.0f;
+	Coeff_Crosstalk_asm[20]=Coeff_Crosstalk_asm[16]; Coeff_Crosstalk_asm[21]=Coeff_Crosstalk_asm[17];
+	Coeff_Crosstalk_asm[22]=Coeff_Crosstalk_asm[18]; Coeff_Crosstalk_asm[23]=0.0f;
+
+	for(uint16_t i=0; i<256; i++)
+	{
+		double x=((double)i)/255.0;
+
+		lookupCrosstalk_8[i]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[0]);
+		lookupCrosstalk_8[i+256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[1]);
+		lookupCrosstalk_8[i+2*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[2]);
+		lookupCrosstalk_8[i+3*256]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[3]);
+		lookupCrosstalk_8[i+4*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[4]);
+		lookupCrosstalk_8[i+5*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[5]);
+		lookupCrosstalk_8[i+6*256]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[6]);
+		lookupCrosstalk_8[i+7*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[7]);
+		lookupCrosstalk_8[i+8*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[8]);
+	}
+	for(uint32_t i=0; i<65536; i++)
+	{
+		double x=((double)i)/65535.0;
+
+		lookupCrosstalk_16[i]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[0]);
+		lookupCrosstalk_16[i+65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[1]);
+		lookupCrosstalk_16[i+2*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[2]);
+		lookupCrosstalk_16[i+3*65536]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[3]);
+		lookupCrosstalk_16[i+4*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[4]);
+		lookupCrosstalk_16[i+5*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[5]);
+		lookupCrosstalk_16[i+6*65536]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[6]);
+		lookupCrosstalk_16[i+7*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[7]);
+		lookupCrosstalk_16[i+8*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[8]);
+	}
 
 	if (max_threads>1)
 	{
@@ -17416,6 +17436,9 @@ void ConvertXYZtoYUV::FreeData(void)
 	myfree(lookupHLG_inv_OOTF);
 	myfree(lookupHLG_OOTF);
 	myfree(lookupHLG_RGB_16);
+	myalignedfree(Coeff_Crosstalk_asm);
+	myfree(lookupCrosstalk_16);
+	myfree(lookupCrosstalk_8);
 	myalignedfree(Coeff_XYZ_asm);
 	myfree(lookupXYZ_16);
 	myfree(lookupXYZ_8);
@@ -17461,9 +17484,9 @@ void ConvertXYZtoYUV::StaticThreadpool(void *ptr)
 		case 3 : Convert_LinearRGBPStoRGB64(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 4 : Convert_LinearRGBPStoRGB64_SSE41(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 5 : Convert_LinearRGBPStoRGB64_AVX(*mt_data_inf,ptrClass->lookupL_20);break;
-		case 6 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
-		case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
-		case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 6 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 9 : Convert_LinearRGBPStoRGB64_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
@@ -17501,6 +17524,15 @@ void ConvertXYZtoYUV::StaticThreadpool(void *ptr)
 		case 41 : Convert_XYZtoRGBPS(*mt_data_inf,ptrClass->Coeff_XYZ); break;
 		case 42 : Convert_XYZtoRGBPS_SSE2(*mt_data_inf,ptrClass->Coeff_XYZ_asm); break;
 		case 43 : Convert_XYZtoRGBPS_AVX(*mt_data_inf,ptrClass->Coeff_XYZ_asm); break;
+		case 44 : Convert_XYZtoRGB32(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 45 : Convert_XYZtoRGB32_SSE2(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 46 : Convert_XYZtoRGB32_AVX(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 47 : Convert_XYZtoRGB64(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 48 : Convert_XYZtoRGB64_SSE41(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 49 : Convert_XYZtoRGB64_AVX(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 50 : Convert_XYZtoRGBPS(*mt_data_inf,ptrClass->Coeff_Crosstalk); break;
+		case 51 : Convert_XYZtoRGBPS_SSE2(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
+		case 52 : Convert_XYZtoRGBPS_AVX(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
 #ifdef AVX2_BUILD_POSSIBLE
 		case 30 : Convert_Planar422toPlanar420_8_AVX2(*mt_data_inf); break;
 		case 34 : Convert_Planar422toPlanar420_16_AVX2(*mt_data_inf); break;
@@ -17823,6 +17855,36 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 		}
 	}
 
+	//Reverse Crosstalk if there is
+	if (Crosstalk!=0.0)
+	{
+		if (threads_number[0]>1)
+		{
+			for(uint8_t i=0; i<threads_number[0]; i++)
+				MT_ThreadGF[i].f_process=f_proc+9;
+			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+
+			for(uint8_t i=0; i<threads_number[0]; i++)
+				MT_ThreadGF[i].f_process=0;
+		}
+		else
+		{
+			switch(f_proc+9)
+			{
+				case 44 : Convert_XYZtoRGB32(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 45 : Convert_XYZtoRGB32_SSE2(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 46 : Convert_XYZtoRGB32_AVX(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 47 : Convert_XYZtoRGB64(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 48 : Convert_XYZtoRGB64_SSE41(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 49 : Convert_XYZtoRGB64_AVX(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 50 : Convert_XYZtoRGBPS(MT_DataGF[0],Coeff_Crosstalk); break;
+				case 51 : Convert_XYZtoRGBPS_SSE2(MT_DataGF[0],Coeff_Crosstalk_asm); break;
+				case 52 : Convert_XYZtoRGBPS_AVX(MT_DataGF[0],Coeff_Crosstalk_asm); break;
+				default : break;
+			}
+		}
+	}
+
 	// Convert Linear RGB to RGB
 	if (bits_per_pixel==32)
 	{
@@ -17924,9 +17986,9 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 			case 3 : Convert_LinearRGBPStoRGB64(MT_DataGF[0],lookupL_20); break;
 			case 4 : Convert_LinearRGBPStoRGB64_SSE41(MT_DataGF[0],lookupL_20); break;
 			case 5 : Convert_LinearRGBPStoRGB64_AVX(MT_DataGF[0],lookupL_20); break;
-			case 6 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OOTF || EOTF); break;
-			case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OOTF || EOTF); break;
-			case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OOTF || EOTF); break;
+			case 6 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OOTF,EOTF); break;
+			case 7 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OOTF,EOTF); break;
+			case 8 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OOTF,EOTF); break;
 			case 9 : Convert_LinearRGBPStoRGB64_PQ(MT_DataGF[0],OOTF,EOTF); break;
 			case 10 : Convert_LinearRGBPStoRGB64_PQ_SSE41(MT_DataGF[0],OOTF,EOTF); break;
 			case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,EOTF); break;
@@ -18241,11 +18303,13 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 
 
 ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,
-	float _Wx,float _Wy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,
+	float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
+	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fastmode(_fastmode),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
-		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
+		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor),
+		Crosstalk(_Crosstalk)
 {
 	UserId=0;
 
@@ -18279,10 +18343,14 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	lookupXYZ_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupXYZ_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
 	Coeff_XYZ_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
+	lookupCrosstalk_8=(int16_t *)malloc(9*256*sizeof(int16_t));
+	lookupCrosstalk_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
+	Coeff_Crosstalk_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
 
 	if ((lookupL_8==NULL) || (lookupL_8to16==NULL) || (lookupL_8to32==NULL)
 		|| (lookupL_16==NULL) || (lookupXYZ_8==NULL) || (lookupXYZ_16==NULL)
-		|| (lookupL_32==NULL) || (lookupL_20==NULL) || (Coeff_XYZ_asm==NULL))
+		|| (lookupL_32==NULL) || (lookupL_20==NULL) || (Coeff_XYZ_asm==NULL)
+		|| (lookupCrosstalk_8==NULL) || (lookupCrosstalk_16==NULL) || (Coeff_Crosstalk_asm==NULL))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -18427,6 +18495,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 
 	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a),a_1=1.0/a;
 	const double coeff3=1.0/3.0,coeff12=1.0/12.0;
+	const double coeff_p=2.404,coeff_ip=1.0/coeff_p;
 
 	if (HLG_Mode)
 	{
@@ -19216,7 +19285,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF-1
 					if (x>0.0)
 					{
-						x=pow(100.0*x,1.0/2.4);
+						x=pow(100.0*x,coeff_ip);
 						if (x<=alpha2*beta2) x/=alpha2;
 						else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45)/59.5208;
 					}
@@ -19234,11 +19303,15 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF-1
-				if (x<(beta*4.5)) x/=4.5;
-				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				if (OOTF)
+				{
+					// OETF-1
+					if (x<(beta*4.5)) x/=4.5;
+					else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				}
+				else x=pow(x,coeff_p); // EOTF
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -19270,7 +19343,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF-1
 					if (x>0.0)
 					{
-						x=pow(100.0*x,1.0/2.4);
+						x=pow(100.0*x,coeff_ip);
 						if (x<=alpha2*beta2) x/=alpha2;
 						else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45)/59.5208;
 					}
@@ -19288,11 +19361,15 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF-1
-				if (x<(beta*4.5)) x/=4.5;
-				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				if (OOTF)
+				{
+					// OETF-1
+					if (x<(beta*4.5)) x/=4.5;
+					else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				}
+				else x=pow(x,coeff_p); // EOTF
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -19322,7 +19399,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF-1
 					if (x>0.0)
 					{
-						x=pow(100.0*x,1.0/2.4);
+						x=pow(100.0*x,coeff_ip);
 						if (x<=alpha2*beta2) x/=alpha2;
 						else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45)/59.5208;
 					}
@@ -19340,11 +19417,15 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (EOTF || OOTF)
+			if (EOTF)
 			{
-				// OETF-1
-				if (x<(beta*4.5)) x/=4.5;
-				else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				if (OOTF)
+				{
+					// OETF-1
+					if (x<(beta*4.5)) x/=4.5;
+					else x=pow(((x+(alpha-1.0)))/alpha,1.0/0.45);
+				}
+				else x=pow(x,coeff_p); // EOTF
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -19355,6 +19436,60 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+
+	Coeff_Crosstalk[0]=(float)(1.0-2.0*Crosstalk);
+	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
+	Coeff_Crosstalk[8]=Coeff_Crosstalk[0];
+	Coeff_Crosstalk[1]=(float)Crosstalk;
+	Coeff_Crosstalk[2]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[3]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[5]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[6]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[7]=Coeff_Crosstalk[1];
+
+	Coeff_Crosstalk_asm[0]=Coeff_Crosstalk[0]; Coeff_Crosstalk_asm[1]=Coeff_Crosstalk[3];
+	Coeff_Crosstalk_asm[2]=Coeff_Crosstalk[6]; Coeff_Crosstalk_asm[3]=0.0f;
+	Coeff_Crosstalk_asm[4]=Coeff_Crosstalk_asm[0]; Coeff_Crosstalk_asm[5]=Coeff_Crosstalk_asm[1];
+	Coeff_Crosstalk_asm[6]=Coeff_Crosstalk_asm[2]; Coeff_Crosstalk_asm[7]=0.0f;
+
+	Coeff_Crosstalk_asm[8]=Coeff_Crosstalk[1]; Coeff_Crosstalk_asm[9]=Coeff_Crosstalk[4];
+	Coeff_Crosstalk_asm[10]=Coeff_Crosstalk[7]; Coeff_Crosstalk_asm[11]=0.0f;
+	Coeff_Crosstalk_asm[12]=Coeff_Crosstalk_asm[8]; Coeff_Crosstalk_asm[13]=Coeff_Crosstalk_asm[9];
+	Coeff_Crosstalk_asm[14]=Coeff_Crosstalk_asm[10]; Coeff_Crosstalk_asm[15]=0.0f;
+
+	Coeff_Crosstalk_asm[16]=Coeff_Crosstalk[2]; Coeff_Crosstalk_asm[17]=Coeff_Crosstalk[5];
+	Coeff_Crosstalk_asm[18]=Coeff_Crosstalk[8]; Coeff_Crosstalk_asm[19]=0.0f;
+	Coeff_Crosstalk_asm[20]=Coeff_Crosstalk_asm[16]; Coeff_Crosstalk_asm[21]=Coeff_Crosstalk_asm[17];
+	Coeff_Crosstalk_asm[22]=Coeff_Crosstalk_asm[18]; Coeff_Crosstalk_asm[23]=0.0f;
+
+	for(uint16_t i=0; i<256; i++)
+	{
+		double x=((double)i)/255.0;
+
+		lookupCrosstalk_8[i]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[0]);
+		lookupCrosstalk_8[i+256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[1]);
+		lookupCrosstalk_8[i+2*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[2]);
+		lookupCrosstalk_8[i+3*256]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[3]);
+		lookupCrosstalk_8[i+4*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[4]);
+		lookupCrosstalk_8[i+5*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[5]);
+		lookupCrosstalk_8[i+6*256]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[6]);
+		lookupCrosstalk_8[i+7*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[7]);
+		lookupCrosstalk_8[i+8*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[8]);
+	}
+	for(uint32_t i=0; i<65536; i++)
+	{
+		double x=((double)i)/65535.0;
+
+		lookupCrosstalk_16[i]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[0]);
+		lookupCrosstalk_16[i+65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[1]);
+		lookupCrosstalk_16[i+2*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[2]);
+		lookupCrosstalk_16[i+3*65536]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[3]);
+		lookupCrosstalk_16[i+4*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[4]);
+		lookupCrosstalk_16[i+5*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[5]);
+		lookupCrosstalk_16[i+6*65536]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[6]);
+		lookupCrosstalk_16[i+7*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[7]);
+		lookupCrosstalk_16[i+8*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[8]);
+	}
 
 	if (threads_number>1)
 	{
@@ -19374,6 +19509,9 @@ void ConvertRGBtoXYZ::FreeData(void)
 	myfree(lookupHLG_inv_OOTF);
 	myfree(lookupHLG_OOTF);
 	myfree(lookupHLG_RGB_16);
+	myalignedfree(Coeff_Crosstalk_asm);
+	myfree(lookupCrosstalk_16);
+	myfree(lookupCrosstalk_8);
 	myalignedfree(Coeff_XYZ_asm);
 	myfree(lookupXYZ_16);
 	myfree(lookupXYZ_8);
@@ -19433,7 +19571,7 @@ void ConvertRGBtoXYZ::StaticThreadpool(void *ptr)
 		case 17 : Convert_RGBPStoLinearRGBPS_SSE41(*mt_data_inf,ptrClass->lookupL_20); break;
 		case 18 : Convert_RGBPStoLinearRGBPS_SSE2(*mt_data_inf,ptrClass->lookupL_20); break;
 		case 19 : Convert_RGBPStoLinearRGBPS(*mt_data_inf,ptrClass->lookupL_20); break;
-		case 20 : Convert_RGBPStoLinearRGBPS_SDR(*mt_data_inf,ptrClass->EOTF || ptrClass->OOTF); break;
+		case 20 : Convert_RGBPStoLinearRGBPS_SDR(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 21 : Convert_RGB32HLGtoLinearRGB32(*mt_data_inf,ptrClass->lookupHLG_OOTF); break;
 		case 22 : Convert_RGBPStoLinearRGBPS_PQ(*mt_data_inf,ptrClass->EOTF,ptrClass->OOTF); break;
 		case 23 : Convert_RGB32HLGtoLinearRGB64b(*mt_data_inf,ptrClass->lookupHLG_OOTF); break;
@@ -19449,6 +19587,15 @@ void ConvertRGBtoXYZ::StaticThreadpool(void *ptr)
 					  ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,
 					  ptrClass->lookupL_20,ptrClass->HLGColor,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF,
 					  (float)ptrClass->HLG_Lw,ptrClass->fastmode); break;
+		case 28 : Convert_RGB32toXYZ(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 29 : Convert_RGB32toXYZ_SSE2(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 30 : Convert_RGB32toXYZ_AVX(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 31 : Convert_RGB64toXYZ(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 32 : Convert_RGB64toXYZ_SSE41(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 33 : Convert_RGB64toXYZ_AVX(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 34 : Convert_RGBPStoXYZ(*mt_data_inf,ptrClass->Coeff_Crosstalk); break;
+		case 35 : Convert_RGBPStoXYZ_SSE2(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
+		case 36 : Convert_RGBPStoXYZ_AVX(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
 #ifdef AVX2_BUILD_POSSIBLE
 		case 15 : Convert_RGBPStoLinearRGBPS_AVX2(*mt_data_inf,ptrClass->lookupL_20); break;
 #endif
@@ -19754,7 +19901,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			case 17 : Convert_RGBPStoLinearRGBPS_SSE41(MT_DataGF[0],lookupL_20); break;
 			case 18 : Convert_RGBPStoLinearRGBPS_SSE2(MT_DataGF[0],lookupL_20); break;
 			case 19 : Convert_RGBPStoLinearRGBPS(MT_DataGF[0],lookupL_20); break;
-			case 20 : Convert_RGBPStoLinearRGBPS_SDR(MT_DataGF[0],EOTF || OOTF); break;
+			case 20 : Convert_RGBPStoLinearRGBPS_SDR(MT_DataGF[0],OOTF,EOTF); break;
 			case 21 : Convert_RGB32HLGtoLinearRGB32(MT_DataGF[0],lookupHLG_OOTF); break;
 			case 22 : Convert_RGBPStoLinearRGBPS_PQ(MT_DataGF[0],EOTF,OOTF); break;
 			case 23 : Convert_RGB32HLGtoLinearRGB64b(MT_DataGF[0],lookupHLG_OOTF); break;
@@ -19843,6 +19990,36 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 		}
 	}
 
+	// Apply Crosstalk if there is
+	if (Crosstalk!=0.0)
+	{
+		if (threads_number>1)
+		{
+			for(uint8_t i=0; i<threads_number; i++)
+				MT_ThreadGF[i].f_process=f_proc+22;
+			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+
+			for(uint8_t i=0; i<threads_number; i++)
+				MT_ThreadGF[i].f_process=0;
+		}
+		else
+		{
+			switch(f_proc+22)
+			{
+				case 28 : Convert_RGB32toXYZ(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 29 : Convert_RGB32toXYZ_SSE2(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 30 : Convert_RGB32toXYZ_AVX(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 31 : Convert_RGB64toXYZ(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 32 : Convert_RGB64toXYZ_SSE41(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 33 : Convert_RGB64toXYZ_AVX(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 34 : Convert_RGBPStoXYZ(MT_DataGF[0],Coeff_Crosstalk); break;
+				case 35 : Convert_RGBPStoXYZ_SSE2(MT_DataGF[0],Coeff_Crosstalk_asm); break;
+				case 36 : Convert_RGBPStoXYZ_AVX(MT_DataGF[0],Coeff_Crosstalk_asm); break;
+				default : break;
+			}
+		}
+	}
+
 	if (threads_number>1)
 	{
 		for(uint8_t i=0; i<threads_number; i++)
@@ -19883,14 +20060,15 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 
 
 ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-	uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,
-	float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
-	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,
+	float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,
+	float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
+	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		OutputMode(_OutputMode),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
 		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),
-		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
+		HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor),Crosstalk(_Crosstalk)
 {
 	UserId=0;
 
@@ -19922,10 +20100,14 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	lookupXYZ_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupXYZ_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
 	Coeff_XYZ_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
+	lookupCrosstalk_8=(int16_t *)malloc(9*256*sizeof(int16_t));
+	lookupCrosstalk_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
+	Coeff_Crosstalk_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
 
 	if ((lookupL_8==NULL) || (lookupL_16==NULL)
 		|| (lookupL_20==NULL) || (lookupL_32==NULL) || (lookupXYZ_8==NULL)
-		|| (lookupXYZ_16==NULL) || (Coeff_XYZ_asm==NULL))
+		|| (lookupXYZ_16==NULL) || (Coeff_XYZ_asm==NULL) || (lookupCrosstalk_8==NULL)
+		|| (lookupCrosstalk_16==NULL) || (Coeff_Crosstalk_asm==NULL))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -20012,6 +20194,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	
 	const double a=0.17883277,b=1.0-4.0*a,c=0.5-a*log(4.0*a);
 	const double coeff12=1.0/12.0;
+	const double coeff_p=2.404,coeff_ip=1.0/coeff_p;
 
 	if (HLG_Mode)
 	{
@@ -20264,7 +20447,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
-					x=pow(x,2.4)/100.0;
+					x=pow(x,coeff_p)/100.0;
 				}
 				if (EOTF)
 				{
@@ -20286,11 +20469,15 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (OOTF || EOTF)
+			if (EOTF)
 			{
-				// OETF
-				if (x<beta) x*=4.5;
-				else x=alpha*pow(x,0.45)-(alpha-1.0);
+				if (OOTF)
+				{
+					// OETF
+					if (x<beta) x*=4.5;
+					else x=alpha*pow(x,0.45)-(alpha-1.0);
+				}
+				else x=pow(x,coeff_ip); // EOTF-1
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -20311,7 +20498,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
-					x=pow(x,2.4)/100.0;
+					x=pow(x,coeff_p)/100.0;
 				}
 				if (EOTF)
 				{
@@ -20333,11 +20520,15 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (OOTF || EOTF)
+			if (EOTF)
 			{
-				// OETF
-				if (x<beta) x*=4.5;
-				else x=alpha*pow(x,0.45)-(alpha-1.0);
+				if (OOTF)
+				{
+					// OETF
+					if (x<beta) x*=4.5;
+					else x=alpha*pow(x,0.45)-(alpha-1.0);
+				}
+				else x=pow(x,coeff_ip); // EOTF-1
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -20359,7 +20550,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 					// PQ_OOTF
 					if (x<=beta2) x*=alpha2;
 					else x=pow(59.5208*x,0.45)*alpha-(alpha-1.0);
-					x=pow(x,2.4)/100.0;
+					x=pow(x,coeff_p)/100.0;
 				}
 				if (EOTF)
 				{
@@ -20381,11 +20572,15 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 		}
 		else
 		{
-			if (OOTF || EOTF)
+			if (EOTF)
 			{
-				// OETF
-				if (x<beta) x*=4.5;
-				else x=alpha*pow(x,0.45)-(alpha-1.0);
+				if (OOTF)
+				{
+					// OETF
+					if (x<beta) x*=4.5;
+					else x=alpha*pow(x,0.45)-(alpha-1.0);
+				}
+				else x=pow(x,coeff_ip); // EOTF-1
 			}
 		}
 		if (x>1.0) x=1.0;
@@ -20397,6 +20592,60 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+
+	Coeff_Crosstalk[0]=(float)((1.0-Crosstalk)/(1.0-3.0*Crosstalk));
+	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
+	Coeff_Crosstalk[8]=Coeff_Crosstalk[0];
+	Coeff_Crosstalk[1]=(float)(-Crosstalk/(1.0-3.0*Crosstalk));
+	Coeff_Crosstalk[2]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[3]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[5]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[6]=Coeff_Crosstalk[1];
+	Coeff_Crosstalk[7]=Coeff_Crosstalk[1];
+
+	Coeff_Crosstalk_asm[0]=Coeff_Crosstalk[0]; Coeff_Crosstalk_asm[1]=Coeff_Crosstalk[3];
+	Coeff_Crosstalk_asm[2]=Coeff_Crosstalk[6]; Coeff_Crosstalk_asm[3]=0.0f;
+	Coeff_Crosstalk_asm[4]=Coeff_Crosstalk_asm[0]; Coeff_Crosstalk_asm[5]=Coeff_Crosstalk_asm[1];
+	Coeff_Crosstalk_asm[6]=Coeff_Crosstalk_asm[2]; Coeff_Crosstalk_asm[7]=0.0f;
+
+	Coeff_Crosstalk_asm[8]=Coeff_Crosstalk[1]; Coeff_Crosstalk_asm[9]=Coeff_Crosstalk[4];
+	Coeff_Crosstalk_asm[10]=Coeff_Crosstalk[7]; Coeff_Crosstalk_asm[11]=0.0f;
+	Coeff_Crosstalk_asm[12]=Coeff_Crosstalk_asm[8]; Coeff_Crosstalk_asm[13]=Coeff_Crosstalk_asm[9];
+	Coeff_Crosstalk_asm[14]=Coeff_Crosstalk_asm[10]; Coeff_Crosstalk_asm[15]=0.0f;
+
+	Coeff_Crosstalk_asm[16]=Coeff_Crosstalk[2]; Coeff_Crosstalk_asm[17]=Coeff_Crosstalk[5];
+	Coeff_Crosstalk_asm[18]=Coeff_Crosstalk[8]; Coeff_Crosstalk_asm[19]=0.0f;
+	Coeff_Crosstalk_asm[20]=Coeff_Crosstalk_asm[16]; Coeff_Crosstalk_asm[21]=Coeff_Crosstalk_asm[17];
+	Coeff_Crosstalk_asm[22]=Coeff_Crosstalk_asm[18]; Coeff_Crosstalk_asm[23]=0.0f;
+
+	for(uint16_t i=0; i<256; i++)
+	{
+		double x=((double)i)/255.0;
+
+		lookupCrosstalk_8[i]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[0]);
+		lookupCrosstalk_8[i+256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[1]);
+		lookupCrosstalk_8[i+2*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[2]);
+		lookupCrosstalk_8[i+3*256]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[3]);
+		lookupCrosstalk_8[i+4*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[4]);
+		lookupCrosstalk_8[i+5*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[5]);
+		lookupCrosstalk_8[i+6*256]=(int16_t)round(8.0+16.0*255.0*x*Coeff_Crosstalk[6]);
+		lookupCrosstalk_8[i+7*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[7]);
+		lookupCrosstalk_8[i+8*256]=(int16_t)round(16.0*255.0*x*Coeff_Crosstalk[8]);
+	}
+	for(uint32_t i=0; i<65536; i++)
+	{
+		double x=((double)i)/65535.0;
+
+		lookupCrosstalk_16[i]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[0]);
+		lookupCrosstalk_16[i+65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[1]);
+		lookupCrosstalk_16[i+2*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[2]);
+		lookupCrosstalk_16[i+3*65536]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[3]);
+		lookupCrosstalk_16[i+4*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[4]);
+		lookupCrosstalk_16[i+5*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[5]);
+		lookupCrosstalk_16[i+6*65536]=(int32_t)round(128.0+256.0*65535.0*x*Coeff_Crosstalk[6]);
+		lookupCrosstalk_16[i+7*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[7]);
+		lookupCrosstalk_16[i+8*65536]=(int32_t)round(256.0*65535.0*x*Coeff_Crosstalk[8]);
+	}
 
 	if (threads_number>1)
 	{
@@ -20416,6 +20665,9 @@ void ConvertXYZtoRGB::FreeData(void)
 	myfree(lookupHLG_inv_OOTF);
 	myfree(lookupHLG_OOTF);
 	myfree(lookupHLG_RGB_16);
+	myalignedfree(Coeff_Crosstalk_asm);
+	myfree(lookupCrosstalk_16);
+	myfree(lookupCrosstalk_8);
 	myalignedfree(Coeff_XYZ_asm);
 	myfree(lookupXYZ_16);
 	myfree(lookupXYZ_8);
@@ -20469,9 +20721,9 @@ void ConvertXYZtoRGB::StaticThreadpool(void *ptr)
 		case 12 : Convert_LinearRGBPStoRGB64(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 13 : Convert_LinearRGBPStoRGB64_SSE41(*mt_data_inf,ptrClass->lookupL_20);break;
 		case 14 : Convert_LinearRGBPStoRGB64_AVX(*mt_data_inf,ptrClass->lookupL_20);break;
-		case 15 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
-		case 16 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
-		case 17 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 15 : Convert_LinearRGBPStoRGB64_SDR(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 16 : Convert_LinearRGBPStoRGB64_SDR_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 17 : Convert_LinearRGBPStoRGB64_SDR_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 18 : Convert_LinearRGBPStoRGB64_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 19 : Convert_LinearRGBPStoRGB64_PQ_SSE41(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 20 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
@@ -20492,7 +20744,16 @@ void ConvertXYZtoRGB::StaticThreadpool(void *ptr)
 					  ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,ptrClass->lookupL_16,
 					  ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
 		case 30 : Convert_LinearRGBPStoRGBPS_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
-		case 31 : Convert_LinearRGBPStoRGBPS_SDR(*mt_data_inf,ptrClass->OOTF || ptrClass->EOTF); break;
+		case 31 : Convert_LinearRGBPStoRGBPS_SDR(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
+		case 32 : Convert_XYZtoRGB32(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 33 : Convert_XYZtoRGB32_SSE2(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 34 : Convert_XYZtoRGB32_AVX(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
+		case 35 : Convert_XYZtoRGB64(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 36 : Convert_XYZtoRGB64_SSE41(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 37 : Convert_XYZtoRGB64_AVX(*mt_data_inf,ptrClass->lookupCrosstalk_16); break;
+		case 38 : Convert_XYZtoRGBPS(*mt_data_inf,ptrClass->Coeff_Crosstalk); break;
+		case 39 : Convert_XYZtoRGBPS_SSE2(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
+		case 40 : Convert_XYZtoRGBPS_AVX(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
 #ifdef AVX2_BUILD_POSSIBLE
 		case 24 : Convert_LinearRGBPStoRGBPS_AVX2(*mt_data_inf,ptrClass->lookupL_32); break;
 #endif
@@ -20775,6 +21036,52 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 		}
 	}
 
+	// Apply reverse Crosstalk if any
+	if (Crosstalk!=0.0)
+	{
+		if ((bits_per_pixel==32) && (vi.pixel_type==VideoInfo::CS_RGBPS))
+		{
+			for(uint8_t i=0; i<threads_number; i++)
+			{
+				MT_DataGF[i].src1=(void *)(dstRw+(MT_DataGF[i].src_Y_h_min*dst_pitch_R));
+				MT_DataGF[i].src2=(void *)(dstGw+(MT_DataGF[i].src_Y_h_min*dst_pitch_G));
+				MT_DataGF[i].src3=(void *)(dstBw+(MT_DataGF[i].src_Y_h_min*dst_pitch_B));
+				MT_DataGF[i].src_pitch1=dst_pitch_R;
+				MT_DataGF[i].src_pitch2=dst_pitch_G;
+				MT_DataGF[i].src_pitch3=dst_pitch_B;
+				MT_DataGF[i].src_modulo1=dst_modulo_R;
+				MT_DataGF[i].src_modulo2=dst_modulo_G;
+				MT_DataGF[i].src_modulo3=dst_modulo_B;
+			}
+		}
+
+		if (threads_number>1)
+		{
+			for(uint8_t i=0; i<threads_number; i++)
+				MT_ThreadGF[i].f_process=f_proc+31;
+			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+
+			for(uint8_t i=0; i<threads_number; i++)
+				MT_ThreadGF[i].f_process=0;
+		}
+		else
+		{
+			switch(f_proc+31)
+			{
+				case 32 : Convert_XYZtoRGB32(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 33 : Convert_XYZtoRGB32_SSE2(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 34 : Convert_XYZtoRGB32_AVX(MT_DataGF[0],lookupCrosstalk_8); break;
+				case 35 : Convert_XYZtoRGB64(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 36 : Convert_XYZtoRGB64_SSE41(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 37 : Convert_XYZtoRGB64_AVX(MT_DataGF[0],lookupCrosstalk_16); break;
+				case 38 : Convert_XYZtoRGBPS(MT_DataGF[0],Coeff_Crosstalk); break;
+				case 39 : Convert_XYZtoRGBPS_SSE2(MT_DataGF[0],Coeff_Crosstalk_asm); break;
+				case 40 : Convert_XYZtoRGBPS_AVX(MT_DataGF[0],Coeff_Crosstalk_asm); break;
+				default : break;
+			}
+		}
+	}
+
 	// Convert Linear RGB to RGB
 	if (bits_per_pixel==32)
 	{
@@ -20954,9 +21261,9 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 			case 12 : Convert_LinearRGBPStoRGB64(MT_DataGF[0],lookupL_20); break;
 			case 13 : Convert_LinearRGBPStoRGB64_SSE41(MT_DataGF[0],lookupL_20); break;
 			case 14 : Convert_LinearRGBPStoRGB64_AVX(MT_DataGF[0],lookupL_20); break;
-			case 15 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OOTF || EOTF); break;
-			case 16 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OOTF || EOTF); break;
-			case 17 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OOTF || EOTF); break;
+			case 15 : Convert_LinearRGBPStoRGB64_SDR(MT_DataGF[0],OOTF,EOTF); break;
+			case 16 : Convert_LinearRGBPStoRGB64_SDR_SSE41(MT_DataGF[0],OOTF,EOTF); break;
+			case 17 : Convert_LinearRGBPStoRGB64_SDR_AVX(MT_DataGF[0],OOTF,EOTF); break;
 			case 18 : Convert_LinearRGBPStoRGB64_PQ(MT_DataGF[0],OOTF,EOTF); break;
 			case 19 : Convert_LinearRGBPStoRGB64_PQ_SSE41(MT_DataGF[0],OOTF,EOTF); break;
 			case 20 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,EOTF); break;
@@ -20972,7 +21279,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 			case 29 : Convert_LinearRGB64toRGB64HLG(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE41_Enable,AVX_Enable,AVX2_Enable,
 						  lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
 			case 30 : Convert_LinearRGBPStoRGBPS_PQ(MT_DataGF[0],OOTF,EOTF); break;
-			case 31 : Convert_LinearRGBPStoRGBPS_SDR(MT_DataGF[0],OOTF || EOTF); break;
+			case 31 : Convert_LinearRGBPStoRGBPS_SDR(MT_DataGF[0],OOTF,EOTF); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 24 : Convert_LinearRGBPStoRGBPS_AVX2(MT_DataGF[0],lookupL_32); break;
 #endif
@@ -23961,13 +24268,14 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	const bool EOTF=args[8].AsBool(true);
 	const bool fullrange=args[9].AsBool(false);
 	const bool mpeg2c=args[10].AsBool(true);
-	const int threads=args[19].AsInt(0);
-	const bool LogicalCores=args[20].AsBool(true);
-	const bool MaxPhysCores=args[21].AsBool(true);
-	const bool SetAffinity=args[22].AsBool(false);
-	const bool sleep = args[23].AsBool(false);
-	int prefetch=args[24].AsInt(0);
-	int thread_level=args[25].AsInt(6);
+	const double Crosstalk=args[19].AsFloat(0.0f);
+	const int threads=args[20].AsInt(0);
+	const bool LogicalCores=args[21].AsBool(true);
+	const bool MaxPhysCores=args[22].AsBool(true);
+	const bool SetAffinity=args[23].AsBool(false);
+	const bool sleep = args[24].AsBool(false);
+	int prefetch=args[25].AsInt(0);
+	int thread_level=args[26].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -23979,6 +24287,8 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertYUVtoXYZ: [OutputMode] must be 0, 1 or 2");
 	if ((HDRMode<0) || (HDRMode>2))
 		env->ThrowError("ConvertYUVtoXYZ: [HDRMode] must be 0, 1 or 2");
+	if ((Crosstalk<0.0) || (Crosstalk>0.33))
+		env->ThrowError("ConvertYUVtoXYZ: [Crosstalk] must be in [0..0.33]");
 
 	switch(Color)
 	{
@@ -24089,8 +24399,8 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertYUVtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fullrange,mpeg2c,
-		Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,env);
+	return new ConvertYUVtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,Crosstalk,HLGColor,OOTF,EOTF,
+		fullrange,mpeg2c,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,env);
 }
 
 
@@ -24254,13 +24564,14 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 	const bool OOTF=args[7].AsBool(true);
 	const bool EOTF=args[8].AsBool(true);
 	const bool fastmode=args[9].AsBool(true);
-	const int threads=args[18].AsInt(0);
-	const bool LogicalCores=args[19].AsBool(true);
-	const bool MaxPhysCores=args[20].AsBool(true);
-	const bool SetAffinity=args[21].AsBool(false);
-	const bool sleep = args[22].AsBool(false);
-	int prefetch=args[23].AsInt(0);
-	int thread_level=args[24].AsInt(6);
+	const double crosstalk=args[18].AsFloat(0.0f);
+	const int threads=args[19].AsInt(0);
+	const bool LogicalCores=args[20].AsBool(true);
+	const bool MaxPhysCores=args[21].AsBool(true);
+	const bool SetAffinity=args[22].AsBool(false);
+	const bool sleep = args[23].AsBool(false);
+	int prefetch=args[24].AsInt(0);
+	int thread_level=args[25].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -24272,6 +24583,8 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertRGBtoXYZ: [OutputMode] must be 0, 1 or 2");
 	if ((HDRMode<0) || (HDRMode>2))
 		env->ThrowError("ConvertRGBtoXYZ: [HDRMode] must be 0, 1 or 2");
+	if ((crosstalk<0.0) || (crosstalk>0.33))
+		env->ThrowError("ConvertRGBtoXYZ: [Crosstalk] must be in [0..0.33]");
 
 	switch(Color)
 	{
@@ -24382,8 +24695,8 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertRGBtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,
-		threads_number,sleep,env);
+	return new ConvertRGBtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,crosstalk,HLGColor,
+		OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,env);
 }
 
 
@@ -24435,13 +24748,14 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	const bool fullrange=args[9].AsBool(false);
 	const bool mpeg2c=args[10].AsBool(true);
 	const bool fastmode=args[11].AsBool(true);
-	const int threads=args[29].AsInt(0);
-	const bool LogicalCores=args[30].AsBool(true);
-	const bool MaxPhysCores=args[31].AsBool(true);
-	const bool SetAffinity=args[32].AsBool(false);
-	const bool sleep = args[33].AsBool(false);
-	int prefetch=args[34].AsInt(0);
-	int thread_level=args[35].AsInt(6);
+	const double crosstalk=args[29].AsFloat(0.0f);
+	const int threads=args[30].AsInt(0);
+	const bool LogicalCores=args[31].AsBool(true);
+	const bool MaxPhysCores=args[32].AsBool(true);
+	const bool SetAffinity=args[33].AsBool(false);
+	const bool sleep = args[34].AsBool(false);
+	int prefetch=args[35].AsInt(0);
+	int thread_level=args[36].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -24458,6 +24772,8 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertXYZtoYUV: [OutputMode] must be 0, 1 or 2");
 	if ((HDRMode<0) || (HDRMode>2))
 		env->ThrowError("ConvertXYZtoYUV: [HDRMode] must be 0, 1 or 2");
+	if ((crosstalk<0.0) || (crosstalk>0.33))
+		env->ThrowError("ConvertXYZtoYUV: [Crosstalk] must be in [0..0.33]");
 
 	switch(Color)
 	{
@@ -24637,8 +24953,8 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertXYZtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fullrange,
-		mpeg2c,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
+	return new ConvertXYZtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,crosstalk,HLGColor,
+		OOTF,EOTF,fullrange,mpeg2c,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
 		threads_number,sleep,env);
 }
 
@@ -24686,13 +25002,14 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	const bool OOTF=args[7].AsBool(true);
 	const bool EOTF=args[8].AsBool(true);
 	const bool fastmode=args[9].AsBool(true);
-	const int threads=args[27].AsInt(0);
-	const bool LogicalCores=args[28].AsBool(true);
-	const bool MaxPhysCores=args[29].AsBool(true);
-	const bool SetAffinity=args[30].AsBool(false);
-	const bool sleep = args[31].AsBool(false);
-	int prefetch=args[32].AsInt(0);
-	int thread_level=args[33].AsInt(6);
+	const double crosstalk=args[27].AsFloat(0.0f);
+	const int threads=args[28].AsInt(0);
+	const bool LogicalCores=args[29].AsBool(true);
+	const bool MaxPhysCores=args[30].AsBool(true);
+	const bool SetAffinity=args[31].AsBool(false);
+	const bool sleep = args[32].AsBool(false);
+	int prefetch=args[33].AsInt(0);
+	int thread_level=args[34].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
 
@@ -24710,6 +25027,8 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 		env->ThrowError("ConvertXYZtoRGB: [OutputMode] must be 0 or 1");
 	if ((HDRMode<0) || (HDRMode>2))
 		env->ThrowError("ConvertXYZtoRGB: [HDRMode] must be 0, 1 or 2");
+	if ((crosstalk<0.0) || (crosstalk>0.33))
+		env->ThrowError("ConvertXYZtoRGB: [Crosstalk] must be in [0..0.33]");
 
 	switch(Color)
 	{
@@ -24889,8 +25208,8 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 		}
 	}
 
-	return new ConvertXYZtoRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,
-		fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
+	return new ConvertXYZtoRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,crosstalk,HLGColor,
+		OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
 		threads_number,sleep,env);
 }
 
@@ -25928,22 +26247,24 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 		Create_ConvertLinearRGBtoYUV, 0);
 
     env->AddFunction("ConvertYUVtoXYZ",
-		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b" \
+		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[Crosstalk]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i[ThreadLevel]i",
 		Create_ConvertYUVtoXYZ, 0);
     env->AddFunction("ConvertXYZtoYUV",
 		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fullrange]b[mpeg2c]b[fastmode]b" \
-		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f" \
+		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f[Crosstalk]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i[ThreadLevel]i",
 		Create_ConvertXYZtoYUV, 0);
 
     env->AddFunction("ConvertRGBtoXYZ",
-		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fastmode]b[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f" \
+		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fastmode]b" \
+		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[Crosstalk]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i[ThreadLevel]i",
 		Create_ConvertRGBtoXYZ, 0);
     env->AddFunction("ConvertXYZtoRGB",
 		"c[Color]i[OutputMode]i[HDRMode]i[HLGLb]f[HLGLw]f[HLGColor]i[OOTF]b[EOTF]b[fastmode]b" \
-		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f" \
+		"[Rx]f[Ry]f[Gx]f[Gy]f[Bx]f[By]f[Wx]f[Wy]f[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f[Crosstalk]f" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i[ThreadLevel]i",
 		Create_ConvertXYZtoRGB, 0);
 
@@ -25992,7 +26313,7 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i[ThreadLevel]i",
 		Create_ConvertRGB_Reinhard_HDRtoSDR, 0);
 
-/*    env->AddFunction("ConvertXYZ_NN_HDRtoSDR",
+	/*    env->AddFunction("ConvertXYZ_NN_HDRtoSDR",
 		"c[MinMastering]f[MaxMastering]f[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b" \
 		"[sleep]b[prefetch]i[ThreadLevel]i",Create_ConvertXYZ_NN_HDRtoSDR, 0);*/
 

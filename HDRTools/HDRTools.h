@@ -23,7 +23,7 @@
 #include "avisynth.h"
 #include "ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 0.5.2 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 0.5.3 JPSDR"
 
 
 typedef struct _dataLookUp
@@ -100,8 +100,9 @@ class ConvertYUVtoXYZ : public GenericVideoFilter
 {
 public:
 	ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-		uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,float _Gx,float _Gy,
-		float _Bx,float _By,float _Wx,float _Wy,uint8_t _threads, bool _sleep, IScriptEnvironment* env);
+		double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,
+		float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
+		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertYUVtoXYZ();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -112,16 +113,16 @@ private:
 	bool OOTF,mpeg2c,fullrange,EOTF;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	bool sleep,HLG_Mode;
-	double HLG_Lb,HLG_Lw;
+	double HLG_Lb,HLG_Lw,Crosstalk;
 	uint16_t *lookup_Upscale8;
 	uint32_t *lookup_Upscale16,*lookup_8to16;
-	int16_t *lookupRGB_8,*lookupXYZ_8;
-	int32_t *lookupRGB_16,*lookupXYZ_16,*lookupHLG_RGB_16;
+	int16_t *lookupRGB_8,*lookupXYZ_8,*lookupCrosstalk_8;
+	int32_t *lookupRGB_16,*lookupXYZ_16,*lookupCrosstalk_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16;
 	float *lookupL_32;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
-	float Coeff_XYZ[9],*Coeff_XYZ_asm;
+	float Coeff_XYZ[9],*Coeff_XYZ_asm,Coeff_Crosstalk[9],*Coeff_Crosstalk_asm;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel;
@@ -149,8 +150,9 @@ class ConvertRGBtoXYZ : public GenericVideoFilter
 {
 public:
 	ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-		uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,
-		float _Wx,float _Wy,uint8_t _threads, bool _sleep, IScriptEnvironment* env);
+		double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,
+		float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
+		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
 	virtual ~ConvertRGBtoXYZ();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -161,13 +163,13 @@ private:
 	bool OOTF,EOTF,fastmode;
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	bool sleep,HLG_Mode;
-	double HLG_Lb,HLG_Lw;
-	int16_t *lookupXYZ_8;
-	int32_t *lookupXYZ_16,*lookupHLG_RGB_16;
+	double HLG_Lb,HLG_Lw,Crosstalk;
+	int16_t *lookupXYZ_8,*lookupCrosstalk_8;;
+	int32_t *lookupXYZ_16,*lookupCrosstalk_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_8to16;
 	float *lookupL_32,*lookupL_8to32,*lookupL_20;
-	float Coeff_XYZ[9],*Coeff_XYZ_asm;
+	float Coeff_XYZ[9],*Coeff_XYZ_asm,Coeff_Crosstalk[9],*Coeff_Crosstalk_asm;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
@@ -238,9 +240,10 @@ class ConvertXYZtoYUV : public GenericVideoFilter
 {
 public:
 	ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-		uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,
-		float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,
-		float _pBx,float _pBy,float _pWx,float _pWy,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
+		double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,
+		float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,
+		float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
+		uint8_t _threads,bool _sleep,IScriptEnvironment* env);
 	virtual ~ConvertXYZtoYUV();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -252,12 +255,12 @@ private:
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	bool sleep,HLG_Mode;
-	double HLG_Lb,HLG_Lw;
-	int16_t *lookupRGB_8,*lookupXYZ_8;
-	int32_t *lookupRGB_16,*lookupXYZ_16,*lookupHLG_RGB_16;
+	double HLG_Lb,HLG_Lw,Crosstalk;
+	int16_t *lookupRGB_8,*lookupXYZ_8,*lookupCrosstalk_8;
+	int32_t *lookupRGB_16,*lookupXYZ_16,*lookupCrosstalk_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_20;
-	float Coeff_XYZ[9],*Coeff_XYZ_asm;
+	float Coeff_XYZ[9],*Coeff_XYZ_asm,Coeff_Crosstalk[9],*Coeff_Crosstalk_asm;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
@@ -286,9 +289,10 @@ class ConvertXYZtoRGB : public GenericVideoFilter
 {
 public:
 	ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-		uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,float _Gx,float _Gy,
-		float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,
-		float _pBx,float _pBy,float _pWx,float _pWy,uint8_t _threads, bool _sleep,IScriptEnvironment* env);
+		double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,
+		float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,
+		float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
+		uint8_t _threads, bool _sleep,IScriptEnvironment* env);
 	virtual ~ConvertXYZtoRGB();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -300,12 +304,12 @@ private:
 	float Rx,Ry,Gx,Gy,Bx,By,Wx,Wy;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	bool sleep,HLG_Mode;
-	double HLG_Lb,HLG_Lw;
-	int16_t *lookupXYZ_8;
-	int32_t *lookupXYZ_16,*lookupHLG_RGB_16;
+	double HLG_Lb,HLG_Lw,Crosstalk;
+	int16_t *lookupXYZ_8,*lookupCrosstalk_8;
+	int32_t *lookupXYZ_16,*lookupCrosstalk_16,*lookupHLG_RGB_16;
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_20;
-	float Coeff_XYZ[9],*Coeff_XYZ_asm,*lookupL_32;
+	float Coeff_XYZ[9],*Coeff_XYZ_asm,Coeff_Crosstalk[9],*Coeff_Crosstalk_asm,*lookupL_32;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 

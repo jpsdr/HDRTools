@@ -753,6 +753,113 @@ Reinhard tonemap, you can have different parameters for each plane, if you want.
 The others parameters are identical to ConvertLinearRGBtoYUV.
 
 
+*******************************************************
+**      ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR      **
+*******************************************************
+
+ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR(float Lhdr,float Lsdr,float CoeffAdj,bool fastmode,
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
+     
+Accepted input: RGB64 and Planar float RGB.
+WARNING : Input must be linear DISPLAYED data, so produced by
+ConvertYUVtoLinearRGB with OOTF=false.
+Output : YV24 16 bits.
+
+HDR to SDR convertion, using the REC-BT.2446 method A tonemap.
+
+   Lhdr -
+      HDR max mastering level cd/m².
+      
+       Default: 1000.0 (float)
+
+   Lsdr -
+      SDR white targeting level cd/m².
+      
+       Default: 100.0 (float)
+   
+   CoeffAdj -
+      This is not part of BT2446 A method, added, multiply the data by the value.
+
+       Default: 1.0
+
+The others parameters are identical to ConvertLinearRGBtoYUV.
+
+
+*******************************************
+**      ConverXYZ_BT2446_C_HDRtoSDR      **
+*******************************************
+
+ConverXYZ_BT2446_C_HDRtoSDR(bool ChromaC,bool PQMode,float Lhdr,float Lsdr,float pct_ref,
+     float pct_ip,float pct_wp,float pct_sdr_skin,float pct_hdr_skin,float WhiteShift,
+     int pColor,float pRx,float pRy,float pGx,float pGy,float pBx,float pBy,bool fastmode,
+     int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
+     int prefetch,int ThreadLevel)
+
+Accepted input: RGB64 and Planar float RGB.
+WARNING : Input must be linear DISPLAYED data, so produced by
+ConvertYUVtoLinearRGB with OOTF=false.
+
+You have to read the BT2446 C method to understand properly the purpose of the parameters.
+
+   ChromaC -
+      Allow the "Optional processing of chroma correction above HDR Reference White".
+      Warning: Will create a slowdown.
+      
+       Default: false (bool)
+
+   PQMode -
+      Adjust some parameters to allow processing of PQ video.
+      
+       Default: false (bool)
+
+   Lhdr -
+      HDR max mastering level cd/m².
+      
+       Default: 10000.0 (float) if PQMode=true, else 1000.0 (float)
+
+   Lsdr -
+      SDR white targeting level cd/m².
+      
+       Default: 100.0 (float)
+
+   pct_ref -
+      Used to compute the Y HDR Reference White.
+      
+       Default: 0.58 (float) if PQMode=true, else 0.75 (float).
+
+   pct_ip -
+      Used to compute the SDR inflection point.
+      
+       Default: 0.80 (float).
+
+   pct_wp -
+      Used to compute the SDR white level corresponding to the HDR Reference White.
+      
+       Default: 0.96 (float).
+
+   pct_sdr_skin -
+      Value for SDR skin tones described in Annex 4 of Report ITU-R BT.2408.
+      
+       Default: 0.70 (float).
+
+   pct_hdr_skin -
+      Value for HDR skin tones described in Annex 4 of Report ITU-R BT.2408.
+      
+       Default: 0.44 (float) if PQMode=true, else 0.50 (float).
+
+   WhiteShift -
+      Value used for white shift in formula (26).
+      
+       Default: 0.00 (float).
+
+The filter will automaticaly compute k1 to k4 according the input parameters.
+There is no real check (and there will not be) for sanity values of the parameters,
+so, if you put nonsense values, it's not impossible that you'll create a crash or garbage output.
+
+The others parameters are identical to ConvertXYZtoRGB.
+
+
 *************************************************************
 
 Note :
@@ -858,3 +965,33 @@ ConvertYUVtoLinearRGB(Color=0,OOTF=false)
 ConvertLinearRGBtoYUV(Color=0,HDRMode=1,HLGLw=1200,HLGColor=2,OOTF=false)
 
 Note: In this case, there is no speed-up for lowering input from 16 to 10 or 12 bits.
+
+----------------------------------
+
+BT2446 methods exemples.
+Supposed to work with linear display, not linear sensor, so, OOTF=false.
+
+Method A
+
+ConvertYUVtoLinearRGB(Color=0,HDRMode=2,OOTF=false)
+ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR(Lhdr=1000.0,CoeffAdj=1.0)
+
+Method C
+
+#For PQ at 4000 for exemple :
+
+ConvertYUVtoXYZ(Color=0,HDRMode=0,OOTF=false,Crosstalk=0.0)
+ConverXYZ_BT2446_C_HDRtoSDR(PQMode=true,Lhdr=4000.0,Lsdr=100.0,pColor=0)
+ConvertXYZtoYUV(Color=2,pColor=0,OOTF=false,Crosstalk=0.0)
+
+#For HLG at 1000 for exemple (HLG must not be normalized to 10000.0) :
+
+ConvertYUVtoXYZ(Color=0,HDRMode=2,OOTF=false,Crosstalk=0.0)
+ConverXYZ_BT2446_C_HDRtoSDR(PQMode=false,Lhdr=1000.0,Lsdr=100.0,pColor=0)
+ConvertXYZtoYUV(Color=2,pColor=0,OOTF=false,Crosstalk=0.0)
+
+#If you play with Crosstalk, put the same value on both sides.
+
+ConvertYUVtoXYZ(Color=0,HDRMode=2,OOTF=false,Crosstalk=0.1)
+ConverXYZ_BT2446_C_HDRtoSDR(PQMode=false,Lhdr=1000.0,Lsdr=100.0,pColor=0)
+ConvertXYZtoYUV(Color=2,pColor=0,OOTF=false,Crosstalk=0.1)

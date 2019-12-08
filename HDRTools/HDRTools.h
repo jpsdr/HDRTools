@@ -23,7 +23,7 @@
 #include "avisynth.h"
 #include "ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 0.5.3 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 0.6.0 JPSDR"
 
 
 typedef struct _dataLookUp
@@ -629,6 +629,95 @@ private:
 	uint8_t threads,threads_number;
 	uint16_t UserId;
 	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
+
+class ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR : public GenericVideoFilter
+{
+public:
+	ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR(PClip _child,double _Lhdr,double _Lsdr,double _CoeffAdj,
+		bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+	virtual ~ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	bool sleep,fastmode;
+	double Lhdr,Lsdr,CoeffAdj;
+	uint16_t *lookupEOTF_16,*lookupR_16,*lookupG_16,*lookupB_16;
+	float *lookupY1_16,*lookupY2_16,*lookupBY_16,*lookupRY_16;
+	uint32_t *lookupEOTF_32,*lookupR_32,*lookupG_32,*lookupB_32;
+	float *lookupY1_32,*lookupY2_32,*lookupBY_32,*lookupRY_32;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	ThreadPoolFunction StaticThreadpoolF;
+
+	static void StaticThreadpool(void *ptr);
+
+	void FreeData(void);
+};
+
+
+class ConverXYZ_BT2446_C_HDRtoSDR : public GenericVideoFilter
+{
+public:
+	ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _ChromaC,bool _PQMode,float _Lhdr,float _Lsdr,
+		float _pct_ref,float _pct_ip,float _pct_wp,float _pct_sdr_skin,float _pct_hdr_skin,float _WhiteShift,
+		float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
+		bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+	virtual ~ConverXYZ_BT2446_C_HDRtoSDR();
+    PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
+
+	int __stdcall SetCacheHints(int cachehints, int frame_range);
+
+private:
+	bool sleep,fastmode;
+	uint16_t *lookupY_16;
+	float *lookupX_16,*lookupiY_16,*lookupZ_16;
+	float *lookup2X_16,*lookup2Y_16,*lookup2Z_16;
+	float *lookupY_32,*lookupiY_32;
+	float *lookup2X_32,*lookup2Y_32,*lookup2Z_32;
+	double pct_ref,pct_ip,pct_wp;
+	double pct_sdr_skin,pct_hdr_skin;
+	double Yhdr_ip,Ysdr_ip,Ysdr_wp,Yhdr_ref;
+	double coeff_k[4],Lhdr,Lsdr;
+	bool ChromaC,PQMode;
+	float WhiteShift;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+
+	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
+	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
+	double Xn,Yn,Zn;
+
+	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	uint8_t pixelsize; // AVS16
+	uint8_t bits_per_pixel;
+
+	VideoInfo *vi_RGBPS;
+
+	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
+	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
+	uint8_t threads,threads_number;
+	uint16_t UserId;
+	
+	double fdico(double a,double b,double k1,double x);
+	bool dicotomie(double k1,double &k3);
+
 	ThreadPoolFunction StaticThreadpoolF;
 
 	static void StaticThreadpool(void *ptr);

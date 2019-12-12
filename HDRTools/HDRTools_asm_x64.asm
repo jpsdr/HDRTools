@@ -31,6 +31,7 @@ data_f_1 real4 8 dup(1.0)
 data_f_1048575 real4 8 dup(1048575.0)
 data_f_65535 real4 8 dup(65535.0)
 data_dw_1048575 dword 8 dup(1048575)
+data_dw_65535 dword 8 dup(65535)
 data_dw_0 dword 8 dup(0)
 data_dw_128 dword 8 dup(128)
 data_dw_32 dword 8 dup(32)
@@ -549,6 +550,86 @@ Lookup_Planar32_2:
 	ret
 	
 JPSDR_HDRTools_Lookup_Planar32 endp
+
+
+;JPSDR_HDRTools_Lookup2_Planar32 proc src:dword,dst1:dword,dst2:dword,w:dword,h:dword,src_modulo:dword,
+;	dst_modulo1:dword,dst_modulo2:dword,lookup1:dword,lookup2:dword
+; src = rcx
+; dst1 = rdx
+; dst2 = r8
+; w = r9d
+
+JPSDR_HDRTools_Lookup2_Planar32 proc public frame
+
+h equ dword ptr[rbp+48]
+src_modulo equ qword ptr[rbp+56]
+dst_modulo1 equ qword ptr[rbp+64]
+dst_modulo2 equ qword ptr[rbp+72]
+lookup1 equ qword ptr[rbp+80]
+lookup2 equ qword ptr[rbp+88]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	push r14
+	.pushreg r14
+	push r15
+	.pushreg r15
+	.endprolog
+
+	cld
+	mov rsi,rcx
+	mov rdi,rdx
+	mov r10,src_modulo
+	mov r11,dst_modulo1
+	mov r12,dst_modulo2
+	mov rdx,lookup1
+	mov rbx,lookup2
+	xor rcx,rcx
+	xor rax,rax
+	mov r13d,h
+	mov r14,4
+	
+Lookup2_Planar32_1:
+	mov ecx,r9d
+Lookup2_Planar32_2:
+	lodsd
+	mov r15,rax
+	mov eax,dword ptr[rdx+4*rax]
+	stosd
+	mov eax,dword ptr[rbx+4*r15]
+	mov dword ptr[r8],eax
+	add r8,r14
+	loop Lookup2_Planar32_2
+	
+	add rsi,r10
+	add rdi,r11
+	add r8,r12
+	dec r13d
+	jnz short Lookup2_Planar32_1
+	
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rdi
+	pop rbp
+	
+	ret
+	
+JPSDR_HDRTools_Lookup2_Planar32 endp
 
 	
 ;JPSDR_HDRTools_Move8to16 proc dst:dword,src:dword,w:dword
@@ -7078,10 +7159,10 @@ dst_pitch equ qword ptr[rbp+56]
 	
 Convert_RGB64toRGB32_SSE2_1:
 	mov ecx,ebx
+	xor rax,rax	
 	or ecx,ecx
 	jz short Convert_RGB64toRGB32_SSE2_3
 	
-	xor rax,rax	
 Convert_RGB64toRGB32_SSE2_2:
 	movdqa xmm0,XMMWORD ptr[rsi+2*rax]
 	movdqa xmm1,XMMWORD ptr[rsi+2*rax+16]
@@ -7186,10 +7267,10 @@ dst_pitch equ qword ptr[rbp+56]
 	
 Convert_RGB64toRGB32_AVX_1:
 	mov ecx,ebx
+	xor rax,rax	
 	or ecx,ecx
 	jz short Convert_RGB64toRGB32_AVX_3
 	
-	xor rax,rax	
 Convert_RGB64toRGB32_AVX_2:
 	vpaddusw xmm0,xmm2,XMMWORD ptr[rsi+2*rax]
 	vpaddusw xmm1,xmm2,XMMWORD ptr[rsi+2*rax+16]
@@ -9688,8 +9769,8 @@ Coeff equ qword ptr[rbp+64]
 	xor rcx,rcx
 	
 Scale_HLG_SSE2_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_HLG_SSE2_2:
 	movaps xmm0,XMMWORD ptr [rsi+rax]
 	mulps xmm0,xmm1
@@ -9748,8 +9829,8 @@ Coeff equ qword ptr[rbp+64]
 	xor rcx,rcx
 	
 Scale_HLG_AVX_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_HLG_AVX_2:
 	vmovaps ymm0,YMMWORD ptr [rsi+rax]
 	vmulps ymm0,ymm0,ymm1
@@ -9804,8 +9885,8 @@ dst_pitch equ qword ptr[rbp+56]
 	xor rcx,rcx
 	
 Scale_20_float_SSE2_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_20_float_SSE2_2:
 	movaps xmm0,XMMWORD ptr [rsi+rax]
 	mulps xmm0,xmm1
@@ -9859,8 +9940,8 @@ dst_pitch equ qword ptr[rbp+56]
 	xor rcx,rcx
 	
 Scale_20_float_AVX_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_20_float_AVX_2:
 	vmovaps ymm0,YMMWORD ptr [rsi+rax]
 	vmulps ymm0,ymm0,ymm1
@@ -9948,8 +10029,8 @@ Coeff_B equ qword ptr[rbp+112]
 	mov rdx,16
 	
 Convert_RGBPStoPlaneY32F_SSE2_1:
-	mov ecx,ebx
 	xor rax,rax
+	mov ecx,ebx
 Convert_RGBPStoPlaneY32F_SSE2_2:	
 	movaps xmm0,XMMWORD ptr [rsi+rax]
 	movaps xmm1,XMMWORD ptr [r9+rax]
@@ -10050,8 +10131,8 @@ Coeff_B equ qword ptr[rbp+112]
 	mov rdx,16
 	
 Convert_RGBPStoPlaneY32D_SSE2_1:
-	mov ecx,ebx
 	xor rax,rax
+	mov ecx,ebx
 Convert_RGBPStoPlaneY32D_SSE2_2:	
 	movaps xmm0,XMMWORD ptr [rsi+rax]
 	movaps xmm1,XMMWORD ptr [r9+rax]
@@ -10155,8 +10236,8 @@ Coeff_B equ qword ptr[rbp+112]
 	mov rdx,32
 	
 Convert_RGBPStoPlaneY32F_AVX_1:
-	mov ecx,ebx
 	xor rax,rax
+	mov ecx,ebx
 Convert_RGBPStoPlaneY32F_AVX_2:	
 	vmulps ymm0,ymm3,YMMWORD ptr [rsi+rax]
 	vmulps ymm1,ymm4,YMMWORD ptr [r9+rax]
@@ -10259,8 +10340,8 @@ Coeff_B equ qword ptr[rbp+112]
 	mov rdx,32
 	
 Convert_RGBPStoPlaneY32D_AVX_1:
-	mov ecx,ebx
 	xor rax,rax
+	mov ecx,ebx
 Convert_RGBPStoPlaneY32D_AVX_2:	
 	vmulps ymm0,ymm3,YMMWORD ptr [rsi+rax]
 	vmulps ymm1,ymm4,YMMWORD ptr [r9+rax]
@@ -10336,10 +10417,10 @@ src_pitchY equ qword ptr[rbp+56]
 	
 Convert_16_RGB64_HLG_OOTF_SSE41_1:
 	mov ecx,r10d
+	xor rax,rax
 	or ecx,ecx
 	jz short Convert_16_RGB64_HLG_OOTF_SSE41_3
 	
-	xor rax,rax
 Convert_16_RGB64_HLG_OOTF_SSE41_2:
 	movss xmm0,dword ptr[rsi+rax]
 	movss xmm1,dword ptr[rsi+rax+4]
@@ -10429,10 +10510,10 @@ src_pitchY equ qword ptr[rbp+56]
 	
 Convert_16_RGB64_HLG_OOTF_AVX_1:
 	mov ecx,r10d
+	xor rax,rax
 	or ecx,ecx
 	jz short Convert_16_RGB64_HLG_OOTF_AVX_3
 	
-	xor rax,rax
 Convert_16_RGB64_HLG_OOTF_AVX_2:
 	vmovss xmm0,dword ptr[rsi+rax]
 	vmovss xmm1,dword ptr[rsi+rax+4]
@@ -10535,8 +10616,8 @@ src_pitchY equ qword ptr[rbp+88]
 	mov rdx,16
 	
 Convert_RGBPS_HLG_OOTF_SSE2_1:
-	mov ecx,ebx
 	xor rax,rax
+	mov ecx,ebx
 Convert_RGBPS_HLG_OOTF_SSE2_2:
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	movaps xmm1,XMMWORD ptr[r9+rax]
@@ -10622,8 +10703,8 @@ src_pitchY equ qword ptr[rbp+88]
 	mov rdx,32
 	
 Convert_RGBPS_HLG_OOTF_AVX_1:
-	mov ecx,ebx
 	xor rax,rax
+	mov ecx,ebx
 Convert_RGBPS_HLG_OOTF_AVX_2:
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
 	vmulps ymm1,ymm0,YMMWORD ptr[r9+rax]
@@ -10709,8 +10790,8 @@ src_pitchY equ qword ptr[rbp+88]
 	mov rdx,16
 	
 Convert_RGBPS_HLG_OOTF_Scale_SSE2_1:
-	mov ecx,ebx
 	xor rax,rax
+	mov ecx,ebx
 Convert_RGBPS_HLG_OOTF_Scale_SSE2_2:
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	movaps xmm1,XMMWORD ptr[r9+rax]
@@ -10800,8 +10881,8 @@ src_pitchY equ qword ptr[rbp+88]
 	mov rdx,32
 	
 Convert_RGBPS_HLG_OOTF_Scale_AVX_1:
-	mov ecx,ebx
 	xor rax,rax
+	mov ecx,ebx
 Convert_RGBPS_HLG_OOTF_Scale_AVX_2:
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
 	vmulps ymm1,ymm0,YMMWORD ptr[r9+rax]
@@ -10886,8 +10967,8 @@ Coeff equ qword ptr[rbp+72]
 	xor rcx,rcx
 	
 Scale_20_XYZ_SSE2_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_20_XYZ_SSE2_2:
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	addps xmm0,xmm1
@@ -10955,8 +11036,8 @@ Coeff equ qword ptr[rbp+72]
 	xor rcx,rcx
 	
 Scale_20_XYZ_SSE41_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_20_XYZ_SSE41_2:
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	addps xmm0,xmm1
@@ -11026,8 +11107,8 @@ Coeff equ qword ptr[rbp+72]
 	xor rcx,rcx
 	
 Scale_20_XYZ_AVX_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_20_XYZ_AVX_2:
 	vaddps ymm0,ymm1,YMMWORD ptr[rsi+rax]
 	vmulps ymm0,ymm0,ymm2
@@ -11085,8 +11166,8 @@ dst_pitch equ qword ptr[rbp+56]
 	xor rcx,rcx
 	
 Scale_20_RGB_SSE2_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_20_RGB_SSE2_2:
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	mulps xmm0,xmm1
@@ -11143,8 +11224,8 @@ dst_pitch equ qword ptr[rbp+56]
 	xor rcx,rcx
 	
 Scale_20_RGB_SSE41_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_20_RGB_SSE41_2:
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	mulps xmm0,xmm1
@@ -11202,8 +11283,8 @@ Coeff equ qword ptr[rbp+72]
 	xor rcx,rcx
 	
 Scale_20_RGB_AVX_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Scale_20_RGB_AVX_2:
 	vmulps ymm0,ymm1,YMMWORD ptr[rsi+rax]
 	vminps ymm0,ymm0,ymm1
@@ -11263,8 +11344,8 @@ Coeff equ qword ptr[rbp+64]
 	xor rcx,rcx
 	
 Convert_XYZ_HDRtoSDR_32_SSE2_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_HDRtoSDR_32_SSE2_2:	
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	mulps xmm0,xmm1
@@ -11321,8 +11402,8 @@ Coeff equ qword ptr[rbp+64]
 	xor rcx,rcx
 	
 Convert_XYZ_HDRtoSDR_32_AVX_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_HDRtoSDR_32_AVX_2:	
 	vmulps ymm0,ymm1,YMMWORD ptr[rsi+rax]
 	vmovaps YMMWORD ptr[rdx+rax],ymm0
@@ -11379,8 +11460,8 @@ Coeff equ qword ptr[rbp+64]
 	xor rcx,rcx
 	
 Convert_XYZ_SDRtoHDR_32_SSE2_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_SDRtoHDR_32_SSE2_2:	
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	mulps xmm0,xmm1
@@ -11437,8 +11518,8 @@ Coeff equ qword ptr[rbp+64]
 	xor rcx,rcx
 	
 Convert_XYZ_SDRtoHDR_32_AVX_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_SDRtoHDR_32_AVX_2:	
 	vmulps ymm0,ymm1,YMMWORD ptr[rsi+rax]
 	vmovaps YMMWORD ptr[rdx+rax],ymm0
@@ -11523,8 +11604,8 @@ Coeff6 equ qword ptr[rbp+104]
 	xor rcx,rcx
 	
 Convert_XYZ_Hable_HDRtoSDR_SSE2_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_Hable_HDRtoSDR_SSE2_2:	
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	
@@ -11632,8 +11713,8 @@ Coeff6 equ qword ptr[rbp+104]
 	xor rcx,rcx
 	
 Convert_XYZ_Hable_HDRtoSDR_AVX_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_Hable_HDRtoSDR_AVX_2:	
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
 	
@@ -11730,8 +11811,8 @@ Coeff4 equ qword ptr[rbp+88]
 	xor rcx,rcx
 	
 Convert_XYZ_Mobius_HDRtoSDR_SSE2_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_Mobius_HDRtoSDR_SSE2_2:	
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	
@@ -11830,8 +11911,8 @@ Coeff4 equ qword ptr[rbp+88]
 	xor rcx,rcx
 	
 Convert_XYZ_Mobius_HDRtoSDR_AVX_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_Mobius_HDRtoSDR_AVX_2:	
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
 	
@@ -11907,8 +11988,8 @@ Coeff2 equ qword ptr[rbp+72]
 	xor rcx,rcx
 	
 Convert_XYZ_Reinhard_HDRtoSDR_SSE2_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_Reinhard_HDRtoSDR_SSE2_2:	
 	movaps xmm0,XMMWORD ptr[rsi+rax]
 	
@@ -11975,8 +12056,8 @@ Coeff2 equ qword ptr[rbp+72]
 	xor rcx,rcx
 	
 Convert_XYZ_Reinhard_HDRtoSDR_AVX_1:
-	mov ecx,r8d
 	xor rax,rax
+	mov ecx,r8d
 Convert_XYZ_Reinhard_HDRtoSDR_AVX_2:	
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
 	
@@ -12003,6 +12084,494 @@ Convert_XYZ_Reinhard_HDRtoSDR_AVX_2:
 	ret
 
 JPSDR_HDRTools_Convert_XYZ_Reinhard_HDRtoSDR_AVX endp
+
+
+;JPSDR_HDRTools_BT2446C_16_XYZ_SSE2 proc src:dword,dst1:dword,dst2:dword,w4:dword,h:dword,src_pitch:dword,
+;	dst_pitch1:dword,dst_pitch2:dword,ValMinX:dword,CoeffX:dword,ValMinZ:dword,CoeffZ:dword
+; src = rcx
+; dst1 = rdx
+; dst2 = r8
+; w4 = r9d
+
+JPSDR_HDRTools_BT2446C_16_XYZ_SSE2 proc public frame
+
+h equ dword ptr[rbp+48]
+src_pitch equ qword ptr[rbp+56]
+dst_pitch1 equ qword ptr[rbp+64]
+dst_pitch2 equ qword ptr[rbp+72]
+ValMinX equ qword ptr[rbp+80]
+CoeffX equ qword ptr[rbp+88]
+ValMinZ equ qword ptr[rbp+96]
+CoeffZ equ qword ptr[rbp+104]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	sub rsp,32
+	.allocstack 32
+	movdqa XMMWORD ptr[rsp],xmm6
+	.savexmm128 xmm6,0
+	movdqa XMMWORD ptr[rsp+16],xmm7
+	.savexmm128 xmm7,16
+	.endprolog
+
+	mov rsi,ValMinX
+	movss xmm2,dword ptr[rsi]
+	shufps xmm2,xmm2,0
+	mov rsi,CoeffX
+	movss xmm3,dword ptr[rsi]
+	shufps xmm3,xmm3,0
+	
+	mov rsi,ValMinZ
+	movss xmm4,dword ptr[rsi]
+	shufps xmm4,xmm4,0
+	mov rsi,CoeffZ
+	movss xmm5,dword ptr[rsi]
+	shufps xmm5,xmm5,0
+	
+	movaps xmm6,XMMWORD ptr data_f_65535
+	movaps xmm7,XMMWORD ptr data_f_0
+	mulps xmm3,xmm6
+	mulps xmm5,xmm6
+	
+	mov rsi,rcx
+	mov r10,src_pitch
+	mov r11,dst_pitch1
+	mov r12,dst_pitch2
+	mov r13d,h
+	mov rbx,16
+	xor rcx,rcx
+	
+BT2446C_16_XYZ_SSE2_1:
+	xor rax,rax
+	mov ecx,r9d
+BT2446C_16_XYZ_SSE2_2:
+	movaps xmm0,XMMWORD ptr[rdx+rax]
+	movaps xmm1,XMMWORD ptr[r8+rax]
+	mulps xmm0,XMMWORD ptr[rsi+rax]
+	mulps xmm1,XMMWORD ptr[rsi+rax]
+	addps xmm0,xmm2
+	addps xmm1,xmm4
+	mulps xmm0,xmm3
+	mulps xmm1,xmm5
+	minps xmm0,xmm6
+	minps xmm1,xmm6
+	maxps xmm0,xmm7
+	maxps xmm1,xmm7
+	cvtps2dq xmm0,xmm0
+	cvtps2dq xmm1,xmm1
+	movdqa XMMWORD ptr[rdx+rax],xmm0
+	movdqa XMMWORD ptr[r8+rax],xmm1
+	
+	add rax,rbx
+	loop BT2446C_16_XYZ_SSE2_2
+	
+	add rsi,r10
+	add rdx,r11
+	add r8,r12
+	dec r13d
+	jnz short BT2446C_16_XYZ_SSE2_1
+	
+	movdqa xmm7,XMMWORD ptr[rsp+16]
+	movdqa xmm6,XMMWORD ptr[rsp]
+	add rsp,32
+	
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_BT2446C_16_XYZ_SSE2 endp
+
+
+;JPSDR_HDRTools_BT2446C_16_XYZ_SSE41 proc src:dword,dst1:dword,dst2:dword,w4:dword,h:dword,src_pitch:dword,
+;	dst_pitch1:dword,dst_pitch2:dword,ValMinX:dword,CoeffX:dword,ValMinZ:dword,CoeffZ:dword
+; src = rcx
+; dst1 = rdx
+; dst2 = r8
+; w4 = r9d
+
+JPSDR_HDRTools_BT2446C_16_XYZ_SSE41 proc public frame
+
+h equ dword ptr[rbp+48]
+src_pitch equ qword ptr[rbp+56]
+dst_pitch1 equ qword ptr[rbp+64]
+dst_pitch2 equ qword ptr[rbp+72]
+ValMinX equ qword ptr[rbp+80]
+CoeffX equ qword ptr[rbp+88]
+ValMinZ equ qword ptr[rbp+96]
+CoeffZ equ qword ptr[rbp+104]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	sub rsp,32
+	.allocstack 32
+	movdqa XMMWORD ptr[rsp],xmm6
+	.savexmm128 xmm6,0
+	movdqa XMMWORD ptr[rsp+16],xmm7
+	.savexmm128 xmm7,16	
+	.endprolog
+
+	mov rsi,ValMinX
+	movss xmm2,dword ptr[rsi]
+	shufps xmm2,xmm2,0
+	mov rsi,CoeffX
+	movss xmm3,dword ptr[rsi]
+	shufps xmm3,xmm3,0
+
+	mov rsi,ValMinZ
+	movss xmm4,dword ptr[rsi]
+	shufps xmm4,xmm4,0
+	mov rsi,CoeffZ
+	movss xmm5,dword ptr[rsi]
+	shufps xmm5,xmm5,0
+	
+	movdqa xmm6,XMMWORD ptr data_dw_65535
+	movdqa xmm7,XMMWORD ptr data_dw_0
+	mulps xmm3,XMMWORD ptr data_f_65535
+	mulps xmm5,XMMWORD ptr data_f_65535
+	
+	mov rsi,rcx
+	mov r10,src_pitch
+	mov r11,dst_pitch1
+	mov r12,dst_pitch2
+	mov r13d,h
+	mov rbx,16
+	xor rcx,rcx
+	
+BT2446C_16_XYZ_SSE41_1:
+	xor rax,rax
+	mov ecx,r9d
+BT2446C_16_XYZ_SSE41_2:
+	movaps xmm0,XMMWORD ptr[rdx+rax]
+	movaps xmm1,XMMWORD ptr[r8+rax]
+	mulps xmm0,XMMWORD ptr[rsi+rax]
+	mulps xmm1,XMMWORD ptr[rsi+rax]
+	addps xmm0,xmm2
+	addps xmm1,xmm4
+	mulps xmm0,xmm3
+	mulps xmm1,xmm5
+	cvtps2dq xmm0,xmm0
+	cvtps2dq xmm1,xmm1
+	pminsd xmm0,xmm6
+	pminsd xmm1,xmm6
+	pmaxsd xmm0,xmm7
+	pmaxsd xmm1,xmm7
+	movdqa XMMWORD ptr[rdx+rax],xmm0
+	movdqa XMMWORD ptr[r8+rax],xmm1
+	
+	add rax,rbx
+	loop BT2446C_16_XYZ_SSE41_2
+	
+	add rsi,r10
+	add rdx,r11
+	add r8,r12
+	dec r13d
+	jnz short BT2446C_16_XYZ_SSE41_1
+	
+	movdqa xmm7,XMMWORD ptr[rsp+16]
+	movdqa xmm6,XMMWORD ptr[rsp]
+	add rsp,32
+	
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_BT2446C_16_XYZ_SSE41 endp
+
+
+;JPSDR_HDRTools_BT2446C_16_XYZ_AVX proc src:dword,dst1:dword,dst2:dword,w8:dword,h:dword,src_pitch:dword,
+;	dst_pitch1:dword,dst_pitch2:dword,ValMinX:dword,CoeffX:dword,ValMinZ:dword,CoeffZ:dword
+; src = rcx
+; dst1 = rdx
+; dst2 = r8
+; w8 = r9d
+
+JPSDR_HDRTools_BT2446C_16_XYZ_AVX proc public frame
+
+h equ dword ptr[rbp+48]
+src_pitch equ qword ptr[rbp+56]
+dst_pitch1 equ qword ptr[rbp+64]
+dst_pitch2 equ qword ptr[rbp+72]
+ValMinX equ qword ptr[rbp+80]
+CoeffX equ qword ptr[rbp+88]
+ValMinZ equ qword ptr[rbp+96]
+CoeffZ equ qword ptr[rbp+104]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	sub rsp,48
+	.allocstack 48
+	vmovdqa XMMWORD ptr[rsp],xmm6
+	.savexmm128 xmm6,0
+	vmovdqa XMMWORD ptr[rsp+16],xmm7
+	.savexmm128 xmm7,16
+	vmovdqa XMMWORD ptr[rsp+32],xmm8
+	.savexmm128 xmm8,32
+	.endprolog
+
+	mov rsi,ValMinX
+	vmovss xmm2,dword ptr[rsi]
+	vshufps xmm2,xmm2,xmm2,0
+	vinsertf128 ymm2,ymm2,xmm2,1
+	mov rsi,CoeffX
+	vmovss xmm3,dword ptr[rsi]
+	vshufps xmm3,xmm3,xmm3,0
+	vinsertf128 ymm3,ymm3,xmm3,1
+
+	mov rsi,ValMinZ
+	vmovss xmm4,dword ptr[rsi]
+	vshufps xmm4,xmm4,xmm4,0
+	vinsertf128 ymm4,ymm4,xmm4,1
+	mov rsi,CoeffZ
+	vmovss xmm5,dword ptr[rsi]
+	vshufps xmm5,xmm5,xmm5,0
+	vinsertf128 ymm5,ymm5,xmm5,1
+	
+	vmovaps ymm6,YMMWORD ptr data_f_65535
+	vmovaps ymm7,YMMWORD ptr data_f_0
+	vmulps ymm3,ymm3,ymm6
+	vmulps ymm5,ymm5,ymm6
+	
+	mov rsi,rcx
+	mov r10,src_pitch
+	mov r11,dst_pitch1
+	mov r12,dst_pitch2
+	mov r13d,h
+	mov rbx,32
+	xor rcx,rcx
+	
+BT2446C_16_XYZ_AVX_1:
+	xor rax,rax
+	mov ecx,r9d
+BT2446C_16_XYZ_AVX_2:
+	vmovaps ymm8,YMMWORD ptr[rsi+rax]
+	vmulps ymm0,ymm8,YMMWORD ptr[rdx+rax]
+	vmulps ymm1,ymm8,YMMWORD ptr[r8+rax]
+	vaddps ymm0,ymm0,ymm2
+	vaddps ymm1,ymm1,ymm4
+	vmulps ymm0,ymm0,ymm3
+	vmulps ymm1,ymm1,ymm5
+	vminps ymm0,ymm0,ymm6
+	vminps ymm1,ymm1,ymm6
+	vmaxps ymm0,ymm0,ymm7
+	vmaxps ymm1,ymm1,ymm7
+	vcvtps2dq ymm0,ymm0
+	vcvtps2dq ymm1,ymm1
+	vmovdqa YMMWORD ptr[rdx+rax],ymm0
+	vmovdqa YMMWORD ptr[r8+rax],ymm1
+	
+	add rax,rbx
+	loop BT2446C_16_XYZ_AVX_2
+	
+	add rsi,r10
+	add rdx,r11
+	add r8,r12
+	dec r13d
+	jnz short BT2446C_16_XYZ_AVX_1
+	
+	vzeroupper
+	
+	vmovdqa xmm8,XMMWORD ptr[rsp+32]
+	vmovdqa xmm7,XMMWORD ptr[rsp+16]
+	vmovdqa xmm6,XMMWORD ptr[rsp]
+	add rsp,48
+	
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_BT2446C_16_XYZ_AVX endp
+
+
+;JPSDR_HDRTools_BT2446C_32_XYZ_SSE2 proc src1:dword,src2:dword,dst1:dword,dst2:dword,w4:dword,h:dword,src_pitch1:dword,
+;	src_pitch2:dword,dst_pitch1:dword,dst_pitch2:dword
+; src1 = rcx
+; src2 = rdx
+; dst1 = r8
+; dst2 = r9
+
+JPSDR_HDRTools_BT2446C_32_XYZ_SSE2 proc public frame
+
+w4 equ dword ptr[rbp+48]
+h equ dword ptr[rbp+56]
+src_pitch1 equ qword ptr[rbp+64]
+src_pitch2 equ qword ptr[rbp+72]
+dst_pitch1 equ qword ptr[rbp+80]
+dst_pitch2 equ qword ptr[rbp+88]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	push r14
+	.pushreg r14
+	push r15
+	.pushreg r15
+	.endprolog
+
+	mov rsi,rcx
+	mov r10,src_pitch1
+	mov r11,src_pitch2
+	mov r12,dst_pitch1
+	mov r13,dst_pitch2
+	mov r14d,w4
+	mov r15d,h
+	mov rbx,16
+	xor rcx,rcx
+	
+BT2446C_32_XYZ_SSE2_1:
+	xor rax,rax
+	mov ecx,r14d
+BT2446C_32_XYZ_SSE2_2:
+	movaps xmm0,XMMWORD ptr[r8+rax]
+	movaps xmm1,xmm0
+	mulps xmm0,XMMWORD ptr[rsi+rax]
+	mulps xmm1,XMMWORD ptr[rdx+rax]
+	movaps XMMWORD ptr[r8+rax],xmm0
+	movaps XMMWORD ptr[r9+rax],xmm1
+	
+	add rax,rbx
+	loop BT2446C_32_XYZ_SSE2_2
+	
+	add rsi,r10
+	add rdx,r11
+	add r8,r12
+	add r9,r13
+	dec r15d
+	jnz short BT2446C_32_XYZ_SSE2_1
+	
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_BT2446C_32_XYZ_SSE2 endp
+
+
+;JPSDR_HDRTools_BT2446C_32_XYZ_AVX proc src1:dword,src2:dword,dst1:dword,dst2:dword,w8:dword,h:dword,src_pitch1:dword,
+;	src_pitch2:dword,dst_pitch1:dword,dst_pitch2:dword
+; src1 = rcx
+; src2 = rdx
+; dst1 = r8
+; dst2 = r9
+
+JPSDR_HDRTools_BT2446C_32_XYZ_AVX proc public frame
+
+w8 equ dword ptr[rbp+48]
+h equ dword ptr[rbp+56]
+src_pitch1 equ qword ptr[rbp+64]
+src_pitch2 equ qword ptr[rbp+72]
+dst_pitch1 equ qword ptr[rbp+80]
+dst_pitch2 equ qword ptr[rbp+88]
+
+	push rbp
+	.pushreg rbp
+	mov rbp,rsp
+	push rsi
+	.pushreg rsi
+	push rbx
+	.pushreg rbx
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
+	push r14
+	.pushreg r14
+	push r15
+	.pushreg r15
+	.endprolog
+
+	mov rsi,rcx
+	mov r10,src_pitch1
+	mov r11,src_pitch2
+	mov r12,dst_pitch1
+	mov r13,dst_pitch2
+	mov r14d,w8
+	mov r15d,h
+	mov rbx,32
+	xor rcx,rcx
+	
+BT2446C_32_XYZ_AVX_1:
+	xor rax,rax
+	mov ecx,r14d
+BT2446C_32_XYZ_AVX_2:
+	vmovaps ymm2,YMMWORD ptr[r8+rax]
+	vmulps ymm0,ymm2,YMMWORD ptr[rsi+rax]
+	vmulps ymm1,ymm2,YMMWORD ptr[rdx+rax]
+	vmovaps YMMWORD ptr[r8+rax],ymm0
+	vmovaps YMMWORD ptr[r9+rax],ymm1
+	
+	add rax,rbx
+	loop BT2446C_32_XYZ_AVX_2
+	
+	add rsi,r10
+	add rdx,r11
+	add r8,r12
+	add r9,r13
+	dec r15d
+	jnz short BT2446C_32_XYZ_AVX_1
+	
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+	pop rsi
+	pop rbp
+
+	ret
+
+JPSDR_HDRTools_BT2446C_32_XYZ_AVX endp
 
 
 end

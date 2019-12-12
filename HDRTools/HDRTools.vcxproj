@@ -154,12 +154,14 @@
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="ThreadPoolDef.h" />
     <ClInclude Include="ThreadPoolInterface.h" />
+    <ClInclude Include="TransferFunctions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HDRTools.cpp" />
     <ClCompile Include="MatrixClass.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="ThreadPoolInterface.cpp" />
+    <ClCompile Include="TransferFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HDRTools.rc" />

@@ -4790,11 +4790,11 @@ static void Convert_RGBPStoLinearRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_
 			else
 			{
 				for(int32_t j=0; j<w; j++)
-					dstR[j]=pow(srcR[j],coeff_p2);
+					dstR[j]=powf(srcR[j],coeff_p2);
 				for(int32_t j=0; j<w; j++)
-					dstG[j]=pow(srcG[j],coeff_p2);
+					dstG[j]=powf(srcG[j],coeff_p2);
 				for(int32_t j=0; j<w; j++)
-					dstB[j]=pow(srcB[j],coeff_p2);
+					dstB[j]=powf(srcB[j],coeff_p2);
 			}
 		}
 		else
@@ -5546,11 +5546,11 @@ static void Convert_LinearRGBPStoRGBPS_SDR(const MT_Data_Info_HDRTools &mt_data_
 			else
 			{
 				for(int32_t j=0; j<w; j++)
-					dstR[j]=pow(srcR[j],coeff_p2);
+					dstR[j]=powf(srcR[j],coeff_p2);
 				for(int32_t j=0; j<w; j++)
-					dstG[j]=pow(srcG[j],coeff_p2);
+					dstG[j]=powf(srcG[j],coeff_p2);
 				for(int32_t j=0; j<w; j++)
-					dstB[j]=pow(srcB[j],coeff_p2);
+					dstB[j]=powf(srcB[j],coeff_p2);
 			}
 		}
 		else
@@ -5896,7 +5896,7 @@ static void Convert_RGBPStoPlaneY32(void *src1,void *src2,void *src3,void *dst1,
 			{
 				const float y=Coeff_R*srcR[j]+Coeff_G*srcG[j]+Coeff_B*srcB[j];
 
-				dst[j]=(y==0.0f)?0.0f:pow(y,lb);
+				dst[j]=(y==0.0f)?0.0f:powf(y,lb);
 			}
 
 			srcR_+=src_pitchR;
@@ -5945,7 +5945,7 @@ static void Convert_RGBPStoPlaneY32_SSE2(void *src1,void *src2,void *src3,void *
 			float *dst=(float *)dst_;
 
 			for(int32_t j=0; j<w; j++)
-				if (dst[j]!=0.0f) dst[j]=pow(dst[j],lb);
+				if (dst[j]!=0.0f) dst[j]=powf(dst[j],lb);
 
 			dst_+=dst_pitch;
 		}
@@ -5990,7 +5990,7 @@ static void Convert_RGBPStoPlaneY32_AVX(void *src1,void *src2,void *src3,void *d
 			float *dst=(float *)dst_;
 
 			for(int32_t j=0; j<w; j++)
-				if (dst[j]!=0.0f) dst[j]=pow(dst[j],lb);
+				if (dst[j]!=0.0f) dst[j]=powf(dst[j],lb);
 
 			dst_+=dst_pitch;
 		}
@@ -6894,7 +6894,7 @@ static void Convert_RGB64HLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 
 	float lb;
 
-	lb=1.2f+0.42f*log10(HLG_Lw/1000.0f);
+	lb=1.2f+0.42f*log10f(HLG_Lw/1000.0f);
 
 	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 		Convert_RGBPStoPlaneY32_AVX(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
@@ -6938,7 +6938,7 @@ static void Convert_RGB64HLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 
 	if (!OOTF) return;
 
-	lb=1.2f+0.42f*log10(10000.0f/1000.0f);
+	lb=1.2f+0.42f*log10f(10000.0f/1000.0f);
 
 	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 		Convert_RGBPStoPlaneY32_AVX(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
@@ -7214,7 +7214,7 @@ static void Convert_LinearRGBPStoRGB64HLG(const MT_Data_Info_HDRTools &mt_data_i
 
 	if (OOTF)
 	{
-		lb=1.2f+0.42f*log10(10000.0f/1000.0f);
+		lb=1.2f+0.42f*log10f(10000.0f/1000.0f);
 
 		if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 			Convert_RGBPStoPlaneY32_AVX(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
@@ -7339,7 +7339,7 @@ static void Convert_LinearRGBPStoRGB64HLG(const MT_Data_Info_HDRTools &mt_data_i
 		}
 	}
 
-	lb=1.2f+0.42f*log10(HLG_Lw/1000.0f);
+	lb=1.2f+0.42f*log10f(HLG_Lw/1000.0f);
 
 	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 		Convert_RGBPStoPlaneY32_AVX(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
@@ -7587,7 +7587,7 @@ static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 	}
 	else
 	{
-		const float a=0.17883277f,b=1.0f-4.0f*a,c=0.5f-a*log(4.0f*a),a_1=1.0f/a;
+		const float a=0.17883277f,b=1.0f-4.0f*a,c=0.5f-a*logf(4.0f*a),a_1=1.0f/a;
 		const float coeff3=1.0f/3.0f,coeff12=1.0f/12.0f;
 
 		for(int32_t i=0; i<h; i++)
@@ -7604,21 +7604,21 @@ static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 				const float r0=srcR[j];
 
 				if (r0<=0.5f) dstR[j]=coeff3*r0*r0;
-				else dstR[j]=coeff12*(exp((r0-c)*a_1)+b);
+				else dstR[j]=coeff12*(expf((r0-c)*a_1)+b);
 			}
 			for(int32_t j=0; j<w; j++)
 			{
 				const float g0=srcG[j];
 
 				if (g0<=0.5f) dstG[j]=coeff3*g0*g0;
-				else dstG[j]=coeff12*(exp((g0-c)*a_1)+b);
+				else dstG[j]=coeff12*(expf((g0-c)*a_1)+b);
 			}
 			for(int32_t j=0; j<w; j++)
 			{
 				const float b0=srcB[j];
 
 				if (b0<=0.5f) dstB[j]=coeff3*b0*b0;
-				else dstB[j]=coeff12*(exp((b0-c)*a_1)+b);
+				else dstB[j]=coeff12*(expf((b0-c)*a_1)+b);
 			}
 
 			srcR_+=src_pitch_R;
@@ -7634,7 +7634,7 @@ static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 
 	float lb;
 
-	lb=1.2f+0.42f*log10(HLG_Lw/1000.0f);
+	lb=1.2f+0.42f*log10f(HLG_Lw/1000.0f);
 
 	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 		Convert_RGBPStoPlaneY32_AVX(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
@@ -7703,7 +7703,7 @@ static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 
 	if (!OOTF) return;
 
-	lb=1.2f+0.42f*log10(10000.0f/1000.0f);
+	lb=1.2f+0.42f*log10f(10000.0f/1000.0f);
 
 	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 		Convert_RGBPStoPlaneY32_AVX(dstR32,dstG32,dstB32,dstY,w,h,dst_pitch_R,dst_pitch_G,dst_pitch_B,
@@ -7952,7 +7952,7 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 		}
 		else
 		{
-			const float a=0.17883277f,b=1.0f-4.0f*a,c=0.5f-a*log(4.0f*a);
+			const float a=0.17883277f,b=1.0f-4.0f*a,c=0.5f-a*logf(4.0f*a);
 			const float coeff12=1.0f/12.0f;
 
 			for(int32_t i=0; i<h; i++)
@@ -7968,22 +7968,22 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 				{
 					const float r0=srcR[j];
 
-					if (r0<=coeff12) dstR[j]=sqrt(3.0f*r0);
-					else dstR[j]=a*log(12.0f*r0-b)+c;
+					if (r0<=coeff12) dstR[j]=sqrtf(3.0f*r0);
+					else dstR[j]=a*logf(12.0f*r0-b)+c;
 				}
 				for(int32_t j=0; j<w; j++)
 				{
 					const float g0=srcG[j];
 
-					if (g0<=coeff12) dstG[j]=sqrt(3.0f*g0);
-					else dstG[j]=a*log(12.0f*g0-b)+c;
+					if (g0<=coeff12) dstG[j]=sqrtf(3.0f*g0);
+					else dstG[j]=a*logf(12.0f*g0-b)+c;
 				}
 				for(int32_t j=0; j<w; j++)
 				{
 					const float b0=srcB[j];
 
-					if (b0<=coeff12) dstB[j]=sqrt(3.0f*b0);
-					else dstB[j]=a*log(12.0f*b0-b)+c;
+					if (b0<=coeff12) dstB[j]=sqrtf(3.0f*b0);
+					else dstB[j]=a*logf(12.0f*b0-b)+c;
 				}
 
 				srcR_+=src_pitch_R;
@@ -8001,7 +8001,7 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 
 	if (OOTF)
 	{
-		lb=1.2f+0.42f*log10(10000.0f/1000.0f);
+		lb=1.2f+0.42f*log10f(10000.0f/1000.0f);
 
 		if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 			Convert_RGBPStoPlaneY32_AVX(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
@@ -8126,7 +8126,7 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 		}
 	}
 
-	lb=1.2f+0.42f*log10(HLG_Lw/1000.0f);
+	lb=1.2f+0.42f*log10f(HLG_Lw/1000.0f);
 
 	if (AVX_Enable && PlaneY_al32 && R32_al32 && G32_al32 && B32_al32)
 		Convert_RGBPStoPlaneY32_AVX(srcR32,srcG32,srcB32,dstY,w,h,src_pitch_R,src_pitch_G,src_pitch_B,
@@ -8263,7 +8263,7 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 	}
 	else
 	{
-		const float a=0.17883277f,b=1.0f-4.0f*a,c=0.5f-a*log(4.0f*a);
+		const float a=0.17883277f,b=1.0f-4.0f*a,c=0.5f-a*logf(4.0f*a);
 		const float coeff12=1.0f/12.0f;
 
 		for(int32_t i=0; i<h; i++)
@@ -8279,22 +8279,22 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 			{
 				const float r0=srcR[j];
 
-				if (r0<=coeff12) dstR[j]=sqrt(3.0f*r0);
-				else dstR[j]=a*log(12.0f*r0-b)+c;
+				if (r0<=coeff12) dstR[j]=sqrtf(3.0f*r0);
+				else dstR[j]=a*logf(12.0f*r0-b)+c;
 			}
 			for(int32_t j=0; j<w; j++)
 			{
 				const float g0=srcG[j];
 
-				if (g0<=coeff12) dstG[j]=sqrt(3.0f*g0);
-				else dstG[j]=a*log(12.0f*g0-b)+c;
+				if (g0<=coeff12) dstG[j]=sqrtf(3.0f*g0);
+				else dstG[j]=a*logf(12.0f*g0-b)+c;
 			}
 			for(int32_t j=0; j<w; j++)
 			{
 				const float b0=srcB[j];
 
-				if (b0<=coeff12) dstB[j]=sqrt(3.0f*b0);
-				else dstB[j]=a*log(12.0f*b0-b)+c;
+				if (b0<=coeff12) dstB[j]=sqrtf(3.0f*b0);
+				else dstB[j]=a*logf(12.0f*b0-b)+c;
 			}
 
 			srcR_+=src_pitch_R;
@@ -11065,10 +11065,10 @@ static void Convert_RGBPS_HDRtoSDR_BT2446_A(const MT_Data_Info_HDRTools &mt_data
 	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
 
 	const float alpha=1.0f/2.404f;
-	const float pHDR=1.0f+32.0f*pow(Lhdr/10000.0f,alpha);
+	const float pHDR=1.0f+32.0f*powf(Lhdr/10000.0f,alpha);
 	const float pHDRm1=pHDR-1.0f;
-	const float ilogpHDR=1.0f/log(pHDR);
-	const float pSDR=1.0f+32.0f*pow(Lsdr/10000.0f,alpha);
+	const float ilogpHDR=1.0f/logf(pHDR);
+	const float pSDR=1.0f+32.0f*powf(Lsdr/10000.0f,alpha);
 	const float ipSDR=1.0f/(pSDR-1.0f);
 	const float Coeffb=1.0f/1.8814f;
 	const float Coeffr=1.0f/1.4746f;
@@ -11084,21 +11084,21 @@ static void Convert_RGBPS_HDRtoSDR_BT2446_A(const MT_Data_Info_HDRTools &mt_data
 
 		for(int32_t j=0; j<w; j++)
 		{
-			const float R=std::min(pow(CoeffAdj*srcR[j],alpha),1.0f);
-			const float G=std::min(pow(CoeffAdj*srcG[j],alpha),1.0f);
-			const float B=std::min(pow(CoeffAdj*srcB[j],alpha),1.0f);
+			const float R=std::min(powf(CoeffAdj*srcR[j],alpha),1.0f);
+			const float G=std::min(powf(CoeffAdj*srcG[j],alpha),1.0f);
+			const float B=std::min(powf(CoeffAdj*srcB[j],alpha),1.0f);
 
 			const float Y1=0.2627f*R+0.6780f*G+0.0593f*B;
 			float Yc,Yp;
 
-			Yp=log(1.0f+pHDRm1*Y1)*ilogpHDR;
+			Yp=logf(1.0f+pHDRm1*Y1)*ilogpHDR;
 			if (Yp<=0.7399) Yc=1.0770f*Yp;
 			else
 			{
 				if (Yp<0.9909) Yc=(2.7811f-1.1510f*Yp)*Yp-0.6302f;
 				else Yc=0.500f+0.500f*Yp;
 			}
-			Yp=(pow(pSDR,Yc)-1.0f)*ipSDR;
+			Yp=(powf(pSDR,Yc)-1.0f)*ipSDR;
 
 			const float yf=(Y1==0.0f)?0.0f:Yp/(1.1f*Y1);
 
@@ -11142,7 +11142,7 @@ static void Convert_RGB64_HDRtoSDR_BT2446_C_2_16(const MT_Data_Info_HDRTools &mt
 	const float iYn=(float)(1.0/Yn);
 	const float sXn=(float)(Xn/hdrScale),sYn=(float)(Yn/hdrScale),sZn=(float)(Zn/hdrScale);
 	const float pcoeff=(float)(1.0/3.0);
-	const float Lref=116.0f-16.0f,Lmax=116.0f*pow(Lhdr*iYn,pcoeff)-16.0f,iLmr=WhiteShift/(Lmax-Lref);
+	const float Lref=116.0f-16.0f,Lmax=116.0f*powf(Lhdr*iYn,pcoeff)-16.0f,iLmr=WhiteShift/(Lmax-Lref);
 	const float i116=(float)(1.0/116.0),i500=(float)(1.0/500.0),i200=(float)(1.0/200.0);
 
 	const float delta=(float)(6.0/29.0);
@@ -11165,24 +11165,24 @@ static void Convert_RGB64_HDRtoSDR_BT2446_C_2_16(const MT_Data_Info_HDRTools &mt
 			a=500.0f*(fx-fy);
 			b=200.0f*(fy-fz);
 
-			Cab=sqrt(a*a+b*b);
-			hab=atan2(b,a);
+			Cab=sqrtf(a*a+b*b);
+			hab=atan2f(b,a);
 			
 			r=(L>Lref)?(1.0f-(L-Lref)*iLmr):1.0f;
 			r=std::max(r,0.0f);
 			Cab*=r;
-			a=Cab*cos(hab);
-			b=Cab*sin(hab);
+			a=Cab*cosf(hab);
+			b=Cab*sinf(hab);
 
 			fy=(L+16.0f)*i116;
 			fx=fy+a*i500;
 			fz=fy-b*i200;
 
-			r=(fx>delta)?sXn*pow(fx,3.0f):(fx-d4)*d3*sXn;
+			r=(fx>delta)?sXn*powf(fx,3.0f):(fx-d4)*d3*sXn;
 			dst[j].x=(uint16_t)round(std::min(std::max((r-Xmin)*iCoeffX,0.0f),1.0f)*65535.0f);
-			r=(fy>delta)?sYn*pow(fy,3.0f):(fy-d4)*d3*sYn;
+			r=(fy>delta)?sYn*powf(fy,3.0f):(fy-d4)*d3*sYn;
 			dst[j].y=(uint16_t)round(std::min(std::max((r-Ymin)*iCoeffY,0.0f),1.0f)*65535.0f);
-			r=(fz>delta)?sZn*pow(fz,3.0f):(fz-d4)*d3*sZn;
+			r=(fz>delta)?sZn*powf(fz,3.0f):(fz-d4)*d3*sZn;
 			dst[j].z=(uint16_t)round(std::min(std::max((r-Zmin)*iCoeffZ,0.0f),1.0f)*65535.0f);
 			dst[j].alpha=0;
 		}
@@ -11616,7 +11616,7 @@ static void Convert_RGBPS_HDRtoSDR_BT2446_C_1(const MT_Data_Info_HDRTools &mt_da
 			const float yhdr=srcY[j]*hdrScale;
 			const float iyhdr=(yhdr==0.0f)?0.0f:1.0f/srcY[j];
 
-			const float ysdr=(yhdr<Yhdrip)?(k1*yhdr)*iLsdr:(k4+k2*log(yhdr*iYhdrip-k3))*iLsdr;
+			const float ysdr=(yhdr<Yhdrip)?(k1*yhdr)*iLsdr:(k4+k2*logf(yhdr*iYhdrip-k3))*iLsdr;
 
 			dstX[j]=srcX[j]*iyhdr*ysdr;
 			dstY[j]=ysdr;
@@ -11657,7 +11657,7 @@ static void Convert_RGBPS_HDRtoSDR_BT2446_C_2(const MT_Data_Info_HDRTools &mt_da
 	const float sXn=(float)(Xn/hdrScale),sYn=(float)(Yn/hdrScale),sZn=(float)(Zn/hdrScale);
 	const float d1=(float)pow(6.0/29.0,3.0),d2=(float)(pow(29.0/6.0,2.0)/3.0),d4=(float)(4.0/29.0);
 	const float pcoeff=(float)(1.0/3.0);
-	const float Lref=116.0f-16.0f,Lmax=116.0f*pow(Lhdr*iYn,pcoeff)-16.0f,iLmr=WhiteShift/(Lmax-Lref);
+	const float Lref=116.0f-16.0f,Lmax=116.0f*powf(Lhdr*iYn,pcoeff)-16.0f,iLmr=WhiteShift/(Lmax-Lref);
 	const float i116=(float)(1.0/116.0),i500=(float)(1.0/500.0),i200=(float)(1.0/200.0);
 
 	const float delta=(float)(6.0/29.0);
@@ -11677,32 +11677,32 @@ static void Convert_RGBPS_HDRtoSDR_BT2446_C_2(const MT_Data_Info_HDRTools &mt_da
 			float L,Cab,hab,a,b,fx,fy,fz,r;
 
 			r=srcX[j]*isXn;
-			fx=(r>d1)?pow(r,pcoeff):d2*r+d4;
+			fx=(r>d1)?powf(r,pcoeff):d2*r+d4;
 			r=srcY[j]*isYn;
-			fy=(r>d1)?pow(r,pcoeff):d2*r+d4;
+			fy=(r>d1)?powf(r,pcoeff):d2*r+d4;
 			r=srcZ[j]*isZn;
-			fz=(r>d1)?pow(r,pcoeff):d2*r+d4;
+			fz=(r>d1)?powf(r,pcoeff):d2*r+d4;
 
 			L=116.0f*fy-16.0f;
 			a=500.0f*(fx-fy);
 			b=200.0f*(fy-fz);
 
-			Cab=sqrt(a*a+b*b);
-			hab=atan2(b,a);
+			Cab=sqrtf(a*a+b*b);
+			hab=atan2f(b,a);
 			
 			r=(L>Lref)?(1.0f-(L-Lref)*iLmr):1.0f;
 			r=std::max(r,0.0f);
 			Cab*=r;
-			a=Cab*cos(hab);
-			b=Cab*sin(hab);
+			a=Cab*cosf(hab);
+			b=Cab*sinf(hab);
 
 			fy=(L+16.0f)*i116;
 			fx=fy+a*i500;
 			fz=fy-b*i200;
 
-			dstX[j]=(fx>delta)?sXn*pow(fx,3.0f):(fx-d4)*d3*sXn;
-			dstY[j]=(fy>delta)?sYn*pow(fy,3.0f):(fy-d4)*d3*sYn;
-			dstZ[j]=(fz>delta)?sZn*pow(fz,3.0f):(fz-d4)*d3*sZn;
+			dstX[j]=(fx>delta)?sXn*powf(fx,3.0f):(fx-d4)*d3*sXn;
+			dstY[j]=(fy>delta)?sYn*powf(fy,3.0f):(fy-d4)*d3*sYn;
+			dstZ[j]=(fz>delta)?sZn*powf(fz,3.0f):(fz-d4)*d3*sZn;
 		}
 		srcX_+=src_pitch_X;
 		srcY_+=src_pitch_Y;
@@ -11741,7 +11741,7 @@ static void Convert_RGBPS_HDRtoSDR_BT2446_C_2_32(const MT_Data_Info_HDRTools &mt
 	const float sXn=(float)(Xn/hdrScale),sYn=(float)(Yn/hdrScale),sZn=(float)(Zn/hdrScale);
 	const float d4=(float)(4.0/29.0);
 	const float pcoeff=(float)(1.0/3.0);
-	const float Lref=116.0f-16.0f,Lmax=116.0f*pow(Lhdr*iYn,pcoeff)-16.0f,iLmr=WhiteShift/(Lmax-Lref);
+	const float Lref=116.0f-16.0f,Lmax=116.0f*powf(Lhdr*iYn,pcoeff)-16.0f,iLmr=WhiteShift/(Lmax-Lref);
 	const float i116=(float)(1.0/116.0),i500=(float)(1.0/500.0),i200=(float)(1.0/200.0);
 
 	const float delta=(float)(6.0/29.0);
@@ -11776,22 +11776,22 @@ static void Convert_RGBPS_HDRtoSDR_BT2446_C_2_32(const MT_Data_Info_HDRTools &mt
 			a=500.0f*(fx-fy);
 			b=200.0f*(fy-fz);
 
-			Cab=sqrt(a*a+b*b);
-			hab=atan2(b,a);
+			Cab=sqrtf(a*a+b*b);
+			hab=atan2f(b,a);
 			
 			r=(L>Lref)?(1.0f-(L-Lref)*iLmr):1.0f;
 			r=std::max(r,0.0f);
 			Cab*=r;
-			a=Cab*cos(hab);
-			b=Cab*sin(hab);
+			a=Cab*cosf(hab);
+			b=Cab*sinf(hab);
 
 			fy=(L+16.0f)*i116;
 			fx=fy+a*i500;
 			fz=fy-b*i200;
 
-			dstX[j]=(fx>delta)?sXn*pow(fx,3.0f):(fx-d4)*d3*sXn;
-			dstY[j]=(fy>delta)?sYn*pow(fy,3.0f):(fy-d4)*d3*sYn;
-			dstZ[j]=(fz>delta)?sZn*pow(fz,3.0f):(fz-d4)*d3*sZn;
+			dstX[j]=(fx>delta)?sXn*powf(fx,3.0f):(fx-d4)*d3*sXn;
+			dstY[j]=(fy>delta)?sYn*powf(fy,3.0f):(fy-d4)*d3*sYn;
+			dstZ[j]=(fz>delta)?sZn*powf(fz,3.0f):(fz-d4)*d3*sZn;
 		}
 		srcX_+=src_pitch_X;
 		srcY_+=src_pitch_Y;

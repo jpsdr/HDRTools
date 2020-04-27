@@ -23,7 +23,7 @@
 #include "./avisynth.h"
 #include "./ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 0.6.0 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 0.6.1 JPSDR"
 
 
 typedef struct _dataLookUp
@@ -75,7 +75,7 @@ private:
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -125,7 +125,7 @@ private:
 	float Coeff_XYZ[9],*Coeff_XYZ_asm,Coeff_Crosstalk[9],*Coeff_Crosstalk_asm;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -175,7 +175,7 @@ private:
 
 	VideoInfo *vi_PlaneY_HLG;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -215,7 +215,7 @@ private:
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -264,7 +264,7 @@ private:
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -315,7 +315,7 @@ private:
 
 	VideoInfo *vi_PlaneY_HLG;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -348,7 +348,7 @@ private:
 	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -382,7 +382,7 @@ private:
 	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -425,7 +425,7 @@ private:
 
 	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -464,7 +464,7 @@ private:
 	float *lookupR_32,*lookupG_32,*lookupB_32;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -505,7 +505,7 @@ private:
 
 	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -542,7 +542,7 @@ private:
 	float *lookupR_32,*lookupG_32,*lookupB_32;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -583,7 +583,7 @@ private:
 
 	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -620,7 +620,7 @@ private:
 	float *lookupR_32,*lookupG_32,*lookupB_32;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -656,7 +656,7 @@ private:
 	float *lookupY1_32,*lookupY2_32,*lookupBY_32,*lookupRY_32;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 
@@ -704,7 +704,7 @@ private:
 	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
 	double Xn,Yn,Zn;
 
-	bool grey,avsp,isRGBPfamily,isAlphaChannel;
+	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
 	uint8_t bits_per_pixel;
 

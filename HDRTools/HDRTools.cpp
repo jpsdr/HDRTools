@@ -13328,6 +13328,9 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 			env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -13432,7 +13435,7 @@ void ConvertYUVtoLinearRGB::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst = env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp1,tmp2,tmp3,tmp4;
 
 	const uint8_t *srcY=NULL,*srcU=NULL,*srcV=NULL;
@@ -14715,6 +14718,9 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 			env->ThrowError("ConvertLinearRGBtoYUV: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -14815,7 +14821,7 @@ void ConvertLinearRGBtoYUV::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp1,tmp2,tmp3,tmp4;
 
 	int32_t h;
@@ -16502,6 +16508,9 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			env->ThrowError("ConvertYUVtoXYZ: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -16630,7 +16639,7 @@ void ConvertYUVtoXYZ::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst = env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp1,tmp2,tmp3,tmp4;
 
 	const uint8_t *srcY=NULL,*srcU=NULL,*srcV=NULL;
@@ -18108,6 +18117,9 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			env->ThrowError("ConvertXYZtoYUV: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -18232,7 +18244,7 @@ void ConvertXYZtoYUV::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp1,tmp2,tmp3,tmp4;
 
 	env->MakeWritable(&src);
@@ -20178,6 +20190,9 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			env->ThrowError("ConvertRGBtoXYZ: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -20285,7 +20300,7 @@ void ConvertRGBtoXYZ::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst = env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp4;
 
 	const uint8_t *srcr=NULL,*srcr0=NULL;
@@ -21328,6 +21343,9 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			env->ThrowError("ConvertXYZtoRGB: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -21437,7 +21455,7 @@ void ConvertXYZtoRGB::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp4;
 
 	if (vi.pixel_type!=VideoInfo::CS_RGBPS) env->MakeWritable(&src);
@@ -22033,6 +22051,9 @@ ConvertXYZ_Scale_HDRtoSDR::ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X
 			env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -22089,7 +22110,7 @@ void ConvertXYZ_Scale_HDRtoSDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertXYZ_Scale_HDRtoSDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
@@ -22315,6 +22336,9 @@ ConvertXYZ_Scale_SDRtoHDR::ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X
 			env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -22371,7 +22395,7 @@ void ConvertXYZ_Scale_SDRtoHDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertXYZ_Scale_SDRtoHDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
@@ -22632,6 +22656,9 @@ ConvertXYZ_Hable_HDRtoSDR::ConvertXYZ_Hable_HDRtoSDR(PClip _child,double _exp_X,
 			env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -22709,7 +22736,7 @@ void ConvertXYZ_Hable_HDRtoSDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcr=NULL,*srcXr=NULL,*srcYr=NULL,*srcZr=NULL;
 	ptrdiff_t src_pitch=0,src_pitch_X=0,src_pitch_Y=0,src_pitch_Z=0;
@@ -22995,6 +23022,9 @@ ConvertRGB_Hable_HDRtoSDR::ConvertRGB_Hable_HDRtoSDR(PClip _child,double _exp_R,
 			env->ThrowError("ConvertRGB_Hable_HDRtoSDR: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -23067,7 +23097,7 @@ void ConvertRGB_Hable_HDRtoSDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
@@ -23369,6 +23399,9 @@ ConvertXYZ_Mobius_HDRtoSDR::ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_
 			env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -23440,7 +23473,7 @@ void ConvertXYZ_Mobius_HDRtoSDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcr=NULL,*srcXr=NULL,*srcYr=NULL,*srcZr=NULL;
 	ptrdiff_t src_pitch=0,src_pitch_X=0,src_pitch_Y=0,src_pitch_Z=0;
@@ -23736,6 +23769,9 @@ ConvertRGB_Mobius_HDRtoSDR::ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_
 			env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -23802,7 +23838,7 @@ void ConvertRGB_Mobius_HDRtoSDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
@@ -24100,6 +24136,9 @@ ConvertXYZ_Reinhard_HDRtoSDR::ConvertXYZ_Reinhard_HDRtoSDR(PClip _child,double _
 			env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -24171,7 +24210,7 @@ void ConvertXYZ_Reinhard_HDRtoSDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcr=NULL,*srcXr=NULL,*srcYr=NULL,*srcZr=NULL;
 	ptrdiff_t src_pitch=0,src_pitch_X=0,src_pitch_Y=0,src_pitch_Z=0;
@@ -24463,6 +24502,9 @@ ConvertRGB_Reinhard_HDRtoSDR::ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _
 			env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -24529,7 +24571,7 @@ void ConvertRGB_Reinhard_HDRtoSDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
@@ -24843,6 +24885,9 @@ ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR
 		}
 	}
 
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
+
 	vi.pixel_type=VideoInfo::CS_YUV444P16;
 }
 
@@ -24913,7 +24958,7 @@ void ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst=env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
 	const uint8_t *srcr=NULL,*srcr0=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
 	ptrdiff_t src_pitch=0,src_pitch0=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
@@ -25264,6 +25309,9 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 			env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: Error with the TheadPool while getting UserId!");
 		}
 	}
+
+	has_at_least_v8=true;
+	try { env->CheckVersion(8); } catch (const AvisynthError&) { has_at_least_v8=false; }
 }
 
 
@@ -25376,7 +25424,7 @@ void ConverXYZ_BT2446_C_HDRtoSDR::StaticThreadpool(void *ptr)
 PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnvironment* env) 
 {
 	PVideoFrame src = child->GetFrame(n,env);
-	PVideoFrame dst = env->NewVideoFrame(vi,64);
+	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp;
 
 	const uint8_t *srcr=NULL,*srcXr=NULL,*srcYr=NULL,*srcZr=NULL;

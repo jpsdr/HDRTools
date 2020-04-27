@@ -20,7 +20,7 @@
  *
  */
 
-#include "MatrixClass.h"
+#include "./MatrixClass.h"
 
 #include <memory.h>
 #include <algorithm>
@@ -5489,8 +5489,6 @@ bool Matrix_Compute::Product_tAA(void)
 
 bool Matrix_Compute::Inverse(const Matrix &ma)
 {
-	const uint16_t l=lines,c=columns;
-
 	if ((Coeff==NULL) || (lines==0) || (columns==0) || (columns!=lines) || (&ma==NULL)) return(false);
 	if (!ma.AllocCheck()) return(false);
 

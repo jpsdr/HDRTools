@@ -20,8 +20,8 @@
  *
  */
 
-#include "avisynth.h"
-#include "ThreadPoolInterface.h"
+#include "./avisynth.h"
+#include "./ThreadPoolInterface.h"
 
 #define HDRTOOLS_VERSION "HDRTools 0.6.0 JPSDR"
 

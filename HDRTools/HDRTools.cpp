@@ -13317,7 +13317,10 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (max_threads>1)
 	{
@@ -14707,7 +14710,10 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (max_threads>1)
 	{
@@ -16443,7 +16449,10 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	Coeff_Crosstalk[0]=(float)(1.0-2.0*Crosstalk);
 	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
@@ -18052,7 +18061,10 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	Coeff_Crosstalk[0]=(float)((1.0-Crosstalk)/(1.0-3.0*Crosstalk));
 	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
@@ -20125,7 +20137,10 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	Coeff_Crosstalk[0]=(float)(1.0-2.0*Crosstalk);
 	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
@@ -21278,7 +21293,10 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	Coeff_Crosstalk[0]=(float)((1.0-Crosstalk)/(1.0-3.0*Crosstalk));
 	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
@@ -22040,7 +22058,10 @@ ConvertXYZ_Scale_HDRtoSDR::ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{
@@ -22325,7 +22346,10 @@ ConvertXYZ_Scale_SDRtoHDR::ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{
@@ -22645,7 +22669,10 @@ ConvertXYZ_Hable_HDRtoSDR::ConvertXYZ_Hable_HDRtoSDR(PClip _child,double _exp_X,
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{
@@ -23011,7 +23038,10 @@ ConvertRGB_Hable_HDRtoSDR::ConvertRGB_Hable_HDRtoSDR(PClip _child,double _exp_R,
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{
@@ -23388,7 +23418,10 @@ ConvertXYZ_Mobius_HDRtoSDR::ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{
@@ -23758,7 +23791,10 @@ ConvertRGB_Mobius_HDRtoSDR::ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{
@@ -24125,7 +24161,10 @@ ConvertXYZ_Reinhard_HDRtoSDR::ConvertXYZ_Reinhard_HDRtoSDR(PClip _child,double _
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{
@@ -24491,7 +24530,10 @@ ConvertRGB_Reinhard_HDRtoSDR::ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{
@@ -24873,7 +24915,10 @@ ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{
@@ -25298,7 +25343,10 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
+	AVX2_Enable=0;
+	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+	#endif
 
 	if (threads_number>1)
 	{

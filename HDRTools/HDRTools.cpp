@@ -13317,7 +13317,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -14710,7 +14710,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -16449,7 +16449,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -18061,7 +18061,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -20137,7 +20137,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -21293,7 +21293,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -22058,7 +22058,7 @@ ConvertXYZ_Scale_HDRtoSDR::ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -22346,7 +22346,7 @@ ConvertXYZ_Scale_SDRtoHDR::ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -22669,7 +22669,7 @@ ConvertXYZ_Hable_HDRtoSDR::ConvertXYZ_Hable_HDRtoSDR(PClip _child,double _exp_X,
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -23038,7 +23038,7 @@ ConvertRGB_Hable_HDRtoSDR::ConvertRGB_Hable_HDRtoSDR(PClip _child,double _exp_R,
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -23418,7 +23418,7 @@ ConvertXYZ_Mobius_HDRtoSDR::ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -23791,7 +23791,7 @@ ConvertRGB_Mobius_HDRtoSDR::ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -24161,7 +24161,7 @@ ConvertXYZ_Reinhard_HDRtoSDR::ConvertXYZ_Reinhard_HDRtoSDR(PClip _child,double _
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -24530,7 +24530,7 @@ ConvertRGB_Reinhard_HDRtoSDR::ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -24915,7 +24915,7 @@ ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif
@@ -25343,7 +25343,7 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 	SSE2_Enable=((env->GetCPUFlags()&CPUF_SSE2)!=0);
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
-	AVX2_Enable=0;
+	AVX2_Enable=false;
 	#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
 	#endif

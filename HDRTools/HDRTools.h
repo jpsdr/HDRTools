@@ -23,7 +23,7 @@
 #include "./avisynth.h"
 #include "./ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 0.6.3 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 0.6.4 JPSDR"
 
 
 typedef struct _dataLookUp
@@ -54,7 +54,8 @@ class ConvertYUVtoLinearRGB : public GenericVideoFilter
 {
 public:
 	ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
-		uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,uint8_t _threads, bool _sleep, IScriptEnvironment* env);
+		uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,uint8_t _threads, bool _sleep,
+		bool negativePrefetch, IScriptEnvironment* env);
 	virtual ~ConvertYUVtoLinearRGB();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -102,7 +103,7 @@ public:
 	ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 		double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,float _Rx,float _Ry,
 		float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
-		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
+		uint8_t _threads, bool _sleep, bool negativePrefetch, IScriptEnvironment* env);
 	virtual ~ConvertYUVtoXYZ();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -152,7 +153,7 @@ public:
 	ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 		double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,
 		float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
-		uint8_t _threads, bool _sleep, IScriptEnvironment* env);
+		uint8_t _threads, bool _sleep, bool negativePrefetch, IScriptEnvironment* env);
 	virtual ~ConvertRGBtoXYZ();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -197,7 +198,7 @@ class ConvertLinearRGBtoYUV : public GenericVideoFilter
 public:
 	ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 		uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads, bool _sleep,
-		IScriptEnvironment* env);
+		bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertLinearRGBtoYUV();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -243,7 +244,7 @@ public:
 		double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,
 		float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,
 		float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
-		uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+		uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertXYZtoYUV();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -292,7 +293,7 @@ public:
 		double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,
 		float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,
 		float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
-		uint8_t _threads, bool _sleep,IScriptEnvironment* env);
+		uint8_t _threads, bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertXYZtoRGB();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -336,7 +337,7 @@ class ConvertXYZ_Scale_HDRtoSDR : public GenericVideoFilter
 {
 public:
 	ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X,float _Coeff_Y,float _Coeff_Z,uint8_t _threads,
-		bool _sleep,IScriptEnvironment* env);
+		bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertXYZ_Scale_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -369,7 +370,7 @@ class ConvertXYZ_Scale_SDRtoHDR : public GenericVideoFilter
 {
 public:
 	ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X,float _Coeff_Y,float _Coeff_Z,
-		uint8_t _threads, bool _sleep,IScriptEnvironment* env);
+		uint8_t _threads, bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertXYZ_Scale_SDRtoHDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -407,7 +408,7 @@ public:
 		double _d_Y,double _e_Y,double _f_Y,double _exp_Z,double _w_Z,double _a_Z,double _b_Z,double _c_Z,
 		double _d_Z,double _e_Z,double _f_Z,
 		float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
-		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+		bool _fastmode, uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertXYZ_Hable_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -449,7 +450,7 @@ public:
 		double _d_R,double _e_R,double _f_R,double _exp_G,double _w_G,double _a_G,double _b_G,double _c_G,
 		double _d_G,double _e_G,double _f_G,double _exp_B,double _w_B,double _a_B,double _b_B,double _c_B,
 		double _d_B,double _e_B,double _f_B,
-		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+		bool _fastmode, uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertRGB_Hable_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -487,7 +488,7 @@ public:
 	ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_X,double _trans_X,double _peak_X,
 		double _exp_Y,double _trans_Y,double _peak_Y,double _exp_Z,double _trans_Z,double _peak_Z,
 		float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
-		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+		bool _fastmode, uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertXYZ_Mobius_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -527,7 +528,7 @@ class ConvertRGB_Mobius_HDRtoSDR : public GenericVideoFilter
 public:
 	ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_R,double _trans_R,double _peak_R,
 		double _exp_G,double _trans_G,double _peak_G,double _exp_B,double _trans_B,double _peak_B,
-		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+		bool _fastmode, uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertRGB_Mobius_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -565,7 +566,7 @@ public:
 	ConvertXYZ_Reinhard_HDRtoSDR(PClip _child,double _exp_X,double _contr_X,double _peak_X,
 		double _exp_Y,double _contr_Y,double _peak_Y,double _exp_Z,double _contr_Z,double _peak_Z,
 		float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
-		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+		bool _fastmode, uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertXYZ_Reinhard_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -605,7 +606,7 @@ class ConvertRGB_Reinhard_HDRtoSDR : public GenericVideoFilter
 public:
 	ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _exp_R,double _contr_R,double _peak_R,
 		double _exp_G,double _contr_G,double _peak_G,double _exp_B,double _contr_B,double _peak_B,
-		bool _fastmode, uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+		bool _fastmode, uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertRGB_Reinhard_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -641,7 +642,7 @@ class ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR : public GenericVideoFilter
 {
 public:
 	ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR(PClip _child,double _Lhdr,double _Lsdr,double _CoeffAdj,
-		bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+		bool _fastmode,uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
@@ -679,7 +680,7 @@ public:
 	ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _ChromaC,bool _PQMode,float _Lhdr,float _Lsdr,
 		float _pct_ref,float _pct_ip,float _pct_wp,float _pct_sdr_skin,float _pct_hdr_skin,float _WhiteShift,
 		float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
-		bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env);
+		bool _fastmode,uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConverXYZ_BT2446_C_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 

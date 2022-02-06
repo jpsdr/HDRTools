@@ -12335,7 +12335,7 @@ bool ComputeXYZScale(float Rx,float Ry,float Gx,float Gy,float Bx,float By,float
 
 ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,
 	double _HLG_Lw,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,uint8_t _threads,bool _sleep,
-	IScriptEnvironment* env) :
+	bool negativePrefetch, IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),
 		HLGColor(_HLGColor)
@@ -13318,9 +13318,9 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (max_threads>1)
 	{
@@ -13329,6 +13329,21 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -13579,7 +13594,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -13588,7 +13603,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 
 	if (max_threads>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,max_threads,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while requesting threadpool !");
 	}
 
@@ -13689,7 +13704,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 		{
 			for(uint8_t i=0; i<threads_number[0]; i++)
 				MT_ThreadGF[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[0]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -13826,7 +13841,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 		{
 			for(uint8_t i=0; i<threads_number[1]; i++)
 				MT_ThreadGF[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[1]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -14035,7 +14050,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 	{
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -14114,7 +14129,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 	{
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -14135,7 +14150,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 		}
 	}
 
-	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -14150,7 +14165,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 
 ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,
 	double _HLG_Lw,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,uint8_t _threads,
-	bool _sleep,IScriptEnvironment* env) :
+	bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),HLG_Lb(_HLG_Lb),
 		HLG_Lw(_HLG_Lw),HLGColor(_HLGColor)
@@ -14711,9 +14726,9 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (max_threads>1)
 	{
@@ -14722,6 +14737,21 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertLinearRGBtoYUV: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertLinearRGBtoYUV: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertLinearRGBtoYUV: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -14979,7 +15009,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -14988,7 +15018,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 
 	if (max_threads>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,max_threads,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -15119,7 +15149,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 	{
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -15245,7 +15275,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 	{
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -15332,7 +15362,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 		{
 			for(uint8_t i=0; i<threads_number[1]; i++)
 				MT_ThreadGF[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[1]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -15412,7 +15442,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 		{
 			for(uint8_t i=0; i<threads_number[2]; i++)
 				MT_ThreadGF[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[2]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -15436,7 +15466,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 		}
 	}
 
-	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -15452,7 +15482,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,
 	double _HLG_Lw,double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,
 	float _Rx,float _Ry,float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
 		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor),Crosstalk(_Crosstalk)
@@ -16450,9 +16480,9 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	Coeff_Crosstalk[0]=(float)(1.0-2.0*Crosstalk);
 	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
@@ -16515,6 +16545,21 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertYUVtoXYZ: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertYUVtoXYZ: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertYUVtoXYZ: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -16789,7 +16834,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -16798,7 +16843,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 
 	if (max_threads>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,max_threads,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertYUVtoXYZ: Error with the TheadPool while requesting threadpool !");
 	}
 
@@ -16899,7 +16944,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 		{
 			for(uint8_t i=0; i<threads_number[0]; i++)
 				MT_ThreadGF[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[0]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -17036,7 +17081,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 		{
 			for(uint8_t i=0; i<threads_number[1]; i++)
 				MT_ThreadGF[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[1]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -17245,7 +17290,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -17324,7 +17369,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -17421,7 +17466,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 		{
 			for(uint8_t i=0; i<threads_number[2]; i++)
 				MT_ThreadGF[i].f_process=f_proc+12;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[2]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -17448,7 +17493,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[2]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -17470,7 +17515,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 		}
 	}
 
-	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -17486,7 +17531,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 	double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fullrange,bool _mpeg2c,bool _fastmode,float _Rx,float _Ry,
 	float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
-	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	float _pBy,float _pWx,float _pWy,uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fullrange(_fullrange),mpeg2c(_mpeg2c),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
@@ -18062,9 +18107,9 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	Coeff_Crosstalk[0]=(float)((1.0-Crosstalk)/(1.0-3.0*Crosstalk));
 	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
@@ -18127,6 +18172,21 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZtoYUV: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertXYZtoYUV: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertXYZtoYUV: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -18408,7 +18468,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -18417,7 +18477,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 
 	if (max_threads>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,max_threads,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,max_threads,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertXYZtoYUV: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -18536,7 +18596,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -18565,7 +18625,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 		{
 			for(uint8_t i=0; i<threads_number[0]; i++)
 				MT_ThreadGF[i].f_process=f_proc+9;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[0]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -18675,7 +18735,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -18801,7 +18861,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number[0]; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -18888,7 +18948,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 		{
 			for(uint8_t i=0; i<threads_number[1]; i++)
 				MT_ThreadGF[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[1]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -18968,7 +19028,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 		{
 			for(uint8_t i=0; i<threads_number[2]; i++)
 				MT_ThreadGF[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number[2]; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -18992,7 +19052,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 		}
 	}
 
-	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (max_threads>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -19008,7 +19068,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode,uint8_t _HDRMode,double _HLG_Lb,double _HLG_Lw,
 	double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,
 	float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep, bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),OutputMode(_OutputMode),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		fastmode(_fastmode),threads(_threads),sleep(_sleep),Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),
 		Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),HLG_Lb(_HLG_Lb),HLG_Lw(_HLG_Lw),HLGColor(_HLGColor),
@@ -20138,9 +20198,9 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	Coeff_Crosstalk[0]=(float)(1.0-2.0*Crosstalk);
 	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
@@ -20203,6 +20263,21 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertRGBtoXYZ: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertRGBtoXYZ: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertRGBtoXYZ: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -20399,7 +20474,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -20408,7 +20483,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertRGBtoXYZ: Error with the TheadPool while requesting threadpool !");
 	}
 
@@ -20586,7 +20661,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -20700,7 +20775,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 		{
 			for(uint8_t i=0; i<threads_number; i++)
 				MT_ThreadGF[i].f_process=f_proc+22;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -20727,7 +20802,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -20749,7 +20824,7 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -20766,7 +20841,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	double _Crosstalk,uint8_t _HLGColor,bool _OOTF,bool _EOTF,bool _fastmode,float _Rx,float _Ry,
 	float _Gx,float _Gy,float _Bx,float _By,float _Wx,float _Wy,float _pRx,float _pRy,float _pGx,
 	float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Color(_Color),HDRMode(_HDRMode),OOTF(_OOTF),EOTF(_EOTF),
 		OutputMode(_OutputMode),fastmode(_fastmode),threads(_threads),sleep(_sleep),
 		Rx(_Rx),Ry(_Ry),Gx(_Gx),Gy(_Gy),Bx(_Bx),By(_By),Wx(_Wx),Wy(_Wy),
@@ -21294,9 +21369,9 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	Coeff_Crosstalk[0]=(float)((1.0-Crosstalk)/(1.0-3.0*Crosstalk));
 	Coeff_Crosstalk[4]=Coeff_Crosstalk[0];
@@ -21359,6 +21434,21 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZtoRGB: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertXYZtoRGB: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertXYZtoRGB: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -21579,7 +21669,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -21588,7 +21678,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertXYZtoRGB: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -21719,7 +21809,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -21764,7 +21854,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 		{
 			for(uint8_t i=0; i<threads_number; i++)
 				MT_ThreadGF[i].f_process=f_proc+31;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -21952,7 +22042,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -21992,7 +22082,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -22006,7 +22096,7 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 
 
 ConvertXYZ_Scale_HDRtoSDR::ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X,float _Coeff_Y,float _Coeff_Z,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Coeff_X(_Coeff_X),
 		Coeff_Y(_Coeff_Y),Coeff_Z(_Coeff_Z),threads(_threads),sleep(_sleep)
 {
@@ -22059,9 +22149,9 @@ ConvertXYZ_Scale_HDRtoSDR::ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (threads_number>1)
 	{
@@ -22070,6 +22160,21 @@ ConvertXYZ_Scale_HDRtoSDR::ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -22176,7 +22281,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -22185,7 +22290,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -22259,7 +22364,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -22276,7 +22381,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -22290,7 +22395,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 
 ConvertXYZ_Scale_SDRtoHDR::ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X,float _Coeff_Y,float _Coeff_Z,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	Coeff_X(_Coeff_X),Coeff_Y(_Coeff_Y),Coeff_Z(_Coeff_Z),
 		GenericVideoFilter(_child),threads(_threads),sleep(_sleep)
 {
@@ -22347,9 +22452,9 @@ ConvertXYZ_Scale_SDRtoHDR::ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (threads_number>1)
 	{
@@ -22358,6 +22463,21 @@ ConvertXYZ_Scale_SDRtoHDR::ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -22464,7 +22584,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_SDRtoHDR::GetFrame(int n, IScriptEnvironm
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -22473,7 +22593,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_SDRtoHDR::GetFrame(int n, IScriptEnvironm
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertXYZ_SDRtoHDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -22547,7 +22667,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_SDRtoHDR::GetFrame(int n, IScriptEnvironm
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -22564,7 +22684,7 @@ PVideoFrame __stdcall ConvertXYZ_Scale_SDRtoHDR::GetFrame(int n, IScriptEnvironm
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -22582,7 +22702,7 @@ ConvertXYZ_Hable_HDRtoSDR::ConvertXYZ_Hable_HDRtoSDR(PClip _child,double _exp_X,
 	double _d_X,double _e_X,double _f_X,double _exp_Y,double _w_Y,double _a_Y,double _b_Y,double _c_Y,double _d_Y,double _e_Y,double _f_Y,
 	double _exp_Z,double _w_Z,double _a_Z,double _b_Z,double _c_Z,double _d_Z,double _e_Z,double _f_Z,float _pRx,float _pRy,float _pGx,
 	float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,bool _fastmode,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),exp_X(_exp_X),w_X(_w_X),a_X(_a_X),b_X(_b_X),c_X(_c_X),d_X(_d_X),e_X(_e_X),f_X(_f_X),
 		exp_Y(_exp_Y),w_Y(_w_Y),a_Y(_a_Y),b_Y(_b_Y),c_Y(_c_Y),d_Y(_d_Y),e_Y(_e_Y),f_Y(_f_Y),
 		exp_Z(_exp_Z),w_Z(_w_Z),a_Z(_a_Z),b_Z(_b_Z),c_Z(_c_Z),d_Z(_d_Z),e_Z(_e_Z),f_Z(_f_Z),
@@ -22670,9 +22790,9 @@ ConvertXYZ_Hable_HDRtoSDR::ConvertXYZ_Hable_HDRtoSDR(PClip _child,double _exp_X,
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (threads_number>1)
 	{
@@ -22681,6 +22801,21 @@ ConvertXYZ_Hable_HDRtoSDR::ConvertXYZ_Hable_HDRtoSDR(PClip _child,double _exp_X,
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -22808,7 +22943,7 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -22817,7 +22952,7 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -22913,7 +23048,7 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -22945,7 +23080,7 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -22961,7 +23096,7 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 ConvertRGB_Hable_HDRtoSDR::ConvertRGB_Hable_HDRtoSDR(PClip _child,double _exp_R,double _w_R,double _a_R,double _b_R,double _c_R,
 	double _d_R,double _e_R,double _f_R,double _exp_G,double _w_G,double _a_G,double _b_G,double _c_G,double _d_G,double _e_G,double _f_G,
 	double _exp_B,double _w_B,double _a_B,double _b_B,double _c_B,double _d_B,double _e_B,double _f_B,bool _fastmode,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),exp_R(_exp_R),w_R(_w_R),a_R(_a_R),b_R(_b_R),c_R(_c_R),d_R(_d_R),e_R(_e_R),f_R(_f_R),
 		exp_G(_exp_G),w_G(_w_G),a_G(_a_G),b_G(_b_G),c_G(_c_G),d_G(_d_G),e_G(_e_G),f_G(_f_G),
 		exp_B(_exp_B),w_B(_w_B),a_B(_a_B),b_B(_b_B),c_B(_c_B),d_B(_d_B),e_B(_e_B),f_B(_f_B),
@@ -23039,9 +23174,9 @@ ConvertRGB_Hable_HDRtoSDR::ConvertRGB_Hable_HDRtoSDR(PClip _child,double _exp_R,
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (threads_number>1)
 	{
@@ -23050,6 +23185,21 @@ ConvertRGB_Hable_HDRtoSDR::ConvertRGB_Hable_HDRtoSDR(PClip _child,double _exp_R,
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertRGB_Hable_HDRtoSDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertRGB_Hable_HDRtoSDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertRGB_Hable_HDRtoSDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -23172,7 +23322,7 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -23181,7 +23331,7 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertRGB_Hable_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -23277,7 +23427,7 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -23304,7 +23454,7 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -23320,7 +23470,7 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 ConvertXYZ_Mobius_HDRtoSDR::ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_X,double _trans_X,double _peak_X,
 	double _exp_Y,double _trans_Y,double _peak_Y,double _exp_Z,double _trans_Z,double _peak_Z,float _pRx,float _pRy,float _pGx,
 	float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,bool _fastmode,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),exp_X(_exp_X),trans_X(_trans_X),peak_X(_peak_X),
 		exp_Y(_exp_Y),trans_Y(_trans_Y),peak_Y(_peak_Y),exp_Z(_exp_Z),trans_Z(_trans_Z),peak_Z(_peak_Z),
 		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),fastmode(_fastmode),
@@ -23419,9 +23569,9 @@ ConvertXYZ_Mobius_HDRtoSDR::ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (threads_number>1)
 	{
@@ -23430,6 +23580,21 @@ ConvertXYZ_Mobius_HDRtoSDR::ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -23551,7 +23716,7 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -23560,7 +23725,7 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 
@@ -23656,7 +23821,7 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -23688,7 +23853,7 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -23703,7 +23868,7 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 
 ConvertRGB_Mobius_HDRtoSDR::ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_R,double _trans_R,double _peak_R,
 	double _exp_G,double _trans_G,double _peak_G,double _exp_B,double _trans_B,double _peak_B,bool _fastmode,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),exp_R(_exp_R),trans_R(_trans_R),peak_R(_peak_R),
 		exp_G(_exp_G),trans_G(_trans_G),peak_G(_peak_G),exp_B(_exp_B),trans_B(_trans_B),peak_B(_peak_B),
 		fastmode(_fastmode),threads(_threads),sleep(_sleep)
@@ -23792,9 +23957,9 @@ ConvertRGB_Mobius_HDRtoSDR::ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (threads_number>1)
 	{
@@ -23803,6 +23968,21 @@ ConvertRGB_Mobius_HDRtoSDR::ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -23919,7 +24099,7 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -23928,7 +24108,7 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -24024,7 +24204,7 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -24051,7 +24231,7 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -24067,7 +24247,7 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 ConvertXYZ_Reinhard_HDRtoSDR::ConvertXYZ_Reinhard_HDRtoSDR(PClip _child,double _exp_X,double _contr_X,double _peak_X,
 	double _exp_Y,double _contr_Y,double _peak_Y,double _exp_Z,double _contr_Z,double _peak_Z,float _pRx,float _pRy,float _pGx,
 	float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,bool _fastmode,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),exp_X(_exp_X),contr_X(_contr_X),peak_X(_peak_X),
 		exp_Y(_exp_Y),contr_Y(_contr_Y),peak_Y(_peak_Y),exp_Z(_exp_Z),contr_Z(_contr_Z),peak_Z(_peak_Z),
 		pRx(_pRx),pRy(_pRy),pGx(_pGx),pGy(_pGy),pBx(_pBx),pBy(_pBy),pWx(_pWx),pWy(_pWy),fastmode(_fastmode),
@@ -24173,6 +24353,21 @@ ConvertXYZ_Reinhard_HDRtoSDR::ConvertXYZ_Reinhard_HDRtoSDR(PClip _child,double _
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -24294,7 +24489,7 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -24303,7 +24498,7 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -24399,7 +24594,7 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -24431,7 +24626,7 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -24446,7 +24641,7 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 
 ConvertRGB_Reinhard_HDRtoSDR::ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _exp_R,double _contr_R,double _peak_R,
 	double _exp_G,double _contr_G,double _peak_G,double _exp_B,double _contr_B,double _peak_B,bool _fastmode,
-	uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),exp_R(_exp_R),contr_R(_contr_R),peak_R(_peak_R),
 		exp_G(_exp_G),contr_G(_contr_G),peak_G(_peak_G),exp_B(_exp_B),contr_B(_contr_B),peak_B(_peak_B),
 		fastmode(_fastmode),threads(_threads),sleep(_sleep)
@@ -24531,9 +24726,9 @@ ConvertRGB_Reinhard_HDRtoSDR::ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (threads_number>1)
 	{
@@ -24542,6 +24737,21 @@ ConvertRGB_Reinhard_HDRtoSDR::ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -24658,7 +24868,7 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -24667,7 +24877,7 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -24763,7 +24973,7 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -24790,7 +25000,7 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -24804,7 +25014,8 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 
 
 ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR(PClip _child,
-	double _Lhdr,double _Lsdr,double _CoeffAdj,bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	double _Lhdr,double _Lsdr,double _CoeffAdj,bool _fastmode,uint8_t _threads,bool _sleep,
+	bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),Lhdr(_Lhdr),Lsdr(_Lsdr),CoeffAdj(_CoeffAdj),
 		fastmode(_fastmode),threads(_threads),sleep(_sleep)
 {
@@ -24916,9 +25127,9 @@ ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (threads_number>1)
 	{
@@ -24927,6 +25138,21 @@ ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -25047,7 +25273,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::GetFrame(int n, I
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -25056,7 +25282,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::GetFrame(int n, I
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 
@@ -25113,7 +25339,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::GetFrame(int n, I
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -25132,7 +25358,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::GetFrame(int n, I
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -25188,7 +25414,8 @@ bool ConverXYZ_BT2446_C_HDRtoSDR::dicotomie(double k1,double &k3)
 ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _ChromaC,bool _PQMode,
 	float _Lhdr,float _Lsdr,float _pct_ref,float _pct_ip,float _pct_wp,float _pct_sdr_skin,
 	float _pct_hdr_skin,float _WhiteShift,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,
-	float _pBy,float _pWx,float _pWy,bool _fastmode,uint8_t _threads,bool _sleep,IScriptEnvironment* env) :
+	float _pBy,float _pWx,float _pWy,bool _fastmode,uint8_t _threads,bool _sleep,
+	bool negativePrefetch,IScriptEnvironment* env) :
 	GenericVideoFilter(_child),ChromaC(_ChromaC),PQMode(_PQMode),Lhdr(_Lhdr),Lsdr(_Lsdr),
 	pct_ref(_pct_ref),pct_ip(_pct_ip),pct_wp(_pct_wp),pct_sdr_skin(_pct_sdr_skin),
 	pct_hdr_skin(_pct_hdr_skin),WhiteShift(_WhiteShift),
@@ -25344,9 +25571,9 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
 
 	if (threads_number>1)
 	{
@@ -25355,6 +25582,21 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 			FreeData();
 			poolInterface->DeAllocateAllThreads(true);
 			env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: Error with the TheadPool while getting UserId!");
+		}
+		if (!poolInterface->EnableAllowSeveral(UserId))
+		{
+			FreeData();
+			poolInterface->DeAllocateAllThreads(true);
+			env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: Error with the TheadPool while allowing multiple request on UserId!");
+		}
+		if (negativePrefetch)
+		{
+			if (!poolInterface->DisableWaitonRequest(UserId))
+			{
+				FreeData();
+				poolInterface->DeAllocateAllThreads(true);
+				env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: Error with the TheadPool while disabling wait on request on UserId!");
+			}
 		}
 	}
 
@@ -25542,7 +25784,7 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 
 	Public_MT_Data_Thread MT_ThreadGF[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_DataGF[MAX_MT_THREADS];
-	int8_t nPool=-1;
+	int8_t idxPool=-1;
 
 	memcpy(MT_ThreadGF,MT_Thread,sizeof(MT_ThreadGF));
 
@@ -25551,7 +25793,7 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 
 	if (threads_number>1)
 	{
-		if ((!poolInterface->RequestThreadPool(UserId,threads_number,MT_ThreadGF,nPool,false,true)) || (nPool==-1))
+		if ((!poolInterface->RequestThreadPool(UserId,idxPool,threads_number,MT_ThreadGF)) || (idxPool==-1))
 			env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
@@ -25672,7 +25914,7 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 		{
 			for(uint8_t i=0; i<threads_number; i++)
 				MT_ThreadGF[i].f_process=f_proc;
-			if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+			if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 			for(uint8_t i=0; i<threads_number; i++)
 				MT_ThreadGF[i].f_process=0;
@@ -25786,7 +26028,7 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 	{
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=f_proc;
-		if (poolInterface->StartThreads(UserId,nPool)) poolInterface->WaitThreadsEnd(UserId,nPool);
+		if (poolInterface->StartThreads(UserId,idxPool)) poolInterface->WaitThreadsEnd(UserId,idxPool);
 
 		for(uint8_t i=0; i<threads_number; i++)
 			MT_ThreadGF[i].f_process=0;
@@ -25828,7 +26070,7 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 		}
 	}
 
-	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,nPool);
+	if (threads_number>1) poolInterface->ReleaseThreadPool(UserId,sleep,idxPool);
 
 	return dst;
 }
@@ -25888,6 +26130,8 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 	int thread_level=args[17].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if (!avsp) OutputMode=0;
 
@@ -25901,8 +26145,8 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertYUVtoLinearRGB: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertYUVtoLinearRGB: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertYUVtoLinearRGB: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertYUVtoLinearRGB: [ThreadLevel] must be between 1 and 7.");
 
@@ -25959,7 +26203,7 @@ AVSValue __cdecl Create_ConvertYUVtoLinearRGB(AVSValue args, void* user_data, IS
 	}
 
 	return new ConvertYUVtoLinearRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fullrange,
-		mpeg2c,threads_number,sleep,env);
+		mpeg2c,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -26013,6 +26257,8 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	int thread_level=args[26].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if (!avsp) OutputMode=0;
 
@@ -26077,8 +26323,8 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertYUVtoXYZ: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertYUVtoXYZ: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertYUVtoXYZ: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertYUVtoXYZ: [ThreadLevel] must be between 1 and 7.");
 
@@ -26135,7 +26381,7 @@ AVSValue __cdecl Create_ConvertYUVtoXYZ(AVSValue args, void* user_data, IScriptE
 	}
 
 	return new ConvertYUVtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,Crosstalk,HLGColor,OOTF,EOTF,
-		fullrange,mpeg2c,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,env);
+		fullrange,mpeg2c,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -26187,6 +26433,8 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 	int thread_level=args[18].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((Color<0) || (Color>4))
 		env->ThrowError("ConvertLinearRGBtoYUV: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
@@ -26198,8 +26446,8 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertLinearRGBtoYUV: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertLinearRGBtoYUV: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertLinearRGBtoYUV: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertLinearRGBtoYUV: [ThreadLevel] must be between 1 and 7.");
 
@@ -26256,7 +26504,7 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV(AVSValue args, void* user_data, IS
 	}
 
 	return new ConvertLinearRGBtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,HLGColor,OOTF,EOTF,fullrange,
-		mpeg2c,fastmode,threads_number,sleep,env);
+		mpeg2c,fastmode,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -26309,6 +26557,8 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 	int thread_level=args[25].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if (!avsp) OutputMode=0;
 
@@ -26373,8 +26623,8 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertRGBtoXYZ: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertRGBtoXYZ: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertRGBtoXYZ: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertRGBtoXYZ: [ThreadLevel] must be between 1 and 7.");
 
@@ -26431,7 +26681,7 @@ AVSValue __cdecl Create_ConvertRGBtoXYZ(AVSValue args, void* user_data, IScriptE
 	}
 
 	return new ConvertRGBtoXYZ(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,crosstalk,HLGColor,
-		OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,env);
+		OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -26493,6 +26743,8 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	int thread_level=args[36].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((Color<0) || (Color>4))
 		env->ThrowError("ConvertXYZtoYUV: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
@@ -26631,8 +26883,8 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertXYZtoYUV: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertXYZtoYUV: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertXYZtoYUV: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertXYZtoYUV: [ThreadLevel] must be between 1 and 7.");
 
@@ -26690,7 +26942,7 @@ AVSValue __cdecl Create_ConvertXYZtoYUV(AVSValue args, void* user_data, IScriptE
 
 	return new ConvertXYZtoYUV(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,crosstalk,HLGColor,
 		OOTF,EOTF,fullrange,mpeg2c,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
-		threads_number,sleep,env);
+		threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -26747,6 +26999,8 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	int thread_level=args[34].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((Color<0) || (Color>4))
 		env->ThrowError("ConvertXYZtoRGB: [Color] must be 0 (BT2100), 1 (BT2020), 2 (BT709), 3 (BT601_525), 4 (BT601_625)");
@@ -26886,8 +27140,8 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertXYZtoRGB: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertXYZtoRGB: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertXYZtoRGB: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertXYZtoRGB: [ThreadLevel] must be between 1 and 7.");
 
@@ -26945,7 +27199,7 @@ AVSValue __cdecl Create_ConvertXYZtoRGB(AVSValue args, void* user_data, IScriptE
 
 	return new ConvertXYZtoRGB(args[0].AsClip(),Color,OutputMode,HDRMode,HLG_Lb,HLG_Lw,crosstalk,HLGColor,
 		OOTF,EOTF,fastmode,Rx,Ry,Gx,Gy,Bx,By,Wx,Wy,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,
-		threads_number,sleep,env);
+		threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -26973,12 +27227,14 @@ AVSValue __cdecl Create_ConvertXYZ_Scale_HDRtoSDR(AVSValue args, void* user_data
 	int thread_level=args[10].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -27034,7 +27290,7 @@ AVSValue __cdecl Create_ConvertXYZ_Scale_HDRtoSDR(AVSValue args, void* user_data
 		}
 	}
 
-	return new ConvertXYZ_Scale_HDRtoSDR(args[0].AsClip(),Coeff_X,Coeff_Y,Coeff_Z,threads_number,sleep,env);
+	return new ConvertXYZ_Scale_HDRtoSDR(args[0].AsClip(),Coeff_X,Coeff_Y,Coeff_Z,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -27062,12 +27318,14 @@ AVSValue __cdecl Create_ConvertXYZ_Scale_SDRtoHDR(AVSValue args, void* user_data
 		env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: Wrong parameter value!");
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -27123,7 +27381,7 @@ AVSValue __cdecl Create_ConvertXYZ_Scale_SDRtoHDR(AVSValue args, void* user_data
 		}
 	}
 
-	return new ConvertXYZ_Scale_SDRtoHDR(args[0].AsClip(),Coeff_X,Coeff_Y,Coeff_Z,threads_number,sleep,env);
+	return new ConvertXYZ_Scale_SDRtoHDR(args[0].AsClip(),Coeff_X,Coeff_Y,Coeff_Z,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -27244,12 +27502,14 @@ AVSValue __cdecl Create_ConvertXYZ_Hable_HDRtoSDR(AVSValue args, void* user_data
 	int thread_level=args[41].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -27306,7 +27566,7 @@ AVSValue __cdecl Create_ConvertXYZ_Hable_HDRtoSDR(AVSValue args, void* user_data
 	}
 
 	return new ConvertXYZ_Hable_HDRtoSDR(args[0].AsClip(),exp_X,w_X,a_X,b_X,c_X,d_X,e_X,f_X,exp_Y,w_Y,a_Y,b_Y,c_Y,d_Y,e_Y,f_Y,
-		exp_Z,w_Z,a_Z,b_Z,c_Z,d_Z,e_Z,f_Z,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,fastmode,threads_number,sleep,env);
+		exp_Z,w_Z,a_Z,b_Z,c_Z,d_Z,e_Z,f_Z,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,fastmode,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -27361,12 +27621,14 @@ AVSValue __cdecl Create_ConvertRGB_Hable_HDRtoSDR(AVSValue args, void* user_data
 	int thread_level=args[32].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertRGB_Hable_HDRtoSDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertRGB_Hable_HDRtoSDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertRGB_Hable_HDRtoSDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertRGB_Hable_HDRtoSDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -27423,7 +27685,7 @@ AVSValue __cdecl Create_ConvertRGB_Hable_HDRtoSDR(AVSValue args, void* user_data
 	}
 
 	return new ConvertRGB_Hable_HDRtoSDR(args[0].AsClip(),exp_R,w_R,a_R,b_R,c_R,d_R,e_R,f_R,exp_G,w_G,a_G,b_G,c_G,d_G,e_G,f_G,
-		exp_B,w_B,a_B,b_B,c_B,d_B,e_B,f_B,fastmode,threads_number,sleep,env);
+		exp_B,w_B,a_B,b_B,c_B,d_B,e_B,f_B,fastmode,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -27526,12 +27788,14 @@ AVSValue __cdecl Create_ConvertXYZ_Mobius_HDRtoSDR(AVSValue args, void* user_dat
 	int thread_level=args[26].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -27588,7 +27852,7 @@ AVSValue __cdecl Create_ConvertXYZ_Mobius_HDRtoSDR(AVSValue args, void* user_dat
 	}
 
 	return new ConvertXYZ_Mobius_HDRtoSDR(args[0].AsClip(),exp_X,trans_X,peak_X,exp_Y,trans_Y,peak_Y,
-		exp_Z,trans_Z,peak_Z,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,fastmode,threads_number,sleep,env);
+		exp_Z,trans_Z,peak_Z,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,fastmode,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -27625,12 +27889,14 @@ AVSValue __cdecl Create_ConvertRGB_Mobius_HDRtoSDR(AVSValue args, void* user_dat
 	int thread_level=args[17].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -27687,7 +27953,7 @@ AVSValue __cdecl Create_ConvertRGB_Mobius_HDRtoSDR(AVSValue args, void* user_dat
 	}
 
 	return new ConvertRGB_Mobius_HDRtoSDR(args[0].AsClip(),exp_R,trans_R,peak_R,exp_G,trans_G,peak_G,
-		exp_B,trans_B,peak_B,fastmode,threads_number,sleep,env);
+		exp_B,trans_B,peak_B,fastmode,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -27794,12 +28060,14 @@ AVSValue __cdecl Create_ConvertXYZ_Reinhard_HDRtoSDR(AVSValue args, void* user_d
 	int thread_level=args[26].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
 	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+		env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -27856,7 +28124,7 @@ AVSValue __cdecl Create_ConvertXYZ_Reinhard_HDRtoSDR(AVSValue args, void* user_d
 	}
 
 	return new ConvertXYZ_Reinhard_HDRtoSDR(args[0].AsClip(),exp_X,contr_X,peak_X,exp_Y,contr_Y,peak_Y,
-		exp_Z,contr_Z,peak_Z,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,fastmode,threads_number,sleep,env);
+		exp_Z,contr_Z,peak_Z,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,fastmode,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -27897,12 +28165,14 @@ AVSValue __cdecl Create_ConvertRGB_Reinhard_HDRtoSDR(AVSValue args, void* user_d
 		env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: Wrong parameter value!");
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -27959,7 +28229,7 @@ AVSValue __cdecl Create_ConvertRGB_Reinhard_HDRtoSDR(AVSValue args, void* user_d
 	}
 
 	return new ConvertRGB_Reinhard_HDRtoSDR(args[0].AsClip(),exp_R,contr_R,peak_R,exp_G,contr_G,peak_G,
-		exp_B,contr_B,peak_B,fastmode,threads_number,sleep,env);
+		exp_B,contr_B,peak_B,fastmode,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -27990,12 +28260,14 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR(AVSValue args, v
 		env->ThrowError("ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR: Wrong parameter value!");
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -28052,7 +28324,7 @@ AVSValue __cdecl Create_ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR(AVSValue args, v
 	}
 
 	return new ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR(args[0].AsClip(),Lhdr,Lsdr,CoeffAdj,
-		fastmode,threads_number,sleep,env);
+		fastmode,threads_number,sleep,negativePrefetch,env);
 }
 
 
@@ -28158,12 +28430,14 @@ AVSValue __cdecl Create_ConverXYZ_BT2446_C_HDRtoSDR(AVSValue args, void* user_da
 	int thread_level=args[27].AsInt(6);
 
 	const bool avsp=env->FunctionExists("ConvertBits");
+	const bool negativePrefetch=(prefetch<0)?true:false;
+	prefetch=abs(prefetch);
 
 	if ((threads<0) || (threads>MAX_MT_THREADS))
 		env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: [threads] must be between 0 and %ld.",MAX_MT_THREADS);
 	if (prefetch==0) prefetch=1;
-	if ((prefetch<0) || (prefetch>MAX_THREAD_POOL))
-		env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: [prefetch] must be between 0 and %d.",MAX_THREAD_POOL);
+	if (prefetch>MAX_THREAD_POOL)
+		env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: [prefetch] can't be higher than %d.",MAX_THREAD_POOL);
 	if ((thread_level<1) || (thread_level>7))
 		env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: [ThreadLevel] must be between 1 and 7.");
 
@@ -28220,7 +28494,7 @@ AVSValue __cdecl Create_ConverXYZ_BT2446_C_HDRtoSDR(AVSValue args, void* user_da
 	}
 
 	return new ConverXYZ_BT2446_C_HDRtoSDR(args[0].AsClip(),ChromaC,PQMode,Lhdr,Lsdr,pct_ref,pct_ip,pct_wp,
-		pct_sdr_skin,pct_hdr_skin,WhiteShift,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,fastmode,threads_number,sleep,env);
+		pct_sdr_skin,pct_hdr_skin,WhiteShift,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,fastmode,threads_number,sleep,negativePrefetch,env);
 }
 
 

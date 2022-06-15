@@ -10340,6 +10340,286 @@ BT2446C_32_XYZ_AVX_2:
 JPSDR_HDRTools_BT2446C_32_XYZ_AVX endp
 
 
+JPSDR_HDRTools_Convert_XYZ_ACES_HDRtoSDR_SSE2 proc src:dword,dst:dword,w4:dword,h:dword,src_pitch:dword,dst_pitch:dword,
+	Coeff1:dword,Coeff2:dword,Coeff3:dword,Coeff4:dword,Coeff5:dword
+
+	public JPSDR_HDRTools_Convert_XYZ_ACES_HDRtoSDR_SSE2
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,Coeff1
+	movss xmm3,dword ptr[esi]
+	shufps xmm3,xmm3,0
+	mov esi,Coeff2
+	movss xmm4,dword ptr[esi]
+	shufps xmm4,xmm4,0
+	mov esi,Coeff3
+	movss xmm5,dword ptr[esi]
+	shufps xmm5,xmm5,0
+	mov esi,Coeff4
+	movss xmm6,dword ptr[esi]
+	shufps xmm6,xmm6,0
+	mov esi,Coeff5
+	movss xmm7,dword ptr[esi]
+	shufps xmm7,xmm7,0
+	
+	mov esi,src
+	mov edi,dst
+	mov ebx,w4
+	mov edx,16
+	
+Convert_XYZ_ACES_HDRtoSDR_SSE2_1:
+	xor eax,eax
+	mov ecx,ebx
+Convert_XYZ_ACES_HDRtoSDR_SSE2_2:	
+	movaps xmm0,XMMWORD ptr[esi+eax]
+	
+	movaps xmm2,xmm0
+	movaps xmm1,xmm0
+	
+	mulps xmm2,xmm5
+	addps xmm1,xmm3
+	addps xmm2,xmm6
+	mulps xmm1,xmm0
+	mulps xmm2,xmm0
+	addps xmm1,xmm4
+	addps xmm2,xmm7
+	
+	divps xmm1,xmm2
+	
+	movaps XMMWORD ptr[edi+eax],xmm1
+	
+	add eax,edx
+	loop Convert_XYZ_ACES_HDRtoSDR_SSE2_2
+	
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_XYZ_ACES_HDRtoSDR_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_XYZ_ACES_HDRtoSDR_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_XYZ_ACES_HDRtoSDR_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword,
+	Coeff1:dword,Coeff2:dword,Coeff3:dword,Coeff4:dword,Coeff5:dword
+
+	public JPSDR_HDRTools_Convert_XYZ_ACES_HDRtoSDR_AVX
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,Coeff1
+	vmovss xmm3,dword ptr[esi]
+	vshufps xmm3,xmm3,xmm3,0
+	vinsertf128 ymm3,ymm3,xmm3,1
+	mov esi,Coeff2
+	vmovss xmm4,dword ptr[esi]
+	vshufps xmm4,xmm4,xmm4,0
+	vinsertf128 ymm4,ymm4,xmm4,1
+	mov esi,Coeff3
+	vmovss xmm5,dword ptr[esi]
+	vshufps xmm5,xmm5,xmm5,0
+	vinsertf128 ymm5,ymm5,xmm5,1
+	mov esi,Coeff4
+	vmovss xmm6,dword ptr[esi]
+	vshufps xmm6,xmm6,xmm6,0
+	vinsertf128 ymm6,ymm6,xmm6,1
+	mov esi,Coeff5
+	vmovss xmm7,dword ptr[esi]
+	vshufps xmm7,xmm7,xmm7,0
+	vinsertf128 ymm7,ymm7,xmm7,1
+	
+	mov esi,src
+	mov edi,dst
+	mov ebx,w8
+	mov edx,32
+	
+Convert_XYZ_ACES_HDRtoSDR_AVX_1:
+	xor eax,eax
+	mov ecx,ebx
+Convert_XYZ_ACES_HDRtoSDR_AVX_2:
+	vmovaps ymm0,YMMWORD ptr[esi+eax]
+	
+	vmulps ymm2,ymm0,ymm5
+	vaddps ymm1,ymm0,ymm3
+	vaddps ymm2,ymm2,ymm6
+	vmulps ymm1,ymm1,ymm0
+	vmulps ymm2,ymm2,ymm0
+	vaddps ymm1,ymm1,ymm4
+	vaddps ymm2,ymm2,ymm7
+	
+	vdivps ymm1,ymm1,ymm2
+	
+	vmovaps YMMWORD ptr[edi+eax],ymm1
+	
+	add eax,edx
+	loop Convert_XYZ_ACES_HDRtoSDR_AVX_2
+	
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_XYZ_ACES_HDRtoSDR_AVX_1
+	
+	vzeroupper
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_XYZ_ACES_HDRtoSDR_AVX endp
+
+
+JPSDR_HDRTools_Convert_RGB_ACES_HDRtoSDR_SSE2 proc src:dword,dst:dword,w4:dword,h:dword,src_pitch:dword,dst_pitch:dword,
+	Coeff1:dword,Coeff2:dword,Coeff3:dword,Coeff4:dword,Coeff5:dword
+
+	public JPSDR_HDRTools_Convert_RGB_ACES_HDRtoSDR_SSE2
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,Coeff1
+	movss xmm3,dword ptr[esi]
+	shufps xmm3,xmm3,0
+	mov esi,Coeff2
+	movss xmm4,dword ptr[esi]
+	shufps xmm4,xmm4,0
+	mov esi,Coeff3
+	movss xmm5,dword ptr[esi]
+	shufps xmm5,xmm5,0
+	mov esi,Coeff4
+	movss xmm6,dword ptr[esi]
+	shufps xmm6,xmm6,0
+	mov esi,Coeff5
+	movss xmm7,dword ptr[esi]
+	shufps xmm7,xmm7,0
+	
+	mov esi,src
+	mov edi,dst
+	mov ebx,w4
+	mov edx,16
+	
+Convert_RGB_ACES_HDRtoSDR_SSE2_1:
+	xor eax,eax
+	mov ecx,ebx
+Convert_RGB_ACES_HDRtoSDR_SSE2_2:	
+	movaps xmm0,XMMWORD ptr[esi+eax]
+	
+	movaps xmm2,xmm0
+	movaps xmm1,xmm0
+	
+	mulps xmm2,xmm5
+	mulps xmm1,xmm3
+	addps xmm2,xmm6
+	addps xmm1,xmm4
+	mulps xmm2,xmm0
+	mulps xmm1,xmm0
+	addps xmm2,xmm7
+	
+	divps xmm1,xmm2
+	
+	movaps XMMWORD ptr[edi+eax],xmm1
+	
+	add eax,edx
+	loop Convert_RGB_ACES_HDRtoSDR_SSE2_2
+	
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_RGB_ACES_HDRtoSDR_SSE2_1
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB_ACES_HDRtoSDR_SSE2 endp
+
+
+JPSDR_HDRTools_Convert_RGB_ACES_HDRtoSDR_AVX proc src:dword,dst:dword,w8:dword,h:dword,src_pitch:dword,dst_pitch:dword,
+	Coeff1:dword,Coeff2:dword,Coeff3:dword,Coeff4:dword,Coeff5:dword
+
+	public JPSDR_HDRTools_Convert_RGB_ACES_HDRtoSDR_AVX
+
+	push esi
+	push edi
+	push ebx
+	
+	mov esi,Coeff1
+	vmovss xmm3,dword ptr[esi]
+	vshufps xmm3,xmm3,xmm3,0
+	vinsertf128 ymm3,ymm3,xmm3,1
+	mov esi,Coeff2
+	vmovss xmm4,dword ptr[esi]
+	vshufps xmm4,xmm4,xmm4,0
+	vinsertf128 ymm4,ymm4,xmm4,1
+	mov esi,Coeff3
+	vmovss xmm5,dword ptr[esi]
+	vshufps xmm5,xmm5,xmm5,0
+	vinsertf128 ymm5,ymm5,xmm5,1
+	mov esi,Coeff4
+	vmovss xmm6,dword ptr[esi]
+	vshufps xmm6,xmm6,xmm6,0
+	vinsertf128 ymm6,ymm6,xmm6,1
+	mov esi,Coeff5
+	vmovss xmm7,dword ptr[esi]
+	vshufps xmm7,xmm7,xmm7,0
+	vinsertf128 ymm7,ymm7,xmm7,1
+	
+	mov esi,src
+	mov edi,dst
+	mov ebx,w8
+	mov edx,32
+	
+Convert_RGB_ACES_HDRtoSDR_AVX_1:
+	xor eax,eax
+	mov ecx,ebx
+Convert_RGB_ACES_HDRtoSDR_AVX_2:
+	vmovaps ymm0,YMMWORD ptr[esi+eax]
+	
+	vmulps ymm2,ymm0,ymm5
+	vmulps ymm1,ymm0,ymm3
+	vaddps ymm2,ymm2,ymm6
+	vaddps ymm1,ymm1,ymm4
+	vmulps ymm2,ymm2,ymm0
+	vmulps ymm1,ymm1,ymm0
+	vaddps ymm2,ymm2,ymm7
+	
+	vdivps ymm1,ymm1,ymm2
+	
+	vmovaps YMMWORD ptr[edi+eax],ymm1
+	
+	add eax,edx
+	loop Convert_RGB_ACES_HDRtoSDR_AVX_2
+	
+	add esi,src_pitch
+	add edi,dst_pitch
+	dec h
+	jnz short Convert_RGB_ACES_HDRtoSDR_AVX_1
+	
+	vzeroupper
+	
+	pop ebx
+	pop edi
+	pop esi
+
+	ret
+
+JPSDR_HDRTools_Convert_RGB_ACES_HDRtoSDR_AVX endp
+
+
 end
 
 

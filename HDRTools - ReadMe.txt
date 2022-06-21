@@ -866,7 +866,8 @@ The others parameters are identical to ConvertXYZtoRGB.
 
 ConvertXYZ_ACES_HDRtoSDR(float a_X,float b_X,float c_X,float d_X,float e_X,
      float a_Y,float b_Y,float c_Y,float d_Y,float e_Y,float a_Z,float b_Z,
-     float c_Z,float d_Z,float e_Z,int pColor,float pRx,float pRy,float pGx,
+     float c_Z,float d_Z,float e_Z,float exposure_X,float exposure_Y,float exposure_Z,
+     int pColor,float pRx,float pRy,float pGx,
      float pGy,float pBx,float pBy,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
      int prefetch,int ThreadLevel)
@@ -874,7 +875,7 @@ ConvertXYZ_ACES_HDRtoSDR(float a_X,float b_X,float c_X,float d_X,float e_X,
 Accepted input: RGB64 and Planar float RGB.
 
 ACES XYZ tonemap, you can have different parameters for each plane, if you want.
-Calcul : (v*(v+a)+b)/(v*(c*v+d)+e)
+Calcul : v=(X,Y,Z)*exposure, (v*(v+a)+b)/(v*(c*v+d)+e)
 
    a_X -
       a value used on X plane.
@@ -901,15 +902,20 @@ Calcul : (v*(v+a)+b)/(v*(c*v+d)+e)
       
        Default: 0.238081 (float)
 
-   a_Y,b_Y,c_Y,d_Y,e_Y
+   exposure_X -
+      exposure used on X plane.
+
+       Default: 1.0 (float)
+
+   a_Y,b_Y,c_Y,d_Y,e_Y,exposure_Y
       Values used on Y plane.
 
-       Default: a_X,b_X,c_X,d_X,e_X (float)
+       Default: a_X,b_X,c_X,d_X,e_X,exposure_X (float)
 
-   a_Z,b_Z,c_Z,d_Z,e_Z
+   a_Z,b_Z,c_Z,d_Z,e_Z,exposure_Z
       Values used on Z plane.
 
-       Default: a_X,b_X,c_X,d_X,e_X (float)
+       Default: a_X,b_X,c_X,d_X,e_X,exposure_X (float)
 
 The others parameters are identical to ConvertXYZtoRGB.
 
@@ -920,14 +926,15 @@ The others parameters are identical to ConvertXYZtoRGB.
 
 ConvertRGB_ACES_HDRtoSDR(float a_R,float b_R,float c_R,float d_R,float e_R,
      float a_G,float b_G,float c_G,float d_G,float e_G,float a_B,float b_B,
-     float c_B,float d_B,float e_B,bool fastmode,
+     float c_B,float d_B,float e_B,float exposure_R,float exposure_G,
+     float exposure_B,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
      int prefetch,int ThreadLevel)
      
 Accepted input: RGB64 and Planar float RGB.
 
 ACES RGB tonemap, you can have different parameters for each plane, if you want.
-Calcul : (v*(a*v+b))/(v*(c*v+d)+e)
+Calcul : v=(R,G,B)*exposure, (v*(a*v+b))/(v*(c*v+d)+e)
 
    a_R -
       a value used on R plane.
@@ -954,15 +961,20 @@ Calcul : (v*(a*v+b))/(v*(c*v+d)+e)
       
        Default: 0.14 (float)
 
-   a_G,b_G,c_G,d_G,e_G
+   exposure_R -
+      exposure used on R plane.
+
+       Default: 1.0 (float)
+
+   a_G,b_G,c_G,d_G,e_G,exposure_G
       Values used on G plane.
 
-       Default: a_R,b_R,c_R,d_R,e_R (float)
+       Default: a_R,b_R,c_R,d_R,e_R,exposure_R (float)
 
-   a_B,b_B,c_B,d_B,e_B
+   a_B,b_B,c_B,d_B,e_B,exposure_B
       Values used on B plane.
 
-       Default: a_R,b_R,c_R,d_R,e_R (float)
+       Default: a_R,b_R,c_R,d_R,e_R,exposure_R (float)
 
 The others parameters are identical to ConvertLinearRGBtoYUV.
 

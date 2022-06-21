@@ -23,7 +23,7 @@
 #include "./avisynth.h"
 #include "./ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 1.0.0 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 1.0.1 JPSDR"
 
 
 typedef struct _dataLookUp
@@ -732,8 +732,8 @@ class ConvertXYZ_ACES_HDRtoSDR : public GenericVideoFilter
 public:
 	ConvertXYZ_ACES_HDRtoSDR(PClip _child,double _a_X,double _b_X,double _c_X,double _d_X,double _e_X,
 		double _a_Y,double _b_Y,double _c_Y,double _d_Y,double _e_Y,double _a_Z,double _b_Z,double _c_Z,
-		double _d_Z,double _e_Z,float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,
-		float _pWx,float _pWy,
+		double _d_Z,double _e_Z,double _exp_X,double _exp_Y,double _exp_Z,
+		float _pRx,float _pRy,float _pGx,float _pGy,float _pBx,float _pBy,float _pWx,float _pWy,
 		bool _fastmode, uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertXYZ_ACES_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
@@ -745,6 +745,7 @@ private:
 	double a_X,b_X,c_X,d_X,e_X;
 	double a_Y,b_Y,c_Y,d_Y,e_Y;
 	double a_Z,b_Z,c_Z,d_Z,e_Z;
+	double exp_X,exp_Y,exp_Z;
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	float *lookupX_32,*lookupY_32,*lookupZ_32;
@@ -775,6 +776,7 @@ public:
 	ConvertRGB_ACES_HDRtoSDR(PClip _child,double _a_R,double _b_R,double _c_R,
 		double _d_R,double _e_R,double _a_G,double _b_G,double _c_G,double _d_G,
 		double _e_G,double _a_B,double _b_B,double _c_B,double _d_B,double _e_B,
+		double _exp_R,double _exp_G,double _exp_B,
 		bool _fastmode, uint8_t _threads,bool _sleep,bool negativePrefetch,IScriptEnvironment* env);
 	virtual ~ConvertRGB_ACES_HDRtoSDR();
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
@@ -786,6 +788,7 @@ private:
 	double a_R,b_R,c_R,d_R,e_R;
 	double a_G,b_G,c_G,d_G,e_G;
 	double a_B,b_B,c_B,d_B,e_B;
+	double exp_R,exp_G,exp_B;
 	uint16_t *lookupR_16,*lookupG_16,*lookupB_16;
 	float *lookupR_32,*lookupG_32,*lookupB_32;
 	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;

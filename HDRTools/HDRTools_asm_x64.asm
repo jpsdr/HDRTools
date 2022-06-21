@@ -6653,9 +6653,9 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg r15
 	sub rsp,32
 	.allocstack 32
-	vmovdqu XMMWORD ptr[rsp],xmm6
+	movdqu XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
-	vmovdqu XMMWORD ptr[rsp+16],xmm7
+	movdqu XMMWORD ptr[rsp+16],xmm7
 	.savexmm128 xmm7,16
 	.endprolog
 
@@ -6723,8 +6723,8 @@ Convert_PlanarXYZtoRGB_32_SSE2_2:
 	dec h
 	jnz short Convert_PlanarXYZtoRGB_32_SSE2_1
 	
-	vmovdqu xmm7,XMMWORD ptr[rsp+16]
-	vmovdqu xmm6,XMMWORD ptr[rsp]
+	movdqu xmm7,XMMWORD ptr[rsp+16]
+	movdqu xmm6,XMMWORD ptr[rsp]
 	add rsp,32
 	
 	pop r15

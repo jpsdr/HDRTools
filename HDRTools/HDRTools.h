@@ -23,7 +23,7 @@
 #include "./avisynth.h"
 #include "./ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 1.0.1 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 1.0.2 JPSDR"
 
 
 typedef struct _dataLookUp
@@ -87,7 +87,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[3][MAX_MT_THREADS];
 	uint8_t threads,threads_number[3],max_threads;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -137,7 +137,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[3][MAX_MT_THREADS];
 	uint8_t threads,threads_number[3],max_threads;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -183,7 +183,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -227,7 +227,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[3][MAX_MT_THREADS];
 	uint8_t threads,threads_number[3],max_threads;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -276,7 +276,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[3][MAX_MT_THREADS];
 	uint8_t threads,threads_number[3],max_threads;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -323,7 +323,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -356,7 +356,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -390,7 +390,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -433,7 +433,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -472,7 +472,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -513,7 +513,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -550,7 +550,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -591,7 +591,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -628,7 +628,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -664,7 +664,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -714,7 +714,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	double fdico(double a,double b,double k1,double x);
 	bool dicotomie(double k1,double &k3);
@@ -760,7 +760,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 
@@ -800,7 +800,7 @@ private:
 	Public_MT_Data_Thread MT_Thread[MAX_MT_THREADS];
 	MT_Data_Info_HDRTools MT_Data[MAX_MT_THREADS];
 	uint8_t threads,threads_number;
-	uint16_t UserId;
+	uint32_t UserId;
 	
 	ThreadPoolFunction StaticThreadpoolF;
 

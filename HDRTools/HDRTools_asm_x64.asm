@@ -10951,9 +10951,9 @@ Coeff equ qword ptr[rbp+72]
 
 	mov rsi,ValMin
 	movss xmm1,dword ptr[rsi]
-	shufps xmm1,xmm1,0
 	mov rsi,Coeff
 	movss xmm2,dword ptr[rsi]
+	shufps xmm1,xmm1,0
 	shufps xmm2,xmm2,0
 	
 	movaps xmm3,XMMWORD ptr data_f_1048575
@@ -12125,16 +12125,16 @@ CoeffZ equ qword ptr[rbp+104]
 
 	mov rsi,ValMinX
 	movss xmm2,dword ptr[rsi]
-	shufps xmm2,xmm2,0
 	mov rsi,CoeffX
 	movss xmm3,dword ptr[rsi]
-	shufps xmm3,xmm3,0
-	
 	mov rsi,ValMinZ
 	movss xmm4,dword ptr[rsi]
-	shufps xmm4,xmm4,0
 	mov rsi,CoeffZ
 	movss xmm5,dword ptr[rsi]
+
+	shufps xmm2,xmm2,0
+	shufps xmm3,xmm3,0
+	shufps xmm4,xmm4,0
 	shufps xmm5,xmm5,0
 	
 	movaps xmm6,XMMWORD ptr data_f_65535

@@ -27,8 +27,14 @@
 #include "./MatrixClass.h"
 #include "./TransferFunctions.h"
 
+// VS 2015
 #if _MSC_VER >= 1900
 #define AVX2_BUILD_POSSIBLE
+#endif
+
+// VS 2019 v16.3
+#if _MSC_VER >= 1923
+#define AVX512_BUILD_POSSIBLE
 #endif
 
 static ThreadPoolInterface *poolInterface;
@@ -171,6 +177,16 @@ extern "C" void JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX2(const void
 extern "C" void JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_AVX2(const void *src1,const void *src2,void *dst,int32_t w32, int32_t h,
 	ptrdiff_t src_pitch2,ptrdiff_t dst_pitch);
 extern "C" void JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_AVX2(const void *src1,const void *src2,void *dst,int32_t w16, int32_t h,
+	ptrdiff_t src_pitch2,ptrdiff_t dst_pitch);
+#endif
+
+#ifdef AVX512_BUILD_POSSIBLE
+extern "C" void JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX512(const void *scr_1,const void *src_2,void *dst,int32_t w);
+extern "C" void JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX512(const void *scr_1,const void *src_2,void *dst,int32_t w);
+
+extern "C" void JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_AVX512(const void *src1,const void *src2,void *dst,int32_t w64, int32_t h,
+	ptrdiff_t src_pitch2,ptrdiff_t dst_pitch);
+extern "C" void JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_AVX512(const void *src1,const void *src2,void *dst,int32_t w32, int32_t h,
 	ptrdiff_t src_pitch2,ptrdiff_t dst_pitch);
 #endif
 
@@ -359,6 +375,27 @@ extern "C" void JPSDR_HDRTools_Scale_20_RGB_AVX2(const void *src,void *dst,int32
 	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
 
 extern "C" void JPSDR_HDRTools_BT2446C_16_XYZ_AVX2(const void *src,void *dst1,void *dst2,int32_t w8,
+	int32_t h,ptrdiff_t src_pitch,ptrdiff_t dst_pitch1,ptrdiff_t dst_pitch2,float *ValMinX,float *CoeffX,
+	float *ValMinZ,float *CoeffZ);
+#endif
+
+#ifdef AVX512_BUILD_POSSIBLE
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_8_AVX512(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX512(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+extern "C" void JPSDR_HDRTools_Convert_RGB64_16toRGB64_12_AVX512(const void *src,void *dst,int32_t w,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+
+extern "C" void JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX512(void *dst,void *srcY,int32_t w,int32_t h,
+	ptrdiff_t dst_pitch,ptrdiff_t src_pitchY);
+
+extern "C" void JPSDR_HDRTools_Scale_20_XYZ_AVX512(const void *src,void *dst,int32_t w16,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch,float *ValMin,float *Coeff);
+extern "C" void JPSDR_HDRTools_Scale_20_RGB_AVX512(const void *src,void *dst,int32_t w16,int32_t h,
+	ptrdiff_t src_pitch,ptrdiff_t dst_pitch);
+
+extern "C" void JPSDR_HDRTools_BT2446C_16_XYZ_AVX512(const void *src,void *dst1,void *dst2,int32_t w16,
 	int32_t h,ptrdiff_t src_pitch,ptrdiff_t dst_pitch1,ptrdiff_t dst_pitch2,float *ValMinX,float *CoeffX,
 	float *ValMinZ,float *CoeffZ);
 #endif
@@ -1716,6 +1753,261 @@ static void Convert_Progressive_16_YV12toYV16_AVX2(const MT_Data_Info_HDRTools &
 		for(int32_t i=h_2; i<h_Y_max; i+=2)
 		{
 			JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX2(src_V,src_Vp,dstVp,w_V16);
+			dstVp+=dst_pitch_V;
+
+			memcpy(dstVp,src_V,w_V2);
+			dstVp+=dst_pitch_V;
+
+			src_V+=src_pitch_V;
+			src_Vp+=src_pitch_V;
+			src_Vn+=src_pitch_V;
+		}
+	}
+}
+#endif
+
+
+#ifdef AVX512_BUILD_POSSIBLE
+static void Convert_Progressive_8_YV12toYV16_AVX512(const MT_Data_Info_HDRTools &mt_data_inf)
+{
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
+	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
+	const int32_t dst_w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
+	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
+	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
+
+	const uint8_t *src_U,*src_Up,*src_Un;
+	const uint8_t *src_V,*src_Vp,*src_Vn;
+	const int32_t w_U=dst_w>>1,w_V=dst_w>>1;
+	const int32_t w_U64=(w_U+63)>>6,w_V64=(w_V+63)>>6;
+	const int32_t h_2 = mt_data_inf.bottom ? h_Y_max-2:h_Y_max;
+	const int32_t h_0 = mt_data_inf.top ? 2:h_Y_min;
+
+	src_U=srcU_;
+	src_V=srcV_;
+	src_Up=src_U-src_pitch_U;
+	src_Un=src_U+src_pitch_U;
+	src_Vp=src_V-src_pitch_V;
+	src_Vn=src_V+src_pitch_V;
+
+	//Move_Full(srcYp,dstYp,dst_w,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+
+// Planar U
+	if (mt_data_inf.top)
+	{
+		for(int32_t i=0; i<2; i+=2)
+		{
+			memcpy(dstUp,src_U,w_U);
+			dstUp+=dst_pitch_U;
+
+			JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX512(src_U,src_Un,dstUp,w_U64);
+			dstUp+=dst_pitch_U;
+
+			src_U+=src_pitch_U;
+			src_Up+=src_pitch_U;
+			src_Un+=src_pitch_U;
+		}
+	}
+
+	for(int32_t i=h_0; i<h_2; i+=2)
+	{
+		JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX512(src_U,src_Up,dstUp,w_U64);
+		dstUp+=dst_pitch_U;
+		JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX512(src_U,src_Un,dstUp,w_U64);
+		dstUp+=dst_pitch_U;
+
+		src_U+=src_pitch_U;
+		src_Up+=src_pitch_U;
+		src_Un+=src_pitch_U;
+	}
+
+	if (mt_data_inf.bottom)
+	{
+		for(int32_t i=h_2; i<h_Y_max; i+=2)
+		{
+			JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX512(src_U,src_Up,dstUp,w_U64);
+			dstUp+=dst_pitch_U;
+
+			memcpy(dstUp,src_U,w_U);
+			dstUp+=dst_pitch_U;
+
+			src_U+=src_pitch_U;
+			src_Up+=src_pitch_U;
+			src_Un+=src_pitch_U;
+		}
+	}
+
+// Planar V
+	if (mt_data_inf.top)
+	{
+		for(int32_t i=0; i<2; i+=2)
+		{
+			memcpy(dstVp,src_V,w_V);
+			dstVp+=dst_pitch_V;
+
+			JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX512(src_V,src_Vn,dstVp,w_V64);
+			dstVp+=dst_pitch_V;
+
+			src_V+=src_pitch_V;
+			src_Vp+=src_pitch_V;
+			src_Vn+=src_pitch_V;
+		}
+	}
+
+	for(int32_t i=h_0; i<h_2; i+=2)
+	{
+		JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX512(src_V,src_Vp,dstVp,w_V64);
+		dstVp+=dst_pitch_V;
+		JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX512(src_V,src_Vn,dstVp,w_V64);
+		dstVp+=dst_pitch_V;
+
+		src_V+=src_pitch_V;
+		src_Vp+=src_pitch_V;
+		src_Vn+=src_pitch_V;
+	}
+
+	if (mt_data_inf.bottom)
+	{
+		for(int32_t i=h_2; i<h_Y_max; i+=2)
+		{
+			JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX512(src_V,src_Vp,dstVp,w_V64);
+			dstVp+=dst_pitch_V;
+
+			memcpy(dstVp,src_V,w_V);
+			dstVp+=dst_pitch_V;
+
+			src_V+=src_pitch_V;
+			src_Vp+=src_pitch_V;
+			src_Vn+=src_pitch_V;
+		}
+	}
+}
+
+
+static void Convert_Progressive_16_YV12toYV16_AVX512(const MT_Data_Info_HDRTools &mt_data_inf)
+{
+	//const uint8_t *srcYp=(const uint8_t *)mt_data_inf.src1;
+	const uint8_t *srcU_=(const uint8_t *)mt_data_inf.src2;
+	const uint8_t *srcV_=(const uint8_t *)mt_data_inf.src3;
+	//uint8_t *dstYp=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dstUp=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dstVp=(uint8_t *)mt_data_inf.dst3;
+	const int32_t dst_w=mt_data_inf.dst_Y_w;
+	const int32_t h_Y_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_Y_max=mt_data_inf.src_Y_h_max;
+	//const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch1;
+	const ptrdiff_t src_pitch_U=mt_data_inf.src_pitch2;
+	const ptrdiff_t src_pitch_V=mt_data_inf.src_pitch3;
+	//const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch1;
+	const ptrdiff_t dst_pitch_U=mt_data_inf.dst_pitch2;
+	const ptrdiff_t dst_pitch_V=mt_data_inf.dst_pitch3;
+
+	const uint8_t *src_U,*src_Up,*src_Un;
+	const uint8_t *src_V,*src_Vp,*src_Vn;
+	const int32_t w_U=dst_w>>1,w_V=dst_w>>1;
+	const int32_t w_U2=w_U << 1,w_V2=w_V << 1;
+	const int32_t w_U32=(w_U+31)>>5,w_V32=(w_V+31)>>5;
+	const int32_t h_2 = mt_data_inf.bottom ? h_Y_max-2:h_Y_max;
+	const int32_t h_0 = mt_data_inf.top ? 2:h_Y_min;
+
+	src_U=srcU_;
+	src_V=srcV_;
+	src_Up=src_U-src_pitch_U;
+	src_Un=src_U+src_pitch_U;
+	src_Vp=src_V-src_pitch_V;
+	src_Vn=src_V+src_pitch_V;
+
+	//Move_Full(srcYp,dstYp,dst_w << 1,h_Y_max-h_Y_min,src_pitch_Y,dst_pitch_Y);
+
+// Planar U
+	if (mt_data_inf.top)
+	{
+		for(int32_t i=0; i<2; i+=2)
+		{
+			memcpy(dstUp,src_U,w_U2);
+			dstUp+=dst_pitch_U;
+
+			JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX512(src_U,src_Un,dstUp,w_U32);
+			dstUp+=dst_pitch_U;
+
+			src_U+=src_pitch_U;
+			src_Up+=src_pitch_U;
+			src_Un+=src_pitch_U;
+		}
+	}
+
+	for(int32_t i=h_0; i<h_2; i+=2)
+	{
+		JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX512(src_U,src_Up,dstUp,w_U32);
+		dstUp+=dst_pitch_U;
+		JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX512(src_U,src_Un,dstUp,w_U32);
+		dstUp+=dst_pitch_U;
+
+		src_U+=src_pitch_U;
+		src_Up+=src_pitch_U;
+		src_Un+=src_pitch_U;
+	}
+
+	if (mt_data_inf.bottom)
+	{
+		for(int32_t i=h_2; i<h_Y_max; i+=2)
+		{
+			JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX512(src_U,src_Up,dstUp,w_U32);
+			dstUp+=dst_pitch_U;
+
+			memcpy(dstUp,src_U,w_U2);
+			dstUp+=dst_pitch_U;
+
+			src_U+=src_pitch_U;
+			src_Up+=src_pitch_U;
+			src_Un+=src_pitch_U;
+		}
+	}
+
+// Planar V
+	if (mt_data_inf.top)
+	{
+		for(int32_t i=0; i<2; i+=2)
+		{
+			memcpy(dstVp,src_V,w_V2);
+			dstVp+=dst_pitch_V;
+
+			JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX512(src_V,src_Vn,dstVp,w_V32);
+			dstVp+=dst_pitch_V;
+
+			src_V+=src_pitch_V;
+			src_Vp+=src_pitch_V;
+			src_Vn+=src_pitch_V;
+		}
+	}
+
+	for(int32_t i=h_0; i<h_2; i+=2)
+	{
+		JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX512(src_V,src_Vp,dstVp,w_V32);
+		dstVp+=dst_pitch_V;
+		JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX512(src_V,src_Vn,dstVp,w_V32);
+		dstVp+=dst_pitch_V;
+
+		src_V+=src_pitch_V;
+		src_Vp+=src_pitch_V;
+		src_Vn+=src_pitch_V;
+	}
+
+	if (mt_data_inf.bottom)
+	{
+		for(int32_t i=h_2; i<h_Y_max; i+=2)
+		{
+			JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX512(src_V,src_Vp,dstVp,w_V32);
 			dstVp+=dst_pitch_V;
 
 			memcpy(dstVp,src_V,w_V2);
@@ -4133,6 +4425,32 @@ static void Convert_Planar422toPlanar420_16_AVX2(const MT_Data_Info_HDRTools &mt
 #endif
 
 
+#ifdef AVX512_BUILD_POSSIBLE
+static void Convert_Planar422toPlanar420_8_AVX512(const MT_Data_Info_HDRTools &mt_data_inf)
+{
+	const int32_t w64=(mt_data_inf.dst_UV_w+63)>>6;
+	const int32_t h=mt_data_inf.dst_UV_h_max-mt_data_inf.dst_UV_h_min;
+
+	JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_AVX512(mt_data_inf.src1,(void *)(((uint8_t *)mt_data_inf.src1)+mt_data_inf.src_pitch1),
+		mt_data_inf.dst1,w64,h,mt_data_inf.src_pitch1 << 1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Convert_Planar422_to_Planar420_8_AVX512(mt_data_inf.src2,(void *)(((uint8_t *)mt_data_inf.src2)+mt_data_inf.src_pitch2),
+		mt_data_inf.dst2,w64,h,mt_data_inf.src_pitch2 << 1,mt_data_inf.dst_pitch2);
+}
+
+
+static void Convert_Planar422toPlanar420_16_AVX512(const MT_Data_Info_HDRTools &mt_data_inf)
+{
+	const int32_t w32=(mt_data_inf.dst_UV_w+31)>>5;
+	const int32_t h=mt_data_inf.dst_UV_h_max-mt_data_inf.dst_UV_h_min;
+
+	JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_AVX512(mt_data_inf.src1,(void *)(((uint8_t *)mt_data_inf.src1)+mt_data_inf.src_pitch1),
+		mt_data_inf.dst1,w32,h,mt_data_inf.src_pitch1 << 1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Convert_Planar422_to_Planar420_16_AVX512(mt_data_inf.src2,(void *)(((uint8_t *)mt_data_inf.src2)+mt_data_inf.src_pitch2),
+		mt_data_inf.dst2,w32,h,mt_data_inf.src_pitch2 << 1,mt_data_inf.dst_pitch2);
+}
+#endif
+
+
 /*
 *****************************************************************
 **             RGB to XYZ related functions                    **
@@ -4655,6 +4973,71 @@ static void Convert_RGBPStoLinearRGBPS_AVX2(const MT_Data_Info_HDRTools &mt_data
 	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
 
 	JPSDR_HDRTools_Scale_20_RGB_AVX2(mt_data_inf.src3,mt_data_inf.dst3,w8,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
+	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
+	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
+	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
+	uint8_t *dstR_=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dstG_=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dstB_=(uint8_t *)mt_data_inf.dst3;
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w8=(w+7)>>3;
+	const int32_t h_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_max=mt_data_inf.src_Y_h_max;
+	const int32_t h=h_max-h_min;
+	const ptrdiff_t src_pitch_R=mt_data_inf.src_pitch1;
+	const ptrdiff_t src_pitch_G=mt_data_inf.src_pitch2;
+	const ptrdiff_t src_pitch_B=mt_data_inf.src_pitch3;
+	const ptrdiff_t dst_pitch_R=mt_data_inf.dst_pitch1;
+	const ptrdiff_t dst_pitch_G=mt_data_inf.dst_pitch2;
+	const ptrdiff_t dst_pitch_B=mt_data_inf.dst_pitch3;
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(srcR_,dstR_,w8,h,src_pitch_R,dst_pitch_R);
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(srcG_,dstG_,w8,h,src_pitch_G,dst_pitch_G);
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(srcB_,dstB_,w8,h,src_pitch_B,dst_pitch_B);
+
+	for(int32_t i=h_min; i<h_max; i++)
+	{
+		uint32_t x=0;
+		const uint32_t *srcR=(const uint32_t *)dstR_;
+		const uint32_t *srcG=(const uint32_t *)dstG_;
+		const uint32_t *srcB=(const uint32_t *)dstB_;
+		float *dstR=(float *)dstR_;
+		float *dstG=(float *)dstG_;
+		float *dstB=(float *)dstB_;
+
+		for(int32_t j=0; j<w; j++)
+			dstR[j]=lookup[srcR[j]];
+
+		for(int32_t j=0; j<w; j++)
+			dstG[j]=lookup[srcG[j]];
+
+		for(int32_t j=0; j<w; j++)
+			dstB[j]=lookup[srcB[j]];
+
+		dstR_+=dst_pitch_R;
+		dstG_+=dst_pitch_G;
+		dstB_+=dst_pitch_B;
+	}*/
+}
+#endif
+
+
+#ifdef AVX512_BUILD_POSSIBLE
+static void Convert_RGBPStoLinearRGBPS_AVX512(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
+{
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w16=(w+15)>>4;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX512(mt_data_inf.src1,mt_data_inf.dst1,w16,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX512(mt_data_inf.src2,mt_data_inf.dst2,w16,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX512(mt_data_inf.src3,mt_data_inf.dst3,w16,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
 	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
 /*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
@@ -5402,6 +5785,79 @@ static void Convert_LinearRGBPStoRGBPS_AVX2(const MT_Data_Info_HDRTools &mt_data
 	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
 
 	JPSDR_HDRTools_Scale_20_RGB_AVX2(mt_data_inf.src3,mt_data_inf.dst3,w8,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
+/*
+	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
+	const uint8_t *srcG_=(uint8_t *)mt_data_inf.src2;
+	const uint8_t *srcB_=(uint8_t *)mt_data_inf.src3;
+	uint8_t *dstR_=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dstG_=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dstB_=(uint8_t *)mt_data_inf.dst3;
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w8=(w+7)>>3;
+	const int32_t h_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_max=mt_data_inf.src_Y_h_max;
+	const int32_t h=h_max-h_min;
+	const ptrdiff_t src_pitch_R=mt_data_inf.src_pitch1;
+	const ptrdiff_t src_pitch_G=mt_data_inf.src_pitch2;
+	const ptrdiff_t src_pitch_B=mt_data_inf.src_pitch3;
+	const ptrdiff_t dst_pitch_R=mt_data_inf.dst_pitch1;
+	const ptrdiff_t dst_pitch_G=mt_data_inf.dst_pitch2;
+	const ptrdiff_t dst_pitch_B=mt_data_inf.dst_pitch3;
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(srcR_,dstR_,w8,h,src_pitch_R,dst_pitch_R);
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(srcG_,dstG_,w8,h,src_pitch_G,dst_pitch_G);
+	JPSDR_HDRTools_Scale_20_RGB_AVX2(srcB_,dstB_,w8,h,src_pitch_B,dst_pitch_B);
+
+	for(int32_t i=h_min; i<h_max; i++)
+	{
+		const uint32_t *srcR=(const uint32_t *)dstR_;
+		float *dstR=(float *)dstR_;
+
+		for(int32_t j=0; j<w; j++)
+			dstR[j]=lookup[srcR[j]];
+
+		dstR_+=dst_pitch_R;
+	}
+	for(int32_t i=h_min; i<h_max; i++)
+	{
+		const uint32_t *srcG=(const uint32_t *)dstG_;
+		float *dstG=(float *)dstG_;
+
+		for(int32_t j=0; j<w; j++)
+			dstG[j]=lookup[srcG[j]];
+
+		dstG_+=dst_pitch_G;
+	}
+	for(int32_t i=h_min; i<h_max; i++)
+	{
+		const uint32_t *srcB=(const uint32_t *)dstB_;
+		float *dstB=(float *)dstB_;
+
+		for(int32_t j=0; j<w; j++)
+			dstB[j]=lookup[srcB[j]];
+
+		dstB_+=dst_pitch_B;
+	}
+	*/
+}
+#endif
+
+
+#ifdef AVX512_BUILD_POSSIBLE
+static void Convert_LinearRGBPStoRGBPS_AVX512(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookup)
+{
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w16=(w+15)>>4;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX512(mt_data_inf.src1,mt_data_inf.dst1,w16,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookup);
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX512(mt_data_inf.src2,mt_data_inf.dst2,w16,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookup);
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX512(mt_data_inf.src3,mt_data_inf.dst3,w16,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
 	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookup);
 /*
 	const uint8_t *srcR_=(uint8_t *)mt_data_inf.src1;
@@ -6282,6 +6738,72 @@ static void Convert_12_RGB64_HLG_OOTF_AVX2(void *src1,void *src2,void *dst1,cons
 #endif
 
 
+#ifdef AVX512_BUILD_POSSIBLE
+static void Convert_10_RGB64_HLG_OOTF_AVX512(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_10_AVX512(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+
+
+static void Convert_12_RGB64_HLG_OOTF_AVX512(void *src1,void *src2,void *dst1,const int32_t w,const int32_t h,const ptrdiff_t src_pitch,
+	const ptrdiff_t src_pitchY,const ptrdiff_t dst_pitch,const uint16_t *lookup)
+{
+	const uint8_t *src_=(uint8_t *)src1;
+	const uint8_t *srcY_=(uint8_t *)src2;
+	uint8_t *dst_=(uint8_t *)dst1;
+
+	JPSDR_HDRTools_Convert_RGB64_16toRGB64_12_AVX512(src1,src1,w,h,src_pitch,src_pitch);
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const RGB64BMP *src=(RGB64BMP *)src_;
+		const uint32_t *srcY=(uint32_t *)srcY_;
+		RGB64BMP *dst=(RGB64BMP *)dst_;
+		
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint32_t y=srcY[j];
+			
+			dst[j].b=lookup[y | src[j].b];
+			dst[j].g=lookup[y | src[j].g];
+			dst[j].r=lookup[y | src[j].r];
+			dst[j].alpha=0;
+		}
+
+		src_+=src_pitch;
+		srcY_+=src_pitchY;
+		dst_+=dst_pitch;
+	}
+}
+#endif
+
+
 static void Convert_RGB32HLGtoLinearRGB32(const MT_Data_Info_HDRTools &mt_data_inf,void *lookupOOTF)
 {
 	void *srcRGB32=mt_data_inf.src1;
@@ -6347,7 +6869,7 @@ static void Convert_RGB32HLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 
 
 static void Convert_RGB64HLGtoLinearRGB64(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
-	uint8_t bits_per_pixel,bool SSE2_Enable,bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,const uint16_t *lookupOETF,
+	uint8_t bits_per_pixel,bool SSE2_Enable,bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,bool AVX512_Enable,const uint16_t *lookupOETF,
 	int32_t *lookupRGB,void *lookupOOTF,void *lookupinvOOTF)
 {
 	void *srcRGB64=mt_data_inf.src1;
@@ -6361,6 +6883,10 @@ static void Convert_RGB64HLGtoLinearRGB64(const MT_Data_Info_HDRTools &mt_data_i
 	const ptrdiff_t src_modulo=mt_data_inf.src_modulo1;
 	const ptrdiff_t dst_modulo=mt_data_inf.dst_modulo1,dst_moduloY=mt_data_inf.dst_modulo4;
 
+	const bool RGB64_al64=((((size_t)srcRGB64) & 0x3F)==0) && ((((size_t)dstRGB64) & 0x3F)==0)
+		&& ((abs(src_pitch) & 0x3F)==0) && ((abs(dst_pitch) & 0x3F)==0);
+	const bool PlaneY_al64=((((size_t)srcY) & 0x3F)==0) && ((((size_t)dstY) & 0x3F)==0)
+		&& ((abs(src_pitchY) & 0x3F)==0) && ((abs(dst_pitchY) & 0x3F)==0);
 	const bool RGB64_al32=((((size_t)srcRGB64) & 0x1F)==0) && ((((size_t)dstRGB64) & 0x1F)==0)
 		&& ((abs(src_pitch) & 0x1F)==0) && ((abs(dst_pitch) & 0x1F)==0);
 	const bool PlaneY_al32=((((size_t)srcY) & 0x1F)==0) && ((((size_t)dstY) & 0x1F)==0)
@@ -6418,23 +6944,31 @@ static void Convert_RGB64HLGtoLinearRGB64(const MT_Data_Info_HDRTools &mt_data_i
 					JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
 				else Convert_10_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
 			}
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
-				Convert_10_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+#ifdef AVX512_BUILD_POSSIBLE
+			if (AVX512_Enable && RGB64_al64 && PlaneY_al64)
+				Convert_10_RGB64_HLG_OOTF_AVX512(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 					(const uint16_t *)lookupOOTF);
 			else
 #endif
 			{
-				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
-					Convert_10_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+					Convert_10_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 						(const uint16_t *)lookupOOTF);
 				else
+#endif
 				{
-					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
-						Convert_10_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_10_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 							(const uint16_t *)lookupOOTF);
-					else Convert_10_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
-							(const uint16_t *)lookupOOTF);
+					else
+					{
+						if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+							Convert_10_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupOOTF);
+						else Convert_10_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupOOTF);
+					}
 				}
 			}
 
@@ -6448,23 +6982,31 @@ static void Convert_RGB64HLGtoLinearRGB64(const MT_Data_Info_HDRTools &mt_data_i
 					JPSDR_HDRTools_Convert_10_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
 				else Convert_10_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
 			}
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
-				Convert_10_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+#ifdef AVX512_BUILD_POSSIBLE
+			if (AVX512_Enable && RGB64_al64 && PlaneY_al64)
+				Convert_10_RGB64_HLG_OOTF_AVX512(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 					(const uint16_t *)lookupinvOOTF);
 			else
 #endif
 			{
-				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
-					Convert_10_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+					Convert_10_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 						(const uint16_t *)lookupinvOOTF);
 				else
+#endif
 				{
-					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
-						Convert_10_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_10_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 							(const uint16_t *)lookupinvOOTF);
-					else Convert_10_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
-							(const uint16_t *)lookupinvOOTF);
+					else
+					{
+						if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+							Convert_10_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupinvOOTF);
+						else Convert_10_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupinvOOTF);
+					}
 				}
 			}
 			break;
@@ -6478,23 +7020,31 @@ static void Convert_RGB64HLGtoLinearRGB64(const MT_Data_Info_HDRTools &mt_data_i
 					JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
 				else Convert_12_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
 			}
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
-				Convert_12_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+#ifdef AVX512_BUILD_POSSIBLE
+			if (AVX512_Enable && RGB64_al64 && PlaneY_al64)
+				Convert_12_RGB64_HLG_OOTF_AVX512(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 					(const uint16_t *)lookupOOTF);
 			else
 #endif
 			{
-				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
-					Convert_12_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+					Convert_12_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 						(const uint16_t *)lookupOOTF);
 				else
+#endif
 				{
-					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
-						Convert_12_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_12_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 							(const uint16_t *)lookupOOTF);
-					else Convert_12_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
-							(const uint16_t *)lookupOOTF);
+					else
+					{
+						if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+							Convert_12_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupOOTF);
+						else Convert_12_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupOOTF);
+					}
 				}
 			}
 
@@ -6508,23 +7058,31 @@ static void Convert_RGB64HLGtoLinearRGB64(const MT_Data_Info_HDRTools &mt_data_i
 					JPSDR_HDRTools_Convert_12_RGB64toPlaneY32_SSE41(dstRGB64,dstY,w,h,lookupRGB,dst_modulo,dst_moduloY);
 				else Convert_12_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,lookupRGB);
 			}
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
-				Convert_12_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+#ifdef AVX512_BUILD_POSSIBLE
+			if (AVX512_Enable && RGB64_al64 && PlaneY_al64)
+				Convert_12_RGB64_HLG_OOTF_AVX512(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 					(const uint16_t *)lookupinvOOTF);
 			else
 #endif
 			{
-				if (AVX_Enable && RGB64_al16 && PlaneY_al16)
-					Convert_12_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+					Convert_12_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 						(const uint16_t *)lookupinvOOTF);
 				else
+#endif
 				{
-					if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
-						Convert_12_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+					if (AVX_Enable && RGB64_al16 && PlaneY_al16)
+						Convert_12_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
 							(const uint16_t *)lookupinvOOTF);
-					else Convert_12_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
-							(const uint16_t *)lookupinvOOTF);
+					else
+					{
+						if (SSE2_Enable && RGB64_al16 && PlaneY_al16)
+							Convert_12_RGB64_HLG_OOTF_SSE2(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupinvOOTF);
+						else Convert_12_RGB64_HLG_OOTF(dstRGB64,dstY,dstRGB64,w,h,dst_pitch,dst_pitchY,dst_pitch,
+								(const uint16_t *)lookupinvOOTF);
+					}
 				}
 			}
 			break;
@@ -6544,19 +7102,26 @@ static void Convert_RGB64HLGtoLinearRGB64(const MT_Data_Info_HDRTools &mt_data_i
 				}
 				else Convert_16_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,dst_moduloY,lookupRGB,(float *)lookupOOTF);
 			}
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
-				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+#ifdef AVX512_BUILD_POSSIBLE
+			if (AVX512_Enable && RGB64_al64 && PlaneY_al64)
+				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX512(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
 			else
 #endif
 			{
-				if (AVX_Enable && RGB64_al32 && PlaneY_al32)
-					JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+					JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
 				else
+#endif
 				{
-					if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
-						JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
-					else Convert_16_RGB64_HLG_OOTF(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					if (AVX_Enable && RGB64_al32 && PlaneY_al32)
+						JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					else
+					{
+						if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+							JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+						else Convert_16_RGB64_HLG_OOTF(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					}
 				}
 			}
 
@@ -6576,22 +7141,28 @@ static void Convert_RGB64HLGtoLinearRGB64(const MT_Data_Info_HDRTools &mt_data_i
 				}
 				else Convert_16_RGB64toPlaneY32(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY,dst_moduloY,lookupRGB,(float *)lookupinvOOTF);
 			}
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
-				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+#ifdef AVX512_BUILD_POSSIBLE
+			if (AVX512_Enable && RGB64_al64 && PlaneY_al64)
+				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX512(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
 			else
 #endif
 			{
-				if (AVX_Enable && RGB64_al32 && PlaneY_al32)
-					JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+					JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
 				else
+#endif
 				{
-					if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
-						JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
-					else Convert_16_RGB64_HLG_OOTF(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					if (AVX_Enable && RGB64_al32 && PlaneY_al32)
+						JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					else
+					{
+						if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+							JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+						else Convert_16_RGB64_HLG_OOTF(dstRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+					}
 				}
 			}
-
 			break;
 	}
 }
@@ -6740,7 +7311,7 @@ static void Convert_LinearRGB32toRGB32HLG(const MT_Data_Info_HDRTools &mt_data_i
 
 
 static void Convert_LinearRGB64toRGB64HLG(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
-	bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,const uint16_t *lookupOETF,int32_t *lookupRGB,
+	bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,bool AVX512_Enable,const uint16_t *lookupOETF,int32_t *lookupRGB,
 	void *lookupOOTF,void *lookupinvOOTF)
 {
 	void *srcRGB64=mt_data_inf.src1;
@@ -6754,6 +7325,10 @@ static void Convert_LinearRGB64toRGB64HLG(const MT_Data_Info_HDRTools &mt_data_i
 	const ptrdiff_t src_modulo=mt_data_inf.src_modulo1;
 	const ptrdiff_t dst_modulo=mt_data_inf.dst_modulo1,dst_moduloY=mt_data_inf.dst_modulo4;
 
+	const bool RGB64_al64=((((size_t)srcRGB64) & 0x3F)==0) && ((((size_t)dstRGB64) & 0x3F)==0)
+		&& ((abs(src_pitch) & 0x3F)==0) && ((abs(dst_pitch) & 0x3F)==0);
+	const bool PlaneY_al64=((((size_t)srcY) & 0x3F)==0) && ((((size_t)dstY) & 0x3F)==0)
+		&& ((abs(src_pitchY) & 0x3F)==0) && ((abs(dst_pitchY) & 0x3F)==0);
 	const bool RGB64_al32=((((size_t)srcRGB64) & 0x1F)==0) && ((((size_t)dstRGB64) & 0x1F)==0)
 		&& ((abs(src_pitch) & 0x1F)==0) && ((abs(dst_pitch) & 0x1F)==0);
 	const bool PlaneY_al32=((((size_t)srcY) & 0x1F)==0) && ((((size_t)dstY) & 0x1F)==0)
@@ -6798,19 +7373,26 @@ static void Convert_LinearRGB64toRGB64HLG(const MT_Data_Info_HDRTools &mt_data_i
 		}
 		else Convert_16_RGB64toPlaneY32(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY,dst_moduloY,lookupRGB,(float *)lookupOOTF);
 	}
-#ifdef AVX2_BUILD_POSSIBLE
-	if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
-		JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable && RGB64_al64 && PlaneY_al64)
+		JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX512(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
 	else
 #endif
 	{
-		if (AVX_Enable && RGB64_al32 && PlaneY_al32)
-			JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+#ifdef AVX2_BUILD_POSSIBLE
+		if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+			JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
 		else
+#endif
 		{
-			if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+			if (AVX_Enable && RGB64_al32 && PlaneY_al32)
+				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
 				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
-			else Convert_16_RGB64_HLG_OOTF(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+				else Convert_16_RGB64_HLG_OOTF(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+			}
 		}
 	}
 
@@ -6828,19 +7410,26 @@ static void Convert_LinearRGB64toRGB64HLG(const MT_Data_Info_HDRTools &mt_data_i
 		}
 		else Convert_16_RGB64toPlaneY32(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY,dst_moduloY,lookupRGB,(float *)lookupinvOOTF);
 	}
-#ifdef AVX2_BUILD_POSSIBLE
-	if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
-		JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable && RGB64_al64 && PlaneY_al64)
+		JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX512(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
 	else
 #endif
 	{
-		if (AVX_Enable && RGB64_al32 && PlaneY_al32)
-			JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+#ifdef AVX2_BUILD_POSSIBLE
+		if (AVX2_Enable && RGB64_al32 && PlaneY_al32)
+			JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX2(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
 		else
+#endif
 		{
-			if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
+			if (AVX_Enable && RGB64_al32 && PlaneY_al32)
+				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_AVX(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+			else
+			{
+				if (SSE41_Enable && RGB64_al16 && PlaneY_al16)
 				JPSDR_HDRTools_Convert_16_RGB64_HLG_OOTF_SSE41(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
-			else Convert_16_RGB64_HLG_OOTF(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+				else Convert_16_RGB64_HLG_OOTF(srcRGB64,dstY,w,h,dst_pitch,dst_pitchY);
+			}
 		}
 	}
 	JPSDR_HDRTools_LookupRGB64(srcRGB64,dstRGB64,w,h,src_modulo,dst_modulo,lookupOETF);
@@ -7167,8 +7756,8 @@ static void Convert_LinearRGBPStoRGB64HLG(const MT_Data_Info_HDRTools &mt_data_i
 
 
 static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
-	bool SSE2_Enable,bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,const float *lookupOETF,uint8_t HLGColor,
-	void *lookupOOTF,void *lookupinvOOTF,float HLG_Lw,bool fastmode)
+	bool SSE2_Enable,bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,bool AVX512_Enable,const float *lookupOETF,
+	uint8_t HLGColor,void *lookupOOTF,void *lookupinvOOTF,float HLG_Lw,bool fastmode)
 {
 	void *srcR32=mt_data_inf.src1;
 	void *srcG32=mt_data_inf.src2;
@@ -7179,7 +7768,7 @@ static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 	void *srcY=mt_data_inf.src4;
 	void *dstY=mt_data_inf.dst4;
 	const int32_t w=mt_data_inf.dst_Y_w;
-	const int32_t w8=(w+7)>>3,w4=(w+3)>>2;
+	const int32_t w16=(w+15)>>4,w8=(w+7)>>3,w4=(w+3)>>2;
 	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
 	const ptrdiff_t src_pitch_R=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_G=mt_data_inf.src_pitch2;
@@ -7197,10 +7786,18 @@ static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 	uint8_t *dstG_=(uint8_t *)mt_data_inf.dst2;
 	uint8_t *dstB_=(uint8_t *)mt_data_inf.dst3;
 
+	const bool PlaneY_al64=((((size_t)srcY) & 0x3F)==0) && ((((size_t)dstY) & 0x3F)==0)
+		&& ((abs(src_pitchY) & 0x3F)==0) && ((abs(dst_pitchY) & 0x3F)==0);
 	const bool PlaneY_al32=((((size_t)srcY) & 0x1F)==0) && ((((size_t)dstY) & 0x1F)==0)
 		&& ((abs(src_pitchY) & 0x1F)==0) && ((abs(dst_pitchY) & 0x1F)==0);
 	const bool PlaneY_al16=((((size_t)srcY) & 0x0F)==0) && ((((size_t)dstY) & 0x0F)==0)
 		&& ((abs(src_pitchY) & 0x0F)==0) && ((abs(dst_pitchY) & 0x0F)==0);
+	const bool R32_al64=((((size_t)srcR32) & 0x3F)==0) && ((abs(src_pitch_R) & 0x3F)==0) &&
+		((((size_t)dstR32) & 0x3F)==0) && ((abs(dst_pitch_R) & 0x3F)==0);
+	const bool G32_al64=((((size_t)srcG32) & 0x3F)==0) && ((abs(src_pitch_G) & 0x3F)==0) &&
+		((((size_t)dstG32) & 0x3F)==0) && ((abs(dst_pitch_G) & 0x3F)==0);
+	const bool B32_al64=((((size_t)srcB32) & 0x3F)==0) && ((abs(src_pitch_B) & 0x3F)==0) &&
+		((((size_t)dstB32) & 0x3F)==0) && ((abs(dst_pitch_B) & 0x3F)==0);
 	const bool R32_al32=((((size_t)srcR32) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0) &&
 		((((size_t)dstR32) & 0x1F)==0) && ((abs(dst_pitch_R) & 0x1F)==0);
 	const bool G32_al32=((((size_t)srcG32) & 0x1F)==0) && ((abs(src_pitch_G) & 0x1F)==0) &&
@@ -7236,107 +7833,123 @@ static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 
 	if (fastmode)
 	{
-#ifdef AVX2_BUILD_POSSIBLE
-		if (AVX2_Enable && R32_al32 && G32_al32 && B32_al32)
+#ifdef AVX512_BUILD_POSSIBLE
+		if (AVX512_Enable && R32_al64 && G32_al64 && B32_al64)
 		{
-			JPSDR_HDRTools_Scale_20_RGB_AVX2(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
+			JPSDR_HDRTools_Scale_20_RGB_AVX512(srcR32,dstR32,w16,h,src_pitch_R,dst_pitch_R);
 			JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-			JPSDR_HDRTools_Scale_20_RGB_AVX2(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
+			JPSDR_HDRTools_Scale_20_RGB_AVX512(srcG32,dstG32,w16,h,src_pitch_G,dst_pitch_G);
 			JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-			JPSDR_HDRTools_Scale_20_RGB_AVX2(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
+			JPSDR_HDRTools_Scale_20_RGB_AVX512(srcB32,dstB32,w16,h,src_pitch_B,dst_pitch_B);
 			JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 		}
 		else
 #endif
 		{
-			if (AVX_Enable && R32_al32 && G32_al32 && B32_al32)
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && R32_al32 && G32_al32 && B32_al32)
 			{
-				JPSDR_HDRTools_Scale_20_RGB_AVX(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
+				JPSDR_HDRTools_Scale_20_RGB_AVX2(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
 				JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-				JPSDR_HDRTools_Scale_20_RGB_AVX(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
+				JPSDR_HDRTools_Scale_20_RGB_AVX2(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
 				JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-				JPSDR_HDRTools_Scale_20_RGB_AVX(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
+				JPSDR_HDRTools_Scale_20_RGB_AVX2(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
 				JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 			}
 			else
+#endif
 			{
-				if (SSE41_Enable && R32_al16 && G32_al16 && B32_al16)
+				if (AVX_Enable && R32_al32 && G32_al32 && B32_al32)
 				{
-					JPSDR_HDRTools_Scale_20_RGB_SSE41(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
+					JPSDR_HDRTools_Scale_20_RGB_AVX(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
 					JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-					JPSDR_HDRTools_Scale_20_RGB_SSE41(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
+					JPSDR_HDRTools_Scale_20_RGB_AVX(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
 					JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-					JPSDR_HDRTools_Scale_20_RGB_SSE41(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
+					JPSDR_HDRTools_Scale_20_RGB_AVX(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
 					JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 				}
 				else
 				{
-					if (SSE2_Enable && R32_al16 && G32_al16 && B32_al16)
+					if (SSE41_Enable && R32_al16 && G32_al16 && B32_al16)
 					{
-						JPSDR_HDRTools_Scale_20_RGB_SSE2(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
+						JPSDR_HDRTools_Scale_20_RGB_SSE41(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
 						JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-						JPSDR_HDRTools_Scale_20_RGB_SSE2(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
+						JPSDR_HDRTools_Scale_20_RGB_SSE41(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
 						JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-						JPSDR_HDRTools_Scale_20_RGB_SSE2(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
+						JPSDR_HDRTools_Scale_20_RGB_SSE41(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
 						JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 					}
 					else
 					{
-						for(int32_t i=0; i<h; i++)
+						if (SSE2_Enable && R32_al16 && G32_al16 && B32_al16)
 						{
-							const float *srcR=(const float *)srcR_;
-							float *dstR=(float *)dstR_;
+							JPSDR_HDRTools_Scale_20_RGB_SSE2(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
+							JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-							for(int32_t j=0; j<w; j++)
-							{
-								int32_t r=(int32_t)round(srcR[j]*1048575.0f);
+							JPSDR_HDRTools_Scale_20_RGB_SSE2(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
+							JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-								r=std::min(1048575,std::max(0,r));
-
-								dstR[j]=lookupOETF[r];
-							}
-							srcR_+=src_pitch_R;
-							dstR_+=dst_pitch_R;
+							JPSDR_HDRTools_Scale_20_RGB_SSE2(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
+							JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 						}
-						for(int32_t i=0; i<h; i++)
+						else
 						{
-							const float *srcG=(const float *)srcG_;
-							float *dstG=(float *)dstG_;
-
-							for(int32_t j=0; j<w; j++)
+							for(int32_t i=0; i<h; i++)
 							{
-								int32_t g=(int32_t)round(srcG[j]*1048575.0f);
+								const float *srcR=(const float *)srcR_;
+								float *dstR=(float *)dstR_;
 
-								g=std::min(1048575,std::max(0,g));
+								for(int32_t j=0; j<w; j++)
+								{
+									int32_t r=(int32_t)round(srcR[j]*1048575.0f);
 
-								dstG[j]=lookupOETF[g];
+									r=std::min(1048575,std::max(0,r));
+
+									dstR[j]=lookupOETF[r];
+								}
+								srcR_+=src_pitch_R;
+								dstR_+=dst_pitch_R;
 							}
-							srcG_+=src_pitch_G;
-							dstG_+=dst_pitch_G;
-						}
-						for(int32_t i=0; i<h; i++)
-						{
-							const float *srcB=(const float *)srcB_;
-							float *dstB=(float *)dstB_;
-
-							for(int32_t j=0; j<w; j++)
+							for(int32_t i=0; i<h; i++)
 							{
-								int32_t b=(int32_t)round(srcB[j]*1048575.0f);
+								const float *srcG=(const float *)srcG_;
+								float *dstG=(float *)dstG_;
 
-								b=std::min(1048575,std::max(0,b));
+								for(int32_t j=0; j<w; j++)
+								{
+									int32_t g=(int32_t)round(srcG[j]*1048575.0f);
 
-								dstB[j]=lookupOETF[b];
+									g=std::min(1048575,std::max(0,g));
+
+									dstG[j]=lookupOETF[g];
+								}
+								srcG_+=src_pitch_G;
+								dstG_+=dst_pitch_G;
 							}
-							srcB_+=src_pitch_B;
-							dstB_+=dst_pitch_B;
+							for(int32_t i=0; i<h; i++)
+							{
+								const float *srcB=(const float *)srcB_;
+								float *dstB=(float *)dstB_;
+
+								for(int32_t j=0; j<w; j++)
+								{
+									int32_t b=(int32_t)round(srcB[j]*1048575.0f);
+
+									b=std::min(1048575,std::max(0,b));
+
+									dstB[j]=lookupOETF[b];
+								}
+								srcB_+=src_pitch_B;
+								dstB_+=dst_pitch_B;
+							}
 						}
 					}
 				}
@@ -7490,7 +8103,7 @@ static void Convert_RGBPSHLGtoLinearRGBPS(const MT_Data_Info_HDRTools &mt_data_i
 
 
 static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_inf,bool OOTF,bool EOTF,bool normalize,
-	bool SSE2_Enable,bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,const float *lookupOETF,uint8_t HLGColor,
+	bool SSE2_Enable,bool SSE41_Enable,bool AVX_Enable,bool AVX2_Enable,bool AVX512_Enable,const float *lookupOETF,uint8_t HLGColor,
 	void *lookupOOTF,void *lookupinvOOTF,float HLG_Lw,bool fastmode)
 {
 	void *srcR32=mt_data_inf.src1;
@@ -7502,7 +8115,7 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 	void *srcY=mt_data_inf.src4;
 	void *dstY=mt_data_inf.dst4;
 	const int32_t w=mt_data_inf.dst_Y_w;
-	const int32_t w8=(w+7)>>3,w4=(w+3)>>2;
+	const int32_t w16=(w+15)>>4,w8=(w+7)>>3,w4=(w+3)>>2;
 	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
 	const ptrdiff_t src_pitch_R=mt_data_inf.src_pitch1;
 	const ptrdiff_t src_pitch_G=mt_data_inf.src_pitch2;
@@ -7525,10 +8138,18 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 	const int32_t wG=(int32_t)((src_pitch_G-wx4) >> 2);
 	const int32_t wB=(int32_t)((src_pitch_B-wx4) >> 2);
 
+	const bool PlaneY_al64=((((size_t)srcY) & 0x3F)==0) && ((((size_t)dstY) & 0x3F)==0)
+		&& ((abs(src_pitchY) & 0x3F)==0) && ((abs(dst_pitchY) & 0x3F)==0);
 	const bool PlaneY_al32=((((size_t)srcY) & 0x1F)==0) && ((((size_t)dstY) & 0x1F)==0)
 		&& ((abs(src_pitchY) & 0x1F)==0) && ((abs(dst_pitchY) & 0x1F)==0);
 	const bool PlaneY_al16=((((size_t)srcY) & 0x0F)==0) && ((((size_t)dstY) & 0x0F)==0)
 		&& ((abs(src_pitchY) & 0x0F)==0) && ((abs(dst_pitchY) & 0x0F)==0);
+	const bool R32_al64=((((size_t)srcR32) & 0x3F)==0) && ((abs(src_pitch_R) & 0x3F)==0) &&
+		((((size_t)dstR32) & 0x3F)==0) && ((abs(dst_pitch_R) & 0x3F)==0);
+	const bool G32_al64=((((size_t)srcG32) & 0x3F)==0) && ((abs(src_pitch_G) & 0x3F)==0) &&
+		((((size_t)dstG32) & 0x3F)==0) && ((abs(dst_pitch_G) & 0x3F)==0);
+	const bool B32_al64=((((size_t)srcB32) & 0x3F)==0) && ((abs(src_pitch_B) & 0x3F)==0) &&
+		((((size_t)dstB32) & 0x3F)==0) && ((abs(dst_pitch_B) & 0x3F)==0);
 	const bool R32_al32=((((size_t)srcR32) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0) &&
 		((((size_t)dstR32) & 0x1F)==0) && ((abs(dst_pitch_R) & 0x1F)==0);
 	const bool G32_al32=((((size_t)srcG32) & 0x1F)==0) && ((abs(src_pitch_G) & 0x1F)==0) &&
@@ -7601,107 +8222,123 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && R32_al32 && G32_al32 && B32_al32)
+#ifdef AVX512_BUILD_POSSIBLE
+			if (AVX512_Enable && R32_al64 && G32_al64 && B32_al64)
 			{
-				JPSDR_HDRTools_Scale_20_RGB_AVX2(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
+				JPSDR_HDRTools_Scale_20_RGB_AVX512(srcR32,dstR32,w16,h,src_pitch_R,dst_pitch_R);
 				JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-				JPSDR_HDRTools_Scale_20_RGB_AVX2(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
+				JPSDR_HDRTools_Scale_20_RGB_AVX512(srcG32,dstG32,w16,h,src_pitch_G,dst_pitch_G);
 				JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-				JPSDR_HDRTools_Scale_20_RGB_AVX2(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
+				JPSDR_HDRTools_Scale_20_RGB_AVX512(srcB32,dstB32,w16,h,src_pitch_B,dst_pitch_B);
 				JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 			}
 			else
 #endif
 			{
-				if (AVX_Enable && R32_al32 && G32_al32 && B32_al32)
+#ifdef AVX2_BUILD_POSSIBLE
+				if (AVX2_Enable && R32_al32 && G32_al32 && B32_al32)
 				{
-					JPSDR_HDRTools_Scale_20_RGB_AVX(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
+					JPSDR_HDRTools_Scale_20_RGB_AVX2(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
 					JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-					JPSDR_HDRTools_Scale_20_RGB_AVX(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
+					JPSDR_HDRTools_Scale_20_RGB_AVX2(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
 					JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-					JPSDR_HDRTools_Scale_20_RGB_AVX(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
+					JPSDR_HDRTools_Scale_20_RGB_AVX2(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
 					JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 				}
 				else
+#endif
 				{
-					if (SSE41_Enable && R32_al16 && G32_al16 && B32_al16)
+					if (AVX_Enable && R32_al32 && G32_al32 && B32_al32)
 					{
-						JPSDR_HDRTools_Scale_20_RGB_SSE41(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
+						JPSDR_HDRTools_Scale_20_RGB_AVX(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
 						JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-						JPSDR_HDRTools_Scale_20_RGB_SSE41(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
+						JPSDR_HDRTools_Scale_20_RGB_AVX(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
 						JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-						JPSDR_HDRTools_Scale_20_RGB_SSE41(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
+						JPSDR_HDRTools_Scale_20_RGB_AVX(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
 						JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 					}
 					else
 					{
-						if (SSE2_Enable && R32_al16 && G32_al16 && B32_al16)
+						if (SSE41_Enable && R32_al16 && G32_al16 && B32_al16)
 						{
-							JPSDR_HDRTools_Scale_20_RGB_SSE2(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
+							JPSDR_HDRTools_Scale_20_RGB_SSE41(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
 							JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-							JPSDR_HDRTools_Scale_20_RGB_SSE2(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
+							JPSDR_HDRTools_Scale_20_RGB_SSE41(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
 							JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-							JPSDR_HDRTools_Scale_20_RGB_SSE2(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
+							JPSDR_HDRTools_Scale_20_RGB_SSE41(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
 							JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 						}
 						else
 						{
-							for(int32_t i=0; i<h; i++)
+							if (SSE2_Enable && R32_al16 && G32_al16 && B32_al16)
 							{
-								const float *srcR=(const float *)srcR_;
-								float *dstR=(float *)dstR_;
+								JPSDR_HDRTools_Scale_20_RGB_SSE2(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
+								JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-								for(int32_t j=0; j<w; j++)
-								{
-									int32_t r=(int32_t)round(srcR[j]*1048575.0f);
+								JPSDR_HDRTools_Scale_20_RGB_SSE2(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
+								JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-									r=std::min(1048575,std::max(0,r));
-
-									dstR[j]=lookupOETF[r];
-								}
-								srcR_+=src_pitch_R;
-								dstR_+=dst_pitch_R;
+								JPSDR_HDRTools_Scale_20_RGB_SSE2(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
+								JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 							}
-							for(int32_t i=0; i<h; i++)
+							else
 							{
-								const float *srcG=(const float *)srcG_;
-								float *dstG=(float *)dstG_;
-
-								for(int32_t j=0; j<w; j++)
+								for(int32_t i=0; i<h; i++)
 								{
-									int32_t g=(int32_t)round(srcG[j]*1048575.0f);
+									const float *srcR=(const float *)srcR_;
+									float *dstR=(float *)dstR_;
 
-									g=std::min(1048575,std::max(0,g));
+									for(int32_t j=0; j<w; j++)
+									{
+										int32_t r=(int32_t)round(srcR[j]*1048575.0f);
 
-									dstG[j]=lookupOETF[g];
+										r=std::min(1048575,std::max(0,r));
+
+										dstR[j]=lookupOETF[r];
+									}
+									srcR_+=src_pitch_R;
+									dstR_+=dst_pitch_R;
 								}
-								srcG_+=src_pitch_G;
-								dstG_+=dst_pitch_G;
-							}
-							for(int32_t i=0; i<h; i++)
-							{
-								const float *srcB=(const float *)srcB_;
-								float *dstB=(float *)dstB_;
-
-								for(int32_t j=0; j<w; j++)
+								for(int32_t i=0; i<h; i++)
 								{
-									int32_t b=(int32_t)round(srcB[j]*1048575.0f);
+									const float *srcG=(const float *)srcG_;
+									float *dstG=(float *)dstG_;
 
-									b=std::min(1048575,std::max(0,b));
+									for(int32_t j=0; j<w; j++)
+									{
+										int32_t g=(int32_t)round(srcG[j]*1048575.0f);
 
-									dstB[j]=lookupOETF[b];
+										g=std::min(1048575,std::max(0,g));
+
+										dstG[j]=lookupOETF[g];
+									}
+									srcG_+=src_pitch_G;
+									dstG_+=dst_pitch_G;
 								}
-								srcB_+=src_pitch_B;
-								dstB_+=dst_pitch_B;
+								for(int32_t i=0; i<h; i++)
+								{
+									const float *srcB=(const float *)srcB_;
+									float *dstB=(float *)dstB_;
+
+									for(int32_t j=0; j<w; j++)
+									{
+										int32_t b=(int32_t)round(srcB[j]*1048575.0f);
+
+										b=std::min(1048575,std::max(0,b));
+
+										dstB[j]=lookupOETF[b];
+									}
+									srcB_+=src_pitch_B;
+									dstB_+=dst_pitch_B;
+								}
 							}
 						}
 					}
@@ -7912,107 +8549,123 @@ static void Convert_LinearRGBPStoRGBPSHLG(const MT_Data_Info_HDRTools &mt_data_i
 
 	if (fastmode)
 	{
-#ifdef AVX2_BUILD_POSSIBLE
-		if (AVX2_Enable && R32_al32 && G32_al32 && B32_al32)
+#ifdef AVX512_BUILD_POSSIBLE
+		if (AVX512_Enable && R32_al64 && G32_al64 && B32_al64)
 		{
-			JPSDR_HDRTools_Scale_20_RGB_AVX2(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
+			JPSDR_HDRTools_Scale_20_RGB_AVX512(srcR32,dstR32,w16,h,src_pitch_R,dst_pitch_R);
 			JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-			JPSDR_HDRTools_Scale_20_RGB_AVX2(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
+			JPSDR_HDRTools_Scale_20_RGB_AVX512(srcG32,dstG32,w16,h,src_pitch_G,dst_pitch_G);
 			JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-			JPSDR_HDRTools_Scale_20_RGB_AVX2(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
+			JPSDR_HDRTools_Scale_20_RGB_AVX512(srcB32,dstB32,w16,h,src_pitch_B,dst_pitch_B);
 			JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 		}
 		else
 #endif
 		{
-			if (AVX_Enable && R32_al32 && G32_al32 && B32_al32)
+#ifdef AVX2_BUILD_POSSIBLE
+			if (AVX2_Enable && R32_al32 && G32_al32 && B32_al32)
 			{
-				JPSDR_HDRTools_Scale_20_RGB_AVX(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
+				JPSDR_HDRTools_Scale_20_RGB_AVX2(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
 				JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-				JPSDR_HDRTools_Scale_20_RGB_AVX(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
+				JPSDR_HDRTools_Scale_20_RGB_AVX2(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
 				JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-				JPSDR_HDRTools_Scale_20_RGB_AVX(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
+				JPSDR_HDRTools_Scale_20_RGB_AVX2(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
 				JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 			}
 			else
+#endif
 			{
-				if (SSE41_Enable && R32_al16 && G32_al16 && B32_al16)
+				if (AVX_Enable && R32_al32 && G32_al32 && B32_al32)
 				{
-					JPSDR_HDRTools_Scale_20_RGB_SSE41(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
+					JPSDR_HDRTools_Scale_20_RGB_AVX(srcR32,dstR32,w8,h,src_pitch_R,dst_pitch_R);
 					JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-					JPSDR_HDRTools_Scale_20_RGB_SSE41(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
+					JPSDR_HDRTools_Scale_20_RGB_AVX(srcG32,dstG32,w8,h,src_pitch_G,dst_pitch_G);
 					JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-					JPSDR_HDRTools_Scale_20_RGB_SSE41(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
+					JPSDR_HDRTools_Scale_20_RGB_AVX(srcB32,dstB32,w8,h,src_pitch_B,dst_pitch_B);
 					JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 				}
 				else
 				{
-					if (SSE2_Enable && R32_al16 && G32_al16 && B32_al16)
+					if (SSE41_Enable && R32_al16 && G32_al16 && B32_al16)
 					{
-						JPSDR_HDRTools_Scale_20_RGB_SSE2(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
+						JPSDR_HDRTools_Scale_20_RGB_SSE41(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
 						JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-						JPSDR_HDRTools_Scale_20_RGB_SSE2(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
+						JPSDR_HDRTools_Scale_20_RGB_SSE41(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
 						JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-						JPSDR_HDRTools_Scale_20_RGB_SSE2(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
+						JPSDR_HDRTools_Scale_20_RGB_SSE41(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
 						JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 					}
 					else
 					{
-						for(int32_t i=0; i<h; i++)
+						if (SSE2_Enable && R32_al16 && G32_al16 && B32_al16)
 						{
-							const float *srcR=(const float *)srcR_;
-							float *dstR=(float *)dstR_;
+							JPSDR_HDRTools_Scale_20_RGB_SSE2(srcR32,dstR32,w4,h,src_pitch_R,dst_pitch_R);
+							JPSDR_HDRTools_Lookup_Planar32(dstR32,dstR32,w,h,dst_modulo_R,dst_modulo_R,lookupOETF);
 
-							for(int32_t j=0; j<w; j++)
-							{
-								int32_t r=(int32_t)round(srcR[j]*1048575.0f);
+							JPSDR_HDRTools_Scale_20_RGB_SSE2(srcG32,dstG32,w4,h,src_pitch_G,dst_pitch_G);
+							JPSDR_HDRTools_Lookup_Planar32(dstG32,dstG32,w,h,dst_modulo_G,dst_modulo_G,lookupOETF);
 
-								r=std::min(1048575,std::max(0,r));
-
-								dstR[j]=lookupOETF[r];
-							}
-							srcR_+=src_pitch_R;
-							dstR_+=dst_pitch_R;
+							JPSDR_HDRTools_Scale_20_RGB_SSE2(srcB32,dstB32,w4,h,src_pitch_G,dst_pitch_G);
+							JPSDR_HDRTools_Lookup_Planar32(dstB32,dstB32,w,h,dst_modulo_B,dst_modulo_B,lookupOETF);
 						}
-						for(int32_t i=0; i<h; i++)
+						else
 						{
-							const float *srcG=(const float *)srcG_;
-							float *dstG=(float *)dstG_;
-
-							for(int32_t j=0; j<w; j++)
+							for(int32_t i=0; i<h; i++)
 							{
-								int32_t g=(int32_t)round(srcG[j]*1048575.0f);
+								const float *srcR=(const float *)srcR_;
+								float *dstR=(float *)dstR_;
 
-								g=std::min(1048575,std::max(0,g));
+								for(int32_t j=0; j<w; j++)
+								{
+									int32_t r=(int32_t)round(srcR[j]*1048575.0f);
 
-								dstG[j]=lookupOETF[g];
+									r=std::min(1048575,std::max(0,r));
+
+									dstR[j]=lookupOETF[r];
+								}
+								srcR_+=src_pitch_R;
+								dstR_+=dst_pitch_R;
 							}
-							srcG_+=src_pitch_G;
-							dstG_+=dst_pitch_G;
-						}
-						for(int32_t i=0; i<h; i++)
-						{
-							const float *srcB=(const float *)srcB_;
-							float *dstB=(float *)dstB_;
-
-							for(int32_t j=0; j<w; j++)
+							for(int32_t i=0; i<h; i++)
 							{
-								int32_t b=(int32_t)round(srcB[j]*1048575.0f);
+								const float *srcG=(const float *)srcG_;
+								float *dstG=(float *)dstG_;
 
-								b=std::min(1048575,std::max(0,b));
+								for(int32_t j=0; j<w; j++)
+								{
+									int32_t g=(int32_t)round(srcG[j]*1048575.0f);
 
-								dstB[j]=lookupOETF[b];
+									g=std::min(1048575,std::max(0,g));
+
+									dstG[j]=lookupOETF[g];
+								}
+								srcG_+=src_pitch_G;
+								dstG_+=dst_pitch_G;
 							}
-							srcB_+=src_pitch_B;
-							dstB_+=dst_pitch_B;
+							for(int32_t i=0; i<h; i++)
+							{
+								const float *srcB=(const float *)srcB_;
+								float *dstB=(float *)dstB_;
+
+								for(int32_t j=0; j<w; j++)
+								{
+									int32_t b=(int32_t)round(srcB[j]*1048575.0f);
+
+									b=std::min(1048575,std::max(0,b));
+
+									dstB[j]=lookupOETF[b];
+								}
+								srcB_+=src_pitch_B;
+								dstB_+=dst_pitch_B;
+							}
 						}
 					}
 				}
@@ -12232,6 +12885,146 @@ static void Convert_RGBPS_HDRtoSDR_BT2446_C_1_32_AVX2(const MT_Data_Info_HDRTool
 #endif
 
 
+#ifdef AVX512_BUILD_POSSIBLE
+static void Convert_RGB_HDRtoSDR_32_AVX512(const MT_Data_Info_HDRTools &mt_data_inf,const float *lookupR,const float *lookupG,
+	const float *lookupB)
+{
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w16=(w+15)>>4;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX512(mt_data_inf.src1,mt_data_inf.dst1,w16,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookupR);
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX512(mt_data_inf.src2,mt_data_inf.dst2,w16,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookupG);
+
+	JPSDR_HDRTools_Scale_20_RGB_AVX512(mt_data_inf.src3,mt_data_inf.dst3,w16,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookupB);
+}
+
+
+static void Convert_XYZ_HDRtoSDR_32_AVX512(const MT_Data_Info_HDRTools &mt_data_inf,
+	double Xmin,double Ymin,double Zmin,double CoeffX,double CoeffY,double CoeffZ,
+	const float *lookupX,const float *lookupY,const float *lookupZ)
+{
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t w16=(w+16)>>4;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+	float x_min=(float)-Xmin,y_min=(float)-Ymin,z_min=(float)-Zmin;
+	float Coeff_X=(float)(1.0/CoeffX),Coeff_Y=(float)(1.0/CoeffY),Coeff_Z=(float)(1.0/CoeffZ);
+
+	JPSDR_HDRTools_Scale_20_XYZ_AVX512(mt_data_inf.src1,mt_data_inf.dst1,w16,h,mt_data_inf.src_pitch1,mt_data_inf.dst_pitch1,&x_min,&Coeff_X);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst1,mt_data_inf.dst1,w,h,mt_data_inf.dst_modulo1,mt_data_inf.dst_modulo1,lookupX);
+
+	JPSDR_HDRTools_Scale_20_XYZ_AVX512(mt_data_inf.src2,mt_data_inf.dst2,w16,h,mt_data_inf.src_pitch2,mt_data_inf.dst_pitch2,&y_min,&Coeff_Y);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst2,mt_data_inf.dst2,w,h,mt_data_inf.dst_modulo2,mt_data_inf.dst_modulo2,lookupY);
+
+	JPSDR_HDRTools_Scale_20_XYZ_AVX512(mt_data_inf.src3,mt_data_inf.dst3,w16,h,mt_data_inf.src_pitch3,mt_data_inf.dst_pitch3,&z_min,&Coeff_Z);
+	JPSDR_HDRTools_Lookup_Planar32(mt_data_inf.dst3,mt_data_inf.dst3,w,h,mt_data_inf.dst_modulo3,mt_data_inf.dst_modulo3,lookupZ);
+}
+
+
+static void Convert_RGB64_HDRtoSDR_BT2446_C_1_16_AVX512(const MT_Data_Info_HDRTools &mt_data_inf,uint16_t *lookupY_16,
+	float *lookupiX_16,float *lookupiY_16,float *lookupiZ_16,float Xmin,float Zmin,double CoeffX,double CoeffZ)
+{
+	const uint8_t *src_=(uint8_t *)mt_data_inf.src1;
+	uint8_t *dst_=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dstX_=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dstY_=(uint8_t *)mt_data_inf.dst3;
+	uint8_t *dstZ_=(uint8_t *)mt_data_inf.dst4;
+	const ptrdiff_t src_pitch=mt_data_inf.src_pitch1;
+	const ptrdiff_t dst_pitch=mt_data_inf.dst_pitch1;
+	const ptrdiff_t dst_pitchX=mt_data_inf.dst_pitch2;
+	const ptrdiff_t dst_pitchY=mt_data_inf.dst_pitch3;
+	const ptrdiff_t dst_pitchZ=mt_data_inf.dst_pitch4;
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t h_min=mt_data_inf.src_Y_h_min;
+	const int32_t h_max=mt_data_inf.src_Y_h_max;
+	float iCoeffX=(float)(1.0/CoeffX),iCoeffZ=(float)(1.0/CoeffZ);
+	float mXmin=-Xmin,mZmin=-Zmin;
+	const int32_t h=h_max-h_min;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		const XYZ64 *src=(const XYZ64 *)src_;
+		XYZ64 *dst=(XYZ64 *)dst_;
+		float *dstX=(float *)dstX_,*dstY=(float *)dstY_,*dstZ=(float *)dstZ_;
+
+		for(int32_t j=0; j<w; j++)
+		{
+			const uint16_t y=src[j].y;
+
+			dst[j].y=lookupY_16[y];
+			dstY[j]=lookupiY_16[y];
+			dstX[j]=lookupiX_16[src[j].x];
+			dstZ[j]=lookupiZ_16[src[j].z];
+			dst[j].alpha=0;
+		}
+		src_+=src_pitch;
+		dst_+=dst_pitch;
+		dstX_+=dst_pitchX;
+		dstY_+=dst_pitchY;
+		dstZ_+=dst_pitchZ;		
+	}
+
+	dstX_=(uint8_t *)mt_data_inf.dst2;
+	dstY_=(uint8_t *)mt_data_inf.dst3;
+	dstZ_=(uint8_t *)mt_data_inf.dst4;
+
+	JPSDR_HDRTools_BT2446C_16_XYZ_AVX512(dstY_,dstX_,dstZ_,(w+15)>>4,h,dst_pitchY,dst_pitchX,dst_pitchZ,
+		&mXmin,&iCoeffX,&mZmin,&iCoeffZ);
+
+	dst_=(uint8_t *)mt_data_inf.dst1;
+
+	for(int32_t i=0; i<h; i++)
+	{
+		XYZ64 *dst=(XYZ64 *)dst_;
+		uint32_t *dstX=(uint32_t *)dstX_,*dstZ=(uint32_t *)dstZ_;
+
+		for(int32_t j=0; j<w; j++)
+		{
+			dst[j].x=(uint16_t)dstX[j];
+			dst[j].z=(uint16_t)dstZ[j];
+		}
+		dst_+=dst_pitch;
+		dstX_+=dst_pitchX;
+		dstZ_+=dst_pitchZ;
+	}
+}
+
+
+static void Convert_RGBPS_HDRtoSDR_BT2446_C_1_32_AVX512(const MT_Data_Info_HDRTools &mt_data_inf,
+	float *lookupY_32,float *lookupiY_32,float Ymin,double CoeffY)
+{
+	const uint8_t *srcX_=(uint8_t *)mt_data_inf.src1;
+	const uint8_t *srcY_=(uint8_t *)mt_data_inf.src2;
+	const uint8_t *srcZ_=(uint8_t *)mt_data_inf.src3;
+	uint8_t *dstX_=(uint8_t *)mt_data_inf.dst1;
+	uint8_t *dstY_=(uint8_t *)mt_data_inf.dst2;
+	uint8_t *dstZ_=(uint8_t *)mt_data_inf.dst3;
+	const int32_t w=mt_data_inf.src_Y_w;
+	const int32_t h=mt_data_inf.src_Y_h_max-mt_data_inf.src_Y_h_min;
+	const ptrdiff_t src_pitch_X=mt_data_inf.src_pitch1;
+	const ptrdiff_t src_pitch_Y=mt_data_inf.src_pitch2;
+	const ptrdiff_t src_pitch_Z=mt_data_inf.src_pitch3;
+	const ptrdiff_t dst_pitch_X=mt_data_inf.dst_pitch1;
+	const ptrdiff_t dst_pitch_Y=mt_data_inf.dst_pitch2;
+	const ptrdiff_t dst_pitch_Z=mt_data_inf.dst_pitch3;
+	const ptrdiff_t src_modulo_Y=mt_data_inf.src_modulo2;
+	const ptrdiff_t dst_modulo_X=mt_data_inf.dst_modulo1;
+	const ptrdiff_t dst_modulo_Y=mt_data_inf.dst_modulo2;
+
+	float iCoeffY=(float)(1.0/CoeffY),mYmin=-Ymin;
+
+	JPSDR_HDRTools_Scale_20_XYZ_AVX512(srcY_,dstY_,(w+15)>>4,h,src_pitch_Y,dst_pitch_Y,&mYmin,&iCoeffY);
+	JPSDR_HDRTools_Lookup2_Planar32(dstY_,dstY_,dstX_,w,h,src_modulo_Y,dst_modulo_Y,dst_modulo_X,
+		lookupY_32,lookupiY_32);
+	JPSDR_HDRTools_BT2446C_32_XYZ_AVX(srcX_,srcZ_,dstX_,dstZ_,(w+7)>>3,h,src_pitch_X,src_pitch_Z,dst_pitch_X,dst_pitch_Z);
+}
+#endif
+
+
 /*
 *****************************************************************
 **               Matrix convertion functions                   **
@@ -13862,8 +14655,14 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (max_threads>1)
@@ -13980,14 +14779,18 @@ void ConvertYUVtoLinearRGB::StaticThreadpool(void *ptr)
 		case 34 : Convert_RGB32HLGtoLinearRGB32(*mt_data_inf,ptrClass->lookupHLG_OOTF); break;
 		case 35 : Convert_RGB64HLGtoLinearRGB64(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
 					  ptrClass->bits_per_pixel,ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,
-					  ptrClass->AVX2_Enable,ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,
-					  ptrClass->lookupHLG_inv_OOTF); break;
+					  ptrClass->AVX2_Enable, ptrClass->AVX512_Enable,ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,
+					  ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
 		case 36 : Convert_RGB64HLGtoLinearRGBPS(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
 					  ptrClass->SSE2_Enable,ptrClass->AVX_Enable,ptrClass->lookupL_32,ptrClass->HLGColor,ptrClass->lookupHLG_OOTF,
 					  ptrClass->lookupHLG_inv_OOTF,(float)ptrClass->HLG_Lw); break;
 #ifdef AVX2_BUILD_POSSIBLE
 		case 4 : Convert_Progressive_8_YV12toYV16_AVX2(*mt_data_inf); break;
 		case 11 : Convert_Progressive_16_YV12toYV16_AVX2(*mt_data_inf); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 37 : Convert_Progressive_8_YV12toYV16_AVX512(*mt_data_inf); break;
+		case 38 : Convert_Progressive_16_YV12toYV16_AVX512(*mt_data_inf); break;
 #endif
 		default : break;
 	}
@@ -14152,6 +14955,8 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 	}
 
 	const bool src_Y_al16=((((size_t)srcY) & 0x0F)==0) && ((abs(src_pitch_Y) & 0x0F)==0);
+	const bool src_UV_al64=((((size_t)srcU) & 0x3F)==0) && ((((size_t)srcV) & 0x3F)==0)
+		&& ((abs(src_pitch_U) & 0x3F)==0) && ((abs(src_pitch_V) & 0x3F)==0);
 	const bool src_UV_al32=((((size_t)srcU) & 0x1F)==0) && ((((size_t)srcV) & 0x1F)==0)
 		&& ((abs(src_pitch_U) & 0x1F)==0) && ((abs(src_pitch_V) & 0x1F)==0);
 	const bool src_UV_al16=((((size_t)srcU) & 0x0F)==0) && ((((size_t)srcV) & 0x0F)==0)
@@ -14159,6 +14964,9 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 
 	const bool tmp1_Y_al16=((((size_t)tmp1Yw) & 0x0F)==0) && ((((size_t)tmp1Yr) & 0x0F)==0)
 		&& ((abs(tmp1_pitch_Y) & 0x0F)==0);
+	const bool tmp1_UV_al64=((((size_t)tmp1Uw) & 0x3F)==0) && ((((size_t)tmp1Vw) & 0x3F)==0)
+		&& ((((size_t)tmp1Ur) & 0x3F)==0) && ((((size_t)tmp1Vr) & 0x3F)==0)
+		&& ((abs(tmp1_pitch_U) & 0x3F)==0) && ((abs(tmp1_pitch_V) & 0x3F)==0);
 	const bool tmp1_UV_al32=((((size_t)tmp1Uw) & 0x1F)==0) && ((((size_t)tmp1Vw) & 0x1F)==0)
 		&& ((((size_t)tmp1Ur) & 0x1F)==0) && ((((size_t)tmp1Vr) & 0x1F)==0)
 		&& ((abs(tmp1_pitch_U) & 0x1F)==0) && ((abs(tmp1_pitch_V) & 0x1F)==0);
@@ -14214,28 +15022,36 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 			}
 			else
 			{
-				if (AVX2_Enable && src_UV_al32 && tmp1_UV_al32) f_proc=4;
+				if (AVX512_Enable && src_UV_al64 && tmp1_UV_al64) f_proc=37;
 				else
 				{
-					if (AVX_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=3;
+					if (AVX2_Enable && src_UV_al32 && tmp1_UV_al32) f_proc=4;
 					else
 					{
-						if (SSE2_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=2;
-						else f_proc=1;
+						if (AVX_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=3;
+						else
+						{
+							if (SSE2_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=2;
+							else f_proc=1;
+						}
 					}
 				}
 			}
 		}
 		else
 		{
-			if (AVX2_Enable && src_UV_al32 && tmp1_UV_al32) f_proc=11;
+			if (AVX512_Enable && src_UV_al64 && tmp1_UV_al64) f_proc=38;
 			else
 			{
-				if (AVX_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=10;
+				if (AVX2_Enable && src_UV_al32 && tmp1_UV_al32) f_proc=11;
 				else
 				{
-					if (SSE2_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=9;
-					else f_proc=8;
+					if (AVX_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=10;
+					else
+					{
+						if (SSE2_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=9;
+						else f_proc=8;
+					}					
 				}
 			}
 		}
@@ -14269,6 +15085,10 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 #ifdef AVX2_BUILD_POSSIBLE
 				case 4 : Convert_Progressive_8_YV12toYV16_AVX2(MT_DataGF[0]); break;
 				case 11 : Convert_Progressive_16_YV12toYV16_AVX2(MT_DataGF[0]); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+				case 37 : Convert_Progressive_8_YV12toYV16_AVX512(MT_DataGF[0]); break;
+				case 38 : Convert_Progressive_16_YV12toYV16_AVX512(MT_DataGF[0]); break;
 #endif
 				default : break;
 			}
@@ -14687,7 +15507,7 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 			case 33 : Convert_RGB64toLinearRGBPS(MT_DataGF[0],lookupL_32); break;
 			case 34 : Convert_RGB32HLGtoLinearRGB32(MT_DataGF[0],lookupHLG_OOTF); break;
 			case 35 : Convert_RGB64HLGtoLinearRGB64(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),bits_per_pixel,SSE2_Enable,
-						  SSE41_Enable,AVX_Enable,AVX2_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
+						  SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
 			case 36 : Convert_RGB64HLGtoLinearRGBPS(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,AVX_Enable,lookupL_32,
 						  HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,(float)HLG_Lw); break;
 			default : break;
@@ -15270,8 +16090,14 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (max_threads>1)
@@ -15366,8 +16192,8 @@ void ConvertLinearRGBtoYUV::StaticThreadpool(void *ptr)
 		case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 12 : Convert_LinearRGB32toRGB32HLG(*mt_data_inf,ptrClass->lookupHLG_OOTF); break;
 		case 13 : Convert_LinearRGB64toRGB64HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
-					  ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,ptrClass->lookupL_16,
-					  ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
+					  ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,ptrClass->AVX512_Enable,
+					  ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
 		case 14 : Convert_LinearRGBPStoRGB64HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
 					  ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->lookupL_20,ptrClass->HLGColor,
 					  ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF,(float)ptrClass->HLG_Lw,ptrClass->fastmode); break;
@@ -15393,7 +16219,11 @@ void ConvertLinearRGBtoYUV::StaticThreadpool(void *ptr)
 		case 30 : Convert_Planar422toPlanar420_8_AVX2(*mt_data_inf); break;
 		case 34 : Convert_Planar422toPlanar420_16_AVX2(*mt_data_inf); break;
 #endif
-		default : ;
+#ifdef AVX512_BUILD_POSSIBLE
+		case 35 : Convert_Planar422toPlanar420_8_AVX512(*mt_data_inf); break;
+		case 36 : Convert_Planar422toPlanar420_16_AVX512(*mt_data_inf); break;
+#endif
+		default : break;
 	}
 }
 
@@ -15566,6 +16396,9 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 			env->ThrowError("ConvertYUVtoLinearRGB: Error with the TheadPool while requesting threadpool !");
 	}
 	
+	const bool src_RGBP_al64=((((size_t)srcRw) & 0x3F)==0) && ((((size_t)srcGw) & 0x3F)==0)
+		&& ((((size_t)srcBw) & 0x3F)==0) && ((abs(src_pitch_R) & 0x3F)==0)
+		&& ((abs(src_pitch_G) & 0x3F)==0) && ((abs(src_pitch_B) & 0x3F)==0);
 	const bool src_RGBP_al32=((((size_t)srcRw) & 0x1F)==0) && ((((size_t)srcGw) & 0x1F)==0)
 		&& ((((size_t)srcBw) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0)
 		&& ((abs(src_pitch_G) & 0x1F)==0) && ((abs(src_pitch_B) & 0x1F)==0);
@@ -15582,6 +16415,11 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 		&& ((abs(tmp2_pitch_Y) & 0x0F)==0) && ((abs(tmp2_pitch_U) & 0x0F)==0)
 		&& ((abs(tmp2_pitch_V) & 0x0F)==0);
 
+	const bool tmp3_al64=((((size_t)tmp3Yr) & 0x3F)==0) && ((((size_t)tmp3Ur) & 0x3F)==0)
+		&& ((((size_t)tmp3Vr) & 0x3F)==0) && ((((size_t)tmp3Yw) & 0x3F)==0)
+		&& ((((size_t)tmp3Uw) & 0x3F)==0) && ((((size_t)tmp3Vw) & 0x3F)==0)
+		&& ((abs(tmp3_pitch_Y) & 0x3F)==0) && ((abs(tmp3_pitch_U) & 0x3F)==0)
+		&& ((abs(tmp3_pitch_V) & 0x3F)==0);
 	const bool tmp3_al32=((((size_t)tmp3Yr) & 0x1F)==0) && ((((size_t)tmp3Ur) & 0x1F)==0)
 		&& ((((size_t)tmp3Vr) & 0x1F)==0) && ((((size_t)tmp3Yw) & 0x1F)==0)
 		&& ((((size_t)tmp3Uw) & 0x1F)==0) && ((((size_t)tmp3Vw) & 0x1F)==0)
@@ -15593,6 +16431,9 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 		&& ((abs(tmp3_pitch_Y) & 0x0F)==0) && ((abs(tmp3_pitch_U) & 0x0F)==0)
 		&& ((abs(tmp3_pitch_V) & 0x0F)==0);
 
+	const bool dst_al64=((((size_t)dstYw) & 0x3F)==0) && ((((size_t)dstUw) & 0x3F)==0)
+		&& ((((size_t)dstVw) & 0x3F)==0) && ((abs(dst_pitch_Y) & 0x3F)==0)
+		&& ((abs(dst_pitch_U) & 0x3F)==0) && ((abs(dst_pitch_V) & 0x3F)==0);
 	const bool dst_al32=((((size_t)dstYw) & 0x1F)==0) && ((((size_t)dstUw) & 0x1F)==0)
 		&& ((((size_t)dstVw) & 0x1F)==0) && ((abs(dst_pitch_Y) & 0x1F)==0)
 		&& ((abs(dst_pitch_U) & 0x1F)==0) && ((abs(dst_pitch_V) & 0x1F)==0);
@@ -15715,7 +16556,7 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 			case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,EOTF); break;
 			case 12 : Convert_LinearRGB32toRGB32HLG(MT_DataGF[0],lookupHLG_OOTF); break;
 			case 13 : Convert_LinearRGB64toRGB64HLG(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE41_Enable,AVX_Enable,
-						  AVX2_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
+						  AVX2_Enable,AVX512_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
 			case 14 : Convert_LinearRGBPStoRGB64HLG(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,SSE41_Enable,
 						  AVX_Enable,lookupL_20,HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,(float)HLG_Lw,fastmode); break;
 			default : break;
@@ -15949,31 +16790,35 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 
 		if (bits_per_pixel==8)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && tmp3_al32 && dst_al32) f_proc=30;
+			if (AVX512_Enable && tmp3_al64 && dst_al64) f_proc=35;
 			else
-#endif
 			{
-				if (AVX_Enable && tmp3_al16 && dst_al16) f_proc=29;
+				if (AVX2_Enable && tmp3_al32 && dst_al32) f_proc=30;
 				else
 				{
-					if (SSE2_Enable && tmp3_al16 && dst_al16) f_proc=28;
-					else f_proc=27;
+					if (AVX_Enable && tmp3_al16 && dst_al16) f_proc=29;
+					else
+					{
+						if (SSE2_Enable && tmp3_al16 && dst_al16) f_proc=28;
+						else f_proc=27;
+					}
 				}
 			}
 		}
 		else
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && tmp3_al32 && dst_al32) f_proc=34;
+			if (AVX512_Enable && tmp3_al64 && dst_al64) f_proc=36;
 			else
-#endif
 			{
-				if (AVX_Enable && tmp3_al16 && dst_al16) f_proc=33;
+				if (AVX2_Enable && tmp3_al32 && dst_al32) f_proc=34;
 				else
 				{
-					if (SSE2_Enable && tmp3_al16 && dst_al16) f_proc=32;
-					else f_proc=31;
+					if (AVX_Enable && tmp3_al16 && dst_al16) f_proc=33;
+					else
+					{
+						if (SSE2_Enable && tmp3_al16 && dst_al16) f_proc=32;
+						else f_proc=31;
+					}
 				}
 			}
 		}
@@ -16004,6 +16849,10 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 #ifdef AVX2_BUILD_POSSIBLE
 				case 30 : Convert_Planar422toPlanar420_8_AVX2(MT_DataGF[0]); break;
 				case 34 : Convert_Planar422toPlanar420_16_AVX2(MT_DataGF[0]); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+				case 35 : Convert_Planar422toPlanar420_8_AVX512(MT_DataGF[0]); break;
+				case 36 : Convert_Planar422toPlanar420_16_AVX512(MT_DataGF[0]); break;
 #endif
 				default : break;
 			}
@@ -17024,8 +17873,14 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	Coeff_Crosstalk[0]=(float)(1.0-2.0*Crosstalk);
@@ -17211,8 +18066,8 @@ void ConvertYUVtoXYZ::StaticThreadpool(void *ptr)
 		case 43 : Convert_RGB32HLGtoLinearRGB32(*mt_data_inf,ptrClass->lookupHLG_OOTF); break;
 		case 44 : Convert_RGB64HLGtoLinearRGB64(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
 					  ptrClass->bits_per_pixel,ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,
-					  ptrClass->AVX2_Enable,ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,
-					  ptrClass->lookupHLG_inv_OOTF); break;
+					  ptrClass->AVX2_Enable,ptrClass->AVX512_Enable,ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,
+					  ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
 		case 45 : Convert_RGB64HLGtoLinearRGBPS(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
 					  ptrClass->SSE2_Enable,ptrClass->AVX_Enable,ptrClass->lookupL_32,ptrClass->HLGColor,ptrClass->lookupHLG_OOTF,
 					  ptrClass->lookupHLG_inv_OOTF,(float)ptrClass->HLG_Lw); break;
@@ -17229,7 +18084,11 @@ void ConvertYUVtoXYZ::StaticThreadpool(void *ptr)
 		case 4 : Convert_Progressive_8_YV12toYV16_AVX2(*mt_data_inf); break;
 		case 11 : Convert_Progressive_16_YV12toYV16_AVX2(*mt_data_inf); break;
 #endif
-		default : ;
+#ifdef AVX512_BUILD_POSSIBLE
+		case 55 : Convert_Progressive_8_YV12toYV16_AVX512(*mt_data_inf); break;
+		case 56 : Convert_Progressive_16_YV12toYV16_AVX512(*mt_data_inf); break;
+#endif
+		default : break;
 	}
 }
 
@@ -17392,6 +18251,8 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 	}
 
 	const bool src_Y_al16=((((size_t)srcY) & 0x0F)==0) && ((abs(src_pitch_Y) & 0x0F)==0);
+	const bool src_UV_al64=((((size_t)srcU) & 0x3F)==0) && ((((size_t)srcV) & 0x3F)==0)
+		&& ((abs(src_pitch_U) & 0x3F)==0) && ((abs(src_pitch_V) & 0x3F)==0);
 	const bool src_UV_al32=((((size_t)srcU) & 0x1F)==0) && ((((size_t)srcV) & 0x1F)==0)
 		&& ((abs(src_pitch_U) & 0x1F)==0) && ((abs(src_pitch_V) & 0x1F)==0);
 	const bool src_UV_al16=((((size_t)srcU) & 0x0F)==0) && ((((size_t)srcV) & 0x0F)==0)
@@ -17399,6 +18260,9 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 
 	const bool tmp1_Y_al16=((((size_t)tmp1Yw) & 0x0F)==0) && ((((size_t)tmp1Yr) & 0x0F)==0)
 		&& ((abs(tmp1_pitch_Y) & 0x0F)==0);
+	const bool tmp1_UV_al64=((((size_t)tmp1Uw) & 0x3F)==0) && ((((size_t)tmp1Vw) & 0x3F)==0)
+		&& ((((size_t)tmp1Ur) & 0x3F)==0) && ((((size_t)tmp1Vr) & 0x3F)==0)
+		&& ((abs(tmp1_pitch_U) & 0x3F)==0) && ((abs(tmp1_pitch_V) & 0x3F)==0);
 	const bool tmp1_UV_al32=((((size_t)tmp1Uw) & 0x1F)==0) && ((((size_t)tmp1Vw) & 0x1F)==0)
 		&& ((((size_t)tmp1Ur) & 0x1F)==0) && ((((size_t)tmp1Vr) & 0x1F)==0)
 		&& ((abs(tmp1_pitch_U) & 0x1F)==0) && ((abs(tmp1_pitch_V) & 0x1F)==0);
@@ -17454,28 +18318,36 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			}
 			else
 			{
-				if (AVX2_Enable && src_UV_al32 && tmp1_UV_al32) f_proc=4;
+				if (AVX512_Enable && src_UV_al64 && tmp1_UV_al64) f_proc=55;
 				else
 				{
-					if (AVX_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=3;
+					if (AVX2_Enable && src_UV_al32 && tmp1_UV_al32) f_proc=4;
 					else
 					{
-						if (SSE2_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=2;
-						else f_proc=1;
+						if (AVX_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=3;
+						else
+						{
+							if (SSE2_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=2;
+							else f_proc=1;
+						}
 					}
 				}
 			}
 		}
 		else
 		{
-			if (AVX2_Enable && src_UV_al32 && tmp1_UV_al32) f_proc=11;
+			if (AVX512_Enable && src_UV_al64 && tmp1_UV_al64) f_proc=56;
 			else
 			{
-				if (AVX_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=10;
+				if (AVX2_Enable && src_UV_al32 && tmp1_UV_al32) f_proc=11;
 				else
 				{
-					if (SSE2_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=9;
-					else f_proc=8;
+					if (AVX_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=10;
+					else
+					{
+						if (SSE2_Enable && src_UV_al16 && tmp1_UV_al16) f_proc=9;
+						else f_proc=8;
+					}
 				}
 			}
 		}
@@ -17509,6 +18381,10 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 #ifdef AVX2_BUILD_POSSIBLE
 				case 4 : Convert_Progressive_8_YV12toYV16_AVX2(MT_DataGF[0]); break;
 				case 11 : Convert_Progressive_16_YV12toYV16_AVX2(MT_DataGF[0]); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+				case 55 : Convert_Progressive_8_YV12toYV16_AVX512(MT_DataGF[0]); break;
+				case 56 : Convert_Progressive_16_YV12toYV16_AVX512(MT_DataGF[0]); break;
 #endif
 				default : break;
 			}
@@ -17927,7 +18803,7 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			case 33 : Convert_RGB64toLinearRGBPS(MT_DataGF[0],lookupL_32); break;
 			case 43 : Convert_RGB32HLGtoLinearRGB32(MT_DataGF[0],lookupHLG_OOTF); break;
 			case 44 : Convert_RGB64HLGtoLinearRGB64(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),bits_per_pixel,SSE2_Enable,
-						  SSE41_Enable,AVX_Enable,AVX2_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
+						  SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
 			case 45 : Convert_RGB64HLGtoLinearRGBPS(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,AVX_Enable,lookupL_32,
 						  HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,(float)HLG_Lw); break;
 			default : break;
@@ -18651,8 +19527,14 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	Coeff_Crosstalk[0]=(float)((1.0-Crosstalk)/(1.0-3.0*Crosstalk));
@@ -18807,8 +19689,8 @@ void ConvertXYZtoYUV::StaticThreadpool(void *ptr)
 		case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 12 : Convert_LinearRGB32toRGB32HLG(*mt_data_inf,ptrClass->lookupHLG_OOTF); break;
 		case 13 : Convert_LinearRGB64toRGB64HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
-					  ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,ptrClass->lookupL_16,
-					  ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
+					  ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,ptrClass->AVX512_Enable,
+					  ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
 		case 14 : Convert_LinearRGBPStoRGB64HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
 					  ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->lookupL_20,ptrClass->HLGColor,
 					  ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF,(float)ptrClass->HLG_Lw,ptrClass->fastmode); break;
@@ -18852,7 +19734,11 @@ void ConvertXYZtoYUV::StaticThreadpool(void *ptr)
 		case 30 : Convert_Planar422toPlanar420_8_AVX2(*mt_data_inf); break;
 		case 34 : Convert_Planar422toPlanar420_16_AVX2(*mt_data_inf); break;
 #endif
-		default : ;
+#ifdef AVX512_BUILD_POSSIBLE
+		case 53 : Convert_Planar422toPlanar420_8_AVX512(*mt_data_inf); break;
+		case 54 : Convert_Planar422toPlanar420_16_AVX512(*mt_data_inf); break;
+#endif
+		default : break;
 	}
 }
 
@@ -19027,6 +19913,9 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 	
 	const bool src_al16=((((size_t)srcw) & 0x0F)==0) && ((abs(src_pitch) & 0x0F)==0);
 
+	const bool src_RGBP_al64=((((size_t)srcRw) & 0x3F)==0) && ((((size_t)srcGw) & 0x3F)==0)
+		&& ((((size_t)srcBw) & 0x3F)==0) && ((abs(src_pitch_R) & 0x3F)==0)
+		&& ((abs(src_pitch_G) & 0x3F)==0) && ((abs(src_pitch_B) & 0x3F)==0);
 	const bool src_RGBP_al32=((((size_t)srcRw) & 0x1F)==0) && ((((size_t)srcGw) & 0x1F)==0)
 		&& ((((size_t)srcBw) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0)
 		&& ((abs(src_pitch_G) & 0x1F)==0) && ((abs(src_pitch_B) & 0x1F)==0);
@@ -19043,6 +19932,11 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 		&& ((abs(tmp2_pitch_Y) & 0x0F)==0) && ((abs(tmp2_pitch_U) & 0x0F)==0)
 		&& ((abs(tmp2_pitch_V) & 0x0F)==0);
 
+	const bool tmp3_al64=((((size_t)tmp3Yr) & 0x3F)==0) && ((((size_t)tmp3Ur) & 0x3F)==0)
+		&& ((((size_t)tmp3Vr) & 0x3F)==0) && ((((size_t)tmp3Yw) & 0x3F)==0)
+		&& ((((size_t)tmp3Uw) & 0x3F)==0) && ((((size_t)tmp3Vw) & 0x3F)==0)
+		&& ((abs(tmp3_pitch_Y) & 0x3F)==0) && ((abs(tmp3_pitch_U) & 0x3F)==0)
+		&& ((abs(tmp3_pitch_V) & 0x3F)==0);
 	const bool tmp3_al32=((((size_t)tmp3Yr) & 0x1F)==0) && ((((size_t)tmp3Ur) & 0x1F)==0)
 		&& ((((size_t)tmp3Vr) & 0x1F)==0) && ((((size_t)tmp3Yw) & 0x1F)==0)
 		&& ((((size_t)tmp3Uw) & 0x1F)==0) && ((((size_t)tmp3Vw) & 0x1F)==0)
@@ -19054,6 +19948,9 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 		&& ((abs(tmp3_pitch_Y) & 0x0F)==0) && ((abs(tmp3_pitch_U) & 0x0F)==0)
 		&& ((abs(tmp3_pitch_V) & 0x0F)==0);
 
+	const bool dst_al64=((((size_t)dstYw) & 0x3F)==0) && ((((size_t)dstUw) & 0x3F)==0)
+		&& ((((size_t)dstVw) & 0x3F)==0) && ((abs(dst_pitch_Y) & 0x3F)==0)
+		&& ((abs(dst_pitch_U) & 0x3F)==0) && ((abs(dst_pitch_V) & 0x3F)==0);
 	const bool dst_al32=((((size_t)dstYw) & 0x1F)==0) && ((((size_t)dstUw) & 0x1F)==0)
 		&& ((((size_t)dstVw) & 0x1F)==0) && ((abs(dst_pitch_Y) & 0x1F)==0)
 		&& ((abs(dst_pitch_U) & 0x1F)==0) && ((abs(dst_pitch_V) & 0x1F)==0);
@@ -19301,7 +20198,7 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 			case 11 : Convert_LinearRGBPStoRGB64_PQ_AVX(MT_DataGF[0],OOTF,EOTF); break;
 			case 12 : Convert_LinearRGB32toRGB32HLG(MT_DataGF[0],lookupHLG_OOTF); break;
 			case 13 : Convert_LinearRGB64toRGB64HLG(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE41_Enable,AVX_Enable,
-						  AVX2_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
+						  AVX2_Enable,AVX512_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
 			case 14 : Convert_LinearRGBPStoRGB64HLG(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,SSE41_Enable,
 						  AVX_Enable,lookupL_20,HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,(float)HLG_Lw,fastmode); break;
 			default : break;
@@ -19535,31 +20432,35 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 
 		if (bits_per_pixel==8)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && tmp3_al32 && dst_al32) f_proc=30;
+			if (AVX512_Enable && tmp3_al64 && dst_al64) f_proc=53;
 			else
-#endif
 			{
-				if (AVX_Enable && tmp3_al16 && dst_al16) f_proc=29;
+				if (AVX2_Enable && tmp3_al32 && dst_al32) f_proc=30;
 				else
 				{
-					if (SSE2_Enable && tmp3_al16 && dst_al16) f_proc=28;
-					else f_proc=27;
+					if (AVX_Enable && tmp3_al16 && dst_al16) f_proc=29;
+					else
+					{
+						if (SSE2_Enable && tmp3_al16 && dst_al16) f_proc=28;
+						else f_proc=27;
+					}
 				}
 			}
 		}
 		else
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && tmp3_al32 && dst_al32) f_proc=34;
+			if (AVX512_Enable && tmp3_al64 && dst_al64) f_proc=54;
 			else
-#endif
 			{
-				if (AVX_Enable && tmp3_al16 && dst_al16) f_proc=33;
+				if (AVX2_Enable && tmp3_al32 && dst_al32) f_proc=34;
 				else
 				{
-					if (SSE2_Enable && tmp3_al16 && dst_al16) f_proc=32;
-					else f_proc=31;
+					if (AVX_Enable && tmp3_al16 && dst_al16) f_proc=33;
+					else
+					{
+						if (SSE2_Enable && tmp3_al16 && dst_al16) f_proc=32;
+						else f_proc=31;
+					}
 				}
 			}
 		}
@@ -19590,6 +20491,10 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 #ifdef AVX2_BUILD_POSSIBLE
 				case 30 : Convert_Planar422toPlanar420_8_AVX2(MT_DataGF[0]); break;
 				case 34 : Convert_Planar422toPlanar420_16_AVX2(MT_DataGF[0]); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+				case 53 : Convert_Planar422toPlanar420_8_AVX512(MT_DataGF[0]); break;
+				case 54 : Convert_Planar422toPlanar420_16_AVX512(MT_DataGF[0]); break;
 #endif
 				default : break;
 			}
@@ -20742,8 +21647,14 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	Coeff_Crosstalk[0]=(float)(1.0-2.0*Crosstalk);
@@ -20905,13 +21816,13 @@ void ConvertRGBtoXYZ::StaticThreadpool(void *ptr)
 		case 24 : Convert_RGB32HLGtoLinearRGBPS(*mt_data_inf,ptrClass->lookupHLG_OOTF); break;
 		case 25 : Convert_RGB64HLGtoLinearRGB64(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
 					  ptrClass->bits_per_pixel,ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,
-					  ptrClass->AVX2_Enable,ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,
-					  ptrClass->lookupHLG_inv_OOTF); break;
+					  ptrClass->AVX2_Enable,ptrClass->AVX512_Enable,ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,
+					  ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
 		case 26 : Convert_RGB64HLGtoLinearRGBPS(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
 					  ptrClass->SSE2_Enable,ptrClass->AVX_Enable,ptrClass->lookupL_32,ptrClass->HLGColor,
 					  ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF,(float)ptrClass->HLG_Lw); break;
 		case 27 : Convert_RGBPSHLGtoLinearRGBPS(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
-					  ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,
+					  ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,ptrClass->AVX512_Enable,
 					  ptrClass->lookupL_20,ptrClass->HLGColor,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF,
 					  (float)ptrClass->HLG_Lw,ptrClass->fastmode); break;
 		case 28 : Convert_RGB32toXYZ(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
@@ -20925,6 +21836,9 @@ void ConvertRGBtoXYZ::StaticThreadpool(void *ptr)
 		case 36 : Convert_RGBPStoXYZ_AVX(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
 #ifdef AVX2_BUILD_POSSIBLE
 		case 15 : Convert_RGBPStoLinearRGBPS_AVX2(*mt_data_inf,ptrClass->lookupL_20); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 37 : Convert_RGBPStoLinearRGBPS_AVX512(*mt_data_inf,ptrClass->lookupL_20); break;
 #endif
 		default : break;
 	}
@@ -21031,6 +21945,10 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			env->ThrowError("ConvertRGBtoXYZ: Error with the TheadPool while requesting threadpool !");
 	}
 
+	const bool src_RGBP_al64=((((size_t)srcRr) & 0x3F)==0)
+		&& ((((size_t)srcGr) & 0x3F)==0) && ((((size_t)srcBr) & 0x3F)==0)
+		&& ((abs(src_pitch_R) & 0x3F)==0) && ((abs(src_pitch_G) & 0x3F)==0)
+		&& ((abs(src_pitch_B) & 0x3F)==0);
 	const bool src_RGBP_al32=((((size_t)srcRr) & 0x1F)==0)
 		&& ((((size_t)srcGr) & 0x1F)==0) && ((((size_t)srcBr) & 0x1F)==0)
 		&& ((abs(src_pitch_R) & 0x1F)==0) && ((abs(src_pitch_G) & 0x1F)==0)
@@ -21043,6 +21961,11 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 	const bool dst_al16=((((size_t)dstw) & 0x0F)==0) && ((((size_t)dstr) & 0x0F)==0)
 		&& ((abs(dst_pitch) & 0x0F)==0);
 	
+	const bool dst_RGBP_al64=((((size_t)dstRw) & 0x3F)==0) && ((((size_t)dstRr) & 0x3F)==0)
+		&& ((((size_t)dstGw) & 0x3F)==0) && ((((size_t)dstGr) & 0x3F)==0)
+		&& ((((size_t)dstBw) & 0x3F)==0) && ((((size_t)dstBr) & 0x3F)==0)
+		&& ((abs(dst_pitch_R) & 0x3F)==0) && ((abs(dst_pitch_G) & 0x3F)==0)
+		&& ((abs(dst_pitch_B) & 0x3F)==0);
 	const bool dst_RGBP_al32=((((size_t)dstRw) & 0x1F)==0) && ((((size_t)dstRr) & 0x1F)==0)
 		&& ((((size_t)dstGw) & 0x1F)==0) && ((((size_t)dstGr) & 0x1F)==0)
 		&& ((((size_t)dstBw) & 0x1F)==0) && ((((size_t)dstBr) & 0x1F)==0)
@@ -21175,19 +22098,21 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			{
 				if ((fastmode) && (EOTF || OOTF))
 				{
-#ifdef AVX2_BUILD_POSSIBLE
-					if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=15;
+					if (AVX512_Enable && src_RGBP_al64 && dst_RGBP_al64) f_proc=37;
 					else
-#endif
 					{
-						if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=16;
+						if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=15;
 						else
 						{
-							if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=17;
+							if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=16;
 							else
 							{
-								if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=18;
-								else f_proc=19;
+								if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=17;
+								else
+								{
+									if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=18;
+									else f_proc=19;
+								}
 							}
 						}
 					}
@@ -21229,15 +22154,18 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 			case 23 : Convert_RGB32HLGtoLinearRGB64b(MT_DataGF[0],lookupHLG_OOTF); break;
 			case 24 : Convert_RGB32HLGtoLinearRGBPS(MT_DataGF[0],lookupHLG_OOTF); break;
 			case 25 : Convert_RGB64HLGtoLinearRGB64(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),bits_per_pixel,SSE2_Enable,
-						  SSE41_Enable,AVX_Enable,AVX2_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,
+						  SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,
 						  lookupHLG_inv_OOTF); break;
 			case 26 : Convert_RGB64HLGtoLinearRGBPS(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,AVX_Enable,
 						  lookupL_32,HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,(float)HLG_Lw); break;
 			case 27 : Convert_RGBPSHLGtoLinearRGBPS(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,SSE41_Enable,
-						  AVX_Enable,AVX2_Enable,lookupL_20,HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,
+						  AVX_Enable,AVX2_Enable,AVX512_Enable,lookupL_20,HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,
 						  (float)HLG_Lw,fastmode); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 15 : Convert_RGBPStoLinearRGBPS_AVX2(MT_DataGF[0],lookupL_20); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 37 : Convert_RGBPStoLinearRGBPS_AVX512(MT_DataGF[0],lookupL_20); break;
 #endif
 			default : break;
 		}
@@ -21913,8 +22841,14 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	Coeff_Crosstalk[0]=(float)((1.0-Crosstalk)/(1.0-3.0*Crosstalk));
@@ -22074,7 +23008,7 @@ void ConvertXYZtoRGB::StaticThreadpool(void *ptr)
 					  ptrClass->HLGColor,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF,
 					  (float)ptrClass->HLG_Lw,ptrClass->fastmode); break;
 		case 22 : Convert_LinearRGBPStoRGBPSHLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
-					  ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,
+					  ptrClass->SSE2_Enable,ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,ptrClass->AVX512_Enable,
 					  ptrClass->lookupL_32,ptrClass->HLGColor,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF,
 					  (float)ptrClass->HLG_Lw,ptrClass->fastmode); break;
 		case 23 : Convert_LinearRGB32toRGB32HLG(*mt_data_inf,ptrClass->lookupHLG_OOTF); break;
@@ -22083,8 +23017,8 @@ void ConvertXYZtoRGB::StaticThreadpool(void *ptr)
 		case 27 : Convert_LinearRGBPStoRGBPS_SSE2(*mt_data_inf,ptrClass->lookupL_32); break;
 		case 28 : Convert_LinearRGBPStoRGBPS(*mt_data_inf,ptrClass->lookupL_32); break;
 		case 29 : Convert_LinearRGB64toRGB64HLG(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF,(ptrClass->HDRMode==1),
-					  ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,ptrClass->lookupL_16,
-					  ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
+					  ptrClass->SSE41_Enable,ptrClass->AVX_Enable,ptrClass->AVX2_Enable,ptrClass->AVX512_Enable,
+					  ptrClass->lookupL_16,ptrClass->lookupHLG_RGB_16,ptrClass->lookupHLG_OOTF,ptrClass->lookupHLG_inv_OOTF); break;
 		case 30 : Convert_LinearRGBPStoRGBPS_PQ(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 31 : Convert_LinearRGBPStoRGBPS_SDR(*mt_data_inf,ptrClass->OOTF,ptrClass->EOTF); break;
 		case 32 : Convert_XYZtoRGB32(*mt_data_inf,ptrClass->lookupCrosstalk_8); break;
@@ -22098,6 +23032,9 @@ void ConvertXYZtoRGB::StaticThreadpool(void *ptr)
 		case 40 : Convert_XYZtoRGBPS_AVX(*mt_data_inf,ptrClass->Coeff_Crosstalk_asm); break;
 #ifdef AVX2_BUILD_POSSIBLE
 		case 24 : Convert_LinearRGBPStoRGBPS_AVX2(*mt_data_inf,ptrClass->lookupL_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 41 : Convert_LinearRGBPStoRGBPS_AVX512(*mt_data_inf,ptrClass->lookupL_32); break;
 #endif
 		default : break;
 	}
@@ -22228,6 +23165,9 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 	
 	const bool src_al16=((((size_t)srcw) & 0x0F)==0) && ((abs(src_pitch) & 0x0F)==0);
 
+	const bool src_RGBP_al64=((((size_t)srcRw) & 0x3F)==0) && ((((size_t)srcGw) & 0x3F)==0)
+		&& ((((size_t)srcBw) & 0x3F)==0) && ((abs(src_pitch_R) & 0x3F)==0)
+		&& ((abs(src_pitch_G) & 0x3F)==0) && ((abs(src_pitch_B) & 0x3F)==0);
 	const bool src_RGBP_al32=((((size_t)srcRw) & 0x1F)==0) && ((((size_t)srcGw) & 0x1F)==0)
 		&& ((((size_t)srcBw) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0)
 		&& ((abs(src_pitch_G) & 0x1F)==0) && ((abs(src_pitch_B) & 0x1F)==0);
@@ -22238,6 +23178,11 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 	const bool dst_al16=((((size_t)dstr) & 0x0F)==0) && ((((size_t)dstw) & 0x0F)==0)
 		&& ((abs(dst_pitch) & 0x0F)==0);
 
+	const bool dst_RGBP_al64=((((size_t)dstRr) & 0x3F)==0) && ((((size_t)dstRw) & 0x3F)==0)
+		&& ((((size_t)dstGr) & 0x3F)==0) && ((((size_t)dstGw) & 0x3F)==0)
+		&& ((((size_t)dstBr) & 0x3F)==0) && ((((size_t)dstBw) & 0x3F)==0)
+		&& ((abs(src_pitch_R) & 0x3F)==0) && ((abs(src_pitch_G) & 0x3F)==0)
+		&& ((abs(src_pitch_B) & 0x3F)==0);
 	const bool dst_RGBP_al32=((((size_t)dstRr) & 0x1F)==0) && ((((size_t)dstRw) & 0x1F)==0)
 		&& ((((size_t)dstGr) & 0x1F)==0) && ((((size_t)dstGw) & 0x1F)==0)
 		&& ((((size_t)dstBr) & 0x1F)==0) && ((((size_t)dstBw) & 0x1F)==0)
@@ -22525,19 +23470,21 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 				{
 					if (fastmode)
 					{
-#ifdef AVX2_BUILD_POSSIBLE
-						if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=24;
+						if (AVX512_Enable && src_RGBP_al64 && dst_RGBP_al64) f_proc=41;
 						else
-#endif
 						{
-							if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=25;
+							if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=24;
 							else
 							{
-								if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=26;
+								if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=25;
 								else
 								{
-									if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=27;
-									else f_proc=28;
+									if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=26;
+									else
+									{
+										if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=27;
+										else f_proc=28;
+									}
 								}
 							}
 						}
@@ -22609,18 +23556,22 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 			case 21 : Convert_LinearRGBPStoRGB64HLG(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,SSE41_Enable,
 						  AVX_Enable,lookupL_20,HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,(float)HLG_Lw,fastmode); break;
 			case 22 : Convert_LinearRGBPStoRGBPSHLG(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE2_Enable,SSE41_Enable,
-						  AVX_Enable,AVX2_Enable,lookupL_32,HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,(float)HLG_Lw,fastmode); break;
+						  AVX_Enable,AVX2_Enable,AVX512_Enable,lookupL_32,HLGColor,lookupHLG_OOTF,lookupHLG_inv_OOTF,
+						  (float)HLG_Lw,fastmode); break;
 			case 23 : Convert_LinearRGB32toRGB32HLG(MT_DataGF[0],lookupHLG_OOTF); break;
 			case 25 : Convert_LinearRGBPStoRGBPS_AVX(MT_DataGF[0],lookupL_32); break;
 			case 26 : Convert_LinearRGBPStoRGBPS_SSE41(MT_DataGF[0],lookupL_32); break;
 			case 27 : Convert_LinearRGBPStoRGBPS_SSE2(MT_DataGF[0],lookupL_32); break;
 			case 28 : Convert_LinearRGBPStoRGBPS(MT_DataGF[0],lookupL_32); break;
 			case 29 : Convert_LinearRGB64toRGB64HLG(MT_DataGF[0],OOTF,EOTF,(HDRMode==1),SSE41_Enable,AVX_Enable,AVX2_Enable,
-						  lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
+						  AVX512_Enable,lookupL_16,lookupHLG_RGB_16,lookupHLG_OOTF,lookupHLG_inv_OOTF); break;
 			case 30 : Convert_LinearRGBPStoRGBPS_PQ(MT_DataGF[0],OOTF,EOTF); break;
 			case 31 : Convert_LinearRGBPStoRGBPS_SDR(MT_DataGF[0],OOTF,EOTF); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 24 : Convert_LinearRGBPStoRGBPS_AVX2(MT_DataGF[0],lookupL_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 41 : Convert_LinearRGBPStoRGBPS_AVX512(MT_DataGF[0],lookupL_32); break;
 #endif
 			default : break;
 		}
@@ -22693,8 +23644,14 @@ ConvertXYZ_Scale_HDRtoSDR::ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -22996,8 +23953,14 @@ ConvertXYZ_Scale_SDRtoHDR::ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -23334,8 +24297,14 @@ ConvertXYZ_Hable_HDRtoSDR::ConvertXYZ_Hable_HDRtoSDR(PClip _child,double _exp_X,
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -23434,6 +24403,10 @@ void ConvertXYZ_Hable_HDRtoSDR::StaticThreadpool(void *ptr)
 		case 6 : Convert_XYZ_HDRtoSDR_32_AVX2(*mt_data_inf,ptrClass->Xmin,ptrClass->Ymin,ptrClass->Zmin,ptrClass->CoeffX,
 					 ptrClass->CoeffY,ptrClass->CoeffZ,ptrClass->lookupX_32,ptrClass->lookupY_32,ptrClass->lookupZ_32); break;
 #endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 10 : Convert_XYZ_HDRtoSDR_32_AVX512(*mt_data_inf,ptrClass->Xmin,ptrClass->Ymin,ptrClass->Zmin,ptrClass->CoeffX,
+					 ptrClass->CoeffY,ptrClass->CoeffZ,ptrClass->lookupX_32,ptrClass->lookupY_32,ptrClass->lookupZ_32); break;
+#endif
 		default : break;
 	}
 }
@@ -23500,6 +24473,9 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 			env->ThrowError("ConvertXYZ_Hable_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
+	const bool src_XYZP_al64=((((size_t)srcXr) & 0x3F)==0) && ((((size_t)srcYr) & 0x3F)==0)
+		&& ((((size_t)srcZr) & 0x3F)==0) && ((abs(src_pitch_X) & 0x3F)==0)
+		&& ((abs(src_pitch_Y) & 0x3F)==0) && ((abs(src_pitch_Z) & 0x3F)==0);
 	const bool src_XYZP_al32=((((size_t)srcXr) & 0x1F)==0) && ((((size_t)srcYr) & 0x1F)==0)
 		&& ((((size_t)srcZr) & 0x1F)==0) && ((abs(src_pitch_X) & 0x1F)==0)
 		&& ((abs(src_pitch_Y) & 0x1F)==0) && ((abs(src_pitch_Z) & 0x1F)==0);
@@ -23507,6 +24483,9 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 		&& ((((size_t)srcZr) & 0x0F)==0) && ((abs(src_pitch_X) & 0x0F)==0)
 		&& ((abs(src_pitch_Y) & 0x0F)==0) && ((abs(src_pitch_Z) & 0x0F)==0);
 
+	const bool dst_XYZP_al64=((((size_t)dstXw) & 0x3F)==0) && ((((size_t)dstYw) & 0x3F)==0)
+		&& ((((size_t)dstZw) & 0x3F)==0) && ((abs(dst_pitch_X) & 0x3F)==0)
+		&& ((abs(dst_pitch_Y) & 0x3F)==0) && ((abs(dst_pitch_Z) & 0x3F)==0);
 	const bool dst_XYZP_al32=((((size_t)dstXw) & 0x1F)==0) && ((((size_t)dstYw) & 0x1F)==0)
 		&& ((((size_t)dstZw) & 0x1F)==0) && ((abs(dst_pitch_X) & 0x1F)==0)
 		&& ((abs(dst_pitch_Y) & 0x1F)==0) && ((abs(dst_pitch_Z) & 0x1F)==0);
@@ -23559,19 +24538,21 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=6;
+			if (AVX512_Enable && src_XYZP_al64 && dst_XYZP_al64) f_proc=10;
 			else
-#endif
 			{
-				if (AVX_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=5;
+				if (AVX2_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=6;
 				else
 				{
-					if (SSE41_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=4;
+					if (AVX_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=5;
 					else
 					{
-						if (SSE2_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=3;
-						else f_proc=2;
+						if (SSE41_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=4;
+						else
+						{
+							if (SSE2_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=3;
+							else f_proc=2;
+						}
 					}
 				}
 			}
@@ -23618,6 +24599,10 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 						 exp_Z,w_Z,a_Z,b_Z,c_Z,d_Z,e_Z,f_Z); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 6 : Convert_XYZ_HDRtoSDR_32_AVX2(MT_DataGF[0],Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ,lookupX_32,
+						 lookupY_32,lookupZ_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 10 : Convert_XYZ_HDRtoSDR_32_AVX512(MT_DataGF[0],Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ,lookupX_32,
 						 lookupY_32,lookupZ_32); break;
 #endif
 			default : break;
@@ -23718,8 +24703,14 @@ ConvertRGB_Hable_HDRtoSDR::ConvertRGB_Hable_HDRtoSDR(PClip _child,double _exp_R,
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -23813,6 +24804,9 @@ void ConvertRGB_Hable_HDRtoSDR::StaticThreadpool(void *ptr)
 #ifdef AVX2_BUILD_POSSIBLE
 		case 6 : Convert_RGB_HDRtoSDR_32_AVX2(*mt_data_inf,ptrClass->lookupR_32,ptrClass->lookupG_32,ptrClass->lookupB_32); break;
 #endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 10 : Convert_RGB_HDRtoSDR_32_AVX512(*mt_data_inf,ptrClass->lookupR_32,ptrClass->lookupG_32,ptrClass->lookupB_32); break;
+#endif
 		default : break;
 	}
 }
@@ -23879,6 +24873,9 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 			env->ThrowError("ConvertRGB_Hable_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
+	const bool src_RGBP_al64=((((size_t)srcRr) & 0x3F)==0) && ((((size_t)srcGr) & 0x3F)==0)
+		&& ((((size_t)srcBr) & 0x3F)==0) && ((abs(src_pitch_R) & 0x3F)==0)
+		&& ((abs(src_pitch_G) & 0x3F)==0) && ((abs(src_pitch_B) & 0x3F)==0);
 	const bool src_RGBP_al32=((((size_t)srcRr) & 0x1F)==0) && ((((size_t)srcGr) & 0x1F)==0)
 		&& ((((size_t)srcBr) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0)
 		&& ((abs(src_pitch_G) & 0x1F)==0) && ((abs(src_pitch_B) & 0x1F)==0);
@@ -23886,6 +24883,9 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 		&& ((((size_t)srcBr) & 0x0F)==0) && ((abs(src_pitch_R) & 0x0F)==0)
 		&& ((abs(src_pitch_G) & 0x0F)==0) && ((abs(src_pitch_B) & 0x0F)==0);
 
+	const bool dst_RGBP_al64=((((size_t)dstRw) & 0x3F)==0) && ((((size_t)dstGw) & 0x3F)==0)
+		&& ((((size_t)dstBw) & 0x3F)==0) && ((abs(dst_pitch_R) & 0x3F)==0)
+		&& ((abs(dst_pitch_G) & 0x3F)==0) && ((abs(dst_pitch_B) & 0x3F)==0);
 	const bool dst_RGBP_al32=((((size_t)dstRw) & 0x1F)==0) && ((((size_t)dstGw) & 0x1F)==0)
 		&& ((((size_t)dstBw) & 0x1F)==0) && ((abs(dst_pitch_R) & 0x1F)==0)
 		&& ((abs(dst_pitch_G) & 0x1F)==0) && ((abs(dst_pitch_B) & 0x1F)==0);
@@ -23938,19 +24938,21 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
+			if (AVX512_Enable && src_RGBP_al64 && dst_RGBP_al64) f_proc=10;
 			else
-#endif
 			{
-				if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
+				if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
 				else
 				{
-					if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+					if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
 					else
 					{
-						if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
-						else f_proc=2;
+						if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+						else
+						{
+							if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
+							else f_proc=2;
+						}
 					}
 				}
 			}
@@ -23993,6 +24995,9 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 						 exp_B,w_B,a_B,b_B,c_B,d_B,e_B,f_B); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 6 : Convert_RGB_HDRtoSDR_32_AVX2(MT_DataGF[0],lookupR_32,lookupG_32,lookupB_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 10 : Convert_RGB_HDRtoSDR_32_AVX512(MT_DataGF[0],lookupR_32,lookupG_32,lookupB_32); break;
 #endif
 			default : break;
 		}
@@ -24113,8 +25118,14 @@ ConvertXYZ_Mobius_HDRtoSDR::ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -24207,6 +25218,10 @@ void ConvertXYZ_Mobius_HDRtoSDR::StaticThreadpool(void *ptr)
 		case 6 : Convert_XYZ_HDRtoSDR_32_AVX2(*mt_data_inf,ptrClass->Xmin,ptrClass->Ymin,ptrClass->Zmin,ptrClass->CoeffX,
 					 ptrClass->CoeffY,ptrClass->CoeffZ,ptrClass->lookupX_32,ptrClass->lookupY_32,ptrClass->lookupZ_32); break;
 #endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 10 : Convert_XYZ_HDRtoSDR_32_AVX512(*mt_data_inf,ptrClass->Xmin,ptrClass->Ymin,ptrClass->Zmin,ptrClass->CoeffX,
+					 ptrClass->CoeffY,ptrClass->CoeffZ,ptrClass->lookupX_32,ptrClass->lookupY_32,ptrClass->lookupZ_32); break;
+#endif
 		default : break;
 	}
 }
@@ -24273,6 +25288,9 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 			env->ThrowError("ConvertXYZ_Mobius_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 
+	const bool src_XYZP_al64=((((size_t)srcXr) & 0x3F)==0) && ((((size_t)srcYr) & 0x3F)==0)
+		&& ((((size_t)srcZr) & 0x3F)==0) && ((abs(src_pitch_X) & 0x3F)==0)
+		&& ((abs(src_pitch_Y) & 0x3F)==0) && ((abs(src_pitch_Z) & 0x3F)==0);
 	const bool src_XYZP_al32=((((size_t)srcXr) & 0x1F)==0) && ((((size_t)srcYr) & 0x1F)==0)
 		&& ((((size_t)srcZr) & 0x1F)==0) && ((abs(src_pitch_X) & 0x1F)==0)
 		&& ((abs(src_pitch_Y) & 0x1F)==0) && ((abs(src_pitch_Z) & 0x1F)==0);
@@ -24280,6 +25298,9 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 		&& ((((size_t)srcZr) & 0x0F)==0) && ((abs(src_pitch_X) & 0x0F)==0)
 		&& ((abs(src_pitch_Y) & 0x0F)==0) && ((abs(src_pitch_Z) & 0x0F)==0);
 
+	const bool dst_XYZP_al64=((((size_t)dstXw) & 0x3F)==0) && ((((size_t)dstYw) & 0x3F)==0)
+		&& ((((size_t)dstZw) & 0x3F)==0) && ((abs(dst_pitch_X) & 0x3F)==0)
+		&& ((abs(dst_pitch_Y) & 0x3F)==0) && ((abs(dst_pitch_Z) & 0x3F)==0);
 	const bool dst_XYZP_al32=((((size_t)dstXw) & 0x1F)==0) && ((((size_t)dstYw) & 0x1F)==0)
 		&& ((((size_t)dstZw) & 0x1F)==0) && ((abs(dst_pitch_X) & 0x1F)==0)
 		&& ((abs(dst_pitch_Y) & 0x1F)==0) && ((abs(dst_pitch_Z) & 0x1F)==0);
@@ -24332,19 +25353,21 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=6;
+			if (AVX512_Enable && src_XYZP_al64 && dst_XYZP_al64) f_proc=10;
 			else
-#endif
 			{
-				if (AVX_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=5;
+				if (AVX2_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=6;
 				else
 				{
-					if (SSE41_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=4;
+					if (AVX_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=5;
 					else
 					{
-						if (SSE2_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=3;
-						else f_proc=2;
+						if (SSE41_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=4;
+						else
+						{
+							if (SSE2_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=3;
+							else f_proc=2;
+						}
 					}
 				}
 			}
@@ -24391,6 +25414,10 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 						 exp_Z,trans_Z,peak_Z); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 6 : Convert_XYZ_HDRtoSDR_32_AVX2(MT_DataGF[0],Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ,lookupX_32,
+						 lookupY_32,lookupZ_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 10 : Convert_XYZ_HDRtoSDR_32_AVX512(MT_DataGF[0],Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ,lookupX_32,
 						 lookupY_32,lookupZ_32); break;
 #endif
 			default : break;
@@ -24501,8 +25528,14 @@ ConvertRGB_Mobius_HDRtoSDR::ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -24590,6 +25623,9 @@ void ConvertRGB_Mobius_HDRtoSDR::StaticThreadpool(void *ptr)
 #ifdef AVX2_BUILD_POSSIBLE
 		case 6 : Convert_RGB_HDRtoSDR_32_AVX2(*mt_data_inf,ptrClass->lookupR_32,ptrClass->lookupG_32,ptrClass->lookupB_32); break;
 #endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 10 : Convert_RGB_HDRtoSDR_32_AVX512(*mt_data_inf,ptrClass->lookupR_32,ptrClass->lookupG_32,ptrClass->lookupB_32); break;
+#endif
 		default : break;
 	}
 }
@@ -24656,6 +25692,9 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 			env->ThrowError("ConvertRGB_Mobius_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
+	const bool src_RGBP_al64=((((size_t)srcRr) & 0x3F)==0) && ((((size_t)srcGr) & 0x3F)==0)
+		&& ((((size_t)srcBr) & 0x3F)==0) && ((abs(src_pitch_R) & 0x3F)==0)
+		&& ((abs(src_pitch_G) & 0x3F)==0) && ((abs(src_pitch_B) & 0x3F)==0);
 	const bool src_RGBP_al32=((((size_t)srcRr) & 0x1F)==0) && ((((size_t)srcGr) & 0x1F)==0)
 		&& ((((size_t)srcBr) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0)
 		&& ((abs(src_pitch_G) & 0x1F)==0) && ((abs(src_pitch_B) & 0x1F)==0);
@@ -24663,6 +25702,9 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 		&& ((((size_t)srcBr) & 0x0F)==0) && ((abs(src_pitch_R) & 0x0F)==0)
 		&& ((abs(src_pitch_G) & 0x0F)==0) && ((abs(src_pitch_B) & 0x0F)==0);
 
+	const bool dst_RGBP_al64=((((size_t)dstRw) & 0x3F)==0) && ((((size_t)dstGw) & 0x3F)==0)
+		&& ((((size_t)dstBw) & 0x3F)==0) && ((abs(dst_pitch_R) & 0x3F)==0)
+		&& ((abs(dst_pitch_G) & 0x3F)==0) && ((abs(dst_pitch_B) & 0x3F)==0);
 	const bool dst_RGBP_al32=((((size_t)dstRw) & 0x1F)==0) && ((((size_t)dstGw) & 0x1F)==0)
 		&& ((((size_t)dstBw) & 0x1F)==0) && ((abs(dst_pitch_R) & 0x1F)==0)
 		&& ((abs(dst_pitch_G) & 0x1F)==0) && ((abs(dst_pitch_B) & 0x1F)==0);
@@ -24715,19 +25757,21 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
+			if (AVX512_Enable && src_RGBP_al64 && dst_RGBP_al64) f_proc=10;
 			else
-#endif
 			{
-				if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
+				if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
 				else
 				{
-					if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+					if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
 					else
 					{
-						if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
-						else f_proc=2;
+						if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+						else
+						{
+							if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
+							else f_proc=2;
+						}
 					}
 				}
 			}
@@ -24770,6 +25814,9 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 						 exp_B,trans_B,peak_B); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 6 : Convert_RGB_HDRtoSDR_32_AVX2(MT_DataGF[0],lookupR_32,lookupG_32,lookupB_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 10 : Convert_RGB_HDRtoSDR_32_AVX512(MT_DataGF[0],lookupR_32,lookupG_32,lookupB_32); break;
 #endif
 			default : break;
 		}
@@ -24886,9 +25933,15 @@ ConvertXYZ_Reinhard_HDRtoSDR::ConvertXYZ_Reinhard_HDRtoSDR(PClip _child,double _
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
-	#ifdef AVX2_BUILD_POSSIBLE
+	AVX512_Enable=false;
+#ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
-	#endif
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
+#endif
 
 	if (threads_number>1)
 	{
@@ -24980,6 +26033,10 @@ void ConvertXYZ_Reinhard_HDRtoSDR::StaticThreadpool(void *ptr)
 		case 6 : Convert_XYZ_HDRtoSDR_32_AVX2(*mt_data_inf,ptrClass->Xmin,ptrClass->Ymin,ptrClass->Zmin,ptrClass->CoeffX,
 					 ptrClass->CoeffY,ptrClass->CoeffZ,ptrClass->lookupX_32,ptrClass->lookupY_32,ptrClass->lookupZ_32); break;
 #endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 10 : Convert_XYZ_HDRtoSDR_32_AVX512(*mt_data_inf,ptrClass->Xmin,ptrClass->Ymin,ptrClass->Zmin,ptrClass->CoeffX,
+					 ptrClass->CoeffY,ptrClass->CoeffZ,ptrClass->lookupX_32,ptrClass->lookupY_32,ptrClass->lookupZ_32); break;
+#endif
 		default : break;
 	}
 }
@@ -25046,6 +26103,9 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 			env->ThrowError("ConvertXYZ_Reinhard_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
+	const bool src_XYZP_al64=((((size_t)srcXr) & 0x3F)==0) && ((((size_t)srcYr) & 0x3F)==0)
+		&& ((((size_t)srcZr) & 0x3F)==0) && ((abs(src_pitch_X) & 0x3F)==0)
+		&& ((abs(src_pitch_Y) & 0x3F)==0) && ((abs(src_pitch_Z) & 0x3F)==0);
 	const bool src_XYZP_al32=((((size_t)srcXr) & 0x1F)==0) && ((((size_t)srcYr) & 0x1F)==0)
 		&& ((((size_t)srcZr) & 0x1F)==0) && ((abs(src_pitch_X) & 0x1F)==0)
 		&& ((abs(src_pitch_Y) & 0x1F)==0) && ((abs(src_pitch_Z) & 0x1F)==0);
@@ -25053,6 +26113,9 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 		&& ((((size_t)srcZr) & 0x0F)==0) && ((abs(src_pitch_X) & 0x0F)==0)
 		&& ((abs(src_pitch_Y) & 0x0F)==0) && ((abs(src_pitch_Z) & 0x0F)==0);
 
+	const bool dst_XYZP_al64=((((size_t)dstXw) & 0x3F)==0) && ((((size_t)dstYw) & 0x3F)==0)
+		&& ((((size_t)dstZw) & 0x3F)==0) && ((abs(dst_pitch_X) & 0x3F)==0)
+		&& ((abs(dst_pitch_Y) & 0x3F)==0) && ((abs(dst_pitch_Z) & 0x3F)==0);
 	const bool dst_XYZP_al32=((((size_t)dstXw) & 0x1F)==0) && ((((size_t)dstYw) & 0x1F)==0)
 		&& ((((size_t)dstZw) & 0x1F)==0) && ((abs(dst_pitch_X) & 0x1F)==0)
 		&& ((abs(dst_pitch_Y) & 0x1F)==0) && ((abs(dst_pitch_Z) & 0x1F)==0);
@@ -25105,19 +26168,21 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=6;
+			if (AVX512_Enable && src_XYZP_al64 && dst_XYZP_al64) f_proc=10;
 			else
-#endif
 			{
-				if (AVX_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=5;
+				if (AVX2_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=6;
 				else
 				{
-					if (SSE41_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=4;
+					if (AVX_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=5;
 					else
 					{
-						if (SSE2_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=3;
-						else f_proc=2;
+						if (SSE41_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=4;
+						else
+						{
+							if (SSE2_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=3;
+							else f_proc=2;
+						}
 					}
 				}
 			}
@@ -25164,6 +26229,10 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 						 exp_Z,contr_Z,peak_Z); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 6 : Convert_XYZ_HDRtoSDR_32_AVX2(MT_DataGF[0],Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ,lookupX_32,
+						 lookupY_32,lookupZ_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 10 : Convert_XYZ_HDRtoSDR_32_AVX512(MT_DataGF[0],Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ,lookupX_32,
 						 lookupY_32,lookupZ_32); break;
 #endif
 			default : break;
@@ -25270,8 +26339,14 @@ ConvertRGB_Reinhard_HDRtoSDR::ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -25359,6 +26434,9 @@ void ConvertRGB_Reinhard_HDRtoSDR::StaticThreadpool(void *ptr)
 #ifdef AVX2_BUILD_POSSIBLE
 		case 6 : Convert_RGB_HDRtoSDR_32_AVX2(*mt_data_inf,ptrClass->lookupR_32,ptrClass->lookupG_32,ptrClass->lookupB_32); break;
 #endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 10 : Convert_RGB_HDRtoSDR_32_AVX512(*mt_data_inf,ptrClass->lookupR_32,ptrClass->lookupG_32,ptrClass->lookupB_32); break;
+#endif
 		default : break;
 	}
 }
@@ -25425,6 +26503,9 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 			env->ThrowError("ConvertRGB_Reinhard_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
+	const bool src_RGBP_al64=((((size_t)srcRr) & 0x3F)==0) && ((((size_t)srcGr) & 0x3F)==0)
+		&& ((((size_t)srcBr) & 0x3F)==0) && ((abs(src_pitch_R) & 0x3F)==0)
+		&& ((abs(src_pitch_G) & 0x3F)==0) && ((abs(src_pitch_B) & 0x3F)==0);
 	const bool src_RGBP_al32=((((size_t)srcRr) & 0x1F)==0) && ((((size_t)srcGr) & 0x1F)==0)
 		&& ((((size_t)srcBr) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0)
 		&& ((abs(src_pitch_G) & 0x1F)==0) && ((abs(src_pitch_B) & 0x1F)==0);
@@ -25432,6 +26513,9 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 		&& ((((size_t)srcBr) & 0x0F)==0) && ((abs(src_pitch_R) & 0x0F)==0)
 		&& ((abs(src_pitch_G) & 0x0F)==0) && ((abs(src_pitch_B) & 0x0F)==0);
 
+	const bool dst_RGBP_al64=((((size_t)dstRw) & 0x3F)==0) && ((((size_t)dstGw) & 0x3F)==0)
+		&& ((((size_t)dstBw) & 0x3F)==0) && ((abs(dst_pitch_R) & 0x3F)==0)
+		&& ((abs(dst_pitch_G) & 0x3F)==0) && ((abs(dst_pitch_B) & 0x3F)==0);
 	const bool dst_RGBP_al32=((((size_t)dstRw) & 0x1F)==0) && ((((size_t)dstGw) & 0x1F)==0)
 		&& ((((size_t)dstBw) & 0x1F)==0) && ((abs(dst_pitch_R) & 0x1F)==0)
 		&& ((abs(dst_pitch_G) & 0x1F)==0) && ((abs(dst_pitch_B) & 0x1F)==0);
@@ -25484,19 +26568,21 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
+			if (AVX512_Enable && src_RGBP_al64 && dst_RGBP_al64) f_proc=10;
 			else
-#endif
 			{
-				if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
+				if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
 				else
 				{
-					if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+					if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
 					else
 					{
-						if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
-						else f_proc=2;
+						if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+						else
+						{
+							if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
+							else f_proc=2;
+						}
 					}
 				}
 			}
@@ -25539,6 +26625,9 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 						 exp_B,contr_B,peak_B); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 6 : Convert_RGB_HDRtoSDR_32_AVX2(MT_DataGF[0],lookupR_32,lookupG_32,lookupB_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 10 : Convert_RGB_HDRtoSDR_32_AVX512(MT_DataGF[0],lookupR_32,lookupG_32,lookupB_32); break;
 #endif
 			default : break;
 		}
@@ -25671,8 +26760,14 @@ ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -26115,8 +27210,14 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -26250,6 +27351,15 @@ void ConverXYZ_BT2446_C_HDRtoSDR::StaticThreadpool(void *ptr)
 					 (float)ptrClass->Xmin,(float)ptrClass->Zmin,ptrClass->CoeffX,ptrClass->CoeffZ);
 			break;
 #endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 15 : Convert_RGBPS_HDRtoSDR_BT2446_C_1_32_AVX512(*mt_data_inf,ptrClass->lookupY_32,
+					 ptrClass->lookupiY_32,(float)ptrClass->Ymin,ptrClass->CoeffY);
+			break;
+		case 16 : Convert_RGB64_HDRtoSDR_BT2446_C_1_16_AVX512(*mt_data_inf,ptrClass->lookupY_16,
+					 ptrClass->lookupX_16,ptrClass->lookupiY_16,ptrClass->lookupZ_16,
+					 (float)ptrClass->Xmin,(float)ptrClass->Zmin,ptrClass->CoeffX,ptrClass->CoeffZ);
+			break;
+#endif
 		default : break;
 	}
 }
@@ -26341,9 +27451,13 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 			env->ThrowError("ConverXYZ_BT2446_C_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
+	const bool src_al64=((((size_t)srcr) & 0x3F)==0) && ((abs(src_pitch) & 0x3F)==0);
 	const bool src_al32=((((size_t)srcr) & 0x1F)==0) && ((abs(src_pitch) & 0x1F)==0);
 	const bool src_al16=((((size_t)srcr) & 0x0F)==0) && ((abs(src_pitch) & 0x0F)==0);
 
+	const bool src_RGBP_al64=((((size_t)srcXr) & 0x3F)==0) && ((((size_t)srcYr) & 0x3F)==0)
+		&& ((((size_t)srcZr) & 0x3F)==0) && ((abs(src_pitch_X) & 0x3F)==0)
+		&& ((abs(src_pitch_Y) & 0x3F)==0) && ((abs(src_pitch_Z) & 0x3F)==0);
 	const bool src_RGBP_al32=((((size_t)srcXr) & 0x1F)==0) && ((((size_t)srcYr) & 0x1F)==0)
 		&& ((((size_t)srcZr) & 0x1F)==0) && ((abs(src_pitch_X) & 0x1F)==0)
 		&& ((abs(src_pitch_Y) & 0x1F)==0) && ((abs(src_pitch_Z) & 0x1F)==0);
@@ -26351,6 +27465,9 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 		&& ((((size_t)srcZr) & 0x0F)==0) && ((abs(src_pitch_X) & 0x0F)==0)
 		&& ((abs(src_pitch_Y) & 0x0F)==0) && ((abs(src_pitch_Z) & 0x0F)==0);
 
+	const bool dst_RGBP_al64=((((size_t)dstXw) & 0x3F)==0) && ((((size_t)dstYw) & 0x3F)==0)
+		&& ((((size_t)dstZw) & 0x3F)==0) && ((abs(dst_pitch_X) & 0x3F)==0)
+		&& ((abs(dst_pitch_Y) & 0x3F)==0) && ((abs(dst_pitch_Z) & 0x3F)==0);
 	const bool dst_RGBP_al32=((((size_t)dstXw) & 0x1F)==0) && ((((size_t)dstYw) & 0x1F)==0)
 		&& ((((size_t)dstZw) & 0x1F)==0) && ((abs(dst_pitch_X) & 0x1F)==0)
 		&& ((abs(dst_pitch_Y) & 0x1F)==0) && ((abs(dst_pitch_Z) & 0x1F)==0);
@@ -26358,6 +27475,9 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 		&& ((((size_t)dstZw) & 0x0F)==0) && ((abs(dst_pitch_X) & 0x0F)==0)
 		&& ((abs(dst_pitch_Y) & 0x0F)==0) && ((abs(dst_pitch_Z) & 0x0F)==0);
 
+	const bool tmp_RGBP_al64=((((size_t)tmpXw) & 0x3F)==0) && ((((size_t)tmpYw) & 0x3F)==0)
+		&& ((((size_t)tmpZw) & 0x3F)==0) && ((abs(tmp_pitch_X) & 0x3F)==0)
+		&& ((abs(tmp_pitch_Y) & 0x3F)==0) && ((abs(tmp_pitch_Z) & 0x3F)==0);
 	const bool tmp_RGBP_al32=((((size_t)tmpXw) & 0x1F)==0) && ((((size_t)tmpYw) & 0x1F)==0)
 		&& ((((size_t)tmpZw) & 0x1F)==0) && ((abs(tmp_pitch_X) & 0x1F)==0)
 		&& ((abs(tmp_pitch_Y) & 0x1F)==0) && ((abs(tmp_pitch_Z) & 0x1F)==0);
@@ -26529,19 +27649,21 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
+			if (AVX512_Enable && src_RGBP_al64 && dst_RGBP_al64) f_proc=15;
 			else
-#endif
 			{
-				if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
+				if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
 				else
 				{
-					if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+					if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
 					else
 					{
-						if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
-						else f_proc=2;
+						if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+						else
+						{
+							if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
+							else f_proc=2;
+						}
 					}
 				}
 			}
@@ -26550,19 +27672,21 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 	}
 	else
 	{
-#ifdef AVX2_BUILD_POSSIBLE
-		if (AVX2_Enable && src_al32 && tmp_RGBP_al32) f_proc=11;
+		if (AVX512_Enable && src_al64 && tmp_RGBP_al64) f_proc=16;
 		else
-#endif
 		{
-			if (AVX_Enable && src_al32 && tmp_RGBP_al32) f_proc=10;
+			if (AVX2_Enable && src_al32 && tmp_RGBP_al32) f_proc=11;
 			else
 			{
-				if (SSE41_Enable && src_al16 && tmp_RGBP_al16) f_proc=9;
+				if (AVX_Enable && src_al32 && tmp_RGBP_al32) f_proc=10;
 				else
 				{
-					if (SSE2_Enable && src_al16 && tmp_RGBP_al16) f_proc=8;
-					else f_proc=7;
+					if (SSE41_Enable && src_al16 && tmp_RGBP_al16) f_proc=9;
+					else
+					{
+						if (SSE2_Enable && src_al16 && tmp_RGBP_al16) f_proc=8;
+						else f_proc=7;
+					}
 				}
 			}
 		}
@@ -26607,6 +27731,13 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 			case 6 : Convert_RGBPS_HDRtoSDR_BT2446_C_1_32_AVX2(MT_DataGF[0],lookupY_32,lookupiY_32,
 						 (float)Ymin,CoeffY); break;
 			case 11 : Convert_RGB64_HDRtoSDR_BT2446_C_1_16_AVX2(MT_DataGF[0],lookupY_16,lookupX_16,
+						 lookupiY_16,lookupZ_16,(float)Xmin,(float)Zmin,CoeffX,CoeffZ);
+				break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 15 : Convert_RGBPS_HDRtoSDR_BT2446_C_1_32_AVX512(MT_DataGF[0],lookupY_32,lookupiY_32,
+						 (float)Ymin,CoeffY); break;
+			case 16 : Convert_RGB64_HDRtoSDR_BT2446_C_1_16_AVX512(MT_DataGF[0],lookupY_16,lookupX_16,
 						 lookupiY_16,lookupZ_16,(float)Xmin,(float)Zmin,CoeffX,CoeffZ);
 				break;
 #endif
@@ -26717,8 +27848,14 @@ ConvertXYZ_ACES_HDRtoSDR::ConvertXYZ_ACES_HDRtoSDR(PClip _child,double _a_X,doub
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -26814,6 +27951,10 @@ void ConvertXYZ_ACES_HDRtoSDR::StaticThreadpool(void *ptr)
 		case 6 : Convert_XYZ_HDRtoSDR_32_AVX2(*mt_data_inf,ptrClass->Xmin,ptrClass->Ymin,ptrClass->Zmin,ptrClass->CoeffX,
 					 ptrClass->CoeffY,ptrClass->CoeffZ,ptrClass->lookupX_32,ptrClass->lookupY_32,ptrClass->lookupZ_32); break;
 #endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 10 : Convert_XYZ_HDRtoSDR_32_AVX512(*mt_data_inf,ptrClass->Xmin,ptrClass->Ymin,ptrClass->Zmin,ptrClass->CoeffX,
+					 ptrClass->CoeffY,ptrClass->CoeffZ,ptrClass->lookupX_32,ptrClass->lookupY_32,ptrClass->lookupZ_32); break;
+#endif
 		default : break;
 	}
 }
@@ -26880,6 +28021,9 @@ PVideoFrame __stdcall ConvertXYZ_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 			env->ThrowError("ConvertXYZ_ACES_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
+	const bool src_XYZP_al64=((((size_t)srcXr) & 0x3F)==0) && ((((size_t)srcYr) & 0x3F)==0)
+		&& ((((size_t)srcZr) & 0x3F)==0) && ((abs(src_pitch_X) & 0x3F)==0)
+		&& ((abs(src_pitch_Y) & 0x3F)==0) && ((abs(src_pitch_Z) & 0x3F)==0);
 	const bool src_XYZP_al32=((((size_t)srcXr) & 0x1F)==0) && ((((size_t)srcYr) & 0x1F)==0)
 		&& ((((size_t)srcZr) & 0x1F)==0) && ((abs(src_pitch_X) & 0x1F)==0)
 		&& ((abs(src_pitch_Y) & 0x1F)==0) && ((abs(src_pitch_Z) & 0x1F)==0);
@@ -26887,6 +28031,9 @@ PVideoFrame __stdcall ConvertXYZ_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 		&& ((((size_t)srcZr) & 0x0F)==0) && ((abs(src_pitch_X) & 0x0F)==0)
 		&& ((abs(src_pitch_Y) & 0x0F)==0) && ((abs(src_pitch_Z) & 0x0F)==0);
 
+	const bool dst_XYZP_al64=((((size_t)dstXw) & 0x3F)==0) && ((((size_t)dstYw) & 0x3F)==0)
+		&& ((((size_t)dstZw) & 0x3F)==0) && ((abs(dst_pitch_X) & 0x3F)==0)
+		&& ((abs(dst_pitch_Y) & 0x3F)==0) && ((abs(dst_pitch_Z) & 0x3F)==0);
 	const bool dst_XYZP_al32=((((size_t)dstXw) & 0x1F)==0) && ((((size_t)dstYw) & 0x1F)==0)
 		&& ((((size_t)dstZw) & 0x1F)==0) && ((abs(dst_pitch_X) & 0x1F)==0)
 		&& ((abs(dst_pitch_Y) & 0x1F)==0) && ((abs(dst_pitch_Z) & 0x1F)==0);
@@ -26939,19 +28086,21 @@ PVideoFrame __stdcall ConvertXYZ_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=6;
+			if (AVX512_Enable && src_XYZP_al64 && dst_XYZP_al64) f_proc=10;
 			else
-#endif
 			{
-				if (AVX_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=5;
+				if (AVX2_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=6;
 				else
 				{
-					if (SSE41_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=4;
+					if (AVX_Enable && src_XYZP_al32 && dst_XYZP_al32) f_proc=5;
 					else
 					{
-						if (SSE2_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=3;
-						else f_proc=2;
+						if (SSE41_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=4;
+						else
+						{
+							if (SSE2_Enable && src_XYZP_al16 && dst_XYZP_al16) f_proc=3;
+							else f_proc=2;
+						}
 					}
 				}
 			}
@@ -26998,6 +28147,10 @@ PVideoFrame __stdcall ConvertXYZ_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 						 d_Z,e_Z,exp_X,exp_Y,exp_Z); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 6 : Convert_XYZ_HDRtoSDR_32_AVX2(MT_DataGF[0],Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ,lookupX_32,
+						 lookupY_32,lookupZ_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 10 : Convert_XYZ_HDRtoSDR_32_AVX512(MT_DataGF[0],Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ,lookupX_32,
 						 lookupY_32,lookupZ_32); break;
 #endif
 			default : break;
@@ -27098,8 +28251,14 @@ ConvertRGB_ACES_HDRtoSDR::ConvertRGB_ACES_HDRtoSDR(PClip _child,double _a_R,doub
 	SSE41_Enable=((env->GetCPUFlags()&CPUF_SSE4_1)!=0);
 	AVX_Enable=((env->GetCPUFlags()&CPUF_AVX)!=0);
 	AVX2_Enable=false;
+	AVX512_Enable=false;
 #ifdef AVX2_BUILD_POSSIBLE
 	AVX2_Enable=((env->GetCPUFlags()&CPUF_AVX2)!=0);
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+	AVX512_Enable=((env->GetCPUFlags()&CPUF_AVX512F)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512DQ)!=0)
+		&& ((env->GetCPUFlags()&CPUF_AVX512BW)!=0);
 #endif
 
 	if (threads_number>1)
@@ -27190,6 +28349,9 @@ void ConvertRGB_ACES_HDRtoSDR::StaticThreadpool(void *ptr)
 #ifdef AVX2_BUILD_POSSIBLE
 		case 6 : Convert_RGB_HDRtoSDR_32_AVX2(*mt_data_inf,ptrClass->lookupR_32,ptrClass->lookupG_32,ptrClass->lookupB_32); break;
 #endif
+#ifdef AVX512_BUILD_POSSIBLE
+		case 10 : Convert_RGB_HDRtoSDR_32_AVX512(*mt_data_inf,ptrClass->lookupR_32,ptrClass->lookupG_32,ptrClass->lookupB_32); break;
+#endif
 		default : break;
 	}
 }
@@ -27256,6 +28418,9 @@ PVideoFrame __stdcall ConvertRGB_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 			env->ThrowError("ConvertRGB_ACES_HDRtoSDR: Error with the TheadPool while requesting threadpool !");
 	}
 	
+	const bool src_RGBP_al64=((((size_t)srcRr) & 0x3F)==0) && ((((size_t)srcGr) & 0x3F)==0)
+		&& ((((size_t)srcBr) & 0x3F)==0) && ((abs(src_pitch_R) & 0x3F)==0)
+		&& ((abs(src_pitch_G) & 0x3F)==0) && ((abs(src_pitch_B) & 0x3F)==0);
 	const bool src_RGBP_al32=((((size_t)srcRr) & 0x1F)==0) && ((((size_t)srcGr) & 0x1F)==0)
 		&& ((((size_t)srcBr) & 0x1F)==0) && ((abs(src_pitch_R) & 0x1F)==0)
 		&& ((abs(src_pitch_G) & 0x1F)==0) && ((abs(src_pitch_B) & 0x1F)==0);
@@ -27263,6 +28428,9 @@ PVideoFrame __stdcall ConvertRGB_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 		&& ((((size_t)srcBr) & 0x0F)==0) && ((abs(src_pitch_R) & 0x0F)==0)
 		&& ((abs(src_pitch_G) & 0x0F)==0) && ((abs(src_pitch_B) & 0x0F)==0);
 
+	const bool dst_RGBP_al64=((((size_t)dstRw) & 0x3F)==0) && ((((size_t)dstGw) & 0x3F)==0)
+		&& ((((size_t)dstBw) & 0x3F)==0) && ((abs(dst_pitch_R) & 0x3F)==0)
+		&& ((abs(dst_pitch_G) & 0x3F)==0) && ((abs(dst_pitch_B) & 0x3F)==0);
 	const bool dst_RGBP_al32=((((size_t)dstRw) & 0x1F)==0) && ((((size_t)dstGw) & 0x1F)==0)
 		&& ((((size_t)dstBw) & 0x1F)==0) && ((abs(dst_pitch_R) & 0x1F)==0)
 		&& ((abs(dst_pitch_G) & 0x1F)==0) && ((abs(dst_pitch_B) & 0x1F)==0);
@@ -27315,19 +28483,21 @@ PVideoFrame __stdcall ConvertRGB_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 	{
 		if (fastmode)
 		{
-#ifdef AVX2_BUILD_POSSIBLE
-			if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
+			if (AVX512_Enable && src_RGBP_al64 && dst_RGBP_al64) f_proc=10;
 			else
-#endif
 			{
-				if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
+				if (AVX2_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=6;
 				else
 				{
-					if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+					if (AVX_Enable && src_RGBP_al32 && dst_RGBP_al32) f_proc=5;
 					else
 					{
-						if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
-						else f_proc=2;
+						if (SSE41_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=4;
+						else
+						{
+							if (SSE2_Enable && src_RGBP_al16 && dst_RGBP_al16) f_proc=3;
+							else f_proc=2;
+						}
 					}
 				}
 			}
@@ -27370,6 +28540,9 @@ PVideoFrame __stdcall ConvertRGB_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 						 e_B,exp_R,exp_G,exp_B); break;
 #ifdef AVX2_BUILD_POSSIBLE
 			case 6 : Convert_RGB_HDRtoSDR_32_AVX2(MT_DataGF[0],lookupR_32,lookupG_32,lookupB_32); break;
+#endif
+#ifdef AVX512_BUILD_POSSIBLE
+			case 10 : Convert_RGB_HDRtoSDR_32_AVX512(MT_DataGF[0],lookupR_32,lookupG_32,lookupB_32); break;
 #endif
 			default : break;
 		}

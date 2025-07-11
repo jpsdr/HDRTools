@@ -23,7 +23,7 @@
 #include "./avisynth.h"
 #include "./ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 1.0.6 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 1.1.0 JPSDR"
 
 
 typedef struct _dataLookUp
@@ -74,7 +74,7 @@ private:
 	uint16_t *lookupL_16;
 	float *lookupL_32;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -124,7 +124,7 @@ private:
 	float *lookupL_32;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
 	float Coeff_XYZ[9],*Coeff_XYZ_asm,Coeff_Crosstalk[9],*Coeff_Crosstalk_asm;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -172,7 +172,7 @@ private:
 	float *lookupL_32,*lookupL_8to32,*lookupL_20;
 	float Coeff_XYZ[9],*Coeff_XYZ_asm,Coeff_Crosstalk[9],*Coeff_Crosstalk_asm;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	VideoInfo *vi_PlaneY_HLG;
 
@@ -214,7 +214,7 @@ private:
 	uint8_t *lookupL_8;
 	uint16_t *lookupL_16,*lookupL_20;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -263,7 +263,7 @@ private:
 	uint16_t *lookupL_16,*lookupL_20;
 	float Coeff_XYZ[9],*Coeff_XYZ_asm,Coeff_Crosstalk[9],*Coeff_Crosstalk_asm;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -312,7 +312,7 @@ private:
 	uint16_t *lookupL_16,*lookupL_20;
 	float Coeff_XYZ[9],*Coeff_XYZ_asm,Coeff_Crosstalk[9],*Coeff_Crosstalk_asm,*lookupL_32;
 	void *lookupHLG_OOTF,*lookupHLG_inv_OOTF;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	VideoInfo *vi_PlaneY_HLG;
 
@@ -347,7 +347,7 @@ private:
 	bool sleep;
 	float Coeff_X,Coeff_Y,Coeff_Z;
 	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -381,7 +381,7 @@ private:
 	bool sleep;
 	float Coeff_X,Coeff_Y,Coeff_Z;
 	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -422,7 +422,7 @@ private:
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	float *lookupX_32,*lookupY_32,*lookupZ_32;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
 
@@ -463,7 +463,7 @@ private:
 	double exp_B,w_B,a_B,b_B,c_B,d_B,e_B,f_B;
 	uint16_t *lookupR_16,*lookupG_16,*lookupB_16;
 	float *lookupR_32,*lookupG_32,*lookupB_32;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -502,7 +502,7 @@ private:
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	float *lookupX_32,*lookupY_32,*lookupZ_32;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
 
@@ -541,7 +541,7 @@ private:
 	double exp_B,trans_B,peak_B;
 	uint16_t *lookupR_16,*lookupG_16,*lookupB_16;
 	float *lookupR_32,*lookupG_32,*lookupB_32;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -580,7 +580,7 @@ private:
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	float *lookupX_32,*lookupY_32,*lookupZ_32;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
 
@@ -619,7 +619,7 @@ private:
 	double exp_B,contr_B,peak_B;
 	uint16_t *lookupR_16,*lookupG_16,*lookupB_16;
 	float *lookupR_32,*lookupG_32,*lookupB_32;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -655,7 +655,7 @@ private:
 	float *lookupY1_16,*lookupY2_16,*lookupBY_16,*lookupRY_16;
 	uint32_t *lookupEOTF_32,*lookupR_32,*lookupG_32,*lookupB_32;
 	float *lookupY1_32,*lookupY2_32,*lookupBY_32,*lookupRY_32;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16
@@ -699,7 +699,7 @@ private:
 	double coeff_k[4],Lhdr,Lsdr;
 	bool ChromaC,PQMode;
 	float WhiteShift;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
@@ -749,7 +749,7 @@ private:
 	float pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy;
 	uint16_t *lookupX_16,*lookupY_16,*lookupZ_16;
 	float *lookupX_32,*lookupY_32,*lookupZ_32;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	double Xmin,Ymin,Zmin,CoeffX,CoeffY,CoeffZ;
 
@@ -791,7 +791,7 @@ private:
 	double exp_R,exp_G,exp_B;
 	uint16_t *lookupR_16,*lookupG_16,*lookupB_16;
 	float *lookupR_32,*lookupG_32,*lookupB_32;
-	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,SSE41_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 	bool grey,avsp,isRGBPfamily,isAlphaChannel,has_at_least_v8;
 	uint8_t pixelsize; // AVS16

@@ -9182,9 +9182,9 @@ JPSDR_HDRTools_Scale_20_XYZ_SSE2 proc src:dword,dst:dword,w4:dword,h:dword,src_p
 	
 	mov esi,ValMin
 	movss xmm1,dword ptr[esi]
-	shufps xmm1,xmm1,0
 	mov esi,Coeff
 	movss xmm2,dword ptr[esi]
+	shufps xmm1,xmm1,0
 	shufps xmm2,xmm2,0
 	
 	movaps xmm3,XMMWORD ptr data_f_1048575
@@ -10042,16 +10042,16 @@ JPSDR_HDRTools_BT2446C_16_XYZ_SSE2 proc src:dword,dst1:dword,dst2:dword,w4:dword
 	
 	mov esi,ValMinX
 	movss xmm2,dword ptr[esi]
-	shufps xmm2,xmm2,0
 	mov esi,CoeffX
 	movss xmm3,dword ptr[esi]
-	shufps xmm3,xmm3,0
-
 	mov esi,ValMinZ
 	movss xmm4,dword ptr[esi]
-	shufps xmm4,xmm4,0
 	mov esi,CoeffZ
 	movss xmm5,dword ptr[esi]
+
+	shufps xmm2,xmm2,0
+	shufps xmm3,xmm3,0
+	shufps xmm4,xmm4,0
 	shufps xmm5,xmm5,0
 	
 	movaps xmm6,XMMWORD ptr data_f_65535

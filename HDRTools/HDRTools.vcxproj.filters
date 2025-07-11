@@ -78,5 +78,11 @@
     <MASM Include="MatrixClass_x86.asm">
       <Filter>Fichiers sources</Filter>
     </MASM>
+    <MASM Include="HDRTools_AVX512_asm.asm">
+      <Filter>Fichiers sources</Filter>
+    </MASM>
+    <MASM Include="HDRTools_AVX512_asm_x64.asm">
+      <Filter>Fichiers sources</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

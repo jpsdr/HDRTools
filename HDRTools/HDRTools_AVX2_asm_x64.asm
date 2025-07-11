@@ -260,11 +260,11 @@ Coeff equ qword ptr[rbp+72]
 
 	mov rsi,ValMin
 	vmovss xmm1,dword ptr[rsi]
-	vshufps xmm1,xmm1,xmm1,0
-	vinsertf128 ymm1,ymm1,xmm1,1
 	mov rsi,Coeff
 	vmovss xmm2,dword ptr[rsi]
+	vshufps xmm1,xmm1,xmm1,0
 	vshufps xmm2,xmm2,xmm2,0
+	vinsertf128 ymm1,ymm1,xmm1,1
 	vinsertf128 ymm2,ymm2,xmm2,1
 	
 	vmovdqa ymm3,YMMWORD ptr data_dw_1048575
@@ -788,20 +788,21 @@ CoeffZ equ qword ptr[rbp+104]
 
 	mov rsi,ValMinX
 	vmovss xmm2,dword ptr[rsi]
-	vshufps xmm2,xmm2,xmm2,0
-	vinsertf128 ymm2,ymm2,xmm2,1
 	mov rsi,CoeffX
 	vmovss xmm3,dword ptr[rsi]
-	vshufps xmm3,xmm3,xmm3,0
-	vinsertf128 ymm3,ymm3,xmm3,1
-
 	mov rsi,ValMinZ
 	vmovss xmm4,dword ptr[rsi]
-	vshufps xmm4,xmm4,xmm4,0
-	vinsertf128 ymm4,ymm4,xmm4,1
 	mov rsi,CoeffZ
 	vmovss xmm5,dword ptr[rsi]
+	
+	vshufps xmm2,xmm2,xmm2,0
+	vshufps xmm3,xmm3,xmm3,0
+	vshufps xmm4,xmm4,xmm4,0
 	vshufps xmm5,xmm5,xmm5,0
+
+	vinsertf128 ymm2,ymm2,xmm2,1
+	vinsertf128 ymm3,ymm3,xmm3,1
+	vinsertf128 ymm4,ymm4,xmm4,1
 	vinsertf128 ymm5,ymm5,xmm5,1
 	
 	vmovdqa ymm6,YMMWORD ptr data_dw_65535

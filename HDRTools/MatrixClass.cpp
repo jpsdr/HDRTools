@@ -25,125 +25,158 @@
 #include <memory.h>
 #include <algorithm>
 
+// VS 2015
 #if _MSC_VER >= 1900
 #define AVX2_BUILD_POSSIBLE
 #endif
 
+// VS 2019 v16.3
+#if _MSC_VER >= 1923
+#define AVX512_BUILD_POSSIBLE
+#endif
+
 extern "C" void CoeffProductF_SSE2(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
-extern "C" void CoeffProductF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
 extern "C" void CoeffProductD_SSE2(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-extern "C" void CoeffProductD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-
 extern "C" void CoeffProduct2F_SSE2(const float *coeff_a,float *coeff_b,uint16_t lght);
-extern "C" void CoeffProduct2F_AVX(const float *coeff_a,float *coeff_b,uint16_t lght);
 extern "C" void CoeffProduct2D_SSE2(const double *coeff_a,double *coeff_b,uint16_t lght);
-extern "C" void CoeffProduct2D_AVX(const double *coeff_a,double *coeff_b,uint16_t lght);
-
 extern "C" void CoeffAddProductF_SSE2(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
-extern "C" void CoeffAddProductF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
 extern "C" void CoeffAddProductD_SSE2(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-extern "C" void CoeffAddProductD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-
 extern "C" void CoeffAddF_SSE2(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
-extern "C" void CoeffAddF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
 extern "C" void CoeffAddD_SSE2(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-extern "C" void CoeffAddD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-
 extern "C" void CoeffAdd2F_SSE2(const float *coeff_a,float *coeff_b,uint16_t lght);
-extern "C" void CoeffAdd2F_AVX(const float *coeff_a,float *coeff_b,uint16_t lght);
 extern "C" void CoeffAdd2D_SSE2(const double *coeff_a,double *coeff_b,uint16_t lght);
-extern "C" void CoeffAdd2D_AVX(const double *coeff_a,double *coeff_b,uint16_t lght);
-
 extern "C" void CoeffSubF_SSE2(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
-extern "C" void CoeffSubF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
 extern "C" void CoeffSubD_SSE2(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-extern "C" void CoeffSubD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-
 extern "C" void CoeffSub2F_SSE2(const float *coeff_a,float *coeff_b,uint16_t lght);
-extern "C" void CoeffSub2F_AVX(const float *coeff_a,float *coeff_b,uint16_t lght);
 extern "C" void CoeffSub2D_SSE2(const double *coeff_a,double *coeff_b,uint16_t lght);
-extern "C" void CoeffSub2D_AVX(const double *coeff_a,double *coeff_b,uint16_t lght);
-
 extern "C" void VectorNorme2F_SSE2(const float *coeff_x,float *result,uint16_t lght);
-extern "C" void VectorNorme2F_AVX(const float *coeff_x,float *result,uint16_t lght);
 extern "C" void VectorNorme2D_SSE2(const double *coeff_x,double *result,uint16_t lght);
-extern "C" void VectorNorme2D_AVX(const double *coeff_x,double *result,uint16_t lght);
-
 extern "C" void VectorNorme1F_SSE2(const float *coeff_x,float *result,uint16_t lght);
-extern "C" void VectorNorme1F_AVX(const float *coeff_x,float *result,uint16_t lght);
 extern "C" void VectorNorme1D_SSE2(const double *coeff_x,double *result,uint16_t lght);
-extern "C" void VectorNorme1D_AVX(const double *coeff_x,double *result,uint16_t lght);
-
 extern "C" void VectorNormeF_SSE2(const float *coeff_x,float *result,uint16_t lght);
-extern "C" void VectorNormeF_AVX(const float *coeff_x,float *result,uint16_t lght);
 extern "C" void VectorNormeD_SSE2(const double *coeff_x,double *result,uint16_t lght);
-extern "C" void VectorNormeD_AVX(const double *coeff_x,double *result,uint16_t lght);
-
 extern "C" void VectorDist2F_SSE2(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
-extern "C" void VectorDist2F_AVX(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
 extern "C" void VectorDist2D_SSE2(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
-extern "C" void VectorDist2D_AVX(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
-
 extern "C" void VectorDist1F_SSE2(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
-extern "C" void VectorDist1F_AVX(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
 extern "C" void VectorDist1D_SSE2(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
-extern "C" void VectorDist1D_AVX(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
-
 extern "C" void VectorDistF_SSE2(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
-extern "C" void VectorDistF_AVX(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
 extern "C" void VectorDistD_SSE2(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
-extern "C" void VectorDistD_AVX(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
-
 extern "C" void VectorProductF_SSE2(const float *coeff_a,const float *coeff_x,float *result,uint16_t lght);
-extern "C" void VectorProductF_AVX(const float *coeff_a,const float *coeff_x,float *result,uint16_t lght);
 extern "C" void VectorProductD_SSE2(const double *coeff_a,const double *coeff_x,double *result,uint16_t lght);
-extern "C" void VectorProductD_AVX(const double *coeff_a,const double *coeff_x,double *result,uint16_t lght);
-
 extern "C" void VectorAddF_SSE2(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
-extern "C" void VectorAddF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
 extern "C" void VectorAddD_SSE2(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-extern "C" void VectorAddD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-
 extern "C" void VectorAdd2F_SSE2(float *coeff_a,const float *coeff_b,uint16_t lght);
-extern "C" void VectorAdd2F_AVX(float *coeff_a,const float *coeff_b,uint16_t lght);
 extern "C" void VectorAdd2D_SSE2(double *coeff_a,const double *coeff_b,uint16_t lght);
-extern "C" void VectorAdd2D_AVX(double *coeff_a,const double *coeff_b,uint16_t lght);
-
 extern "C" void VectorSubF_SSE2(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
-extern "C" void VectorSubF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
 extern "C" void VectorSubD_SSE2(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-extern "C" void VectorSubD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-
 extern "C" void VectorSub2F_SSE2(float *coeff_a,const float *coeff_b,uint16_t lght);
-extern "C" void VectorSub2F_AVX(float *coeff_a,const float *coeff_b,uint16_t lght);
 extern "C" void VectorSub2D_SSE2(double *coeff_a,const double *coeff_b,uint16_t lght);
-extern "C" void VectorSub2D_AVX(double *coeff_a,const double *coeff_b,uint16_t lght);
-
 extern "C" void VectorInvSubF_SSE2(float *coeff_a,const float *coeff_b,uint16_t lght);
-extern "C" void VectorInvSubF_AVX(float *coeff_a,const float *coeff_b,uint16_t lght);
 extern "C" void VectorInvSubD_SSE2(double *coeff_a,const double *coeff_b,uint16_t lght);
-extern "C" void VectorInvSubD_AVX(double *coeff_a,const double *coeff_b,uint16_t lght);
-
 extern "C" void VectorProdF_SSE2(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
-extern "C" void VectorProdF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
 extern "C" void VectorProdD_SSE2(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-extern "C" void VectorProdD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
-
 extern "C" void VectorProd2F_SSE2(float *coeff_a,const float *coeff_b,uint16_t lght);
-extern "C" void VectorProd2F_AVX(float *coeff_a,const float *coeff_b,uint16_t lght);
 extern "C" void VectorProd2D_SSE2(double *coeff_a,const double *coeff_b,uint16_t lght);
+
+extern "C" void CoeffProductF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void CoeffProductD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void CoeffProduct2F_AVX(const float *coeff_a,float *coeff_b,uint16_t lght);
+extern "C" void CoeffProduct2D_AVX(const double *coeff_a,double *coeff_b,uint16_t lght);
+extern "C" void CoeffAddProductF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void CoeffAddProductD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void CoeffAddF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void CoeffAddD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void CoeffAdd2F_AVX(const float *coeff_a,float *coeff_b,uint16_t lght);
+extern "C" void CoeffAdd2D_AVX(const double *coeff_a,double *coeff_b,uint16_t lght);
+extern "C" void CoeffSubF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void CoeffSubD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void CoeffSub2F_AVX(const float *coeff_a,float *coeff_b,uint16_t lght);
+extern "C" void CoeffSub2D_AVX(const double *coeff_a,double *coeff_b,uint16_t lght);
+extern "C" void VectorNorme2F_AVX(const float *coeff_x,float *result,uint16_t lght);
+extern "C" void VectorNorme2D_AVX(const double *coeff_x,double *result,uint16_t lght);
+extern "C" void VectorNorme1F_AVX(const float *coeff_x,float *result,uint16_t lght);
+extern "C" void VectorNorme1D_AVX(const double *coeff_x,double *result,uint16_t lght);
+extern "C" void VectorNormeF_AVX(const float *coeff_x,float *result,uint16_t lght);
+extern "C" void VectorNormeD_AVX(const double *coeff_x,double *result,uint16_t lght);
+extern "C" void VectorDist2F_AVX(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
+extern "C" void VectorDist2D_AVX(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
+extern "C" void VectorDist1F_AVX(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
+extern "C" void VectorDist1D_AVX(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
+extern "C" void VectorDistF_AVX(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
+extern "C" void VectorDistD_AVX(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
+extern "C" void VectorProductF_AVX(const float *coeff_a,const float *coeff_x,float *result,uint16_t lght);
+extern "C" void VectorProductD_AVX(const double *coeff_a,const double *coeff_x,double *result,uint16_t lght);
+extern "C" void VectorAddF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void VectorAddD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void VectorAdd2F_AVX(float *coeff_a,const float *coeff_b,uint16_t lght);
+extern "C" void VectorAdd2D_AVX(double *coeff_a,const double *coeff_b,uint16_t lght);
+extern "C" void VectorSubF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void VectorSubD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void VectorSub2F_AVX(float *coeff_a,const float *coeff_b,uint16_t lght);
+extern "C" void VectorSub2D_AVX(double *coeff_a,const double *coeff_b,uint16_t lght);
+extern "C" void VectorInvSubF_AVX(float *coeff_a,const float *coeff_b,uint16_t lght);
+extern "C" void VectorInvSubD_AVX(double *coeff_a,const double *coeff_b,uint16_t lght);
+extern "C" void VectorProdF_AVX(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void VectorProdD_AVX(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void VectorProd2F_AVX(float *coeff_a,const float *coeff_b,uint16_t lght);
 extern "C" void VectorProd2D_AVX(double *coeff_a,const double *coeff_b,uint16_t lght);
+
+#ifdef AVX512_BUILD_POSSIBLE
+extern "C" void CoeffProductF_AVX512(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void CoeffProductD_AVX512(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void CoeffProduct2F_AVX512(const float *coeff_a,float *coeff_b,uint16_t lght);
+extern "C" void CoeffProduct2D_AVX512(const double *coeff_a,double *coeff_b,uint16_t lght);
+extern "C" void CoeffAddProductF_AVX512(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void CoeffAddProductD_AVX512(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void CoeffAddF_AVX512(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void CoeffAddD_AVX512(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void CoeffAdd2F_AVX512(const float *coeff_a,float *coeff_b,uint16_t lght);
+extern "C" void CoeffAdd2D_AVX512(const double *coeff_a,double *coeff_b,uint16_t lght);
+extern "C" void CoeffSubF_AVX512(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void CoeffSubD_AVX512(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void CoeffSub2F_AVX512(const float *coeff_a,float *coeff_b,uint16_t lght);
+extern "C" void CoeffSub2D_AVX512(const double *coeff_a,double *coeff_b,uint16_t lght);
+extern "C" void VectorNorme2F_AVX512(const float *coeff_x,float *result,uint16_t lght);
+extern "C" void VectorNorme2D_AVX512(const double *coeff_x,double *result,uint16_t lght);
+extern "C" void VectorNorme1F_AVX512(const float *coeff_x,float *result,uint16_t lght);
+extern "C" void VectorNorme1D_AVX512(const double *coeff_x,double *result,uint16_t lght);
+extern "C" void VectorNormeF_AVX512(const float *coeff_x,float *result,uint16_t lght);
+extern "C" void VectorNormeD_AVX512(const double *coeff_x,double *result,uint16_t lght);
+extern "C" void VectorDist2F_AVX512(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
+extern "C" void VectorDist2D_AVX512(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
+extern "C" void VectorDist1F_AVX512(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
+extern "C" void VectorDist1D_AVX512(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
+extern "C" void VectorDistF_AVX512(const float *coeff_x,const float *coeff_y,float *result,uint16_t lght);
+extern "C" void VectorDistD_AVX512(const double *coeff_x,const double *coeff_y,double *result,uint16_t lght);
+extern "C" void VectorProductF_AVX512(const float *coeff_a,const float *coeff_x,float *result,uint16_t lght);
+extern "C" void VectorProductD_AVX512(const double *coeff_a,const double *coeff_x,double *result,uint16_t lght);
+extern "C" void VectorAddF_AVX512(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void VectorAddD_AVX512(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void VectorAdd2F_AVX512(float *coeff_a,const float *coeff_b,uint16_t lght);
+extern "C" void VectorAdd2D_AVX512(double *coeff_a,const double *coeff_b,uint16_t lght);
+extern "C" void VectorSubF_AVX512(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void VectorSubD_AVX512(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void VectorSub2F_AVX512(float *coeff_a,const float *coeff_b,uint16_t lght);
+extern "C" void VectorSub2D_AVX512(double *coeff_a,const double *coeff_b,uint16_t lght);
+extern "C" void VectorInvSubF_AVX512(float *coeff_a,const float *coeff_b,uint16_t lght);
+extern "C" void VectorInvSubD_AVX512(double *coeff_a,const double *coeff_b,uint16_t lght);
+extern "C" void VectorProdF_AVX512(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
+extern "C" void VectorProdD_AVX512(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
+extern "C" void VectorProd2F_AVX512(float *coeff_a,const float *coeff_b,uint16_t lght);
+extern "C" void VectorProd2D_AVX512(double *coeff_a,const double *coeff_b,uint16_t lght);
+#endif
 
 #define MATRIX_ALIGN_SIZE 64
 #define MATRIX_ALIGN_SHIFT 6
 
-static bool g_EnableSSE2=false,g_EnableAVX=false,g_EnableAVX2=false;
+static bool g_EnableSSE2=false,g_EnableAVX=false,g_EnableAVX2=false,g_EnableAVX512=false;
 
-void SetCPUMatrixClass(bool SSE2,bool AVX,bool AVX2)
+void SetCPUMatrixClass(const bool SSE2,const bool AVX,const bool AVX2,const bool AVX512)
 {
 	g_EnableSSE2=SSE2;
 	g_EnableAVX=AVX;
 	g_EnableAVX2=AVX2;
+	g_EnableAVX512=AVX512;
 }
 
 Vector::Vector(void)
@@ -487,7 +520,7 @@ bool Vector::CopyRaw(const void *ptr)
 }
 
 
-bool Vector::CopyRaw(const void *ptr,uint16_t lgth)
+bool Vector::CopyRaw(const void *ptr,const uint16_t lgth)
 {
 	if ((Coeff==NULL) || (ptr==NULL) || (length==0) || (lgth>length)) return(false);
 
@@ -547,7 +580,7 @@ bool Vector::ExportRaw(void *ptr)
 }
 
 
-bool Vector::ExportRaw(void *ptr,uint16_t lgth)
+bool Vector::ExportRaw(void *ptr,const uint16_t lgth)
 {
 	if ((Coeff==NULL) || (ptr==NULL) || (length==0) || (lgth>length)) return(false);
 
@@ -675,6 +708,7 @@ Vector_Compute::Vector_Compute(void)
 	SSE2_Enable=g_EnableSSE2;
 	AVX_Enable=g_EnableAVX;
 	AVX2_Enable=g_EnableAVX2;
+	AVX512_Enable=g_EnableAVX512;
 }
 
 
@@ -688,14 +722,16 @@ Vector_Compute::Vector_Compute(const uint16_t l,const COEFF_DATA_TYPE data):Vect
 	SSE2_Enable=g_EnableSSE2;
 	AVX_Enable=g_EnableAVX;
 	AVX2_Enable=g_EnableAVX2;
+	AVX512_Enable=g_EnableAVX512;
 }
 
 
 Vector_Compute::Vector_Compute(const Vector_Compute &x):Vector(x)
 {
-		SSE2_Enable=x.SSE2_Enable;
-		AVX_Enable=x.AVX_Enable;
-		AVX2_Enable=x.AVX2_Enable;
+	SSE2_Enable=x.SSE2_Enable;
+	AVX_Enable=x.AVX_Enable;
+	AVX2_Enable=x.AVX2_Enable;
+	AVX512_Enable=x.AVX512_Enable;
 }
 
 
@@ -748,39 +784,54 @@ void Vector_Compute::ProductF_AX(const Matrix &ma, const Vector &x)
 	float *c1=(float *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch();
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(lb+7)>>3;
+		const uint16_t n=(lb+15)>>4;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorProductF_AVX((const float *)a0,x1,c1++,n);
+			VectorProductF_AVX512((const float *)a0,x1,c1++,n);
 			a0+=pa;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(lb+3)>>2;
+			const uint16_t n=(lb+7)>>3;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorProductF_SSE2((const float *)a0,x1,c1++,n);
+				VectorProductF_AVX((const float *)a0,x1,c1++,n);
 				a0+=pa;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a0;
-				float s=0.0f;
+				const uint16_t n=(lb+3)>>2;
 
-				for (uint16_t k=0; k<lb; k++)
-					s+=a1[k]*x1[k];
-				*c1++=s;
-				a0+=pa;
+				for (int32_t i=0; i<l; i++)
+				{
+					VectorProductF_SSE2((const float *)a0,x1,c1++,n);
+					a0+=pa;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const float *a1=(const float *)a0;
+					float s=0.0f;
+
+					for (uint16_t k=0; k<lb; k++)
+						s+=a1[k]*x1[k];
+					*c1++=s;
+					a0+=pa;
+				}
 			}
 		}
 	}
@@ -795,39 +846,54 @@ void Vector_Compute::ProductD_AX(const Matrix &ma, const Vector &x)
 	double *c1=(double *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch();
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(lb+3)>>2;
+		const uint16_t n=(lb+7)>>3;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorProductD_AVX((const double *)a0,x1,c1++,n);
+			VectorProductD_AVX512((const double *)a0,x1,c1++,n);
 			a0+=pa;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(lb+1)>>1;
+			const uint16_t n=(lb+3)>>2;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorProductD_SSE2((const double *)a0,x1,c1++,n);
+				VectorProductD_AVX((const double *)a0,x1,c1++,n);
 				a0+=pa;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a0;
-				double s=0.0;
+				const uint16_t n=(lb+1)>>1;
 
-				for (uint16_t k=0; k<lb; k++)
-					s+=a1[k]*x1[k];
-				*c1++=s;
-				a0+=pa;
+				for (int32_t i=0; i<l; i++)
+				{
+					VectorProductD_SSE2((const double *)a0,x1,c1++,n);
+					a0+=pa;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const double *a1=(const double *)a0;
+					double s=0.0;
+
+					for (uint16_t k=0; k<lb; k++)
+						s+=a1[k]*x1[k];
+					*c1++=s;
+					a0+=pa;
+				}
 			}
 		}
 	}
@@ -881,7 +947,8 @@ void Vector_Compute::ProductF_tAX(const Matrix &ma, const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
 		Matrix_Compute mb;
 
@@ -890,17 +957,18 @@ void Vector_Compute::ProductF_tAX(const Matrix &ma, const Vector &x)
 		const uint8_t *b0=(uint8_t *)mb.GetPtrMatrix();
 		const ptrdiff_t pb=mb.GetPitch();
 
-		uint16_t n=(lb+7) >> 3;
+		uint16_t n=(lb+15) >> 4;
 
 		for (uint16_t i=0; i<l; i++)
 		{
-			VectorProductF_AVX((const float *)b0,x1,c1++,n);
+			VectorProductF_AVX512((const float *)b0,x1,c1++,n);
 			b0+=pb;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
 			Matrix_Compute mb;
 
@@ -909,32 +977,52 @@ void Vector_Compute::ProductF_tAX(const Matrix &ma, const Vector &x)
 			const uint8_t *b0=(uint8_t *)mb.GetPtrMatrix();
 			const ptrdiff_t pb=mb.GetPitch();
 
-			uint16_t n=(lb+3) >> 2;
+			uint16_t n=(lb+7) >> 3;
 
 			for (uint16_t i=0; i<l; i++)
 			{
-				VectorProductF_SSE2((const float *)b0,x1,c1++,n);
+				VectorProductF_AVX((const float *)b0,x1,c1++,n);
 				b0+=pb;
 			}
 		}
 		else
 		{
-			const uint8_t *a0=(uint8_t *)ma.GetPtrMatrix();
-			const ptrdiff_t pa=ma.GetPitch();
-
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const uint8_t *a1=a0;
-				float s=0.0;
+				Matrix_Compute mb;
 
-				for (uint16_t k=0; k<lb; k++)
+				mb.CreateTranspose(ma);
+
+				const uint8_t *b0=(uint8_t *)mb.GetPtrMatrix();
+				const ptrdiff_t pb=mb.GetPitch();
+
+				uint16_t n=(lb+3) >> 2;
+
+				for (uint16_t i=0; i<l; i++)
 				{
-					s+=*((float *)a1)*x1[k];
-					a1+=pa;
+					VectorProductF_SSE2((const float *)b0,x1,c1++,n);
+					b0+=pb;
 				}
-				*c1++=s;
+			}
+			else
+			{
+				const uint8_t *a0=(uint8_t *)ma.GetPtrMatrix();
+				const ptrdiff_t pa=ma.GetPitch();
 
-				a0+=sizeof(float);
+				for (uint16_t i=0; i<l; i++)
+				{
+					const uint8_t *a1=a0;
+					float s=0.0;
+
+					for (uint16_t k=0; k<lb; k++)
+					{
+						s+=*((float *)a1)*x1[k];
+						a1+=pa;
+					}
+					*c1++=s;
+
+					a0+=sizeof(float);
+				}
 			}
 		}
 	}
@@ -947,7 +1035,8 @@ void Vector_Compute::ProductD_tAX(const Matrix &ma, const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
 		Matrix_Compute mb;
 
@@ -956,17 +1045,18 @@ void Vector_Compute::ProductD_tAX(const Matrix &ma, const Vector &x)
 		const uint8_t *b0=(uint8_t *)mb.GetPtrMatrix();
 		const ptrdiff_t pb=mb.GetPitch();
 
-		uint16_t n=(lb+3) >> 2;
+		uint16_t n=(lb+7) >> 3;
 
 		for (uint16_t i=0; i<l; i++)
 		{
-			VectorProductD_AVX((const double *)b0,x1,c1++,n);
+			VectorProductD_AVX512((const double *)b0,x1,c1++,n);
 			b0+=pb;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
 			Matrix_Compute mb;
 
@@ -975,32 +1065,52 @@ void Vector_Compute::ProductD_tAX(const Matrix &ma, const Vector &x)
 			const uint8_t *b0=(uint8_t *)mb.GetPtrMatrix();
 			const ptrdiff_t pb=mb.GetPitch();
 
-			uint16_t n=(lb+1) >> 1;
+			uint16_t n=(lb+3) >> 2;
 
 			for (uint16_t i=0; i<l; i++)
 			{
-				VectorProductD_SSE2((const double *)b0,x1,c1++,n);
+				VectorProductD_AVX((const double *)b0,x1,c1++,n);
 				b0+=pb;
 			}
 		}
 		else
 		{
-			const uint8_t *a0=(uint8_t *)ma.GetPtrMatrix();
-			const ptrdiff_t pa=ma.GetPitch();
-
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const uint8_t *a1=a0;
-				double s=0.0;
+				Matrix_Compute mb;
 
-				for (uint16_t k=0; k<lb; k++)
+				mb.CreateTranspose(ma);
+
+				const uint8_t *b0=(uint8_t *)mb.GetPtrMatrix();
+				const ptrdiff_t pb=mb.GetPitch();
+
+				uint16_t n=(lb+1) >> 1;
+
+				for (uint16_t i=0; i<l; i++)
 				{
-					s+=*((double *)a1)*x1[k];
-					a1+=pa;
+					VectorProductD_SSE2((const double *)b0,x1,c1++,n);
+					b0+=pb;
 				}
-				*c1++=s;
+			}
+			else
+			{
+				const uint8_t *a0=(uint8_t *)ma.GetPtrMatrix();
+				const ptrdiff_t pa=ma.GetPitch();
 
-				a0+=sizeof(double);
+				for (uint16_t i=0; i<l; i++)
+				{
+					const uint8_t *a1=a0;
+					double s=0.0;
+
+					for (uint16_t k=0; k<lb; k++)
+					{
+						s+=*((double *)a1)*x1[k];
+						a1+=pa;
+					}
+					*c1++=s;
+
+					a0+=sizeof(double);
+				}
 			}
 		}
 	}
@@ -1066,24 +1176,35 @@ void Vector_Compute::MultF(const double coef, const Vector &x)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		CoeffProductF_AVX(&b,x1,c1,n);
+		CoeffProductF_AVX512(&b,x1,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			CoeffProductF_SSE2(&b,x1,c1,n);
+			CoeffProductF_AVX(&b,x1,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=b*x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+3)>>2;
+
+				CoeffProductF_SSE2(&b,x1,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=b*x1[i];
+			}
 		}
 	}
 }
@@ -1095,24 +1216,35 @@ void Vector_Compute::MultF(const double coef)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		CoeffProduct2F_AVX(&b,c1,n);
+		CoeffProduct2F_AVX512(&b,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			CoeffProduct2F_SSE2(&b,c1,n);
+			CoeffProduct2F_AVX(&b,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]*=b;
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+3)>>2;
+
+				CoeffProduct2F_SSE2(&b,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]*=b;
+			}
 		}
 	}
 }
@@ -1124,24 +1256,35 @@ void Vector_Compute::MultD(const double coef, const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		CoeffProductD_AVX(&coef,x1,c1,n);
+		CoeffProductD_AVX512(&coef,x1,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			CoeffProductD_SSE2(&coef,x1,c1,n);
+			CoeffProductD_AVX(&coef,x1,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=coef*x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				CoeffProductD_SSE2(&coef,x1,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=coef*x1[i];
+			}
 		}
 	}
 }
@@ -1152,24 +1295,35 @@ void Vector_Compute::MultD(const double coef)
 	const uint16_t l=length;
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		CoeffProduct2D_AVX(&coef,c1,n);
+		CoeffProduct2D_AVX512(&coef,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			CoeffProduct2D_SSE2(&coef,c1,n);
+			CoeffProduct2D_AVX(&coef,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]*=coef;
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				CoeffProduct2D_SSE2(&coef,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]*=coef;
+			}
 		}
 	}
 }
@@ -1223,28 +1377,41 @@ void Vector_Compute::AddF(const double coef, const Vector &x)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=l>>3,n1=n0<<3;
+		const uint16_t n0=l>>4,n1=n0<<4;
 
-		if (n0>0) CoeffAddF_AVX(&b,x1,c1,n0);
+		if (n0>0) CoeffAddF_AVX512(&b,x1,c1,n0);
 		for (uint16_t i=n1; i<l; i++)
 			c1[i]=b+x1[i];
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=l>>2,n1=n0<<2;
+			const uint16_t n0=l>>3,n1=n0<<3;
 
-			if (n0>0) CoeffAddF_SSE2(&b,x1,c1,n0);
+			if (n0>0) CoeffAddF_AVX(&b,x1,c1,n0);
 			for (uint16_t i=n1; i<l; i++)
 				c1[i]=b+x1[i];
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=b+x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n0=l>>2,n1=n0<<2;
+
+				if (n0>0) CoeffAddF_SSE2(&b,x1,c1,n0);
+				for (uint16_t i=n1; i<l; i++)
+					c1[i]=b+x1[i];
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=b+x1[i];
+			}
 		}
 	}
 }
@@ -1256,28 +1423,41 @@ void Vector_Compute::AddF(const double coef)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=l>>3,n1=n0<<3;
+		const uint16_t n0=l>>4,n1=n0<<4;
 
-		if (n0>0) CoeffAdd2F_AVX(&b,c1,n0);
+		if (n0>0) CoeffAdd2F_AVX512(&b,c1,n0);
 		for (uint16_t i=n1; i<l; i++)
 			c1[i]+=b;
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=l>>2,n1=n0<<2;
+			const uint16_t n0=l>>3,n1=n0<<3;
 
-			if (n0>0) CoeffAdd2F_SSE2(&b,c1,n0);
+			if (n0>0) CoeffAdd2F_AVX(&b,c1,n0);
 			for (uint16_t i=n1; i<l; i++)
 				c1[i]+=b;
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]+=b;
+			if (SSE2_Enable)
+			{
+				const uint16_t n0=l>>2,n1=n0<<2;
+
+				if (n0>0) CoeffAdd2F_SSE2(&b,c1,n0);
+				for (uint16_t i=n1; i<l; i++)
+					c1[i]+=b;
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]+=b;
+			}
 		}
 	}
 }
@@ -1289,28 +1469,41 @@ void Vector_Compute::AddD(const double coef, const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=l>>2,n1=n0<<2;
+		const uint16_t n0=l>>3,n1=n0<<3;
 
-		if (n0>0) CoeffAddD_AVX(&coef,x1,c1,n0);
+		if (n0>0) CoeffAddD_AVX512(&coef,x1,c1,n0);
 		for (uint16_t i=n1; i<l; i++)
 			c1[i]=coef+x1[i];
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=l>>1,n1=n0<<1;
+			const uint16_t n0=l>>2,n1=n0<<2;
 
-			if (n0>0) CoeffAddD_SSE2(&coef,x1,c1,n0);
+			if (n0>0) CoeffAddD_AVX(&coef,x1,c1,n0);
 			for (uint16_t i=n1; i<l; i++)
 				c1[i]=coef+x1[i];
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=coef+x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n0=l>>1,n1=n0<<1;
+
+				if (n0>0) CoeffAddD_SSE2(&coef,x1,c1,n0);
+				for (uint16_t i=n1; i<l; i++)
+					c1[i]=coef+x1[i];
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=coef+x1[i];
+			}
 		}
 	}
 }
@@ -1321,28 +1514,41 @@ void Vector_Compute::AddD(const double coef)
 	const uint16_t l=length;
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=l>>2,n1=n0<<2;
+		const uint16_t n0=l>>3,n1=n0<<3;
 
-		if (n0>0) CoeffAdd2D_AVX(&coef,c1,n0);
+		if (n0>0) CoeffAdd2D_AVX512(&coef,c1,n0);
 		for (uint16_t i=n1; i<l; i++)
 			c1[i]+=coef;
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=l>>1,n1=n0<<1;
+			const uint16_t n0=l>>2,n1=n0<<2;
 
-			if (n0>0) CoeffAdd2D_SSE2(&coef,c1,n0);
+			if (n0>0) CoeffAdd2D_AVX(&coef,c1,n0);
 			for (uint16_t i=n1; i<l; i++)
 				c1[i]+=coef;
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]+=coef;
+			if (SSE2_Enable)
+			{
+				const uint16_t n0=l>>1,n1=n0<<1;
+
+				if (n0>0) CoeffAdd2D_SSE2(&coef,c1,n0);
+				for (uint16_t i=n1; i<l; i++)
+					c1[i]+=coef;
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]+=coef;
+			}
 		}
 	}
 }
@@ -1396,28 +1602,41 @@ void Vector_Compute::SubF(const double coef, const Vector &x)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=l>>3,n1=n0<<3;
+		const uint16_t n0=l>>4,n1=n0<<4;
 
-		if (n0>0) CoeffSubF_AVX(&b,x1,c1,n0);
+		if (n0>0) CoeffSubF_AVX512(&b,x1,c1,n0);
 		for (uint16_t i=n1; i<l; i++)
 			c1[i]=b-x1[i];
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=l>>2,n1=n0<<2;
+			const uint16_t n0=l>>3,n1=n0<<3;
 
-			if (n0>0) CoeffSubF_SSE2(&b,x1,c1,n0);
+			if (n0>0) CoeffSubF_AVX(&b,x1,c1,n0);
 			for (uint16_t i=n1; i<l; i++)
 				c1[i]=b-x1[i];
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=b-x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n0=l>>2,n1=n0<<2;
+
+				if (n0>0) CoeffSubF_SSE2(&b,x1,c1,n0);
+				for (uint16_t i=n1; i<l; i++)
+					c1[i]=b-x1[i];
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=b-x1[i];
+			}
 		}
 	}
 }
@@ -1429,28 +1648,41 @@ void Vector_Compute::SubF(const double coef)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=l>>3,n1=n0<<3;
+		const uint16_t n0=l>>4,n1=n0<<4;
 
-		if (n0>0) CoeffSub2F_AVX(&b,c1,n0);
+		if (n0>0) CoeffSub2F_AVX512(&b,c1,n0);
 		for (uint16_t i=n1; i<l; i++)
 			c1[i]=b-c1[i];
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=l>>2,n1=n0<<2;
+			const uint16_t n0=l>>3,n1=n0<<3;
 
-			if (n0>0) CoeffSub2F_SSE2(&b,c1,n0);
+			if (n0>0) CoeffSub2F_AVX(&b,c1,n0);
 			for (uint16_t i=n1; i<l; i++)
 				c1[i]=b-c1[i];
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=b-c1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n0=l>>2,n1=n0<<2;
+
+				if (n0>0) CoeffSub2F_SSE2(&b,c1,n0);
+				for (uint16_t i=n1; i<l; i++)
+					c1[i]=b-c1[i];
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=b-c1[i];
+			}
 		}
 	}
 }
@@ -1462,28 +1694,41 @@ void Vector_Compute::SubD(const double coef, const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=l>>2,n1=n0<<2;
+		const uint16_t n0=l>>3,n1=n0<<3;
 
-		if (n0>0) CoeffSubD_AVX(&coef,x1,c1,n0);
+		if (n0>0) CoeffSubD_AVX512(&coef,x1,c1,n0);
 		for (uint16_t i=n1; i<l; i++)
 			c1[i]=coef-x1[i];
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=l>>1,n1=n0<<1;
+			const uint16_t n0=l>>2,n1=n0<<2;
 
-			if (n0>0) CoeffSubD_SSE2(&coef,x1,c1,n0);
+			if (n0>0) CoeffSubD_AVX(&coef,x1,c1,n0);
 			for (uint16_t i=n1; i<l; i++)
 				c1[i]=coef-x1[i];
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=coef-x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n0=l>>1,n1=n0<<1;
+
+				if (n0>0) CoeffSubD_SSE2(&coef,x1,c1,n0);
+				for (uint16_t i=n1; i<l; i++)
+					c1[i]=coef-x1[i];
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=coef-x1[i];
+			}
 		}
 	}
 }
@@ -1494,28 +1739,41 @@ void Vector_Compute::SubD(const double coef)
 	const uint16_t l=length;
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=l>>2,n1=n0<<2;
+		const uint16_t n0=l>>3,n1=n0<<3;
 
-		if (n0>0) CoeffSub2D_AVX(&coef,c1,n0);
+		if (n0>0) CoeffSub2D_AVX512(&coef,c1,n0);
 		for (uint16_t i=n1; i<l; i++)
 			c1[i]=coef-c1[i];
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=l>>1,n1=n0<<1;
+			const uint16_t n0=l>>2,n1=n0<<2;
 
-			if (n0>0) CoeffSub2D_SSE2(&coef,c1,n0);
+			if (n0>0) CoeffSub2D_AVX(&coef,c1,n0);
 			for (uint16_t i=n1; i<l; i++)
 				c1[i]=coef-c1[i];
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=coef-c1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n0=l>>1,n1=n0<<1;
+
+				if (n0>0) CoeffSub2D_SSE2(&coef,c1,n0);
+				for (uint16_t i=n1; i<l; i++)
+					c1[i]=coef-c1[i];
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=coef-c1[i];
+			}
 		}
 	}
 }
@@ -1565,24 +1823,35 @@ void Vector_Compute::AddF_X(const Vector &x,const Vector &y)
 	const float *y1=(const float *)y.GetPtrVector();
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorAddF_AVX(x1,y1,c1,n);
+		VectorAddF_AVX512(x1,y1,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorAddF_SSE2(x1,y1,c1,n);
+			VectorAddF_AVX(x1,y1,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=x1[i]+y1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+3)>>2;
+
+				VectorAddF_SSE2(x1,y1,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=x1[i]+y1[i];
+			}
 		}
 	}
 }
@@ -1594,24 +1863,35 @@ void Vector_Compute::AddF_X(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorAdd2F_AVX(c1,x1,n);
+		VectorAdd2F_AVX512(c1,x1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorAdd2F_SSE2(c1,x1,n);
+			VectorAdd2F_AVX(c1,x1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]+=x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+3)>>2;
+
+				VectorAdd2F_SSE2(c1,x1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]+=x1[i];
+			}
 		}
 	}
 }
@@ -1624,24 +1904,35 @@ void Vector_Compute::AddD_X(const Vector &x,const Vector &y)
 	const double *y1=(const double *)y.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorAddD_AVX(x1,y1,c1,n);
+		VectorAddD_AVX512(x1,y1,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorAddD_SSE2(x1,y1,c1,n);
+			VectorAddD_AVX(x1,y1,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=x1[i]+y1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				VectorAddD_SSE2(x1,y1,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=x1[i]+y1[i];
+			}
 		}
 	}
 }
@@ -1653,24 +1944,35 @@ void Vector_Compute::AddD_X(const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorAdd2D_AVX(c1,x1,n);
+		VectorAdd2D_AVX512(c1,x1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorAdd2D_SSE2(c1,x1,n);
+			VectorAdd2D_AVX(c1,x1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]+=x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				VectorAdd2D_SSE2(c1,x1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]+=x1[i];
+			}
 		}
 	}
 }
@@ -1738,24 +2040,35 @@ void Vector_Compute::SubF_X(const Vector &x,const Vector &y)
 	const float *y1=(const float *)y.GetPtrVector();
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorSubF_AVX(x1,y1,c1,n);
+		VectorSubF_AVX512(x1,y1,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorSubF_SSE2(x1,y1,c1,n);
+			VectorSubF_AVX(x1,y1,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=x1[i]-y1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+3)>>2;
+
+				VectorSubF_SSE2(x1,y1,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=x1[i]-y1[i];
+			}
 		}
 	}
 }
@@ -1767,24 +2080,35 @@ void Vector_Compute::SubF_X(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorSub2F_AVX(c1,x1,n);
+		VectorSub2F_AVX512(c1,x1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorSub2F_SSE2(c1,x1,n);
+			VectorSub2F_AVX(c1,x1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]-=x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+3)>>2;
+
+				VectorSub2F_SSE2(c1,x1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]-=x1[i];
+			}
 		}
 	}
 }
@@ -1796,24 +2120,35 @@ void Vector_Compute::InvSubF_X(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorInvSubF_AVX(c1,x1,n);
+		VectorInvSubF_AVX512(c1,x1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorInvSubF_SSE2(c1,x1,n);
+			VectorInvSubF_AVX(c1,x1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=x1[i]-c1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+3)>>2;
+
+				VectorInvSubF_SSE2(c1,x1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=x1[i]-c1[i];
+			}
 		}
 	}
 }
@@ -1826,24 +2161,35 @@ void Vector_Compute::SubD_X(const Vector &x,const Vector &y)
 	const double *y1=(const double *)y.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorSubD_AVX(x1,y1,c1,n);
+		VectorSubD_AVX512(x1,y1,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorSubD_SSE2(x1,y1,c1,n);
+			VectorSubD_AVX(x1,y1,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=x1[i]-y1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				VectorSubD_SSE2(x1,y1,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=x1[i]-y1[i];
+			}
 		}
 	}
 }
@@ -1855,24 +2201,35 @@ void Vector_Compute::SubD_X(const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorSub2D_AVX(c1,x1,n);
+		VectorSub2D_AVX512(c1,x1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorSub2D_SSE2(c1,x1,n);
+			VectorSub2D_AVX(c1,x1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]-=x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				VectorSub2D_SSE2(c1,x1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]-=x1[i];
+			}
 		}
 	}
 }
@@ -1884,24 +2241,35 @@ void Vector_Compute::InvSubD_X(const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorInvSubD_AVX(c1,x1,n);
+		VectorInvSubD_AVX512(c1,x1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorInvSubD_SSE2(c1,x1,n);
+			VectorInvSubD_AVX(c1,x1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=x1[i]-c1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				VectorInvSubD_SSE2(c1,x1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=x1[i]-c1[i];
+			}
 		}
 	}
 }
@@ -1951,24 +2319,35 @@ void Vector_Compute::MultF_X(const Vector &x,const Vector &y)
 	const float *y1=(const float *)y.GetPtrVector();
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorProdF_AVX(x1,y1,c1,n);
+		VectorProdF_AVX512(x1,y1,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorProdF_SSE2(x1,y1,c1,n);
+			VectorProdF_AVX(x1,y1,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=x1[i]*y1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+3)>>2;
+
+				VectorProdF_SSE2(x1,y1,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=x1[i]*y1[i];
+			}
 		}
 	}
 }
@@ -1980,24 +2359,35 @@ void Vector_Compute::MultF_X(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorProd2F_AVX(c1,x1,n);
+		VectorProd2F_AVX512(c1,x1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorProd2F_SSE2(c1,x1,n);
+			VectorProd2F_AVX(c1,x1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]*=x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+3)>>2;
+
+				VectorProd2F_SSE2(c1,x1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]*=x1[i];
+			}
 		}
 	}
 }
@@ -2010,24 +2400,35 @@ void Vector_Compute::MultD_X(const Vector &x,const Vector &y)
 	const double *y1=(const double *)y.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorProdD_AVX(x1,y1,c1,n);
+		VectorProdD_AVX512(x1,y1,c1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorProdD_SSE2(x1,y1,c1,n);
+			VectorProdD_AVX(x1,y1,c1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]=x1[i]*y1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				VectorProdD_SSE2(x1,y1,c1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]=x1[i]*y1[i];
+			}
 		}
 	}
 }
@@ -2039,24 +2440,35 @@ void Vector_Compute::MultD_X(const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorProd2D_AVX(c1,x1,n);
+		VectorProd2D_AVX512(c1,x1,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorProd2D_SSE2(c1,x1,n);
+			VectorProd2D_AVX(c1,x1,n);
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
-				c1[i]*=x1[i];
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				VectorProd2D_SSE2(c1,x1,n);
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+					c1[i]*=x1[i];
+			}
 		}
 	}
 }
@@ -2086,38 +2498,52 @@ double Vector_Compute::Distance2F(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	const float *c1=(const float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
 		float r;
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorDist2F_AVX(x1,c1,&r,n);
+		VectorDist2F_AVX512(x1,c1,&r,n);
 
 		return((double)r);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
 			float r;
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorDist2F_SSE2(x1,c1,&r,n);
+			VectorDist2F_AVX(x1,c1,&r,n);
 
 			return((double)r);
 		}
 		else
 		{
-			double r=0.0;
-
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				double d=(double)(c1[i]-x1[i]);
+				float r;
+				const uint16_t n=(l+3)>>2;
 
-				r+=d*d;
+				VectorDist2F_SSE2(x1,c1,&r,n);
+
+				return((double)r);
 			}
-			r=sqrt(r);
-			return(r);
+			else
+			{
+				double r=0.0;
+
+				for (uint16_t i=0; i<l; i++)
+				{
+					double d=(double)(c1[i]-x1[i]);
+
+					r+=d*d;
+				}
+				r=sqrt(r);
+				return(r);
+			}
 		}
 	}
 }
@@ -2130,30 +2556,41 @@ double Vector_Compute::Distance2D(const Vector &x)
 	const double *c1=(const double *)Coeff;
 	double r;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorDist2D_AVX(x1,c1,&r,n);
+		VectorDist2D_AVX512(x1,c1,&r,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorDist2D_SSE2(x1,c1,&r,n);
+			VectorDist2D_AVX(x1,c1,&r,n);
 		}
 		else
 		{
-			r=0.0;
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				double d=c1[i]-x1[i];
+				const uint16_t n=(l+1)>>1;
 
-				r+=d*d;
+				VectorDist2D_SSE2(x1,c1,&r,n);
 			}
-			r=sqrt(r);
+			else
+			{
+				r=0.0;
+				for (uint16_t i=0; i<l; i++)
+				{
+					double d=c1[i]-x1[i];
+
+					r+=d*d;
+				}
+				r=sqrt(r);
+			}
 		}
 	}
 	return(r);
@@ -2184,33 +2621,47 @@ double Vector_Compute::Distance1F(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	const float *c1=(const float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
 		float r;
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorDist1F_AVX(x1,c1,&r,n);
+		VectorDist1F_AVX512(x1,c1,&r,n);
 
 		return((double)r);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
 			float r;
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorDist1F_SSE2(x1,c1,&r,n);
+			VectorDist1F_AVX(x1,c1,&r,n);
 
 			return((double)r);
 		}
 		else
 		{
-			double r=0.0;
+			if (SSE2_Enable)
+			{
+				float r;
+				const uint16_t n=(l+3)>>2;
 
-			for (uint16_t i=0; i<l; i++)
-				r+=fabs(c1[i]-x1[i]);
-			return(r);
+				VectorDist1F_SSE2(x1,c1,&r,n);
+
+				return((double)r);
+			}
+			else
+			{
+				double r=0.0;
+
+				for (uint16_t i=0; i<l; i++)
+					r+=fabs(c1[i]-x1[i]);
+				return(r);
+			}
 		}
 	}
 }
@@ -2223,25 +2674,36 @@ double Vector_Compute::Distance1D(const Vector &x)
 	const double *c1=(const double *)Coeff;
 	double r;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorDist1D_AVX(x1,c1,&r,n);
+		VectorDist1D_AVX512(x1,c1,&r,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorDist1D_SSE2(x1,c1,&r,n);
+			VectorDist1D_AVX(x1,c1,&r,n);
 		}
 		else
 		{
-			r=0.0;
-			for (uint16_t i=0; i<l; i++)
-				r+=fabs(c1[i]-x1[i]);
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				VectorDist1D_SSE2(x1,c1,&r,n);
+			}
+			else
+			{
+				r=0.0;
+				for (uint16_t i=0; i<l; i++)
+					r+=fabs(c1[i]-x1[i]);
+			}
 		}
 	}
 	return(r);
@@ -2268,37 +2730,51 @@ double Vector_Compute::Norme2F(void)
 	const uint16_t l=length;
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
 		float r;
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorNorme2F_AVX(c1,&r,n);
+		VectorNorme2F_AVX512(c1,&r,n);
 
 		return((double)r);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
 			float r;
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorNorme2F_SSE2(c1,&r,n);
+			VectorNorme2F_AVX(c1,&r,n);
 
 			return((double)r);
 		}
 		else
 		{
-			double r=0.0;
-
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const double d=c1[i];
-				r+=d*d;
+				float r;
+				const uint16_t n=(l+3)>>2;
+
+				VectorNorme2F_SSE2(c1,&r,n);
+
+				return((double)r);
 			}
-			r=sqrt(r);
-			return(r);
+			else
+			{
+				double r=0.0;
+
+				for (uint16_t i=0; i<l; i++)
+				{
+					const double d=c1[i];
+					r+=d*d;
+				}
+				r=sqrt(r);
+				return(r);
+			}
 		}
 	}
 }
@@ -2310,29 +2786,40 @@ double Vector_Compute::Norme2D(void)
 	double *c1=(double *)Coeff;
 	double r;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorNorme2D_AVX(c1,&r,n);
+		VectorNorme2D_AVX512(c1,&r,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorNorme2D_SSE2(c1,&r,n);
+			VectorNorme2D_AVX(c1,&r,n);
 		}
 		else
 		{
-			r=0.0;
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const double d=c1[i];
-				r+=d*d;
+				const uint16_t n=(l+1)>>1;
+
+				VectorNorme2D_SSE2(c1,&r,n);
 			}
-			r=sqrt(r);
+			else
+			{
+				r=0.0;
+				for (uint16_t i=0; i<l; i++)
+				{
+					const double d=c1[i];
+					r+=d*d;
+				}
+				r=sqrt(r);
+			}
 		}
 	}
 	return(r);
@@ -2359,33 +2846,47 @@ double Vector_Compute::Norme1F(void)
 	const uint16_t l=length;
 	float *c1=(float *)Coeff;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
 		float r;
-		const uint16_t n=(l+7)>>3;
+		const uint16_t n=(l+15)>>4;
 
-		VectorNorme1F_AVX(c1,&r,n);
+		VectorNorme1F_AVX512(c1,&r,n);
 
 		return((double)r);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
 			float r;
-			const uint16_t n=(l+3)>>2;
+			const uint16_t n=(l+7)>>3;
 
-			VectorNorme1F_SSE2(c1,&r,n);
+			VectorNorme1F_AVX(c1,&r,n);
 
 			return((double)r);
 		}
 		else
 		{
-			double r=0.0;
+			if (SSE2_Enable)
+			{
+				float r;
+				const uint16_t n=(l+3)>>2;
 
-			for (uint16_t i=0; i<l; i++)
-				r+=fabs(c1[i]);
-			return(r);
+				VectorNorme1F_SSE2(c1,&r,n);
+
+				return((double)r);
+			}
+			else
+			{
+				double r=0.0;
+
+				for (uint16_t i=0; i<l; i++)
+					r+=fabs(c1[i]);
+				return(r);
+			}
 		}
 	}
 }
@@ -2397,25 +2898,36 @@ double Vector_Compute::Norme1D(void)
 	double *c1=(double *)Coeff;
 	double r;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(l+3)>>2;
+		const uint16_t n=(l+7)>>3;
 
-		VectorNorme1D_AVX(c1,&r,n);
+		VectorNorme1D_AVX512(c1,&r,n);
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(l+1)>>1;
+			const uint16_t n=(l+3)>>2;
 
-			VectorNorme1D_SSE2(c1,&r,n);
+			VectorNorme1D_AVX(c1,&r,n);
 		}
 		else
 		{
-			r=0.0;
-			for (uint16_t i=0; i<l; i++)
-				r+=fabs(c1[i]);
+			if (SSE2_Enable)
+			{
+				const uint16_t n=(l+1)>>1;
+
+				VectorNorme1D_SSE2(c1,&r,n);
+			}
+			else
+			{
+				r=0.0;
+				for (uint16_t i=0; i<l; i++)
+					r+=fabs(c1[i]);
+			}
 		}
 	}
 	return(r);
@@ -3008,7 +3520,7 @@ bool Matrix::CopyRaw(const void *ptr)
 }
 
 
-bool Matrix::CopyRaw(const void *ptr,ptrdiff_t ptr_pitch)
+bool Matrix::CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch)
 {
 	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0)) return(false);
 
@@ -3045,7 +3557,7 @@ bool Matrix::CopyRaw(const void *ptr,ptrdiff_t ptr_pitch)
 }
 
 
-bool Matrix::CopyRaw(const void *ptr,ptrdiff_t ptr_pitch,uint16_t ln,uint16_t co)
+bool Matrix::CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln,const uint16_t co)
 {
 	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0) || (ln>lines) || (co>columns)) return(false);
 
@@ -3119,7 +3631,7 @@ bool Matrix::ExportRaw(void *ptr)
 }
 
 
-bool Matrix::ExportRaw(void *ptr,ptrdiff_t ptr_pitch)
+bool Matrix::ExportRaw(void *ptr,const ptrdiff_t ptr_pitch)
 {
 	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0)) return(false);
 
@@ -3156,7 +3668,7 @@ bool Matrix::ExportRaw(void *ptr,ptrdiff_t ptr_pitch)
 }
 
 
-bool Matrix::ExportRaw(void *ptr,ptrdiff_t ptr_pitch,uint16_t ln,uint16_t co)
+bool Matrix::ExportRaw(void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln,const uint16_t co)
 {
 	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0) || (ln>lines) || (co>columns)) return(false);
 
@@ -3200,6 +3712,7 @@ Matrix_Compute::Matrix_Compute(void)
 	SSE2_Enable=g_EnableSSE2;
 	AVX_Enable=g_EnableAVX;
 	AVX2_Enable=g_EnableAVX2;
+	AVX512_Enable=g_EnableAVX512;
 }
 
 
@@ -3214,6 +3727,7 @@ Matrix_Compute::Matrix_Compute(const uint16_t l,const uint16_t c,const COEFF_DAT
 	SSE2_Enable=g_EnableSSE2;
 	AVX_Enable=g_EnableAVX;
 	AVX2_Enable=g_EnableAVX2;
+	AVX512_Enable=g_EnableAVX512;
 }
 
 
@@ -3223,6 +3737,7 @@ Matrix_Compute::Matrix_Compute(const Matrix_Compute &m):Matrix(m)
 	SSE2_Enable=m.SSE2_Enable;
 	AVX_Enable=m.AVX_Enable;
 	AVX2_Enable=m.AVX2_Enable;
+	AVX512_Enable=m.AVX512_Enable;
 }
 
 
@@ -3380,27 +3895,29 @@ void Matrix_Compute::MultF(const double coef,const Matrix &ma)
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 	const float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			CoeffProductF_AVX(&b,(const float *)a,(float *)c,n);
+			CoeffProductF_AVX512(&b,(const float *)a,(float *)c,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				CoeffProductF_SSE2(&b,(const float *)a,(float *)c,n);
+				CoeffProductF_AVX(&b,(const float *)a,(float *)c,n);
 
 				a+=pa;
 				c+=pc;
@@ -3408,16 +3925,31 @@ void Matrix_Compute::MultF(const double coef,const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				float *c1=(float *)c;
+				const uint16_t n=(co+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=b*a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					CoeffProductF_SSE2(&b,(const float *)a,(float *)c,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=b*a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -3431,27 +3963,29 @@ void Matrix_Compute::MultD(const double coef,const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			CoeffProductD_AVX(&coef,(const double *)a,(double *)c,n);
+			CoeffProductD_AVX512(&coef,(const double *)a,(double *)c,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				CoeffProductD_SSE2(&coef,(const double *)a,(double *)c,n);
+				CoeffProductD_AVX(&coef,(const double *)a,(double *)c,n);
 
 				a+=pa;
 				c+=pc;
@@ -3459,16 +3993,31 @@ void Matrix_Compute::MultD(const double coef,const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				double *c1=(double *)c;
+				const uint16_t n=(co+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=coef*a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					CoeffProductD_SSE2(&coef,(const double *)a,(double *)c,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=coef*a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -3482,40 +4031,56 @@ void Matrix_Compute::MultF(const double coef)
 	const ptrdiff_t pc=pitch;
 	const float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			CoeffProduct2F_AVX(&b,(float *)c,n);
+			CoeffProduct2F_AVX512(&b,(float *)c,n);
 
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				CoeffProduct2F_SSE2(&b,(float *)c,n);
+				CoeffProduct2F_AVX(&b,(float *)c,n);
 
 				c+=pc;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				float *c1=(float *)c;
+				const uint16_t n=(co+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]*=b;
+				for (uint16_t i=0; i<li; i++)
+				{
+					CoeffProduct2F_SSE2(&b,(float *)c,n);
 
-				c+=pc;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]*=b;
+
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -3528,40 +4093,56 @@ void Matrix_Compute::MultD(const double coef)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			CoeffProduct2D_AVX(&coef,(double *)c,n);
+			CoeffProduct2D_AVX512(&coef,(double *)c,n);
 
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				CoeffProduct2D_SSE2(&coef,(double *)c,n);
+				CoeffProduct2D_AVX(&coef,(double *)c,n);
 
 				c+=pc;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				double *c1=(double *)c;
+				const uint16_t n=(co+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]*=coef;
+				for (uint16_t i=0; i<li; i++)
+				{
+					CoeffProduct2D_SSE2(&coef,(double *)c,n);
 
-				c+=pc;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]*=coef;
+
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -3617,16 +4198,17 @@ void Matrix_Compute::AddF(const double coef,const Matrix &ma)
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 	const float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=co>>3,n1=n0<<3;
+		const uint16_t n0=co>>4,n1=n0<<4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			const float *a1=(const float *)a;
 			float *c1=(float *)c;
 
-			if (n0>0) CoeffAddF_AVX(&b,(const float *)a,(float *)c,n0);
+			if (n0>0) CoeffAddF_AVX512(&b,(const float *)a,(float *)c,n0);
 			for (uint16_t j=n1; j<co; j++)
 				c1[j]=b+a1[j];
 
@@ -3635,17 +4217,18 @@ void Matrix_Compute::AddF(const double coef,const Matrix &ma)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=co>>2,n1=n0<<2;
+			const uint16_t n0=co>>3,n1=n0<<3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				const float *a1=(const float *)a;
 				float *c1=(float *)c;
 
-				if (n0>0) CoeffAddF_SSE2(&b,(const float *)a,(float *)c,n0);
+				if (n0>0) CoeffAddF_AVX(&b,(const float *)a,(float *)c,n0);
 				for (uint16_t j=n1; j<co; j++)
 					c1[j]=b+a1[j];
 
@@ -3655,16 +4238,36 @@ void Matrix_Compute::AddF(const double coef,const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				float *c1=(float *)c;
+				const uint16_t n0=co>>2,n1=n0<<2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=b+a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					float *c1=(float *)c;
 
-				a+=pa;
-				c+=pc;
+					if (n0>0) CoeffAddF_SSE2(&b,(const float *)a,(float *)c,n0);
+					for (uint16_t j=n1; j<co; j++)
+						c1[j]=b+a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=b+a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -3678,16 +4281,17 @@ void Matrix_Compute::AddD(const double coef,const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=co>>2,n1=n0<<2;
+		const uint16_t n0=co>>3,n1=n0<<3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			const double *a1=(const double *)a;
 			double *c1=(double *)c;
 
-			if (n0>0) CoeffAddD_AVX(&coef,(const double *)a,(double *)c,n0);
+			if (n0>0) CoeffAddD_AVX512(&coef,(const double *)a,(double *)c,n0);
 			for (uint16_t j=n1; j<co; j++)
 				c1[j]=coef+a1[j];
 
@@ -3696,17 +4300,18 @@ void Matrix_Compute::AddD(const double coef,const Matrix &ma)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=co>>1,n1=n0<<1;
+			const uint16_t n0=co>>2,n1=n0<<2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				const double *a1=(const double *)a;
 				double *c1=(double *)c;
 
-				if (n0>0) CoeffAddD_SSE2(&coef,(const double *)a,(double *)c,n0);
+				if (n0>0) CoeffAddD_AVX(&coef,(const double *)a,(double *)c,n0);
 				for (uint16_t j=n1; j<co; j++)
 					c1[j]=coef+a1[j];
 
@@ -3716,16 +4321,36 @@ void Matrix_Compute::AddD(const double coef,const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				double *c1=(double *)c;
+				const uint16_t n0=co>>1,n1=n0<<1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=coef+a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					double *c1=(double *)c;
 
-				a+=pa;
-				c+=pc;
+					if (n0>0) CoeffAddD_SSE2(&coef,(const double *)a,(double *)c,n0);
+					for (uint16_t j=n1; j<co; j++)
+						c1[j]=coef+a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=coef+a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -3739,15 +4364,16 @@ void Matrix_Compute::AddF(const double coef)
 	const ptrdiff_t pc=pitch;
 	const float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=co>>3,n1=n0<<3;
+		const uint16_t n0=co>>4,n1=n0<<4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			float *c1=(float *)c;
 
-			if (n0>0) CoeffAdd2F_AVX(&b,(float *)c,n0);
+			if (n0>0) CoeffAdd2F_AVX512(&b,(float *)c,n0);
 			for (uint16_t j=n1; j<co; j++)
 				c1[j]+=b;
 
@@ -3755,16 +4381,17 @@ void Matrix_Compute::AddF(const double coef)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=co>>2,n1=n0<<2;
+			const uint16_t n0=co>>3,n1=n0<<3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				float *c1=(float *)c;
 
-				if (n0>0) CoeffAdd2F_SSE2(&b,(float *)c,n0);
+				if (n0>0) CoeffAdd2F_AVX(&b,(float *)c,n0);
 				for (uint16_t j=n1; j<co; j++)
 					c1[j]+=b;
 
@@ -3773,14 +4400,32 @@ void Matrix_Compute::AddF(const double coef)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				float *c1=(float *)c;
+				const uint16_t n0=co>>2,n1=n0<<2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]+=b;
+				for (uint16_t i=0; i<li; i++)
+				{
+					float *c1=(float *)c;
 
-				c+=pc;
+					if (n0>0) CoeffAdd2F_SSE2(&b,(float *)c,n0);
+					for (uint16_t j=n1; j<co; j++)
+						c1[j]+=b;
+
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]+=b;
+
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -3793,15 +4438,16 @@ void Matrix_Compute::AddD(const double coef)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=co>>2,n1=n0<<2;
+		const uint16_t n0=co>>3,n1=n0<<3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			double *c1=(double *)c;
 
-			if (n0>0) CoeffAdd2D_AVX(&coef,(double *)c,n0);
+			if (n0>0) CoeffAdd2D_AVX512(&coef,(double *)c,n0);
 			for (uint16_t j=n1; j<co; j++)
 				c1[j]+=coef;
 
@@ -3809,16 +4455,17 @@ void Matrix_Compute::AddD(const double coef)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=co>>1,n1=n0<<1;
+			const uint16_t n0=co>>2,n1=n0<<2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				double *c1=(double *)c;
 
-				if (n0>0) CoeffAdd2D_SSE2(&coef,(double *)c,n0);
+				if (n0>0) CoeffAdd2D_AVX(&coef,(double *)c,n0);
 				for (uint16_t j=n1; j<co; j++)
 					c1[j]+=coef;
 
@@ -3827,14 +4474,32 @@ void Matrix_Compute::AddD(const double coef)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				double *c1=(double *)c;
+				const uint16_t n0=co>>1,n1=n0<<1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]+=coef;
+				for (uint16_t i=0; i<li; i++)
+				{
+					double *c1=(double *)c;
 
-				c+=pc;
+					if (n0>0) CoeffAdd2D_SSE2(&coef,(double *)c,n0);
+					for (uint16_t j=n1; j<co; j++)
+						c1[j]+=coef;
+
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]+=coef;
+
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -3890,16 +4555,17 @@ void Matrix_Compute::SubF(const double coef,const Matrix &ma)
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 	const float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=co>>3,n1=n0<<3;
+		const uint16_t n0=co>>4,n1=n0<<4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			const float *a1=(const float *)a;
 			float *c1=(float *)c;
 
-			if (n0>0) CoeffSubF_AVX(&b,(const float *)a,(float *)c,n0);
+			if (n0>0) CoeffSubF_AVX512(&b,(const float *)a,(float *)c,n0);
 			for (uint16_t j=n1; j<co; j++)
 				c1[j]=b-a1[j];
 
@@ -3908,17 +4574,18 @@ void Matrix_Compute::SubF(const double coef,const Matrix &ma)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=co>>2,n1=n0<<2;
+			const uint16_t n0=co>>3,n1=n0<<3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				const float *a1=(const float *)a;
 				float *c1=(float *)c;
 
-				if (n0>0) CoeffSubF_SSE2(&b,(const float *)a,(float *)c,n0);
+				if (n0>0) CoeffSubF_AVX(&b,(const float *)a,(float *)c,n0);
 				for (uint16_t j=n1; j<co; j++)
 					c1[j]=b-a1[j];
 
@@ -3928,16 +4595,36 @@ void Matrix_Compute::SubF(const double coef,const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				float *c1=(float *)c;
+				const uint16_t n0=co>>2,n1=n0<<2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=b-a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					float *c1=(float *)c;
 
-				a+=pa;
-				c+=pc;
+					if (n0>0) CoeffSubF_SSE2(&b,(const float *)a,(float *)c,n0);
+					for (uint16_t j=n1; j<co; j++)
+						c1[j]=b-a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=b-a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -3951,16 +4638,17 @@ void Matrix_Compute::SubD(const double coef,const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=co>>2,n1=n0<<2;
+		const uint16_t n0=co>>3,n1=n0<<3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			const double *a1=(const double *)a;
 			double *c1=(double *)c;
 
-			if (n0>0) CoeffSubD_AVX(&coef,(const double *)a,(double *)c,n0);
+			if (n0>0) CoeffSubD_AVX512(&coef,(const double *)a,(double *)c,n0);
 			for (uint16_t j=n1; j<co; j++)
 				c1[j]=coef-a1[j];
 
@@ -3969,17 +4657,18 @@ void Matrix_Compute::SubD(const double coef,const Matrix &ma)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=co>>1,n1=n0<<1;
+			const uint16_t n0=co>>2,n1=n0<<2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				const double *a1=(const double *)a;
 				double *c1=(double *)c;
 
-				if (n0>0) CoeffSubD_SSE2(&coef,(const double *)a,(double *)c,n0);
+				if (n0>0) CoeffSubD_AVX(&coef,(const double *)a,(double *)c,n0);
 				for (uint16_t j=n1; j<co; j++)
 					c1[j]=coef-a1[j];
 
@@ -3989,16 +4678,36 @@ void Matrix_Compute::SubD(const double coef,const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				double *c1=(double *)c;
+				const uint16_t n0=co>>1,n1=n0<<1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=coef-a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					double *c1=(double *)c;
 
-				a+=pa;
-				c+=pc;
+					if (n0>0) CoeffSubD_SSE2(&coef,(const double *)a,(double *)c,n0);
+					for (uint16_t j=n1; j<co; j++)
+						c1[j]=coef-a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=coef-a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4012,15 +4721,16 @@ void Matrix_Compute::SubF(const double coef)
 	const ptrdiff_t pc=pitch;
 	const float b=(float)coef;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=co>>3,n1=n0<<3;
+		const uint16_t n0=co>>4,n1=n0<<4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			float *c1=(float *)c;
 
-			if (n0>0) CoeffSub2F_AVX(&b,(float *)c,n0);
+			if (n0>0) CoeffSub2F_AVX512(&b,(float *)c,n0);
 			for (uint16_t j=n1; j<co; j++)
 				c1[j]=b-c1[j];
 
@@ -4028,16 +4738,17 @@ void Matrix_Compute::SubF(const double coef)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=co>>2,n1=n0<<2;
+			const uint16_t n0=co>>3,n1=n0<<3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				float *c1=(float *)c;
 
-				if (n0>0) CoeffSub2F_SSE2(&b,(float *)c,n0);
+				if (n0>0) CoeffSub2F_AVX(&b,(float *)c,n0);
 				for (uint16_t j=n1; j<co; j++)
 					c1[j]=b-c1[j];
 
@@ -4046,14 +4757,32 @@ void Matrix_Compute::SubF(const double coef)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				float *c1=(float *)c;
+				const uint16_t n0=co>>2,n1=n0<<2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=b-c1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					float *c1=(float *)c;
 
-				c+=pc;
+					if (n0>0) CoeffSub2F_SSE2(&b,(float *)c,n0);
+					for (uint16_t j=n1; j<co; j++)
+						c1[j]=b-c1[j];
+
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=b-c1[j];
+
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4066,15 +4795,16 @@ void Matrix_Compute::SubD(const double coef)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n0=co>>2,n1=n0<<2;
+		const uint16_t n0=co>>3,n1=n0<<3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			double *c1=(double *)c;
 
-			if (n0>0) CoeffSub2D_AVX(&coef,(double *)c,n0);
+			if (n0>0) CoeffSub2D_AVX512(&coef,(double *)c,n0);
 			for (uint16_t j=n1; j<co; j++)
 				c1[j]=coef-c1[j];
 
@@ -4082,16 +4812,17 @@ void Matrix_Compute::SubD(const double coef)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n0=co>>1,n1=n0<<1;
+			const uint16_t n0=co>>2,n1=n0<<2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				double *c1=(double *)c;
 
-				if (n0>0) CoeffSub2D_SSE2(&coef,(double *)c,n0);
+				if (n0>0) CoeffSub2D_AVX(&coef,(double *)c,n0);
 				for (uint16_t j=n1; j<co; j++)
 					c1[j]=coef-c1[j];
 
@@ -4100,14 +4831,32 @@ void Matrix_Compute::SubD(const double coef)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				double *c1=(double *)c;
+				const uint16_t n0=co>>1,n1=n0<<1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=coef-c1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					double *c1=(double *)c;
 
-				c+=pc;
+					if (n0>0) CoeffSub2D_SSE2(&coef,(double *)c,n0);
+					for (uint16_t j=n1; j<co; j++)
+						c1[j]=coef-c1[j];
+
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=coef-c1[j];
+
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4159,13 +4908,14 @@ void Matrix_Compute::AddF_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorAddF_AVX((const float *)a,(const float *)b,(float *)c,n);
+			VectorAddF_AVX512((const float *)a,(const float *)b,(float *)c,n);
 
 			a+=pa;
 			b+=pb;
@@ -4173,14 +4923,15 @@ void Matrix_Compute::AddF_A(const Matrix &ma, const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorAddF_SSE2((const float *)a,(const float *)b,(float *)c,n);
+				VectorAddF_AVX((const float *)a,(const float *)b,(float *)c,n);
 
 				a+=pa;
 				b+=pb;
@@ -4189,18 +4940,34 @@ void Matrix_Compute::AddF_A(const Matrix &ma, const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				const float *b1=(const float *)b;
-				float *c1=(float *)c;
+				const uint16_t n=(co+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=a1[j]+b1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorAddF_SSE2((const float *)a,(const float *)b,(float *)c,n);
 
-				a+=pa;
-				b+=pb;
-				c+=pc;
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					const float *b1=(const float *)b;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=a1[j]+b1[j];
+
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4215,13 +4982,14 @@ void Matrix_Compute::AddD_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorAddD_AVX((const double *)a,(const double *)b,(double *)c,n);
+			VectorAddD_AVX512((const double *)a,(const double *)b,(double *)c,n);
 
 			a+=pa;
 			b+=pb;
@@ -4229,14 +4997,15 @@ void Matrix_Compute::AddD_A(const Matrix &ma, const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorAddD_SSE2((const double *)a,(const double *)b,(double *)c,n);
+				VectorAddD_AVX((const double *)a,(const double *)b,(double *)c,n);
 
 				a+=pa;
 				b+=pb;
@@ -4245,18 +5014,34 @@ void Matrix_Compute::AddD_A(const Matrix &ma, const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				const double *b1=(const double *)b;
-				double *c1=(double *)c;
+				const uint16_t n=(co+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=a1[j]+b1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorAddD_SSE2((const double *)a,(const double *)b,(double *)c,n);
 
-				a+=pa;
-				b+=pb;
-				c+=pc;
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					const double *b1=(const double *)b;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=a1[j]+b1[j];
+
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4270,27 +5055,29 @@ void Matrix_Compute::AddF_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorAdd2F_AVX((float *)c,(const float *)a,n);
+			VectorAdd2F_AVX512((float *)c,(const float *)a,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorAdd2F_SSE2((float *)c,(const float *)a,n);
+				VectorAdd2F_AVX((float *)c,(const float *)a,n);
 
 				a+=pa;
 				c+=pc;
@@ -4298,16 +5085,31 @@ void Matrix_Compute::AddF_A(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				float *c1=(float *)c;
+				const uint16_t n=(co+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]+=a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorAdd2F_SSE2((float *)c,(const float *)a,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]+=a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4321,27 +5123,29 @@ void Matrix_Compute::AddD_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorAdd2D_AVX((double *)c,(const double *)a,n);
+			VectorAdd2D_AVX512((double *)c,(const double *)a,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorAdd2D_SSE2((double *)c,(const double *)a,n);
+				VectorAdd2D_AVX((double *)c,(const double *)a,n);
 
 				a+=pa;
 				c+=pc;
@@ -4349,16 +5153,31 @@ void Matrix_Compute::AddD_A(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				double *c1=(double *)c;
+				const uint16_t n=(co+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]+=a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorAdd2D_SSE2((double *)c,(const double *)a,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]+=a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4410,13 +5229,14 @@ void Matrix_Compute::MultF_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorProdF_AVX((const float *)a,(const float *)b,(float *)c,n);
+			VectorProdF_AVX512((const float *)a,(const float *)b,(float *)c,n);
 
 			a+=pa;
 			b+=pb;
@@ -4424,14 +5244,15 @@ void Matrix_Compute::MultF_A(const Matrix &ma, const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorProdF_SSE2((const float *)a,(const float *)b,(float *)c,n);
+				VectorProdF_AVX((const float *)a,(const float *)b,(float *)c,n);
 
 				a+=pa;
 				b+=pb;
@@ -4440,18 +5261,34 @@ void Matrix_Compute::MultF_A(const Matrix &ma, const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				const float *b1=(const float *)b;
-				float *c1=(float *)c;
+				const uint16_t n=(co+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=a1[j]*b1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorProdF_SSE2((const float *)a,(const float *)b,(float *)c,n);
 
-				a+=pa;
-				b+=pb;
-				c+=pc;
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					const float *b1=(const float *)b;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=a1[j]*b1[j];
+
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4466,13 +5303,14 @@ void Matrix_Compute::MultD_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorProdD_AVX((const double *)a,(const double *)b,(double *)c,n);
+			VectorProdD_AVX512((const double *)a,(const double *)b,(double *)c,n);
 
 			a+=pa;
 			b+=pb;
@@ -4480,14 +5318,15 @@ void Matrix_Compute::MultD_A(const Matrix &ma, const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorProdD_SSE2((const double *)a,(const double *)b,(double *)c,n);
+				VectorProdD_AVX((const double *)a,(const double *)b,(double *)c,n);
 
 				a+=pa;
 				b+=pb;
@@ -4496,18 +5335,34 @@ void Matrix_Compute::MultD_A(const Matrix &ma, const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				const double *b1=(const double *)b;
-				double *c1=(double *)c;
+				const uint16_t n=(co+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=a1[j]*b1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorProdD_SSE2((const double *)a,(const double *)b,(double *)c,n);
 
-				a+=pa;
-				b+=pb;
-				c+=pc;
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					const double *b1=(const double *)b;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=a1[j]*b1[j];
+
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4521,27 +5376,29 @@ void Matrix_Compute::MultF_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorProd2F_AVX((float *)c,(const float *)a,n);
+			VectorProd2F_AVX512((float *)c,(const float *)a,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorProd2F_SSE2((float *)c,(const float *)a,n);
+				VectorProd2F_AVX((float *)c,(const float *)a,n);
 
 				a+=pa;
 				c+=pc;
@@ -4549,16 +5406,31 @@ void Matrix_Compute::MultF_A(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				float *c1=(float *)c;
+				const uint16_t n=(co+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]*=a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorProd2F_SSE2((float *)c,(const float *)a,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]*=a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4572,27 +5444,29 @@ void Matrix_Compute::MultD_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorProd2D_AVX((double *)c,(const double *)a,n);
+			VectorProd2D_AVX512((double *)c,(const double *)a,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorProd2D_SSE2((double *)c,(const double *)a,n);
+				VectorProd2D_AVX((double *)c,(const double *)a,n);
 
 				a+=pa;
 				c+=pc;
@@ -4600,16 +5474,31 @@ void Matrix_Compute::MultD_A(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				double *c1=(double *)c;
+				const uint16_t n=(co+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]*=a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorProd2D_SSE2((double *)c,(const double *)a,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]*=a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4679,13 +5568,14 @@ void Matrix_Compute::SubF_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorSubF_AVX((const float *)a,(const float *)b,(float *)c,n);
+			VectorSubF_AVX512((const float *)a,(const float *)b,(float *)c,n);
 
 			a+=pa;
 			b+=pb;
@@ -4693,14 +5583,15 @@ void Matrix_Compute::SubF_A(const Matrix &ma, const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorSubF_SSE2((const float *)a,(const float *)b,(float *)c,n);
+				VectorSubF_AVX((const float *)a,(const float *)b,(float *)c,n);
 
 				a+=pa;
 				b+=pb;
@@ -4709,18 +5600,34 @@ void Matrix_Compute::SubF_A(const Matrix &ma, const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				const float *b1=(const float *)b;
-				float *c1=(float *)c;
+				const uint16_t n=(co+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=a1[j]-b1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorSubF_SSE2((const float *)a,(const float *)b,(float *)c,n);
 
-				a+=pa;
-				b+=pb;
-				c+=pc;
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					const float *b1=(const float *)b;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=a1[j]-b1[j];
+
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4735,13 +5642,14 @@ void Matrix_Compute::SubD_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorSubD_AVX((const double *)a,(const double *)b,(double *)c,n);
+			VectorSubD_AVX512((const double *)a,(const double *)b,(double *)c,n);
 
 			a+=pa;
 			b+=pb;
@@ -4749,14 +5657,15 @@ void Matrix_Compute::SubD_A(const Matrix &ma, const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorSubD_SSE2((const double *)a,(const double *)b,(double *)c,n);
+				VectorSubD_AVX((const double *)a,(const double *)b,(double *)c,n);
 
 				a+=pa;
 				b+=pb;
@@ -4765,18 +5674,34 @@ void Matrix_Compute::SubD_A(const Matrix &ma, const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				const double *b1=(const double *)b;
-				double *c1=(double *)c;
+				const uint16_t n=(co+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=a1[j]-b1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorSubD_SSE2((const double *)a,(const double *)b,(double *)c,n);
 
-				a+=pa;
-				b+=pb;
-				c+=pc;
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					const double *b1=(const double *)b;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=a1[j]-b1[j];
+
+					a+=pa;
+					b+=pb;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4790,27 +5715,29 @@ void Matrix_Compute::SubF_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorSub2F_AVX((float *)c,(const float *)a,n);
+			VectorSub2F_AVX512((float *)c,(const float *)a,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorSub2F_SSE2((float *)c,(const float *)a,n);
+				VectorSub2F_AVX((float *)c,(const float *)a,n);
 
 				a+=pa;
 				c+=pc;
@@ -4818,16 +5745,31 @@ void Matrix_Compute::SubF_A(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				float *c1=(float *)c;
+				const uint16_t n=(co+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]-=a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorSub2F_SSE2((float *)c,(const float *)a,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]-=a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4841,27 +5783,29 @@ void Matrix_Compute::InvSubF_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorInvSubF_AVX((float *)c,(const float *)a,n);
+			VectorInvSubF_AVX512((float *)c,(const float *)a,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorInvSubF_SSE2((float *)c,(const float *)a,n);
+				VectorInvSubF_AVX((float *)c,(const float *)a,n);
 
 				a+=pa;
 				c+=pc;
@@ -4869,16 +5813,31 @@ void Matrix_Compute::InvSubF_A(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				float *c1=(float *)c;
+				const uint16_t n=(co+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=a1[j]-c1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorInvSubF_SSE2((float *)c,(const float *)a,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *a1=(const float *)a;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=a1[j]-c1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4892,27 +5851,29 @@ void Matrix_Compute::SubD_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorSub2D_AVX((double *)c,(const double *)a,n);
+			VectorSub2D_AVX512((double *)c,(const double *)a,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorSub2D_SSE2((double *)c,(const double *)a,n);
+				VectorSub2D_AVX((double *)c,(const double *)a,n);
 
 				a+=pa;
 				c+=pc;
@@ -4920,16 +5881,31 @@ void Matrix_Compute::SubD_A(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				double *c1=(double *)c;
+				const uint16_t n=(co+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]-=a1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorSub2D_SSE2((double *)c,(const double *)a,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]-=a1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -4943,27 +5919,29 @@ void Matrix_Compute::InvSubD_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
-			VectorInvSubD_AVX((double *)c,(const double *)a,n);
+			VectorInvSubD_AVX512((double *)c,(const double *)a,n);
 
 			a+=pa;
 			c+=pc;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
-				VectorInvSubD_SSE2((double *)c,(const double *)a,n);
+				VectorInvSubD_AVX((double *)c,(const double *)a,n);
 
 				a+=pa;
 				c+=pc;
@@ -4971,16 +5949,31 @@ void Matrix_Compute::InvSubD_A(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				double *c1=(double *)c;
+				const uint16_t n=(co+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
-					c1[j]=a1[j]-c1[j];
+				for (uint16_t i=0; i<li; i++)
+				{
+					VectorInvSubD_SSE2((double *)c,(const double *)a,n);
 
-				a+=pa;
-				c+=pc;
+					a+=pa;
+					c+=pc;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *a1=(const double *)a;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+						c1[j]=a1[j]-c1[j];
+
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -5018,15 +6011,16 @@ void Matrix_Compute::ProductF_AB(const Matrix &ma, const Matrix &mb)
 	const uint8_t *a0=a;
 	uint8_t *c0=c;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+7)>>3;
+		const uint16_t n=(co+15)>>4;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			const float a1=*(const float *)a0;
 
-			if (a1!=0.0f) CoeffProductF_AVX(&a1,(const float *)b,(float *)c0,n);
+			if (a1!=0.0f) CoeffProductF_AVX512(&a1,(const float *)b,(float *)c0,n);
 			else std::fill_n((float *)c0,co,0.0f);
 
 			a0+=pa;
@@ -5043,7 +6037,7 @@ void Matrix_Compute::ProductF_AB(const Matrix &ma, const Matrix &mb)
 			{
 				const float a1=((float *)a0)[i];
 
-				if (a1!=0.0f) CoeffAddProductF_AVX(&a1,b1,(float *)c0,n);
+				if (a1!=0.0f) CoeffAddProductF_AVX512(&a1,b1,(float *)c0,n);
 				a0+=pa;
 				c0+=pc;
 			}
@@ -5051,16 +6045,17 @@ void Matrix_Compute::ProductF_AB(const Matrix &ma, const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+3)>>2;
+			const uint16_t n=(co+7)>>3;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				const float a1=*(const float *)a0;
 
-				if (a1!=0.0f) CoeffProductF_SSE2(&a1,(const float *)b,(float *)c0,n);
+				if (a1!=0.0f) CoeffProductF_AVX(&a1,(const float *)b,(float *)c0,n);
 				else std::fill_n((float *)c0,co,0.0f);
 
 				a0+=pa;
@@ -5077,7 +6072,7 @@ void Matrix_Compute::ProductF_AB(const Matrix &ma, const Matrix &mb)
 				{
 					const float a1=((float *)a0)[i];
 
-					if (a1!=0.0f) CoeffAddProductF_SSE2(&a1,b1,(float *)c0,n);
+					if (a1!=0.0f) CoeffAddProductF_AVX(&a1,b1,(float *)c0,n);
 					a0+=pa;
 					c0+=pc;
 				}
@@ -5086,43 +6081,78 @@ void Matrix_Compute::ProductF_AB(const Matrix &ma, const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const float *b1=(const float *)b;
-				const float a1=*(const float *)a0;
-				float *c1=(float *)c0;
+				const uint16_t n=(co+3)>>2;
 
-				if (a1!=0.0f)
+				for (uint16_t i=0; i<li; i++)
 				{
-					for (uint16_t j=0; j<co; j++)
-						c1[j]=a1*b1[j];
-				}
-				else std::fill_n((float *)c0,co,0.0f);
+					const float a1=*(const float *)a0;
 
-				a0+=pa;
-				c0+=pc;
-			}
-			b+=pb;
+					if (a1!=0.0f) CoeffProductF_SSE2(&a1,(const float *)b,(float *)c0,n);
+					else std::fill_n((float *)c0,co,0.0f);
 
-			for(uint16_t i=1; i<ca; i++)
-			{
-				const float *b1=(const float *)b;
-
-				a0=a;c0=c;
-				for (uint16_t j=0; j<li; j++)
-				{
-					float *c1=(float *)c0;
-					const float a1=((float *)a0)[i];
-
-					if (a1!=0.0f)
-					{
-						for(uint16_t k=0; k<co; k++)
-							c1[k]+=a1*b1[k];
-					}
 					a0+=pa;
 					c0+=pc;
 				}
 				b+=pb;
+
+				for(uint16_t i=1; i<ca; i++)
+				{
+					const float *b1=(const float *)b;
+
+					a0=a;c0=c;
+					for (uint16_t j=0; j<li; j++)
+					{
+						const float a1=((float *)a0)[i];
+
+						if (a1!=0.0f) CoeffAddProductF_SSE2(&a1,b1,(float *)c0,n);
+						a0+=pa;
+						c0+=pc;
+					}
+					b+=pb;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const float *b1=(const float *)b;
+					const float a1=*(const float *)a0;
+					float *c1=(float *)c0;
+
+					if (a1!=0.0f)
+					{
+						for (uint16_t j=0; j<co; j++)
+							c1[j]=a1*b1[j];
+					}
+					else std::fill_n((float *)c0,co,0.0f);
+
+					a0+=pa;
+					c0+=pc;
+				}
+				b+=pb;
+
+				for(uint16_t i=1; i<ca; i++)
+				{
+					const float *b1=(const float *)b;
+
+					a0=a;c0=c;
+					for (uint16_t j=0; j<li; j++)
+					{
+						float *c1=(float *)c0;
+						const float a1=((float *)a0)[i];
+
+						if (a1!=0.0f)
+						{
+							for(uint16_t k=0; k<co; k++)
+								c1[k]+=a1*b1[k];
+						}
+						a0+=pa;
+						c0+=pc;
+					}
+					b+=pb;
+				}
 			}
 		}
 	}
@@ -5141,15 +6171,16 @@ void Matrix_Compute::ProductD_AB(const Matrix &ma, const Matrix &mb)
 	const uint8_t *a0=a;
 	uint8_t *c0=c;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(co+3)>>2;
+		const uint16_t n=(co+7)>>3;
 
 		for (uint16_t i=0; i<li; i++)
 		{
 			const double a1=*(double *)a0;
 
-			if (a1!=0.0) CoeffProductD_AVX(&a1,(const double *)b,(double *)c0,n);
+			if (a1!=0.0) CoeffProductD_AVX512(&a1,(const double *)b,(double *)c0,n);
 			else std::fill_n((double *)c0,co,0.0);
 
 			a0+=pa;
@@ -5166,7 +6197,7 @@ void Matrix_Compute::ProductD_AB(const Matrix &ma, const Matrix &mb)
 			{
 				const double a1=((double *)a0)[i];
 
-				if (a1!=0.0) CoeffAddProductD_AVX(&a1,b1,(double *)c0,n);
+				if (a1!=0.0) CoeffAddProductD_AVX512(&a1,b1,(double *)c0,n);
 				a0+=pa;
 				c0+=pc;
 			}
@@ -5174,16 +6205,17 @@ void Matrix_Compute::ProductD_AB(const Matrix &ma, const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(co+1)>>1;
+			const uint16_t n=(co+3)>>2;
 
 			for (uint16_t i=0; i<li; i++)
 			{
 				const double a1=*(double *)a0;
 
-				if (a1!=0.0) CoeffProductD_SSE2(&a1,(const double *)b,(double *)c0,n);
+				if (a1!=0.0) CoeffProductD_AVX(&a1,(const double *)b,(double *)c0,n);
 				else std::fill_n((double *)c0,co,0.0);
 
 				a0+=pa;
@@ -5200,7 +6232,7 @@ void Matrix_Compute::ProductD_AB(const Matrix &ma, const Matrix &mb)
 				{
 					const double a1=((double *)a0)[i];
 
-					if (a1!=0.0) CoeffAddProductD_SSE2(&a1,b1,(double *)c0,n);
+					if (a1!=0.0) CoeffAddProductD_AVX(&a1,b1,(double *)c0,n);
 					a0+=pa;
 					c0+=pc;
 				}
@@ -5209,43 +6241,78 @@ void Matrix_Compute::ProductD_AB(const Matrix &ma, const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<li; i++)
+			if (SSE2_Enable)
 			{
-				const double *b1=(const double *)b;
-				const double a1=*(double *)a0;
-				double *c1=(double *)c0;
+				const uint16_t n=(co+1)>>1;
 
-				if (a1!=0.0)
+				for (uint16_t i=0; i<li; i++)
 				{
-					for (uint16_t j=0; j<co; j++)
-						c1[j]=a1*b1[j];
-				}
-				else std::fill_n((double *)c0,co,0.0);
+					const double a1=*(double *)a0;
 
-				a0+=pa;
-				c0+=pc;
-			}
-			b+=pb;
+					if (a1!=0.0) CoeffProductD_SSE2(&a1,(const double *)b,(double *)c0,n);
+					else std::fill_n((double *)c0,co,0.0);
 
-			for(uint16_t i=1; i<ca; i++)
-			{
-				const double *b1=(const double *)b;
-
-				a0=a;c0=c;
-				for (uint16_t j=0; j<li; j++)
-				{
-					double *c1=(double *)c0;
-					const double a1=((double *)a0)[i];
-
-					if (a1!=0.0)
-					{
-						for(uint16_t k=0; k<co; k++)
-							c1[k]+=a1*b1[k];
-					}
 					a0+=pa;
 					c0+=pc;
 				}
 				b+=pb;
+
+				for(uint16_t i=1; i<ca; i++)
+				{
+					const double *b1=(const double *)b;
+
+					a0=a;c0=c;
+					for (uint16_t j=0; j<li; j++)
+					{
+						const double a1=((double *)a0)[i];
+
+						if (a1!=0.0) CoeffAddProductD_SSE2(&a1,b1,(double *)c0,n);
+						a0+=pa;
+						c0+=pc;
+					}
+					b+=pb;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<li; i++)
+				{
+					const double *b1=(const double *)b;
+					const double a1=*(double *)a0;
+					double *c1=(double *)c0;
+
+					if (a1!=0.0)
+					{
+						for (uint16_t j=0; j<co; j++)
+							c1[j]=a1*b1[j];
+					}
+					else std::fill_n((double *)c0,co,0.0);
+
+					a0+=pa;
+					c0+=pc;
+				}
+				b+=pb;
+
+				for(uint16_t i=1; i<ca; i++)
+				{
+					const double *b1=(const double *)b;
+
+					a0=a;c0=c;
+					for (uint16_t j=0; j<li; j++)
+					{
+						double *c1=(double *)c0;
+						const double a1=((double *)a0)[i];
+
+						if (a1!=0.0)
+						{
+							for(uint16_t k=0; k<co; k++)
+								c1[k]+=a1*b1[k];
+						}
+						a0+=pa;
+						c0+=pc;
+					}
+					b+=pb;
+				}
 			}
 		}
 	}
@@ -5280,9 +6347,10 @@ void Matrix_Compute::ProductF_AtB(const Matrix &ma,const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(ca+7)>>3;
+		const uint16_t n=(ca+15)>>4;
 
 		for (uint16_t i=0; i<l; i++)
 		{
@@ -5291,7 +6359,7 @@ void Matrix_Compute::ProductF_AtB(const Matrix &ma,const Matrix &mb)
 
 			for (uint16_t j=0; j<co; j++)
 			{
-				VectorProductF_AVX((const float *)a,(const float *)b0,c1++,n);
+				VectorProductF_AVX512((const float *)a,(const float *)b0,c1++,n);
 				b0+=pb;
 			}
 			a+=pa;
@@ -5299,10 +6367,11 @@ void Matrix_Compute::ProductF_AtB(const Matrix &ma,const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(ca+3)>>2;
+			const uint16_t n=(ca+7)>>3;
 
 			for (uint16_t i=0; i<l; i++)
 			{
@@ -5311,7 +6380,7 @@ void Matrix_Compute::ProductF_AtB(const Matrix &ma,const Matrix &mb)
 
 				for (uint16_t j=0; j<co; j++)
 				{
-					VectorProductF_SSE2((const float *)a,(const float *)b0,c1++,n);
+					VectorProductF_AVX((const float *)a,(const float *)b0,c1++,n);
 					b0+=pb;
 				}
 				a+=pa;
@@ -5320,24 +6389,45 @@ void Matrix_Compute::ProductF_AtB(const Matrix &ma,const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const float *a1=(const float *)a;
-				const uint8_t *b0=b;
-				float *c1=(float *)c;
+				const uint16_t n=(ca+3)>>2;
 
-				for (uint16_t j=0; j<co; j++)
+				for (uint16_t i=0; i<l; i++)
 				{
-					float s=0.0f;
-					const float *b1=(const float *)b0;
+					const uint8_t *b0=b;
+					float *c1=(float *)c;
 
-					for (uint16_t k=0; k<ca; k++)
-						s+=a1[k]*b1[k];
-					*c1++=s;
-					b0+=pb;
+					for (uint16_t j=0; j<co; j++)
+					{
+						VectorProductF_SSE2((const float *)a,(const float *)b0,c1++,n);
+						b0+=pb;
+					}
+					a+=pa;
+					c+=pc;
 				}
-				a+=pa;
-				c+=pc;
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const float *a1=(const float *)a;
+					const uint8_t *b0=b;
+					float *c1=(float *)c;
+
+					for (uint16_t j=0; j<co; j++)
+					{
+						float s=0.0f;
+						const float *b1=(const float *)b0;
+
+						for (uint16_t k=0; k<ca; k++)
+							s+=a1[k]*b1[k];
+						*c1++=s;
+						b0+=pb;
+					}
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -5353,9 +6443,10 @@ void Matrix_Compute::ProductD_AtB(const Matrix &ma,const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(ca+3)>>2;
+		const uint16_t n=(ca+7)>>3;
 
 		for (uint16_t i=0; i<l; i++)
 		{
@@ -5364,7 +6455,7 @@ void Matrix_Compute::ProductD_AtB(const Matrix &ma,const Matrix &mb)
 
 			for (uint16_t j=0; j<co; j++)
 			{
-				VectorProductD_AVX((const double *)a,(const double *)b0,c1++,n);
+				VectorProductD_AVX512((const double *)a,(const double *)b0,c1++,n);
 				b0+=pb;
 			}
 			a+=pa;
@@ -5372,10 +6463,11 @@ void Matrix_Compute::ProductD_AtB(const Matrix &ma,const Matrix &mb)
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(ca+1)>>1;
+			const uint16_t n=(ca+3)>>2;
 
 			for (uint16_t i=0; i<l; i++)
 			{
@@ -5384,7 +6476,7 @@ void Matrix_Compute::ProductD_AtB(const Matrix &ma,const Matrix &mb)
 
 				for (uint16_t j=0; j<co; j++)
 				{
-					VectorProductD_SSE2((const double *)a,(const double *)b0,c1++,n);
+					VectorProductD_AVX((const double *)a,(const double *)b0,c1++,n);
 					b0+=pb;
 				}
 				a+=pa;
@@ -5393,24 +6485,45 @@ void Matrix_Compute::ProductD_AtB(const Matrix &ma,const Matrix &mb)
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const double *a1=(const double *)a;
-				const uint8_t *b0=b;
-				double *c1=(double *)c;
+				const uint16_t n=(ca+1)>>1;
 
-				for (uint16_t j=0; j<co; j++)
+				for (uint16_t i=0; i<l; i++)
 				{
-					double s=0.0;
-					const double *b1=(const double *)b0;
+					const uint8_t *b0=b;
+					double *c1=(double *)c;
 
-					for (uint16_t k=0; k<ca; k++)
-						s+=a1[k]*b1[k];
-					*c1++=s;
-					b0+=pb;
+					for (uint16_t j=0; j<co; j++)
+					{
+						VectorProductD_SSE2((const double *)a,(const double *)b0,c1++,n);
+						b0+=pb;
+					}
+					a+=pa;
+					c+=pc;
 				}
-				a+=pa;
-				c+=pc;
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const double *a1=(const double *)a;
+					const uint8_t *b0=b;
+					double *c1=(double *)c;
+
+					for (uint16_t j=0; j<co; j++)
+					{
+						double s=0.0;
+						const double *b1=(const double *)b0;
+
+						for (uint16_t k=0; k<ca; k++)
+							s+=a1[k]*b1[k];
+						*c1++=s;
+						b0+=pb;
+					}
+					a+=pa;
+					c+=pc;
+				}
 			}
 		}
 	}
@@ -5526,9 +6639,10 @@ bool Matrix_Compute::InverseF(const Matrix &ma)
 
 	b0=b_;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c2+7)>>3;
+		const uint16_t n=(c2+15)>>4;
 
 		for (uint16_t i=0; i<l; i++)
 		{
@@ -5543,7 +6657,7 @@ bool Matrix_Compute::InverseF(const Matrix &ma)
 				{
 					const float ratio=-b3[i]/b2[i];
 
-					if (ratio!=0.0f) CoeffAddProductF_AVX(&ratio,b2,b3,n);
+					if (ratio!=0.0f) CoeffAddProductF_AVX512(&ratio,b2,b3,n);
 				}
 				b1+=pb;
 			}
@@ -5556,16 +6670,17 @@ bool Matrix_Compute::InverseF(const Matrix &ma)
 			float *b2=(float *)b0;
 			const float a=1.0f/b2[i];
 
-			CoeffProductF_AVX(&a,b2,b2,n);
+			CoeffProductF_AVX512(&a,b2,b2,n);
 
 			b0+=pb;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c2+3)>>2;
+			const uint16_t n=(c2+7)>>3;
 
 			for (uint16_t i=0; i<l; i++)
 			{
@@ -5580,7 +6695,7 @@ bool Matrix_Compute::InverseF(const Matrix &ma)
 					{
 						const float ratio=-b3[i]/b2[i];
 
-						if (ratio!=0.0f) CoeffAddProductF_SSE2(&ratio,b2,b3,n);
+						if (ratio!=0.0f) CoeffAddProductF_AVX(&ratio,b2,b3,n);
 					}
 					b1+=pb;
 				}
@@ -5593,46 +6708,84 @@ bool Matrix_Compute::InverseF(const Matrix &ma)
 				float *b2=(float *)b0;
 				const float a=1.0f/b2[i];
 
-				CoeffProductF_SSE2(&a,b2,b2,n);
+				CoeffProductF_AVX(&a,b2,b2,n);
 
 				b0+=pb;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				float *b2=(float *)b0;
-				uint8_t *b1=b_;
+				const uint16_t n=(c2+3)>>2;
 
-				for (uint16_t j=0; j<c; j++)
+				for (uint16_t i=0; i<l; i++)
 				{
-					float *b3=(float *)b1;
+					float *b2=(float *)b0;
+					uint8_t *b1=b_;
 
-					if (i!=j)
+					for (uint16_t j=0; j<c; j++)
 					{
-						const float ratio=-b3[i]/b2[i];
+						float *b3=(float *)b1;
 
-						if (ratio!=0.0f)
+						if (i!=j)
 						{
-							for (uint16_t k=0; k<c2; k++)
-								b3[k]+=ratio*b2[k];
+							const float ratio=-b3[i]/b2[i];
+
+							if (ratio!=0.0f) CoeffAddProductF_SSE2(&ratio,b2,b3,n);
 						}
+						b1+=pb;
 					}
-					b1+=pb;
+					b0+=pb;
 				}
-				b0+=pb;
+
+				b0=b_;
+				for (uint16_t i=0; i<l; i++)
+				{
+					float *b2=(float *)b0;
+					const float a=1.0f/b2[i];
+
+					CoeffProductF_SSE2(&a,b2,b2,n);
+
+					b0+=pb;
+				}
 			}
-
-			b0=b_;
-			for (uint16_t i=0; i<l; i++)
+			else
 			{
-				float *b2=(float *)b0;
-				const float a=1.0f/b2[i];
+				for (uint16_t i=0; i<l; i++)
+				{
+					float *b2=(float *)b0;
+					uint8_t *b1=b_;
 
-				for (uint16_t j=0; j<c2; j++)
-					b2[j]*=a;
-				b0+=pb;
+					for (uint16_t j=0; j<c; j++)
+					{
+						float *b3=(float *)b1;
+
+						if (i!=j)
+						{
+							const float ratio=-b3[i]/b2[i];
+
+							if (ratio!=0.0f)
+							{
+								for (uint16_t k=0; k<c2; k++)
+									b3[k]+=ratio*b2[k];
+							}
+						}
+						b1+=pb;
+					}
+					b0+=pb;
+				}
+
+				b0=b_;
+				for (uint16_t i=0; i<l; i++)
+				{
+					float *b2=(float *)b0;
+					const float a=1.0f/b2[i];
+
+					for (uint16_t j=0; j<c2; j++)
+						b2[j]*=a;
+					b0+=pb;
+				}
 			}
 		}
 	}
@@ -5678,9 +6831,10 @@ bool Matrix_Compute::InverseD(const Matrix &ma)
 
 	b0=b_;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c2+3)>>2;
+		const uint16_t n=(c2+7)>>3;
 
 		for (uint16_t i=0; i<l; i++)
 		{
@@ -5695,7 +6849,7 @@ bool Matrix_Compute::InverseD(const Matrix &ma)
 				{
 					const double ratio=-b3[i]/b2[i];
 
-					if (ratio!=0.0) CoeffAddProductD_AVX(&ratio,b2,b3,n);
+					if (ratio!=0.0) CoeffAddProductD_AVX512(&ratio,b2,b3,n);
 				}
 				b1+=pb;
 			}
@@ -5708,16 +6862,17 @@ bool Matrix_Compute::InverseD(const Matrix &ma)
 			double *b2=(double *)b0;
 			const double a=1.0/b2[i];
 
-			CoeffProductD_AVX(&a,b2,b2,n);
+			CoeffProductD_AVX512(&a,b2,b2,n);
 
 			b0+=pb;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c2+1)>>1;
+			const uint16_t n=(c2+3)>>2;
 
 			for (uint16_t i=0; i<l; i++)
 			{
@@ -5732,7 +6887,7 @@ bool Matrix_Compute::InverseD(const Matrix &ma)
 					{
 						const double ratio=-b3[i]/b2[i];
 
-						if (ratio!=0.0) CoeffAddProductD_SSE2(&ratio,b2,b3,n);
+						if (ratio!=0.0) CoeffAddProductD_AVX(&ratio,b2,b3,n);
 					}
 					b1+=pb;
 				}
@@ -5745,46 +6900,84 @@ bool Matrix_Compute::InverseD(const Matrix &ma)
 				double *b2=(double *)b0;
 				const double a=1.0/b2[i];
 
-				CoeffProductD_SSE2(&a,b2,b2,n);
+				CoeffProductD_AVX(&a,b2,b2,n);
 
 				b0+=pb;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				double *b2=(double *)b0;
-				uint8_t *b1=b_;
+				const uint16_t n=(c2+1)>>1;
 
-				for (uint16_t j=0; j<c; j++)
+				for (uint16_t i=0; i<l; i++)
 				{
-					double *b3=(double *)b1;
+					double *b2=(double *)b0;
+					uint8_t *b1=b_;
 
-					if (i!=j)
+					for (uint16_t j=0; j<c; j++)
 					{
-						const double ratio=-b3[i]/b2[i];
+						double *b3=(double *)b1;
 
-						if (ratio!=0.0)
+						if (i!=j)
 						{
-							for (uint16_t k=0; k<c2; k++)
-								b3[k]+=ratio*b2[k];
+							const double ratio=-b3[i]/b2[i];
+
+							if (ratio!=0.0) CoeffAddProductD_SSE2(&ratio,b2,b3,n);
 						}
+						b1+=pb;
 					}
-					b1+=pb;
+					b0+=pb;
 				}
-				b0+=pb;
+
+				b0=b_;
+				for (uint16_t i=0; i<l; i++)
+				{
+					double *b2=(double *)b0;
+					const double a=1.0/b2[i];
+
+					CoeffProductD_SSE2(&a,b2,b2,n);
+
+					b0+=pb;
+				}
 			}
-
-			b0=b_;
-			for (uint16_t i=0; i<l; i++)
+			else
 			{
-				double *b2=(double *)b0;
-				const double a=1.0/b2[i];
+				for (uint16_t i=0; i<l; i++)
+				{
+					double *b2=(double *)b0;
+					uint8_t *b1=b_;
 
-				for (uint16_t j=0; j<c2; j++)
-					b2[j]*=a;
-				b0+=pb;
+					for (uint16_t j=0; j<c; j++)
+					{
+						double *b3=(double *)b1;
+
+						if (i!=j)
+						{
+							const double ratio=-b3[i]/b2[i];
+
+							if (ratio!=0.0)
+							{
+								for (uint16_t k=0; k<c2; k++)
+									b3[k]+=ratio*b2[k];
+							}
+						}
+						b1+=pb;
+					}
+					b0+=pb;
+				}
+
+				b0=b_;
+				for (uint16_t i=0; i<l; i++)
+				{
+					double *b2=(double *)b0;
+					const double a=1.0/b2[i];
+
+					for (uint16_t j=0; j<c2; j++)
+						b2[j]*=a;
+					b0+=pb;
+				}
 			}
 		}
 	}
@@ -5842,7 +7035,7 @@ int8_t Matrix_Compute::InverseSafe(void)
 }
 
 
-/*
+/*	
 Return :
  0 : Matrix is reversed.
  -1 : Allocation/Matrix configuration error.
@@ -5876,9 +7069,10 @@ int8_t Matrix_Compute::InverseSafeF(const Matrix_Compute &ma)
 
 	b0=b_;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c2+7)>>3;
+		const uint16_t n=(c2+15)>>4;
 
 		for (uint16_t i=0; i<l; i++)
 		{
@@ -5895,7 +7089,7 @@ int8_t Matrix_Compute::InverseSafeF(const Matrix_Compute &ma)
 
 					const float ratio=-b3[i]/b2[i];
 
-					if (ratio!=0.0f) CoeffAddProductF_AVX(&ratio,b2,b3,n);
+					if (ratio!=0.0f) CoeffAddProductF_AVX512(&ratio,b2,b3,n);
 				}
 				b1+=pb;
 			}
@@ -5911,16 +7105,17 @@ int8_t Matrix_Compute::InverseSafeF(const Matrix_Compute &ma)
 
 			const float a=1.0f/b2[i];
 
-			CoeffProductF_AVX(&a,b2,b2,n);
+			CoeffProductF_AVX512(&a,b2,b2,n);
 
 			b0+=pb;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c2+3)>>2;
+			const uint16_t n=(c2+7)>>3;
 
 			for (uint16_t i=0; i<l; i++)
 			{
@@ -5937,7 +7132,7 @@ int8_t Matrix_Compute::InverseSafeF(const Matrix_Compute &ma)
 
 						const float ratio=-b3[i]/b2[i];
 
-						if (ratio!=0.0f) CoeffAddProductF_SSE2(&ratio,b2,b3,n);
+						if (ratio!=0.0f) CoeffAddProductF_AVX(&ratio,b2,b3,n);
 					}
 					b1+=pb;
 				}
@@ -5953,51 +7148,94 @@ int8_t Matrix_Compute::InverseSafeF(const Matrix_Compute &ma)
 
 				const float a=1.0f/b2[i];
 
-				CoeffProductF_SSE2(&a,b2,b2,n);
+				CoeffProductF_AVX(&a,b2,b2,n);
 
 				b0+=pb;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				float *b2=(float *)b0;
-				uint8_t *b1=b_;
+				const uint16_t n=(c2+3)>>2;
 
-				for (uint16_t j=0; j<c; j++)
+				for (uint16_t i=0; i<l; i++)
 				{
-					float *b3=(float *)b1;
+					float *b2=(float *)b0;
+					uint8_t *b1=b_;
 
-					if (i!=j)
+					for (uint16_t j=0; j<c; j++)
 					{
-						if (fabs(b2[i])<=_zero) return(-2);
+						float *b3=(float *)b1;
 
-						const float ratio=-b3[i]/b2[i];
-
-						if (ratio!=0.0f)
+						if (i!=j)
 						{
-							for (uint16_t k=0; k<c2; k++)
-								b3[k]+=ratio*b2[k];
+							if (fabs(b2[i])<=_zero) return(-2);
+
+							const float ratio=-b3[i]/b2[i];
+
+							if (ratio!=0.0f) CoeffAddProductF_SSE2(&ratio,b2,b3,n);
 						}
+						b1+=pb;
 					}
-					b1+=pb;
+					b0+=pb;
 				}
-				b0+=pb;
+
+				b0=b_;
+				for (uint16_t i=0; i<l; i++)
+				{
+					float *b2=(float *)b0;
+
+					if (fabs(b2[i])<=_zero) return(-2);
+
+					const float a=1.0f/b2[i];
+
+					CoeffProductF_SSE2(&a,b2,b2,n);
+
+					b0+=pb;
+				}
 			}
-
-			b0=b_;
-			for (uint16_t i=0; i<l; i++)
+			else
 			{
-				float *b2=(float *)b0;
+				for (uint16_t i=0; i<l; i++)
+				{
+					float *b2=(float *)b0;
+					uint8_t *b1=b_;
 
-				if (fabs(b2[i])<=_zero) return(-2);
+					for (uint16_t j=0; j<c; j++)
+					{
+						float *b3=(float *)b1;
 
-				const float a=1.0f/b2[i];
+						if (i!=j)
+						{
+							if (fabs(b2[i])<=_zero) return(-2);
 
-				for (uint16_t j=0; j<c2; j++)
-					b2[j]*=a;
-				b0+=pb;
+							const float ratio=-b3[i]/b2[i];
+
+							if (ratio!=0.0f)
+							{
+								for (uint16_t k=0; k<c2; k++)
+									b3[k]+=ratio*b2[k];
+							}
+						}
+						b1+=pb;
+					}
+					b0+=pb;
+				}
+
+				b0=b_;
+				for (uint16_t i=0; i<l; i++)
+				{
+					float *b2=(float *)b0;
+
+					if (fabs(b2[i])<=_zero) return(-2);
+
+					const float a=1.0f/b2[i];
+
+					for (uint16_t j=0; j<c2; j++)
+						b2[j]*=a;
+					b0+=pb;
+				}
 			}
 		}
 	}
@@ -6050,9 +7288,10 @@ int8_t Matrix_Compute::InverseSafeD(const Matrix_Compute &ma)
 
 	b0=b_;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c2+3)>>2;
+		const uint16_t n=(c2+7)>>3;
 
 		for (uint16_t i=0; i<l; i++)
 		{
@@ -6069,7 +7308,7 @@ int8_t Matrix_Compute::InverseSafeD(const Matrix_Compute &ma)
 
 					const double ratio=-b3[i]/b2[i];
 
-					if (ratio!=0.0) CoeffAddProductD_AVX(&ratio,b2,b3,n);
+					if (ratio!=0.0) CoeffAddProductD_AVX512(&ratio,b2,b3,n);
 				}
 				b1+=pb;
 			}
@@ -6085,16 +7324,17 @@ int8_t Matrix_Compute::InverseSafeD(const Matrix_Compute &ma)
 
 			const double a=1.0/b2[i];
 
-			CoeffProductD_AVX(&a,b2,b2,n);
+			CoeffProductD_AVX512(&a,b2,b2,n);
 
 			b0+=pb;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c2+1)>>1;
+			const uint16_t n=(c2+3)>>2;
 
 			for (uint16_t i=0; i<l; i++)
 			{
@@ -6111,7 +7351,7 @@ int8_t Matrix_Compute::InverseSafeD(const Matrix_Compute &ma)
 
 						const double ratio=-b3[i]/b2[i];
 
-						if (ratio!=0.0) CoeffAddProductD_SSE2(&ratio,b2,b3,n);
+						if (ratio!=0.0) CoeffAddProductD_AVX(&ratio,b2,b3,n);
 					}
 					b1+=pb;
 				}
@@ -6127,51 +7367,94 @@ int8_t Matrix_Compute::InverseSafeD(const Matrix_Compute &ma)
 
 				const double a=1.0/b2[i];
 
-				CoeffProductD_SSE2(&a,b2,b2,n);
+				CoeffProductD_AVX(&a,b2,b2,n);
 
 				b0+=pb;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				double *b2=(double *)b0;
-				uint8_t *b1=b_;
+				const uint16_t n=(c2+1)>>1;
 
-				for (uint16_t j=0; j<c; j++)
+				for (uint16_t i=0; i<l; i++)
 				{
-					double *b3=(double *)b1;
+					double *b2=(double *)b0;
+					uint8_t *b1=b_;
 
-					if (i!=j)
+					for (uint16_t j=0; j<c; j++)
 					{
-						if (fabs(b2[i])<=_zero) return(-2);
+						double *b3=(double *)b1;
 
-						const double ratio=-b3[i]/b2[i];
-
-						if (ratio!=0.0)
+						if (i!=j)
 						{
-							for (uint16_t k=0; k<c2; k++)
-								b3[k]+=ratio*b2[k];
+							if (fabs(b2[i])<=_zero) return(-2);
+
+							const double ratio=-b3[i]/b2[i];
+
+							if (ratio!=0.0) CoeffAddProductD_SSE2(&ratio,b2,b3,n);
 						}
+						b1+=pb;
 					}
-					b1+=pb;
+					b0+=pb;
 				}
-				b0+=pb;
+
+				b0=b_;
+				for (uint16_t i=0; i<l; i++)
+				{
+					double *b2=(double *)b0;
+
+					if (fabs(b2[i])<=_zero) return(-2);
+
+					const double a=1.0/b2[i];
+
+					CoeffProductD_SSE2(&a,b2,b2,n);
+
+					b0+=pb;
+				}
 			}
-
-			b0=b_;
-			for (uint16_t i=0; i<l; i++)
+			else
 			{
-				double *b2=(double *)b0;
+				for (uint16_t i=0; i<l; i++)
+				{
+					double *b2=(double *)b0;
+					uint8_t *b1=b_;
 
-				if (fabs(b2[i])<=_zero) return(-2);
+					for (uint16_t j=0; j<c; j++)
+					{
+						double *b3=(double *)b1;
 
-				const double a=1.0/b2[i];
+						if (i!=j)
+						{
+							if (fabs(b2[i])<=_zero) return(-2);
 
-				for (uint16_t j=0; j<c2; j++)
-					b2[j]*=a;
-				b0+=pb;
+							const double ratio=-b3[i]/b2[i];
+
+							if (ratio!=0.0)
+							{
+								for (uint16_t k=0; k<c2; k++)
+									b3[k]+=ratio*b2[k];
+							}
+						}
+						b1+=pb;
+					}
+					b0+=pb;
+				}
+
+				b0=b_;
+				for (uint16_t i=0; i<l; i++)
+				{
+					double *b2=(double *)b0;
+
+					if (fabs(b2[i])<=_zero) return(-2);
+
+					const double a=1.0/b2[i];
+
+					for (uint16_t j=0; j<c2; j++)
+						b2[j]*=a;
+					b0+=pb;
+				}
 			}
 		}
 	}
@@ -6494,45 +7777,62 @@ double Matrix_Compute::Norme2F(void)
 	const ptrdiff_t p=pitch;
 	double s=0.0;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c+7)>>3;
+		const uint16_t n=(c+15)>>4;
 		float r;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorNormeF_AVX((const float *)c0,&r,n);
+			VectorNormeF_AVX512((const float *)c0,&r,n);
 			c0+=p;
 			s+=(double)r;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c+3)>>2;
+			const uint16_t n=(c+7)>>3;
 			float r;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorNormeF_SSE2((const float *)c0,&r,n);
+				VectorNormeF_AVX((const float *)c0,&r,n);
 				c0+=p;
 				s+=(double)r;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const float *c1=(const float *)c0;
+				const uint16_t n=(c+3)>>2;
+				float r;
 
-				for (uint16_t j=0; j<c; j++)
+				for (int32_t i=0; i<l; i++)
 				{
-					double d=(double)c1[j];
-
-					s+=d*d;
+					VectorNormeF_SSE2((const float *)c0,&r,n);
+					c0+=p;
+					s+=(double)r;
 				}
-				c0+=p;
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const float *c1=(const float *)c0;
+
+					for (uint16_t j=0; j<c; j++)
+					{
+						double d=(double)c1[j];
+
+						s+=d*d;
+					}
+					c0+=p;
+				}
 			}
 		}
 	}
@@ -6547,45 +7847,62 @@ double Matrix_Compute::Norme2D(void)
 	const ptrdiff_t p=pitch;
 	double s=0.0;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c+3)>>2;
+		const uint16_t n=(c+7)>>3;
 		double r;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorNormeD_AVX((const double *)c0,&r,n);
+			VectorNormeD_AVX512((const double *)c0,&r,n);
 			c0+=p;
 			s+=r;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c+1)>>1;
+			const uint16_t n=(c+3)>>2;
 			double r;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorNormeD_SSE2((const double *)c0,&r,n);
+				VectorNormeD_AVX((const double *)c0,&r,n);
 				c0+=p;
 				s+=r;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const double *c1=(const double *)c0;
+				const uint16_t n=(c+1)>>1;
+				double r;
 
-				for (uint16_t j=0; j<c; j++)
+				for (int32_t i=0; i<l; i++)
 				{
-					double d=c1[j];
-
-					s+=d*d;
+					VectorNormeD_SSE2((const double *)c0,&r,n);
+					c0+=p;
+					s+=r;
 				}
-				c0+=p;
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const double *c1=(const double *)c0;
+
+					for (uint16_t j=0; j<c; j++)
+					{
+						double d=c1[j];
+
+						s+=d*d;
+					}
+					c0+=p;
+				}
 			}
 		}
 	}
@@ -6615,41 +7932,58 @@ double Matrix_Compute::Norme1F(void)
 	const ptrdiff_t p=pitch;
 	double s=0.0;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c+7)>>3;
+		const uint16_t n=(c+15)>>4;
 		float r;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorNorme1F_AVX((const float *)c0,&r,n);
+			VectorNorme1F_AVX512((const float *)c0,&r,n);
 			c0+=p;
 			s+=(double)r;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c+3)>>2;
+			const uint16_t n=(c+7)>>3;
 			float r;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorNorme1F_SSE2((const float *)c0,&r,n);
+				VectorNorme1F_AVX((const float *)c0,&r,n);
 				c0+=p;
 				s+=(double)r;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const float *c1=(const float *)c0;
+				const uint16_t n=(c+3)>>2;
+				float r;
 
-				for (uint16_t j=0; j<c; j++)
-					s+=fabs(c1[j]);
-				c0+=p;
+				for (int32_t i=0; i<l; i++)
+				{
+					VectorNorme1F_SSE2((const float *)c0,&r,n);
+					c0+=p;
+					s+=(double)r;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const float *c1=(const float *)c0;
+
+					for (uint16_t j=0; j<c; j++)
+						s+=fabs(c1[j]);
+					c0+=p;
+				}
 			}
 		}
 	}
@@ -6664,41 +7998,58 @@ double Matrix_Compute::Norme1D(void)
 	const ptrdiff_t p=pitch;
 	double s=0.0;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c+3)>>2;
+		const uint16_t n=(c+7)>>3;
 		double r;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorNorme1D_AVX((const double *)c0,&r,n);
+			VectorNorme1D_AVX512((const double *)c0,&r,n);
 			c0+=p;
 			s+=r;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c+1)>>1;
+			const uint16_t n=(c+3)>>2;
 			double r;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorNorme1D_SSE2((const double *)c0,&r,n);
+				VectorNorme1D_AVX((const double *)c0,&r,n);
 				c0+=p;
 				s+=r;
 			}
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const double *c1=(const double *)c0;
+				const uint16_t n=(c+1)>>1;
+				double r;
 
-				for (uint16_t j=0; j<c; j++)
-					s+=fabs(c1[j]);
-				c0+=p;
+				for (int32_t i=0; i<l; i++)
+				{
+					VectorNorme1D_SSE2((const double *)c0,&r,n);
+					c0+=p;
+					s+=r;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const double *c1=(const double *)c0;
+
+					for (uint16_t j=0; j<c; j++)
+						s+=fabs(c1[j]);
+					c0+=p;
+				}
 			}
 		}
 	}
@@ -6732,29 +8083,31 @@ double Matrix_Compute::Distance2F(const Matrix &ma)
 	const ptrdiff_t p=pitch,pa=ma.GetPitch();
 	double s=0.0;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c+7)>>3;
+		const uint16_t n=(c+15)>>4;
 		float r;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorDistF_AVX((const float *)c0,(const float *)a0,&r,n);
+			VectorDistF_AVX512((const float *)c0,(const float *)a0,&r,n);
 			a0+=pa;
 			c0+=p;
 			s+=(double)r;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c+3)>>2;
+			const uint16_t n=(c+7)>>3;
 			float r;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorDistF_SSE2((const float *)c0,(const float *)a0,&r,n);
+				VectorDistF_AVX((const float *)c0,(const float *)a0,&r,n);
 				a0+=pa;
 				c0+=p;
 				s+=(double)r;
@@ -6762,19 +8115,35 @@ double Matrix_Compute::Distance2F(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const float *c1=(const float *)c0;
-				const float *a1=(const float *)a0;
+				const uint16_t n=(c+3)>>2;
+				float r;
 
-				for (uint16_t j=0; j<c; j++)
+				for (int32_t i=0; i<l; i++)
 				{
-					const double d=(double)(c1[j]-a1[j]);
-
-					s+=d*d;
+					VectorDistF_SSE2((const float *)c0,(const float *)a0,&r,n);
+					a0+=pa;
+					c0+=p;
+					s+=(double)r;
 				}
-				a0+=pa;
-				c0+=p;
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const float *c1=(const float *)c0;
+					const float *a1=(const float *)a0;
+
+					for (uint16_t j=0; j<c; j++)
+					{
+						const double d=(double)(c1[j]-a1[j]);
+
+						s+=d*d;
+					}
+					a0+=pa;
+					c0+=p;
+				}
 			}
 		}
 	}
@@ -6790,29 +8159,31 @@ double Matrix_Compute::Distance2D(const Matrix &ma)
 	const ptrdiff_t p=pitch,pa=ma.GetPitch();
 	double s=0.0;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
 		const uint16_t n=(c+7)>>3;
 		double r;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorDistD_AVX((const double *)c0,(const double *)a0,&r,n);
+			VectorDistD_AVX512((const double *)c0,(const double *)a0,&r,n);
 			a0+=pa;
 			c0+=p;
 			s+=r;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
 			const uint16_t n=(c+3)>>2;
 			double r;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorDistD_SSE2((const double *)c0,(const double *)a0,&r,n);
+				VectorDistD_AVX((const double *)c0,(const double *)a0,&r,n);
 				a0+=pa;
 				c0+=p;
 				s+=r;
@@ -6820,19 +8191,35 @@ double Matrix_Compute::Distance2D(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const double *c1=(const double *)c0;
-				const double *a1=(const double *)a0;
+				const uint16_t n=(c+1)>>1;
+				double r;
 
-				for (uint16_t j=0; j<c; j++)
+				for (int32_t i=0; i<l; i++)
 				{
-					const double d=c1[j]-a1[j];
-
-					s+=d*d;
+					VectorDistD_SSE2((const double *)c0,(const double *)a0,&r,n);
+					a0+=pa;
+					c0+=p;
+					s+=r;
 				}
-				a0+=pa;
-				c0+=p;
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const double *c1=(const double *)c0;
+					const double *a1=(const double *)a0;
+
+					for (uint16_t j=0; j<c; j++)
+					{
+						const double d=c1[j]-a1[j];
+
+						s+=d*d;
+					}
+					a0+=pa;
+					c0+=p;
+				}
 			}
 		}
 	}
@@ -6866,29 +8253,31 @@ double Matrix_Compute::Distance1F(const Matrix &ma)
 	const ptrdiff_t p=pitch,pa=ma.GetPitch();
 	double s=0.0;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
-		const uint16_t n=(c+7)>>3;
+		const uint16_t n=(c+15)>>4;
 		float r;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorDist1F_AVX((const float *)c0,(const float *)a0,&r,n);
+			VectorDist1F_AVX512((const float *)c0,(const float *)a0,&r,n);
 			a0+=pa;
 			c0+=p;
 			s+=(double)r;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
-			const uint16_t n=(c+3)>>2;
+			const uint16_t n=(c+7)>>3;
 			float r;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorDist1F_SSE2((const float *)c0,(const float *)a0,&r,n);
+				VectorDist1F_AVX((const float *)c0,(const float *)a0,&r,n);
 				a0+=pa;
 				c0+=p;
 				s+=(double)r;
@@ -6896,15 +8285,31 @@ double Matrix_Compute::Distance1F(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const float *c1=(const float *)c0;
-				const float *a1=(const float *)a0;
+				const uint16_t n=(c+3)>>2;
+				float r;
 
-				for (uint16_t j=0; j<c; j++)
-					s+=fabs(c1[j]-a1[j]);
-				a0+=pa;
-				c0+=p;
+				for (int32_t i=0; i<l; i++)
+				{
+					VectorDist1F_SSE2((const float *)c0,(const float *)a0,&r,n);
+					a0+=pa;
+					c0+=p;
+					s+=(double)r;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const float *c1=(const float *)c0;
+					const float *a1=(const float *)a0;
+
+					for (uint16_t j=0; j<c; j++)
+						s+=fabs(c1[j]-a1[j]);
+					a0+=pa;
+					c0+=p;
+				}
 			}
 		}
 	}
@@ -6920,29 +8325,31 @@ double Matrix_Compute::Distance1D(const Matrix &ma)
 	const ptrdiff_t p=pitch,pa=ma.GetPitch();
 	double s=0.0;
 
-	if (AVX_Enable)
+#ifdef AVX512_BUILD_POSSIBLE
+	if (AVX512_Enable)
 	{
 		const uint16_t n=(c+7)>>3;
 		double r;
 
 		for (int32_t i=0; i<l; i++)
 		{
-			VectorDist1D_AVX((const double *)c0,(const double *)a0,&r,n);
+			VectorDist1D_AVX512((const double *)c0,(const double *)a0,&r,n);
 			a0+=pa;
 			c0+=p;
 			s+=r;
 		}
 	}
 	else
+#endif
 	{
-		if (SSE2_Enable)
+		if (AVX_Enable)
 		{
 			const uint16_t n=(c+3)>>2;
 			double r;
 
 			for (int32_t i=0; i<l; i++)
 			{
-				VectorDist1D_SSE2((const double *)c0,(const double *)a0,&r,n);
+				VectorDist1D_AVX((const double *)c0,(const double *)a0,&r,n);
 				a0+=pa;
 				c0+=p;
 				s+=r;
@@ -6950,15 +8357,31 @@ double Matrix_Compute::Distance1D(const Matrix &ma)
 		}
 		else
 		{
-			for (uint16_t i=0; i<l; i++)
+			if (SSE2_Enable)
 			{
-				const double *c1=(const double *)c0;
-				const double *a1=(const double *)a0;
+				const uint16_t n=(c+1)>>1;
+				double r;
 
-				for (uint16_t j=0; j<c; j++)
-					s+=fabs(c1[j]-a1[j]);
-				a0+=pa;
-				c0+=p;
+				for (int32_t i=0; i<l; i++)
+				{
+					VectorDist1D_SSE2((const double *)c0,(const double *)a0,&r,n);
+					a0+=pa;
+					c0+=p;
+					s+=r;
+				}
+			}
+			else
+			{
+				for (uint16_t i=0; i<l; i++)
+				{
+					const double *c1=(const double *)c0;
+					const double *a1=(const double *)a0;
+
+					for (uint16_t j=0; j<c; j++)
+						s+=fabs(c1[j]-a1[j]);
+					a0+=pa;
+					c0+=p;
+				}
 			}
 		}
 	}

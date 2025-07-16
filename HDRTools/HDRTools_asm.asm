@@ -20,7 +20,6 @@
 ;
 ;
 
-.586
 .xmm
 .model flat,c
 

@@ -31,7 +31,7 @@ typedef enum COEFF_DATA_TYPE_ {DATA_NONE,DATA_DOUBLE,DATA_FLOAT,DATA_UINT64,DATA
 	DATA_UINT32,DATA_INT32,DATA_UINT16,DATA_INT16,DATA_UINT8,DATA_INT8} COEFF_DATA_TYPE;
 
 
-void SetCPUMatrixClass(bool SSE2,bool AVX,bool AVX2);
+void SetCPUMatrixClass(const bool SSE2,const bool AVX,const bool AVX2,const bool AVX512);
 
 
 class Vector
@@ -42,29 +42,29 @@ public :
 	Vector(const Vector &x);
 	virtual ~Vector(void);
 
-	bool AllocCheck(void) const {return(Coeff!=NULL);}
+	inline bool AllocCheck(void) const {return(Coeff!=NULL);}
 	bool Create(void);
 	bool Create(const uint16_t l,const COEFF_DATA_TYPE data);
 	bool Create(const Vector &x);
 	bool CopyStrict(const Vector &x);
 	bool CopyRaw(const void *ptr);
-	bool CopyRaw(const void *ptr,uint16_t lgth);
+	bool CopyRaw(const void *ptr,const uint16_t lgth);
 	bool ExportRaw(void *ptr);
-	bool ExportRaw(void *ptr,uint16_t lgth);
+	bool ExportRaw(void *ptr,const uint16_t lgth);
 	void Destroy(void);
 	bool FillD(const double data);
 	bool FillF(const float data);
 	bool FillZero(void);
-	COEFF_DATA_TYPE GetDataType(void) const {return(data_type);}
+	inline COEFF_DATA_TYPE GetDataType(void) const {return(data_type);}
 	bool SetInfo(const uint16_t l,const COEFF_DATA_TYPE data);
 	void GetInfo(uint16_t &l,COEFF_DATA_TYPE &data) const;
-	uint16_t GetLength(void) const {return(length);}
-	void* GetPtrVector(void) const {return(Coeff);}
-	size_t GetDataSize(void) const {return(size);}
-	double GetD(const uint16_t i) const {return(((double *)Coeff)[i]);}
-	float GetF(const uint16_t i) const {return(((float *)Coeff)[i]);}
-	void SetD(const uint16_t i,const double d) {((double *)Coeff)[i]=d;}
-	void SetF(const uint16_t i,const float d) {((float *)Coeff)[i]=d;}
+	inline uint16_t GetLength(void) const {return(length);}
+	inline void* GetPtrVector(void) const {return(Coeff);}
+	inline size_t GetDataSize(void) const {return(size);}
+	inline double GetD(const uint16_t i) const {return(((double *)Coeff)[i]);}
+	inline float GetF(const uint16_t i) const {return(((float *)Coeff)[i]);}
+	inline void SetD(const uint16_t i,const double d) {((double *)Coeff)[i]=d;}
+	inline void SetF(const uint16_t i,const float d) {((float *)Coeff)[i]=d;}
 	bool GetSafeD(const uint16_t i,double &d) const ;
 	bool SetSafeD(const uint16_t i,const double d);
 	bool GetSafeF(const uint16_t i,float &d) const ;
@@ -87,7 +87,7 @@ class Matrix;
 class Vector_Compute : public Vector
 {
 protected :
-	bool SSE2_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 public :
 	Vector_Compute(void);
@@ -95,9 +95,10 @@ public :
 	Vector_Compute(const Vector_Compute &x);
 	virtual ~Vector_Compute(void);
 
-	void SetSSE2(bool val) {SSE2_Enable=val;}
-	void SetAVX(bool val) {AVX_Enable=val;}
-	void SetAVX2(bool val) {AVX2_Enable=val;}
+	inline void SetSSE2(const bool val) {SSE2_Enable=val;}
+	inline void SetAVX(const bool val) {AVX_Enable=val;}
+	inline void SetAVX2(const bool val) {AVX2_Enable=val;}
+	inline void SetAVX512(const bool val) {AVX512_Enable=val;}
 
 	bool Mult(const double coef,const Vector &x);
 	bool Mult(const double coef);
@@ -185,34 +186,34 @@ public :
 	Matrix(const Matrix &m);
 	virtual ~Matrix(void);
 
-	bool AllocCheck(void) const {return(Coeff!=NULL);}
+	inline bool AllocCheck(void) const {return(Coeff!=NULL);}
 	bool Create(void);
 	bool Create(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data);
 	bool Create(const Matrix &m);
 	virtual bool CopyStrict(const Matrix &m);
 	bool CopyRaw(const void *ptr);
-	bool CopyRaw(const void *ptr,ptrdiff_t ptr_pitch);
-	bool CopyRaw(const void *ptr,ptrdiff_t ptr_pitch,uint16_t ln,uint16_t co);
+	bool CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch);
+	bool CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln,const uint16_t co);
 	bool ExportRaw(void *ptr);
-	bool ExportRaw(void *ptr,ptrdiff_t ptr_pitch);
-	bool ExportRaw(void *ptr,ptrdiff_t ptr_pitch,uint16_t ln,uint16_t co);
+	bool ExportRaw(void *ptr,const ptrdiff_t ptr_pitch);
+	bool ExportRaw(void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln,const uint16_t co);
 	void Destroy(void);
 	bool FillD(const double data);
 	bool FillF(const float data);
 	bool FillZero(void);
-	COEFF_DATA_TYPE GetDataType(void) const {return(data_type);}
+	inline COEFF_DATA_TYPE GetDataType(void) const {return(data_type);}
 	bool SetInfo(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data);
 	void GetInfo(uint16_t &l,uint16_t &c,COEFF_DATA_TYPE &data) const;
-	uint16_t GetLines(void) const {return(lines);}
-	uint16_t GetColumns(void) const {return(columns);}
-	void* GetPtrMatrix(void) const {return(Coeff);}
-	void* GetPtrMatrixLine(const uint16_t i) const {return((void *)((uint8_t *)Coeff+i*pitch));}
-	ptrdiff_t GetPitch(void) const {return(pitch);}
-	size_t GetDataSize(void) const {return(size);}
-	double GetD(const uint16_t i,const uint16_t j) const {return(((double *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]);}
-	float GetF(const uint16_t i,const uint16_t j) const {return(((float *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]);}
-	void SetD(const uint16_t i,const uint16_t j,const double d) {((double *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]=d;}
-	void SetF(const uint16_t i,const uint16_t j,const float d) {((float *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]=d;}
+	inline uint16_t GetLines(void) const {return(lines);}
+	inline uint16_t GetColumns(void) const {return(columns);}
+	inline void* GetPtrMatrix(void) const {return(Coeff);}
+	inline void* GetPtrMatrixLine(const uint16_t i) const {return((void *)((uint8_t *)Coeff+i*pitch));}
+	inline ptrdiff_t GetPitch(void) const {return(pitch);}
+	inline size_t GetDataSize(void) const {return(size);}
+	inline double GetD(const uint16_t i,const uint16_t j) const {return(((double *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]);}
+	inline float GetF(const uint16_t i,const uint16_t j) const {return(((float *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]);}
+	inline void SetD(const uint16_t i,const uint16_t j,const double d) {((double *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]=d;}
+	inline void SetF(const uint16_t i,const uint16_t j,const float d) {((float *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]=d;}
 	bool GetSafeD(const uint16_t i,const uint16_t j,double &d) const ;
 	bool SetSafeD(const uint16_t i,const uint16_t j,const double d);
 	bool GetSafeF(const uint16_t i,const uint16_t j,float &d) const ;
@@ -237,7 +238,7 @@ class Matrix_Compute : public Matrix
 {
 protected :
 	double zero_value;
-	bool SSE2_Enable,AVX_Enable,AVX2_Enable;
+	bool SSE2_Enable,AVX_Enable,AVX2_Enable,AVX512_Enable;
 
 public :
 	Matrix_Compute(void);
@@ -245,14 +246,15 @@ public :
 	Matrix_Compute(const Matrix_Compute &m);
 	virtual ~Matrix_Compute(void);
 
-	void SetSSE2(bool val) {SSE2_Enable=val;}
-	void SetAVX(bool val) {AVX_Enable=val;}
-	void SetAVX2(bool val) {AVX2_Enable=val;}
+	inline void SetSSE2(const bool val) {SSE2_Enable=val;}
+	inline void SetAVX(const bool val) {AVX_Enable=val;}
+	inline void SetAVX2(const bool val) {AVX2_Enable=val;}
+	inline void SetAVX512(const bool val) {AVX512_Enable=val;}
 
 	bool CreateTranspose(const Matrix &m);
 	virtual bool CopyStrict(const Matrix_Compute &m);
-	void SetZeroValue(const double z) {zero_value=fabs(z);}
-	double GetZeroValue(void) const {return(zero_value);}
+	inline void SetZeroValue(const double z) {zero_value=fabs(z);}
+	inline double GetZeroValue(void) const {return(zero_value);}
 
 	bool Transpose(void);
 	bool Transpose(const Matrix &ma);

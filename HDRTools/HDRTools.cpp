@@ -31269,7 +31269,8 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 	AVS_linkage = vectors;
 
 	poolInterface=ThreadPoolInterface::Init(0);
-	SetCPUMatrixClass((env->GetCPUFlags() & CPUF_SSE2)!=0,(env->GetCPUFlags() & CPUF_AVX)!=0,(env->GetCPUFlags() & CPUF_AVX2)!=0);
+	SetCPUMatrixClass((env->GetCPUFlags() & CPUF_SSE2)!=0,(env->GetCPUFlags() & CPUF_AVX)!=0,
+		(env->GetCPUFlags() & CPUF_AVX2)!=0, ((env->GetCPUFlags() & CPUF_AVX512F)!=0) && ((env->GetCPUFlags() & CPUF_AVX512DQ)!=0));
 
 	if (!poolInterface->GetThreadPoolInterfaceStatus()) env->ThrowError("HDRTools: Error with the TheadPool status!");
 

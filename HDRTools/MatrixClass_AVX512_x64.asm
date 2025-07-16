@@ -1086,7 +1086,7 @@ VectorProductF_AVX512_1:
 	vmovhlps xmm3,xmm3,xmm2
 
 	vaddps xmm0,xmm0,xmm1
-	vaddps xmm2,xmm2,xmm2
+	vaddps xmm2,xmm2,xmm3
 
 	vpsrldq xmm1,xmm0,4
 	vpsrldq xmm3,xmm2,4

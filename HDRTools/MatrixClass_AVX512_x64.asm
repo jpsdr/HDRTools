@@ -782,7 +782,7 @@ VectorDistF_AVX512_1:
 	vaddps xmm2,xmm2,xmm3
 
 	vpsrldq xmm1,xmm0,4
-	vpsrldq xmm2,xmm3,4
+	vpsrldq xmm3,xmm2,4
 
 	vaddss xmm0,xmm0,xmm1
 	vaddss xmm2,xmm2,xmm3
@@ -1131,6 +1131,7 @@ VectorProductD_AVX512_1:
 	vextractf64x4 ymm2,zmm0,1
 
 	vextractf128 xmm1,ymm0,1
+	vextractf128 xmm3,ymm2,1
 
 	vaddpd xmm0,xmm0,xmm1
 	vaddpd xmm2,xmm2,xmm3

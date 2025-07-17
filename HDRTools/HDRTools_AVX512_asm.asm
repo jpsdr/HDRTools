@@ -577,7 +577,6 @@ Convert_16_RGB64_HLG_OOTF_AVX512_2:
 	vinserti128 ymm7,ymm7,xmm6,1	
 
 	vinsertf32x8 zmm0,zmm0,ymm1,1
-
 	vinserti32x8 zmm2,zmm2,ymm7,1
 
 	vcvtdq2ps zmm2,zmm2
@@ -667,10 +666,10 @@ JPSDR_HDRTools_BT2446C_16_XYZ_AVX512 proc src:dword,dst1:dword,dst2:dword,w16:dw
 	vinsertf32x8 zmm4,zmm4,ymm4,1
 	vinsertf32x8 zmm5,zmm5,ymm5,1
 	
-	vmovdqa64 ymm6,YMMWORD ptr data_dw_65535
-	vmovdqa64 ymm7,YMMWORD ptr data_dw_0
-	vmulps ymm3,ymm3,YMMWORD ptr data_f_65535
-	vmulps ymm5,ymm5,YMMWORD ptr data_f_65535
+	vmovdqa64 zmm6,ZMMWORD ptr data_dw_65535
+	vmovdqa64 zmm7,ZMMWORD ptr data_dw_0
+	vmulps zmm3,zmm3,ZMMWORD ptr data_f_65535
+	vmulps zmm5,zmm5,ZMMWORD ptr data_f_65535
 	
 	mov esi,src
 	mov edi,dst1

@@ -748,7 +748,6 @@ Convert_16_RGB64_HLG_OOTF_AVX512_2:
 	vinserti128 ymm7,ymm7,xmm6,1	
 
 	vinsertf32x8 zmm0,zmm0,ymm1,1
-
 	vinserti32x8 zmm2,zmm2,ymm7,1
 
 	vcvtdq2ps zmm2,zmm2

@@ -6651,11 +6651,11 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg r14
 	push r15
 	.pushreg r15
-	sub rsp,32
-	.allocstack 32
-	movdqu XMMWORD ptr[rsp],xmm6
+	sub rsp,40
+	.allocstack 40
+	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
-	movdqu XMMWORD ptr[rsp+16],xmm7
+	movdqa XMMWORD ptr[rsp+16],xmm7
 	.savexmm128 xmm7,16
 	.endprolog
 
@@ -6723,9 +6723,9 @@ Convert_PlanarXYZtoRGB_32_SSE2_2:
 	dec h
 	jnz short Convert_PlanarXYZtoRGB_32_SSE2_1
 	
-	movdqu xmm7,XMMWORD ptr[rsp+16]
-	movdqu xmm6,XMMWORD ptr[rsp]
-	add rsp,32
+	movdqa xmm7,XMMWORD ptr[rsp+16]
+	movdqa xmm6,XMMWORD ptr[rsp]
+	add rsp,40
 	
 	pop r15
 	pop r14
@@ -6780,9 +6780,9 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg r14
 	push r15
 	.pushreg r15
-	sub rsp,16
-	.allocstack 16
-	vmovdqu XMMWORD ptr[rsp],xmm6
+	sub rsp,24
+	.allocstack 24
+	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	.endprolog
 
@@ -6900,8 +6900,8 @@ Convert_PlanarRGBtoXYZ_32_AVX_4:
 	
 	vzeroupper
 	
-	vmovdqu xmm6,XMMWORD ptr[rsp]
-	add rsp,16
+	vmovdqa xmm6,XMMWORD ptr[rsp]
+	add rsp,24
 	
 	pop r15
 	pop r14
@@ -6956,13 +6956,13 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg r14
 	push r15
 	.pushreg r15
-	sub rsp,48
-	.allocstack 48
-	vmovdqu XMMWORD ptr[rsp],xmm6
+	sub rsp,56
+	.allocstack 56
+	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
-	vmovdqu XMMWORD ptr[rsp+16],xmm7
+	vmovdqa XMMWORD ptr[rsp+16],xmm7
 	.savexmm128 xmm7,16
-	vmovdqu XMMWORD ptr[rsp+32],xmm8
+	vmovdqa XMMWORD ptr[rsp+32],xmm8
 	.savexmm128 xmm8,32
 	.endprolog
 
@@ -7086,10 +7086,10 @@ Convert_PlanarXYZtoRGB_32_AVX_4:
 	
 	vzeroupper
 	
-	vmovdqu xmm8,XMMWORD ptr[rsp+32]
-	vmovdqu xmm7,XMMWORD ptr[rsp+16]
-	vmovdqu xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	vmovdqa xmm8,XMMWORD ptr[rsp+32]
+	vmovdqa xmm7,XMMWORD ptr[rsp+16]
+	vmovdqa xmm6,XMMWORD ptr[rsp]
+	add rsp,56
 	
 	pop r15
 	pop r14

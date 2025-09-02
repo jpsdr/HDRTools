@@ -27,13 +27,13 @@
 #include "./MatrixClass.h"
 #include "./TransferFunctions.h"
 
-// VS 2015
-#if _MSC_VER >= 1900
+// VS 2013
+#if _MSC_VER >= 1800
 #define AVX2_BUILD_POSSIBLE
 #endif
 
-// VS 2019 v16.3
-#if _MSC_VER >= 1923
+// VS 2017 v15.3
+#if _MSC_VER >= 1911
 #define AVX512_BUILD_POSSIBLE
 #endif
 

@@ -25,8 +25,8 @@
 
 #include "./ThreadPool.h"
 
-#define myfree(ptr) if (ptr!=NULL) { free(ptr); ptr=NULL;}
-#define myCloseHandle(ptr) if (ptr!=NULL) { CloseHandle(ptr); ptr=NULL;}
+#define myfree(ptr) if (ptr!=nullptr) { free(ptr); ptr=nullptr;}
+#define myCloseHandle(ptr) if (ptr!=nullptr) { CloseHandle(ptr); ptr=nullptr;}
 
 static const int TabThreadLevel[8]={THREAD_PRIORITY_NORMAL,THREAD_PRIORITY_IDLE,THREAD_PRIORITY_LOWEST,
 	THREAD_PRIORITY_BELOW_NORMAL,THREAD_PRIORITY_NORMAL,THREAD_PRIORITY_ABOVE_NORMAL,
@@ -53,8 +53,8 @@ static uint8_t CountSetBits(ULONG_PTR bitMask)
 static void Get_CPU_Info(Arch_CPU& cpu)
 {
     bool done = false;
-    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer=NULL;
-    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION ptr=NULL;
+    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer=nullptr;
+    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION ptr=nullptr;
     DWORD returnLength=0;
     uint8_t logicalProcessorCount=0;
     uint8_t processorCoreCount=0;
@@ -75,7 +75,7 @@ static void Get_CPU_Info(Arch_CPU& cpu)
                 myfree(buffer);
                 buffer=(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)malloc(returnLength);
 
-                if (buffer==NULL) return;
+                if (buffer==nullptr) return;
             } 
             else
 			{
@@ -214,10 +214,10 @@ DWORD WINAPI ThreadPool::StaticThreadpool(LPVOID lpParam )
 		switch(data->f_process)
 		{
 			case 1 :
-				if (data->MTData!=NULL)
+				if (data->MTData!=nullptr)
 				{
 					data->MTData->thread_Id=data->thread_Id;
-					if (data->MTData->pFunc!=NULL) data->MTData->pFunc(data->MTData);
+					if (data->MTData->pFunc!=nullptr) data->MTData->pFunc(data->MTData);
 				}
 				break;
 			case 255 : return(0); break;
@@ -235,14 +235,14 @@ ThreadPool::ThreadPool(void): Status_Ok(true)
 
 	for (i=0; i<MAX_MT_THREADS; i++)
 	{
-		jobFinished[i]=NULL;
-		nextJob[i]=NULL;
-		MT_Thread[i].MTData=NULL;
+		jobFinished[i]=nullptr;
+		nextJob[i]=nullptr;
+		MT_Thread[i].MTData=nullptr;
 		MT_Thread[i].f_process=0;
 		MT_Thread[i].thread_Id=(uint8_t)i;
-		MT_Thread[i].jobFinished=NULL;
-		MT_Thread[i].nextJob=NULL;
-		thds[i]=NULL;
+		MT_Thread[i].jobFinished=nullptr;
+		MT_Thread[i].nextJob=nullptr;
+		thds[i]=nullptr;
 		tids[i]=0;
 		ThreadMask[i]=0;
 		ThreadSleep[i]=true;
@@ -268,7 +268,7 @@ void ThreadPool::FreeThreadPool(void)
 
 		for (i=TotalThreadsRequested-1; i>=0; i--)
 		{
-			if (thds[i]!=NULL)
+			if (thds[i]!=nullptr)
 			{
 				SetThreadPriority(thds[i],nPr);
 				if (ThreadSleep[i]) ResumeThread(thds[i]);
@@ -277,9 +277,9 @@ void ThreadPool::FreeThreadPool(void)
 				WaitForSingleObject(thds[i],INFINITE);
 				myCloseHandle(thds[i]);
 				MT_Thread[i].f_process=0;
-				MT_Thread[i].MTData=NULL;
-				MT_Thread[i].jobFinished=NULL;
-				MT_Thread[i].nextJob=NULL;
+				MT_Thread[i].MTData=nullptr;
+				MT_Thread[i].jobFinished=nullptr;
+				MT_Thread[i].nextJob=nullptr;
 				ThreadSleep[i]=true;
 			}
 		}
@@ -318,7 +318,7 @@ void ThreadPool::DestroyThreadPool(void)
 	{
 		for (i=TotalThreadsRequested-1; i>=0; i--)
 		{
-			if (thds[i]!=NULL)
+			if (thds[i]!=nullptr)
 			{
 				TerminateThread(thds[i],0);
 				myCloseHandle(thds[i]);
@@ -446,7 +446,7 @@ void ThreadPool::CreateThreadPool(uint8_t offset_core,uint8_t offset_ht,bool Use
 		nextJob[i]=CreateEvent(NULL,TRUE,FALSE,NULL);
 		MT_Thread[i].jobFinished=jobFinished[i];
 		MT_Thread[i].nextJob=nextJob[i];
-		Status_Ok=Status_Ok && ((MT_Thread[i].jobFinished!=NULL) && (MT_Thread[i].nextJob!=NULL));
+		Status_Ok=Status_Ok && ((MT_Thread[i].jobFinished!=nullptr) && (MT_Thread[i].nextJob!=nullptr));
 		i++;
 	}
 	if (!Status_Ok)
@@ -461,7 +461,7 @@ void ThreadPool::CreateThreadPool(uint8_t offset_core,uint8_t offset_ht,bool Use
 	while ((i<(int16_t)TotalThreadsRequested) && Status_Ok)
 	{
 		thds[i]=CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)StaticThreadpool,&MT_Thread[i],CREATE_SUSPENDED,&tids[i]);
-		Status_Ok=Status_Ok && (thds[i]!=NULL);
+		Status_Ok=Status_Ok && (thds[i]!=nullptr);
 		if (Status_Ok)
 		{
 			SetThreadAffinityMask(thds[i],SetAffinity?ThreadMask[i]:CPU.FullMask);
@@ -519,7 +519,7 @@ bool ThreadPool::ReleaseThreadPool(bool sleep)
 				ThreadSleep[i]=true;
 			}
 			SetThreadPriority(thds[i],nPr);
-			MT_Thread[i].MTData=NULL;
+			MT_Thread[i].MTData=nullptr;
 		}
 		CurrentThreadsUsed=0;
 	}

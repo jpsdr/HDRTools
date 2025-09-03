@@ -23,9 +23,9 @@
 #include "./ThreadPoolInterface.h"
 #include "./ThreadPool.h"
 
-#define myfree(ptr) if (ptr!=NULL) { free(ptr); ptr=NULL;}
-#define myCloseHandle(ptr) if (ptr!=NULL) { CloseHandle(ptr); ptr=NULL;}
-#define mydelete(ptr) if (ptr!=NULL) { delete ptr; ptr=NULL;}
+#define myfree(ptr) if (ptr!=nullptr) { free(ptr); ptr=nullptr;}
+#define myCloseHandle(ptr) if (ptr!=nullptr) { CloseHandle(ptr); ptr=nullptr;}
+#define mydelete(ptr) if (ptr!=nullptr) { delete ptr; ptr=nullptr;}
 
 
 static ThreadPool *ptrPool[MAX_THREAD_POOL];
@@ -72,7 +72,7 @@ ThreadPoolInterface* ThreadPoolInterface::Init(uint8_t num)
 								while ((PoolInterface.NbrePool<num) && ok)
 								{
 									ptrPool[PoolInterface.NbrePool]= new ThreadPool();
-									ok=ok && (ptrPool[PoolInterface.NbrePool]!=NULL);
+									ok=ok && (ptrPool[PoolInterface.NbrePool]!=nullptr);
 									PoolInterface.NbrePool++;
 								}
 								if (!ok)
@@ -148,7 +148,7 @@ bool ThreadPoolInterface::CreatePoolEvent(uint8_t num)
 		{
 			JobsEnded[NbrePoolEvent]=CreateEvent(NULL,TRUE,TRUE,NULL);
 			ThreadPoolFree[NbrePoolEvent]=CreateEvent(NULL,TRUE,TRUE,NULL);
-			ok=ok && (JobsEnded[NbrePoolEvent]!=NULL) && (ThreadPoolFree[NbrePoolEvent]!=NULL);
+			ok=ok && (JobsEnded[NbrePoolEvent]!=nullptr) && (ThreadPoolFree[NbrePoolEvent]!=nullptr);
 			NbrePoolEvent++;
 		}
 		if (!ok) Error_Occured=true;
@@ -189,7 +189,7 @@ void ThreadPoolInterface::FreePool(int8_t nPool)
 	{
 		if ((nPool>=0) && (nPool<(int8_t)NbrePool))
 		{
-			if (ptrPool[nPool]!=NULL)
+			if (ptrPool[nPool]!=nullptr)
 			{
 				ThreadPoolWaitFree[nPool]=true;
 				while(ThreadPoolRequested[nPool])
@@ -232,7 +232,7 @@ void ThreadPoolInterface::FreePool(void)
 			ThreadPoolWaitFree[i]=true;
 		for(int16_t i=NbrePool-1; i>=0; i--)
 		{
-			if (ptrPool[i]!=NULL)
+			if (ptrPool[i]!=nullptr)
 			{
 				while(ThreadPoolRequested[i])
 				{
@@ -265,13 +265,13 @@ void ThreadPoolInterface::FreePool(void)
 
 
 ThreadPoolInterface::ThreadPoolInterface(void):CSectionOk(FALSE),Status_Ok(false),Error_Occured(false),
-	NbrePool(0),NbrePoolEvent(0),ghMutexResources(NULL)
+	NbrePool(0),NbrePoolEvent(0),ghMutexResources(nullptr)
 {
 	CSectionOk=InitializeCriticalSectionAndSpinCount(&CriticalSection,0x00010000);
 	if (CSectionOk==TRUE)
 	{
 		ghMutexResources=CreateMutex(NULL,FALSE,NULL);
-		if (ghMutexResources==NULL)
+		if (ghMutexResources==nullptr)
 		{
 			CSectionOk=FALSE;
 			DeleteCriticalSection(&CriticalSection);
@@ -279,21 +279,21 @@ ThreadPoolInterface::ThreadPoolInterface(void):CSectionOk(FALSE),Status_Ok(false
 		else Status_Ok=true;
 	}
 
-	EndExclusive=NULL;
+	EndExclusive=nullptr;
 	ExclusiveMode=false;
 	TabId.clear();
 
 	for (uint8_t i=0; i<MAX_THREAD_POOL; i++)
 	{
-		JobsEnded[i]=NULL;
-		ThreadPoolFree[i]=NULL;
+		JobsEnded[i]=nullptr;
+		ThreadPoolFree[i]=nullptr;
 		ThreadPoolRequested[i]=false;
 		ThreadPoolReleased[i]=false;
 		ThreadWaitEnd[i]=false;
 		ThreadPoolWaitFree[i]=false;
 		ThreadPoolUserId[i]=0;
 		JobsRunning[i]=false;
-		ptrPool[i]=NULL;
+		ptrPool[i]=nullptr;
 	}
 }
 
@@ -348,7 +348,7 @@ bool ThreadPoolInterface::CreatePool(uint8_t num)
 		while ((NbrePool<num) && ok)
 		{
 			ptrPool[NbrePool]= new ThreadPool();
-			ok=ok && (ptrPool[NbrePool]!=NULL);
+			ok=ok && (ptrPool[NbrePool]!=nullptr);
 			NbrePool++;
 		}
 		if (!ok)
@@ -404,7 +404,7 @@ int16_t ThreadPoolInterface::AddPool(uint8_t num)
 		while ((NbrePool<numP) && ok)
 		{
 			ptrPool[NbrePool]= new ThreadPool();
-			ok=ok && (ptrPool[NbrePool]!=NULL);
+			ok=ok && (ptrPool[NbrePool]!=nullptr);
 			NbrePool++;
 		}
 		if (!ok)
@@ -457,7 +457,7 @@ bool ThreadPoolInterface::DeletePool(uint8_t num)
 	
 	for(uint8_t i=0; i<num; i++)
 	{
-		if (ptrPool[CurrentNum]!=NULL)
+		if (ptrPool[CurrentNum]!=nullptr)
 		{
 			ThreadPoolWaitFree[CurrentNum]=true;
 			while(ThreadPoolRequested[CurrentNum])
@@ -528,7 +528,7 @@ bool ThreadPoolInterface::RemovePool(uint8_t num)
 		return(false);
 	}
 	
-	if (ptrPool[num]!=NULL)
+	if (ptrPool[num]!=nullptr)
 	{
 		ThreadPoolWaitFree[num]=true;
 		while(ThreadPoolRequested[num])
@@ -1098,7 +1098,7 @@ bool ThreadPoolInterface::RequestThreadPool(uint32_t UserId,int8_t &idxPool,uint
 
 	idxPool=-1;
 
-	if ((!Status_Ok) || Error_Occured || (UserId==0) || (nPool<-1) || (thread_number==0) || (Data==NULL))
+	if ((!Status_Ok) || Error_Occured || (UserId==0) || (nPool<-1) || (thread_number==0) || (Data==nullptr))
 	{
 		nPool=-1;
 		return(false);

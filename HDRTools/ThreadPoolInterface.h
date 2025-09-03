@@ -28,7 +28,7 @@
 
 #include "./ThreadPoolDef.h"
 
-#define THREADPOOLINTERFACE_VERSION "ThreadPoolInterface 1.12.0"
+#define THREADPOOLINTERFACE_VERSION "ThreadPoolInterface 1.12.1"
 
 class ThreadPoolInterface;
  

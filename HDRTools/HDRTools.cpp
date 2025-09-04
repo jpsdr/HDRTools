@@ -452,9 +452,9 @@ extern "C" void JPSDR_HDRTools_Convert_RGB_ACES_HDRtoSDR_AVX512(const void *src,
 #endif
 
 
-#define myfree(ptr) if (ptr!=NULL) { free(ptr); ptr=NULL;}
-#define myalignedfree(ptr) if (ptr!=NULL) { _aligned_free(ptr); ptr=NULL;}
-#define mydelete(ptr) if (ptr!=NULL) { delete ptr; ptr=NULL;}
+#define myfree(ptr) if (ptr!=nullptr) { free(ptr); ptr=nullptr;}
+#define myalignedfree(ptr) if (ptr!=nullptr) { _aligned_free(ptr); ptr=nullptr;}
+#define mydelete(ptr) if (ptr!=nullptr) { delete ptr; ptr=nullptr;}
 
 #define trunc(x) (signed long) floor(x)
 #define round(x) (signed long) floor(x+0.5)
@@ -15137,8 +15137,8 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 	const uint32_t vmax=1 << bits_per_pixel;
 	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
-	vi_original=NULL; vi_422=NULL; vi_444=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
-	lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
+	vi_original=nullptr; vi_422=nullptr; vi_444=nullptr; vi_RGB64=nullptr; vi_PlaneY_HLG=nullptr;
+	lookupHLG_RGB_16=nullptr; lookupHLG_OOTF=nullptr; lookupHLG_inv_OOTF=nullptr;
 
 	lookup_Upscale8=(uint16_t *)malloc(256*sizeof(uint16_t));
 	lookup_8to16=(uint32_t *)malloc(256*sizeof(uint32_t));
@@ -15151,9 +15151,9 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 	lookupL_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 	lookupL_32=(float *)malloc(65536*sizeof(float));
 
-	if ((lookup_Upscale8==NULL) || (lookup_8to16==NULL) || (lookup_Upscale16==NULL)
-		|| (lookupRGB_8==NULL) || (lookupRGB_16==NULL) || (lookupL_8==NULL)
-		|| (lookupL_16==NULL) || (lookupL_32==NULL))
+	if ((lookup_Upscale8==nullptr) || (lookup_8to16==nullptr) || (lookup_Upscale16==nullptr)
+		|| (lookupRGB_8==nullptr) || (lookupRGB_16==nullptr) || (lookupL_8==nullptr)
+		|| (lookupL_16==nullptr) || (lookupL_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -15237,7 +15237,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 			}
 		}
 
-		if ((lookupHLG_RGB_16==NULL) || (lookupHLG_OOTF==NULL) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==NULL)))
+		if ((lookupHLG_RGB_16==nullptr) || (lookupHLG_OOTF==nullptr) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==nullptr)))
 		{
 			FreeData();
 			if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -15251,7 +15251,7 @@ ConvertYUVtoLinearRGB::ConvertYUVtoLinearRGB(PClip _child,uint8_t _Color,uint8_t
 	vi_RGB64 = new VideoInfo(vi);
 	if (HLG_Mode) vi_PlaneY_HLG = new VideoInfo(vi);
 
-	if ((vi_original==NULL) || (vi_422==NULL) || (vi_444==NULL) || (vi_RGB64==NULL) || (HLG_Mode && (vi_PlaneY_HLG==NULL)))
+	if ((vi_original==nullptr) || (vi_422==nullptr) || (vi_444==nullptr) || (vi_RGB64==nullptr) || (HLG_Mode && (vi_PlaneY_HLG==nullptr)))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -16243,33 +16243,33 @@ PVideoFrame __stdcall ConvertYUVtoLinearRGB::GetFrame(int n, IScriptEnvironment*
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp1,tmp2,tmp3,tmp4;
 
-	const uint8_t *srcY=NULL,*srcU=NULL,*srcV=NULL;
+	const uint8_t *srcY=nullptr,*srcU=nullptr,*srcV=nullptr;
 	ptrdiff_t src_pitch_Y=0,src_pitch_U=0,src_pitch_V=0;
 	ptrdiff_t src_modulo_Y=0,src_modulo_U=0,src_modulo_V=0;
 
-	const uint8_t *tmp1Yr=NULL,*tmp1Ur=NULL,*tmp1Vr=NULL;
-	uint8_t *tmp1Yw=NULL,*tmp1Uw=NULL,*tmp1Vw=NULL;
+	const uint8_t *tmp1Yr=nullptr,*tmp1Ur=nullptr,*tmp1Vr=nullptr;
+	uint8_t *tmp1Yw=nullptr,*tmp1Uw=nullptr,*tmp1Vw=nullptr;
 	ptrdiff_t tmp1_pitch_Y=0,tmp1_pitch_U=0,tmp1_pitch_V=0;
 
-	const uint8_t *tmp2Yr=NULL,*tmp2Ur=NULL,*tmp2Vr=NULL;
-	uint8_t *tmp2Yw=NULL,*tmp2Uw=NULL,*tmp2Vw=NULL;
+	const uint8_t *tmp2Yr=nullptr,*tmp2Ur=nullptr,*tmp2Vr=nullptr;
+	uint8_t *tmp2Yw=nullptr,*tmp2Uw=nullptr,*tmp2Vw=nullptr;
 	ptrdiff_t tmp2_pitch_Y=0,tmp2_pitch_U=0,tmp2_pitch_V=0;
 	ptrdiff_t tmp2_modulo_Y=0,tmp2_modulo_U=0,tmp2_modulo_V=0;
 
-	const uint8_t *tmp3r=NULL,*tmp3r0=NULL;
-	uint8_t *tmp3w=NULL,*tmp3w0=NULL;
+	const uint8_t *tmp3r=nullptr,*tmp3r0=nullptr;
+	uint8_t *tmp3w=nullptr,*tmp3w0=nullptr;
 	ptrdiff_t tmp3_pitch=0,tmp3_pitch0=0,tmp3_modulo0=0;
 
-	const uint8_t *tmp4r=NULL;
-	uint8_t *tmp4w=NULL;
+	const uint8_t *tmp4r=nullptr;
+	uint8_t *tmp4w=nullptr;
 	ptrdiff_t tmp4_pitch=0,tmp4_modulo=0;
 
-	const uint8_t *dstr=NULL;
-	uint8_t *dstw=NULL,*dstw0=NULL;
+	const uint8_t *dstr=nullptr;
+	uint8_t *dstw=nullptr,*dstw0=nullptr;
 	ptrdiff_t dst_pitch=0,dst_modulo=0,dst_pitch0=0,dst_modulo0=0;
 
-	const uint8_t *dstRr=NULL,*dstGr=NULL,*dstBr=NULL;
-	uint8_t *dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	const uint8_t *dstRr=nullptr,*dstGr=nullptr,*dstBr=nullptr;
+	uint8_t *dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 
@@ -16993,9 +16993,9 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
-	vi_original=NULL; vi_420=NULL; vi_422=NULL; vi_444=NULL;
-	vi_RGB32=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
-	lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
+	vi_original=nullptr; vi_420=nullptr; vi_422=nullptr; vi_444=nullptr;
+	vi_RGB32=nullptr; vi_RGB64=nullptr; vi_PlaneY_HLG=nullptr;
+	lookupHLG_RGB_16=nullptr; lookupHLG_OOTF=nullptr; lookupHLG_inv_OOTF=nullptr;
 
 	lookupRGB_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupRGB_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
@@ -17003,8 +17003,8 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	lookupL_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 	lookupL_20=(uint16_t *)malloc(16*65536*sizeof(uint16_t));
 
-	if ((lookupRGB_8==NULL) || (lookupRGB_16==NULL) || (lookupL_8==NULL) || (lookupL_16==NULL)
-		|| (lookupL_20==NULL))
+	if ((lookupRGB_8==nullptr) || (lookupRGB_16==nullptr) || (lookupL_8==nullptr) || (lookupL_16==nullptr)
+		|| (lookupL_20==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -17032,7 +17032,7 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 				break;
 		}
 
-		if ((lookupHLG_RGB_16==NULL) || (lookupHLG_OOTF==NULL) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==NULL)))
+		if ((lookupHLG_RGB_16==nullptr) || (lookupHLG_OOTF==nullptr) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==nullptr)))
 		{
 			FreeData();
 			if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -17048,8 +17048,8 @@ ConvertLinearRGBtoYUV::ConvertLinearRGBtoYUV(PClip _child,uint8_t _Color,uint8_t
 	vi_RGB64 = new VideoInfo(vi);
 	if (HLG_Mode) vi_PlaneY_HLG = new VideoInfo(vi);
 
-	if ((vi_original==NULL) || (vi_420==NULL) || (vi_422==NULL) || (vi_444==NULL)
-		|| (vi_RGB32==NULL) || (vi_RGB64==NULL) || (HLG_Mode && (vi_PlaneY_HLG==NULL)))
+	if ((vi_original==nullptr) || (vi_420==nullptr) || (vi_422==nullptr) || (vi_444==nullptr)
+		|| (vi_RGB32==nullptr) || (vi_RGB64==nullptr) || (HLG_Mode && (vi_PlaneY_HLG==nullptr)))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -17681,29 +17681,29 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV::GetFrame(int n, IScriptEnvironment*
 
 	int32_t h;
 
-	uint8_t *srcw=NULL,*srcw0=NULL,*srcRw=NULL,*srcGw=NULL,*srcBw=NULL;
+	uint8_t *srcw=nullptr,*srcw0=nullptr,*srcRw=nullptr,*srcGw=nullptr,*srcBw=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch0=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo0=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	const uint8_t *tmp1r=NULL,*tmp1r0=NULL;
-	uint8_t *tmp1w=NULL,*tmp1w0=NULL;
+	const uint8_t *tmp1r=nullptr,*tmp1r0=nullptr;
+	uint8_t *tmp1w=nullptr,*tmp1w0=nullptr;
 	ptrdiff_t tmp1_pitch=0,tmp1_modulo=0,tmp1_pitch0=0,tmp1_modulo0=0;
 
-	const uint8_t *tmp2Yr=NULL,*tmp2Ur=NULL,*tmp2Vr=NULL;
-	uint8_t *tmp2Yw=NULL,*tmp2Uw=NULL,*tmp2Vw=NULL;
+	const uint8_t *tmp2Yr=nullptr,*tmp2Ur=nullptr,*tmp2Vr=nullptr;
+	uint8_t *tmp2Yw=nullptr,*tmp2Uw=nullptr,*tmp2Vw=nullptr;
 	ptrdiff_t tmp2_pitch_Y=0,tmp2_pitch_U=0,tmp2_pitch_V=0;
 	ptrdiff_t tmp2_modulo_Y=0,tmp2_modulo_U=0,tmp2_modulo_V=0;
 
-	const uint8_t *tmp3Yr=NULL,*tmp3Ur=NULL,*tmp3Vr=NULL;
-	uint8_t *tmp3Yw=NULL,*tmp3Uw=NULL,*tmp3Vw=NULL;
+	const uint8_t *tmp3Yr=nullptr,*tmp3Ur=nullptr,*tmp3Vr=nullptr;
+	uint8_t *tmp3Yw=nullptr,*tmp3Uw=nullptr,*tmp3Vw=nullptr;
 	ptrdiff_t tmp3_pitch_Y=0,tmp3_pitch_U=0,tmp3_pitch_V=0;
 	ptrdiff_t tmp3_modulo_Y=0,tmp3_modulo_U=0,tmp3_modulo_V=0;
 
-	const uint8_t *tmp4r=NULL;
-	uint8_t *tmp4w=NULL;
+	const uint8_t *tmp4r=nullptr;
+	uint8_t *tmp4w=nullptr;
 	ptrdiff_t tmp4_pitch=0,tmp4_modulo=0;
 
-	uint8_t *dstYw=NULL,*dstUw=NULL,*dstVw=NULL;
+	uint8_t *dstYw=nullptr,*dstUw=nullptr,*dstVw=nullptr;
 	ptrdiff_t dst_pitch_Y=0,dst_pitch_U=0,dst_pitch_V=0;
 	ptrdiff_t dst_modulo_Y=0,dst_modulo_U=0,dst_modulo_V=0;
 
@@ -18369,8 +18369,8 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	const uint32_t vmax=1 << bits_per_pixel;
 	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
-	vi_original=NULL; vi_422=NULL; vi_444=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
-	lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
+	vi_original=nullptr; vi_422=nullptr; vi_444=nullptr; vi_RGB64=nullptr; vi_PlaneY_HLG=nullptr;
+	lookupHLG_RGB_16=nullptr; lookupHLG_OOTF=nullptr; lookupHLG_inv_OOTF=nullptr;
 
 	lookup_Upscale8=(uint16_t *)malloc(256*sizeof(uint16_t));
 	lookup_8to16=(uint32_t *)malloc(256*sizeof(uint32_t));
@@ -18389,11 +18389,11 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	lookupCrosstalk_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
 	Coeff_Crosstalk_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
 
-	if ((lookup_Upscale8==NULL) || (lookup_8to16==NULL) || (lookup_Upscale16==NULL)
-		|| (lookupRGB_8==NULL) || (lookupRGB_16==NULL) || (lookupL_8==NULL)
-		|| (lookupL_16==NULL) || (lookupXYZ_8==NULL) || (lookupXYZ_16==NULL)
-		|| (lookupL_32==NULL) || (Coeff_XYZ_asm==NULL) || (lookupCrosstalk_8==NULL)
-		|| (lookupCrosstalk_16==NULL) || (Coeff_Crosstalk_asm==NULL))
+	if ((lookup_Upscale8==nullptr) || (lookup_8to16==nullptr) || (lookup_Upscale16==nullptr)
+		|| (lookupRGB_8==nullptr) || (lookupRGB_16==nullptr) || (lookupL_8==nullptr)
+		|| (lookupL_16==nullptr) || (lookupXYZ_8==nullptr) || (lookupXYZ_16==nullptr)
+		|| (lookupL_32==nullptr) || (Coeff_XYZ_asm==nullptr) || (lookupCrosstalk_8==nullptr)
+		|| (lookupCrosstalk_16==nullptr) || (Coeff_Crosstalk_asm==nullptr))
 	{
 		FreeData();
 		env->ThrowError("ConvertYUVtoXYZ: Error while allocating the lookup tables!");
@@ -18476,7 +18476,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 		}
 
-		if ((lookupHLG_RGB_16==NULL) || (lookupHLG_OOTF==NULL) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==NULL)))
+		if ((lookupHLG_RGB_16==nullptr) || (lookupHLG_OOTF==nullptr) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==nullptr)))
 		{
 			FreeData();
 			if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -18491,7 +18491,7 @@ ConvertYUVtoXYZ::ConvertYUVtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	vi_RGB64 = new VideoInfo(vi);
 	if (HLG_Mode) vi_PlaneY_HLG = new VideoInfo(vi);
 
-	if ((vi_original==NULL) || (vi_422==NULL) || (vi_444==NULL) || (vi_RGB64==NULL) || (HLG_Mode && (vi_PlaneY_HLG==NULL)))
+	if ((vi_original==nullptr) || (vi_422==nullptr) || (vi_444==nullptr) || (vi_RGB64==nullptr) || (HLG_Mode && (vi_PlaneY_HLG==nullptr)))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -19568,33 +19568,33 @@ PVideoFrame __stdcall ConvertYUVtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp1,tmp2,tmp3,tmp4;
 
-	const uint8_t *srcY=NULL,*srcU=NULL,*srcV=NULL;
+	const uint8_t *srcY=nullptr,*srcU=nullptr,*srcV=nullptr;
 	ptrdiff_t src_pitch_Y=0,src_pitch_U=0,src_pitch_V=0;
 	ptrdiff_t src_modulo_Y=0,src_modulo_U=0,src_modulo_V=0;
 
-	const uint8_t *tmp1Yr=NULL,*tmp1Ur=NULL,*tmp1Vr=NULL;
-	uint8_t *tmp1Yw=NULL,*tmp1Uw=NULL,*tmp1Vw=NULL;
+	const uint8_t *tmp1Yr=nullptr,*tmp1Ur=nullptr,*tmp1Vr=nullptr;
+	uint8_t *tmp1Yw=nullptr,*tmp1Uw=nullptr,*tmp1Vw=nullptr;
 	ptrdiff_t tmp1_pitch_Y=0,tmp1_pitch_U=0,tmp1_pitch_V=0;
 
-	const uint8_t *tmp2Yr=NULL,*tmp2Ur=NULL,*tmp2Vr=NULL;
-	uint8_t *tmp2Yw=NULL,*tmp2Uw=NULL,*tmp2Vw=NULL;
+	const uint8_t *tmp2Yr=nullptr,*tmp2Ur=nullptr,*tmp2Vr=nullptr;
+	uint8_t *tmp2Yw=nullptr,*tmp2Uw=nullptr,*tmp2Vw=nullptr;
 	ptrdiff_t tmp2_pitch_Y=0,tmp2_pitch_U=0,tmp2_pitch_V=0;
 	ptrdiff_t tmp2_modulo_Y=0,tmp2_modulo_U=0,tmp2_modulo_V=0;
 
-	const uint8_t *tmp3r=NULL,*tmp3r0=NULL;
-	uint8_t *tmp3w=NULL,*tmp3w0=NULL;
+	const uint8_t *tmp3r=nullptr,*tmp3r0=nullptr;
+	uint8_t *tmp3w=nullptr,*tmp3w0=nullptr;
 	ptrdiff_t tmp3_pitch=0,tmp3_pitch0=0,tmp3_modulo0=0;
 
-	const uint8_t *tmp4r=NULL;
-	uint8_t *tmp4w=NULL;
+	const uint8_t *tmp4r=nullptr;
+	uint8_t *tmp4w=nullptr;
 	ptrdiff_t tmp4_pitch=0,tmp4_modulo=0;
 
-	const uint8_t *dstr=NULL;
-	uint8_t *dstw=NULL,*dstw0=NULL;
+	const uint8_t *dstr=nullptr;
+	uint8_t *dstw=nullptr,*dstw0=nullptr;
 	ptrdiff_t dst_pitch=0,dst_modulo=0,dst_pitch0=0,dst_modulo0=0;
 
-	const uint8_t *dstRr=NULL,*dstGr=NULL,*dstBr=NULL;
-	uint8_t *dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	const uint8_t *dstRr=nullptr,*dstGr=nullptr,*dstBr=nullptr;
+	uint8_t *dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 
@@ -20446,9 +20446,9 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
-	vi_original=NULL; vi_420=NULL; vi_422=NULL; vi_444=NULL;
-	vi_RGB32=NULL; vi_RGB64=NULL; vi_PlaneY_HLG=NULL;
-	lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
+	vi_original=nullptr; vi_420=nullptr; vi_422=nullptr; vi_444=nullptr;
+	vi_RGB32=nullptr; vi_RGB64=nullptr; vi_PlaneY_HLG=nullptr;
+	lookupHLG_RGB_16=nullptr; lookupHLG_OOTF=nullptr; lookupHLG_inv_OOTF=nullptr;
 
 	lookupRGB_8=(int16_t *)malloc(9*256*sizeof(int16_t));
 	lookupRGB_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
@@ -20462,9 +20462,9 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	lookupCrosstalk_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
 	Coeff_Crosstalk_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
 
-	if ((lookupRGB_8==NULL) || (lookupRGB_16==NULL) || (lookupL_8==NULL) || (lookupL_16==NULL)
-		|| (lookupL_20==NULL) || (lookupXYZ_8==NULL) || (lookupXYZ_16==NULL) || (Coeff_XYZ_asm==NULL)
-		|| (lookupCrosstalk_8==NULL) || (lookupCrosstalk_16==NULL) || (Coeff_Crosstalk_asm==NULL))
+	if ((lookupRGB_8==nullptr) || (lookupRGB_16==nullptr) || (lookupL_8==nullptr) || (lookupL_16==nullptr)
+		|| (lookupL_20==nullptr) || (lookupXYZ_8==nullptr) || (lookupXYZ_16==nullptr) || (Coeff_XYZ_asm==nullptr)
+		|| (lookupCrosstalk_8==nullptr) || (lookupCrosstalk_16==nullptr) || (Coeff_Crosstalk_asm==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -20492,7 +20492,7 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 				break;
 		}
 
-		if ((lookupHLG_RGB_16==NULL) || (lookupHLG_OOTF==NULL) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==NULL)))
+		if ((lookupHLG_RGB_16==nullptr) || (lookupHLG_OOTF==nullptr) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==nullptr)))
 		{
 			FreeData();
 			if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -20508,8 +20508,8 @@ ConvertXYZtoYUV::ConvertXYZtoYUV(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	vi_RGB64 = new VideoInfo(vi);
 	if (HLG_Mode) vi_PlaneY_HLG = new VideoInfo(vi);
 
-	if ((vi_original==NULL) || (vi_420==NULL) || (vi_422==NULL) || (vi_444==NULL)
-		|| (vi_RGB32==NULL) || (vi_RGB64==NULL) || (HLG_Mode && (vi_PlaneY_HLG==NULL)))
+	if ((vi_original==nullptr) || (vi_420==nullptr) || (vi_422==nullptr) || (vi_444==nullptr)
+		|| (vi_RGB32==nullptr) || (vi_RGB64==nullptr) || (HLG_Mode && (vi_PlaneY_HLG==nullptr)))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -21227,29 +21227,29 @@ PVideoFrame __stdcall ConvertXYZtoYUV::GetFrame(int n, IScriptEnvironment* env)
 
 	int32_t h;
 
-	uint8_t *srcw=NULL,*srcw0=NULL,*srcRw=NULL,*srcGw=NULL,*srcBw=NULL;
+	uint8_t *srcw=nullptr,*srcw0=nullptr,*srcRw=nullptr,*srcGw=nullptr,*srcBw=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch0=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo0=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	const uint8_t *tmp1r=NULL,*tmp1r0=NULL;
-	uint8_t *tmp1w=NULL,*tmp1w0=NULL;
+	const uint8_t *tmp1r=nullptr,*tmp1r0=nullptr;
+	uint8_t *tmp1w=nullptr,*tmp1w0=nullptr;
 	ptrdiff_t tmp1_pitch=0,tmp1_modulo=0,tmp1_pitch0=0,tmp1_modulo0=0;
 
-	const uint8_t *tmp2Yr=NULL,*tmp2Ur=NULL,*tmp2Vr=NULL;
-	uint8_t *tmp2Yw=NULL,*tmp2Uw=NULL,*tmp2Vw=NULL;
+	const uint8_t *tmp2Yr=nullptr,*tmp2Ur=nullptr,*tmp2Vr=nullptr;
+	uint8_t *tmp2Yw=nullptr,*tmp2Uw=nullptr,*tmp2Vw=nullptr;
 	ptrdiff_t tmp2_pitch_Y=0,tmp2_pitch_U=0,tmp2_pitch_V=0;
 	ptrdiff_t tmp2_modulo_Y=0,tmp2_modulo_U=0,tmp2_modulo_V=0;
 
-	const uint8_t *tmp3Yr=NULL,*tmp3Ur=NULL,*tmp3Vr=NULL;
-	uint8_t *tmp3Yw=NULL,*tmp3Uw=NULL,*tmp3Vw=NULL;
+	const uint8_t *tmp3Yr=nullptr,*tmp3Ur=nullptr,*tmp3Vr=nullptr;
+	uint8_t *tmp3Yw=nullptr,*tmp3Uw=nullptr,*tmp3Vw=nullptr;
 	ptrdiff_t tmp3_pitch_Y=0,tmp3_pitch_U=0,tmp3_pitch_V=0;
 	ptrdiff_t tmp3_modulo_Y=0,tmp3_modulo_U=0,tmp3_modulo_V=0;
 
-	const uint8_t *tmp4r=NULL;
-	uint8_t *tmp4w=NULL;
+	const uint8_t *tmp4r=nullptr;
+	uint8_t *tmp4w=nullptr;
 	ptrdiff_t tmp4_pitch=0,tmp4_modulo=0;
 
-	uint8_t *dstYw=NULL,*dstUw=NULL,*dstVw=NULL;
+	uint8_t *dstYw=nullptr,*dstUw=nullptr,*dstVw=nullptr;
 	ptrdiff_t dst_pitch_Y=0,dst_pitch_U=0,dst_pitch_V=0;
 	ptrdiff_t dst_modulo_Y=0,dst_modulo_U=0,dst_modulo_V=0;
 
@@ -22040,8 +22040,8 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
-	vi_PlaneY_HLG=NULL;
-	lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
+	vi_PlaneY_HLG=nullptr;
+	lookupHLG_RGB_16=nullptr; lookupHLG_OOTF=nullptr; lookupHLG_inv_OOTF=nullptr;
 
 	lookupL_8=(uint8_t *)malloc(256*sizeof(uint8_t));
 	lookupL_8to16=(uint16_t *)malloc(256*sizeof(uint16_t));
@@ -22056,10 +22056,10 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	lookupCrosstalk_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
 	Coeff_Crosstalk_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
 
-	if ((lookupL_8==NULL) || (lookupL_8to16==NULL) || (lookupL_8to32==NULL)
-		|| (lookupL_16==NULL) || (lookupXYZ_8==NULL) || (lookupXYZ_16==NULL)
-		|| (lookupL_32==NULL) || (lookupL_20==NULL) || (Coeff_XYZ_asm==NULL)
-		|| (lookupCrosstalk_8==NULL) || (lookupCrosstalk_16==NULL) || (Coeff_Crosstalk_asm==NULL))
+	if ((lookupL_8==nullptr) || (lookupL_8to16==nullptr) || (lookupL_8to32==nullptr)
+		|| (lookupL_16==nullptr) || (lookupXYZ_8==nullptr) || (lookupXYZ_16==nullptr)
+		|| (lookupL_32==nullptr) || (lookupL_20==nullptr) || (Coeff_XYZ_asm==nullptr)
+		|| (lookupCrosstalk_8==nullptr) || (lookupCrosstalk_16==nullptr) || (Coeff_Crosstalk_asm==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -22145,7 +22145,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 			}
 		}
 
-		if ((lookupHLG_RGB_16==NULL) || (lookupHLG_OOTF==NULL) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==NULL)))
+		if ((lookupHLG_RGB_16==nullptr) || (lookupHLG_OOTF==nullptr) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==nullptr)))
 		{
 			FreeData();
 			if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -22155,7 +22155,7 @@ ConvertRGBtoXYZ::ConvertRGBtoXYZ(PClip _child,uint8_t _Color,uint8_t _OutputMode
 
 	if (HLG_Mode) vi_PlaneY_HLG = new VideoInfo(vi);
 
-	if (HLG_Mode && (vi_PlaneY_HLG==NULL))
+	if (HLG_Mode && (vi_PlaneY_HLG==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -23349,25 +23349,25 @@ PVideoFrame __stdcall ConvertRGBtoXYZ::GetFrame(int n, IScriptEnvironment* env)
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp4;
 
-	const uint8_t *srcr=NULL,*srcr0=NULL;
+	const uint8_t *srcr=nullptr,*srcr0=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch0=0;
 	ptrdiff_t src_modulo=0,src_modulo0=0;
 
-	const uint8_t *srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
+	const uint8_t *srcRr=nullptr,*srcGr=nullptr,*srcBr=nullptr;
 	ptrdiff_t src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	const uint8_t *dstr=NULL;
-	uint8_t *dstw=NULL;
+	const uint8_t *dstr=nullptr;
+	uint8_t *dstw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_modulo=0;
 
-	const uint8_t *dstRr=NULL,*dstGr=NULL,*dstBr=NULL;
-	uint8_t *dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	const uint8_t *dstRr=nullptr,*dstGr=nullptr,*dstBr=nullptr;
+	uint8_t *dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 
-	const uint8_t *tmp4r=NULL;
-	uint8_t *tmp4w=NULL;
+	const uint8_t *tmp4r=nullptr;
+	uint8_t *tmp4w=nullptr;
 	ptrdiff_t tmp4_pitch=0,tmp4_modulo=0;
 
 	const int32_t h=src->GetHeight();
@@ -23837,8 +23837,8 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
 	HLG_Mode = (Color==0) && ((HDRMode==1) || (HDRMode==2));
 
-	vi_PlaneY_HLG=NULL;
-	lookupHLG_RGB_16=NULL; lookupHLG_OOTF=NULL; lookupHLG_inv_OOTF=NULL;
+	vi_PlaneY_HLG=nullptr;
+	lookupHLG_RGB_16=nullptr; lookupHLG_OOTF=nullptr; lookupHLG_inv_OOTF=nullptr;
 
 	lookupL_8=(uint8_t *)malloc(256*sizeof(uint8_t));
 	lookupL_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
@@ -23851,10 +23851,10 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 	lookupCrosstalk_16=(int32_t *)malloc(9*65536*sizeof(int32_t));
 	Coeff_Crosstalk_asm=(float *)_aligned_malloc(3*8*sizeof(float),64);
 
-	if ((lookupL_8==NULL) || (lookupL_16==NULL)
-		|| (lookupL_20==NULL) || (lookupL_32==NULL) || (lookupXYZ_8==NULL)
-		|| (lookupXYZ_16==NULL) || (Coeff_XYZ_asm==NULL) || (lookupCrosstalk_8==NULL)
-		|| (lookupCrosstalk_16==NULL) || (Coeff_Crosstalk_asm==NULL))
+	if ((lookupL_8==nullptr) || (lookupL_16==nullptr)
+		|| (lookupL_20==nullptr) || (lookupL_32==nullptr) || (lookupXYZ_8==nullptr)
+		|| (lookupXYZ_16==nullptr) || (Coeff_XYZ_asm==nullptr) || (lookupCrosstalk_8==nullptr)
+		|| (lookupCrosstalk_16==nullptr) || (Coeff_Crosstalk_asm==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -23882,7 +23882,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 				break;
 		}
 
-		if ((lookupHLG_RGB_16==NULL) || (lookupHLG_OOTF==NULL) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==NULL)))
+		if ((lookupHLG_RGB_16==nullptr) || (lookupHLG_OOTF==nullptr) || (alloc_inv_ootf && (lookupHLG_inv_OOTF==nullptr)))
 		{
 			FreeData();
 			if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -23892,7 +23892,7 @@ ConvertXYZtoRGB::ConvertXYZtoRGB(PClip _child,uint8_t _Color,uint8_t _OutputMode
 
 	if (HLG_Mode) vi_PlaneY_HLG = new VideoInfo(vi);
 
-	if (HLG_Mode && (vi_PlaneY_HLG==NULL))
+	if (HLG_Mode && (vi_PlaneY_HLG==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -24553,21 +24553,21 @@ PVideoFrame __stdcall ConvertXYZtoRGB::GetFrame(int n, IScriptEnvironment* env)
 
 	const int32_t h=dst->GetHeight();
 
-	const uint8_t *srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
-	uint8_t *srcw=NULL,*srcRw=NULL,*srcGw=NULL,*srcBw=NULL;
+	const uint8_t *srcRr=nullptr,*srcGr=nullptr,*srcBr=nullptr;
+	uint8_t *srcw=nullptr,*srcRw=nullptr,*srcGw=nullptr,*srcBw=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	const uint8_t *dstr=NULL,*dstr0=NULL;
-	uint8_t *dstw=NULL,*dstw0=NULL;
+	const uint8_t *dstr=nullptr,*dstr0=nullptr;
+	uint8_t *dstw=nullptr,*dstw0=nullptr;
 	ptrdiff_t dst_pitch=0,dst_modulo=0,dst_pitch0=0,dst_modulo0=0;
 
-	const uint8_t *tmp4r=NULL;
-	uint8_t *tmp4w=NULL;
+	const uint8_t *tmp4r=nullptr;
+	uint8_t *tmp4w=nullptr;
 	ptrdiff_t tmp4_pitch=0,tmp4_modulo=0;
 
-	const uint8_t *dstRr=NULL,*dstGr=NULL,*dstBr=NULL;
-	uint8_t *dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	const uint8_t *dstRr=nullptr,*dstGr=nullptr,*dstBr=nullptr;
+	uint8_t *dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 
@@ -25139,7 +25139,7 @@ ConvertXYZ_Scale_HDRtoSDR::ConvertXYZ_Scale_HDRtoSDR(PClip _child,float _Coeff_X
 	lookupY_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 	lookupZ_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 
-	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL))
+	if ((lookupX_16==nullptr) || (lookupY_16==nullptr) || (lookupZ_16==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -25265,11 +25265,11 @@ PVideoFrame __stdcall ConvertXYZ_Scale_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
+	const uint8_t *srcr=nullptr,*srcRr=nullptr,*srcGr=nullptr,*srcBr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	uint8_t *dstw=NULL,*dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	uint8_t *dstw=nullptr,*dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 
@@ -25465,7 +25465,7 @@ ConvertXYZ_Scale_SDRtoHDR::ConvertXYZ_Scale_SDRtoHDR(PClip _child,float _Coeff_X
 	lookupY_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 	lookupZ_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 
-	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL))
+	if ((lookupX_16==nullptr) || (lookupY_16==nullptr) || (lookupZ_16==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -25591,11 +25591,11 @@ PVideoFrame __stdcall ConvertXYZ_Scale_SDRtoHDR::GetFrame(int n, IScriptEnvironm
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
+	const uint8_t *srcr=nullptr,*srcRr=nullptr,*srcGr=nullptr,*srcBr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	uint8_t *dstw=NULL,*dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	uint8_t *dstw=nullptr,*dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 
@@ -25797,8 +25797,8 @@ ConvertXYZ_Hable_HDRtoSDR::ConvertXYZ_Hable_HDRtoSDR(PClip _child,double _exp_X,
 	lookupY_32=(float *)malloc(1048576*sizeof(float));
 	lookupZ_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL)
-		|| (lookupX_32==NULL) || (lookupY_32==NULL) || (lookupZ_32==NULL))
+	if ((lookupX_16==nullptr) || (lookupY_16==nullptr) || (lookupZ_16==nullptr)
+		|| (lookupX_32==nullptr) || (lookupY_32==nullptr) || (lookupZ_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -25977,11 +25977,11 @@ PVideoFrame __stdcall ConvertXYZ_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcXr=NULL,*srcYr=NULL,*srcZr=NULL;
+	const uint8_t *srcr=nullptr,*srcXr=nullptr,*srcYr=nullptr,*srcZr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_X=0,src_pitch_Y=0,src_pitch_Z=0;
 	ptrdiff_t src_modulo=0,src_modulo_X=0,src_modulo_Y=0,src_modulo_Z=0;
 
-	uint8_t *dstw=NULL,*dstXw=NULL,*dstYw=NULL,*dstZw=NULL;
+	uint8_t *dstw=nullptr,*dstXw=nullptr,*dstYw=nullptr,*dstZw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_X=0,dst_pitch_Y=0,dst_pitch_Z=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_X=0,dst_modulo_Y=0,dst_modulo_Z=0;
 
@@ -26222,8 +26222,8 @@ ConvertRGB_Hable_HDRtoSDR::ConvertRGB_Hable_HDRtoSDR(PClip _child,double _exp_R,
 	lookupG_32=(float *)malloc(1048576*sizeof(float));
 	lookupB_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupR_16==NULL) || (lookupG_16==NULL) || (lookupB_16==NULL)
-		|| (lookupR_32==NULL) || (lookupG_32==NULL) || (lookupB_32==NULL))
+	if ((lookupR_16==nullptr) || (lookupG_16==nullptr) || (lookupB_16==nullptr)
+		|| (lookupR_32==nullptr) || (lookupG_32==nullptr) || (lookupB_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -26387,11 +26387,11 @@ PVideoFrame __stdcall ConvertRGB_Hable_HDRtoSDR::GetFrame(int n, IScriptEnvironm
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
+	const uint8_t *srcr=nullptr,*srcRr=nullptr,*srcGr=nullptr,*srcBr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	uint8_t *dstw=NULL,*dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	uint8_t *dstw=nullptr,*dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 
@@ -26626,8 +26626,8 @@ ConvertXYZ_Mobius_HDRtoSDR::ConvertXYZ_Mobius_HDRtoSDR(PClip _child,double _exp_
 	lookupY_32=(float *)malloc(1048576*sizeof(float));
 	lookupZ_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL)
-		|| (lookupX_32==NULL) || (lookupY_32==NULL) || (lookupZ_32==NULL))
+	if ((lookupX_16==nullptr) || (lookupY_16==nullptr) || (lookupZ_16==nullptr)
+		|| (lookupX_32==nullptr) || (lookupY_32==nullptr) || (lookupZ_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -26810,11 +26810,11 @@ PVideoFrame __stdcall ConvertXYZ_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcXr=NULL,*srcYr=NULL,*srcZr=NULL;
+	const uint8_t *srcr=nullptr,*srcXr=nullptr,*srcYr=nullptr,*srcZr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_X=0,src_pitch_Y=0,src_pitch_Z=0;
 	ptrdiff_t src_modulo=0,src_modulo_X=0,src_modulo_Y=0,src_modulo_Z=0;
 
-	uint8_t *dstw=NULL,*dstXw=NULL,*dstYw=NULL,*dstZw=NULL;
+	uint8_t *dstw=nullptr,*dstXw=nullptr,*dstYw=nullptr,*dstZw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_X=0,dst_pitch_Y=0,dst_pitch_Z=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_X=0,dst_modulo_Y=0,dst_modulo_Z=0;
 
@@ -27053,8 +27053,8 @@ ConvertRGB_Mobius_HDRtoSDR::ConvertRGB_Mobius_HDRtoSDR(PClip _child,double _exp_
 	lookupG_32=(float *)malloc(1048576*sizeof(float));
 	lookupB_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupR_16==NULL) || (lookupG_16==NULL) || (lookupB_16==NULL)
-		|| (lookupR_32==NULL) || (lookupG_32==NULL) || (lookupB_32==NULL))
+	if ((lookupR_16==nullptr) || (lookupG_16==nullptr) || (lookupB_16==nullptr)
+		|| (lookupR_32==nullptr) || (lookupG_32==nullptr) || (lookupB_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -27222,11 +27222,11 @@ PVideoFrame __stdcall ConvertRGB_Mobius_HDRtoSDR::GetFrame(int n, IScriptEnviron
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
+	const uint8_t *srcr=nullptr,*srcRr=nullptr,*srcGr=nullptr,*srcBr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	uint8_t *dstw=NULL,*dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	uint8_t *dstw=nullptr,*dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 
@@ -27461,8 +27461,8 @@ ConvertXYZ_Reinhard_HDRtoSDR::ConvertXYZ_Reinhard_HDRtoSDR(PClip _child,double _
 	lookupY_32=(float *)malloc(1048576*sizeof(float));
 	lookupZ_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL)
-		|| (lookupX_32==NULL) || (lookupY_32==NULL) || (lookupZ_32==NULL))
+	if ((lookupX_16==nullptr) || (lookupY_16==nullptr) || (lookupZ_16==nullptr)
+		|| (lookupX_32==nullptr) || (lookupY_32==nullptr) || (lookupZ_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -27641,11 +27641,11 @@ PVideoFrame __stdcall ConvertXYZ_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcXr=NULL,*srcYr=NULL,*srcZr=NULL;
+	const uint8_t *srcr=nullptr,*srcXr=nullptr,*srcYr=nullptr,*srcZr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_X=0,src_pitch_Y=0,src_pitch_Z=0;
 	ptrdiff_t src_modulo=0,src_modulo_X=0,src_modulo_Y=0,src_modulo_Z=0;
 
-	uint8_t *dstw=NULL,*dstXw=NULL,*dstYw=NULL,*dstZw=NULL;
+	uint8_t *dstw=nullptr,*dstXw=nullptr,*dstYw=nullptr,*dstZw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_X=0,dst_pitch_Y=0,dst_pitch_Z=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_X=0,dst_modulo_Y=0,dst_modulo_Z=0;
 
@@ -27884,8 +27884,8 @@ ConvertRGB_Reinhard_HDRtoSDR::ConvertRGB_Reinhard_HDRtoSDR(PClip _child,double _
 	lookupG_32=(float *)malloc(1048576*sizeof(float));
 	lookupB_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupR_16==NULL) || (lookupG_16==NULL) || (lookupB_16==NULL)
-		|| (lookupR_32==NULL) || (lookupG_32==NULL) || (lookupB_32==NULL))
+	if ((lookupR_16==nullptr) || (lookupG_16==nullptr) || (lookupB_16==nullptr)
+		|| (lookupR_32==nullptr) || (lookupG_32==nullptr) || (lookupB_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -28049,11 +28049,11 @@ PVideoFrame __stdcall ConvertRGB_Reinhard_HDRtoSDR::GetFrame(int n, IScriptEnvir
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
+	const uint8_t *srcr=nullptr,*srcRr=nullptr,*srcGr=nullptr,*srcBr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	uint8_t *dstw=NULL,*dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	uint8_t *dstw=nullptr,*dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 
@@ -28295,10 +28295,10 @@ ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR
 	lookupBY_32=(float *)malloc(1048576*sizeof(float));
 	lookupRY_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupEOTF_16==NULL) || (lookupR_16==NULL) || (lookupG_16==NULL) || (lookupB_16==NULL)
-		|| (lookupY1_16==NULL) || (lookupY2_16==NULL) || (lookupBY_16==NULL) || (lookupRY_16==NULL)
-		|| (lookupEOTF_32==NULL) || (lookupR_32==NULL) || (lookupG_32==NULL) || (lookupB_32==NULL)
-		|| (lookupY1_32==NULL) || (lookupY2_32==NULL) || (lookupBY_32==NULL) || (lookupRY_32==NULL))
+	if ((lookupEOTF_16==nullptr) || (lookupR_16==nullptr) || (lookupG_16==nullptr) || (lookupB_16==nullptr)
+		|| (lookupY1_16==nullptr) || (lookupY2_16==nullptr) || (lookupBY_16==nullptr) || (lookupRY_16==nullptr)
+		|| (lookupEOTF_32==nullptr) || (lookupR_32==nullptr) || (lookupG_32==nullptr) || (lookupB_32==nullptr)
+		|| (lookupY1_32==nullptr) || (lookupY2_32==nullptr) || (lookupBY_32==nullptr) || (lookupRY_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -28478,11 +28478,11 @@ PVideoFrame __stdcall ConvertLinearRGBtoYUV_BT2446_A_HDRtoSDR::GetFrame(int n, I
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcr0=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
+	const uint8_t *srcr=nullptr,*srcr0=nullptr,*srcRr=nullptr,*srcGr=nullptr,*srcBr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch0=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo0=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	uint8_t *dstYw=NULL,*dstUw=NULL,*dstVw=NULL;
+	uint8_t *dstYw=nullptr,*dstUw=nullptr,*dstVw=nullptr;
 	ptrdiff_t dst_pitch_Y=0,dst_pitch_U=0,dst_pitch_V=0;
 	ptrdiff_t dst_modulo_Y=0,dst_modulo_U=0,dst_modulo_V=0;
 	
@@ -28686,7 +28686,7 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 	isAlphaChannel = vi.IsYUVA() || vi.IsPlanarRGBA();
 	pixelsize = (uint8_t)vi.ComponentSize(); // AVS16
 	bits_per_pixel = (uint8_t)vi.BitsPerComponent();
-	vi_RGBPS=NULL;
+	vi_RGBPS=nullptr;
 
 	lookupY_16=(uint16_t *)malloc(65536*sizeof(uint16_t));
 	lookupX_16=(float *)malloc(65536*sizeof(float));
@@ -28701,9 +28701,9 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 	lookup2Y_32=(float *)malloc(1048576*sizeof(float));
 	lookup2Z_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupY_16==NULL) || (lookupX_16==NULL) || (lookupiY_16==NULL) || (lookupZ_16==NULL)
-		|| (lookupY_32==NULL) || (lookupiY_32==NULL) || (lookup2Y_16==NULL)
-		|| (lookup2X_32==NULL) || (lookup2Y_32==NULL) || (lookup2Z_32==NULL))
+	if ((lookupY_16==nullptr) || (lookupX_16==nullptr) || (lookupiY_16==nullptr) || (lookupZ_16==nullptr)
+		|| (lookupY_32==nullptr) || (lookupiY_32==nullptr) || (lookup2Y_16==nullptr)
+		|| (lookup2X_32==nullptr) || (lookup2Y_32==nullptr) || (lookup2Z_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -28711,7 +28711,7 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 	}
 
 	vi_RGBPS = new VideoInfo(vi);
-	if (vi_RGBPS==NULL)
+	if (vi_RGBPS==nullptr)
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -28979,16 +28979,16 @@ PVideoFrame __stdcall ConverXYZ_BT2446_C_HDRtoSDR::GetFrame(int n, IScriptEnviro
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 	PVideoFrame tmp;
 
-	const uint8_t *srcr=NULL,*srcXr=NULL,*srcYr=NULL,*srcZr=NULL;
-	uint8_t *srcw=NULL;
+	const uint8_t *srcr=nullptr,*srcXr=nullptr,*srcYr=nullptr,*srcZr=nullptr;
+	uint8_t *srcw=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_X=0,src_pitch_Y=0,src_pitch_Z=0;
 	ptrdiff_t src_modulo=0,src_modulo_X=0,src_modulo_Y=0,src_modulo_Z=0;
 
-	uint8_t *dstw=NULL,*dstXw=NULL,*dstYw=NULL,*dstZw=NULL;
+	uint8_t *dstw=nullptr,*dstXw=nullptr,*dstYw=nullptr,*dstZw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_X=0,dst_pitch_Y=0,dst_pitch_Z=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_X=0,dst_modulo_Y=0,dst_modulo_Z=0;
 
-	uint8_t *tmpXw=NULL,*tmpYw=NULL,*tmpZw=NULL;
+	uint8_t *tmpXw=nullptr,*tmpYw=nullptr,*tmpZw=nullptr;
 	ptrdiff_t tmp_pitch_X=0,tmp_pitch_Y=0,tmp_pitch_Z=0;
 	ptrdiff_t tmp_modulo_X=0,tmp_modulo_Y=0,tmp_modulo_Z=0;
 	
@@ -29400,8 +29400,8 @@ ConvertXYZ_ACES_HDRtoSDR::ConvertXYZ_ACES_HDRtoSDR(PClip _child,double _a_X,doub
 	lookupY_32=(float *)malloc(1048576*sizeof(float));
 	lookupZ_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupX_16==NULL) || (lookupY_16==NULL) || (lookupZ_16==NULL)
-		|| (lookupX_32==NULL) || (lookupY_32==NULL) || (lookupZ_32==NULL))
+	if ((lookupX_16==nullptr) || (lookupY_16==nullptr) || (lookupZ_16==nullptr)
+		|| (lookupX_32==nullptr) || (lookupY_32==nullptr) || (lookupZ_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -29576,11 +29576,11 @@ PVideoFrame __stdcall ConvertXYZ_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcXr=NULL,*srcYr=NULL,*srcZr=NULL;
+	const uint8_t *srcr=nullptr,*srcXr=nullptr,*srcYr=nullptr,*srcZr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_X=0,src_pitch_Y=0,src_pitch_Z=0;
 	ptrdiff_t src_modulo=0,src_modulo_X=0,src_modulo_Y=0,src_modulo_Z=0;
 
-	uint8_t *dstw=NULL,*dstXw=NULL,*dstYw=NULL,*dstZw=NULL;
+	uint8_t *dstw=nullptr,*dstXw=nullptr,*dstYw=nullptr,*dstZw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_X=0,dst_pitch_Y=0,dst_pitch_Z=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_X=0,dst_modulo_Y=0,dst_modulo_Z=0;
 
@@ -29821,8 +29821,8 @@ ConvertRGB_ACES_HDRtoSDR::ConvertRGB_ACES_HDRtoSDR(PClip _child,double _a_R,doub
 	lookupG_32=(float *)malloc(1048576*sizeof(float));
 	lookupB_32=(float *)malloc(1048576*sizeof(float));
 
-	if ((lookupR_16==NULL) || (lookupG_16==NULL) || (lookupB_16==NULL)
-		|| (lookupR_32==NULL) || (lookupG_32==NULL) || (lookupB_32==NULL))
+	if ((lookupR_16==nullptr) || (lookupG_16==nullptr) || (lookupB_16==nullptr)
+		|| (lookupR_32==nullptr) || (lookupG_32==nullptr) || (lookupB_32==nullptr))
 	{
 		FreeData();
 		if (threads>1) poolInterface->DeAllocateAllThreads(true);
@@ -29982,11 +29982,11 @@ PVideoFrame __stdcall ConvertRGB_ACES_HDRtoSDR::GetFrame(int n, IScriptEnvironme
 	PVideoFrame src = child->GetFrame(n,env);
 	PVideoFrame dst = (has_at_least_v8)?env->NewVideoFrameP(vi,&src):env->NewVideoFrame(vi,64);
 
-	const uint8_t *srcr=NULL,*srcRr=NULL,*srcGr=NULL,*srcBr=NULL;
+	const uint8_t *srcr=nullptr,*srcRr=nullptr,*srcGr=nullptr,*srcBr=nullptr;
 	ptrdiff_t src_pitch=0,src_pitch_R=0,src_pitch_G=0,src_pitch_B=0;
 	ptrdiff_t src_modulo=0,src_modulo_R=0,src_modulo_G=0,src_modulo_B=0;
 
-	uint8_t *dstw=NULL,*dstRw=NULL,*dstGw=NULL,*dstBw=NULL;
+	uint8_t *dstw=nullptr,*dstRw=nullptr,*dstGw=nullptr,*dstBw=nullptr;
 	ptrdiff_t dst_pitch=0,dst_pitch_R=0,dst_pitch_G=0,dst_pitch_B=0;
 	ptrdiff_t dst_modulo=0,dst_modulo_R=0,dst_modulo_G=0,dst_modulo_B=0;
 

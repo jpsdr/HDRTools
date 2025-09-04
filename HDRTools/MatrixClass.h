@@ -42,7 +42,7 @@ public :
 	Vector(const Vector &x);
 	virtual ~Vector(void);
 
-	inline bool AllocCheck(void) const {return(Coeff!=NULL);}
+	inline bool AllocCheck(void) const {return(Coeff!=nullptr);}
 	bool Create(void);
 	bool Create(const uint16_t l,const COEFF_DATA_TYPE data);
 	bool Create(const Vector &x);
@@ -186,7 +186,7 @@ public :
 	Matrix(const Matrix &m);
 	virtual ~Matrix(void);
 
-	inline bool AllocCheck(void) const {return(Coeff!=NULL);}
+	inline bool AllocCheck(void) const {return(Coeff!=nullptr);}
 	bool Create(void);
 	bool Create(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data);
 	bool Create(const Matrix &m);

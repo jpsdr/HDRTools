@@ -181,7 +181,7 @@ void SetCPUMatrixClass(const bool SSE2,const bool AVX,const bool AVX2,const bool
 
 Vector::Vector(void)
 {
-	Coeff=NULL;
+	Coeff=nullptr;
 	length=0;
 	size=0;
 	data_type=DATA_NONE;
@@ -190,7 +190,7 @@ Vector::Vector(void)
 
 Vector::Vector(const uint16_t l,const COEFF_DATA_TYPE data)
 {
-	Coeff=NULL;
+	Coeff=nullptr;
 	length=0;
 	size=0;
 	data_type=DATA_NONE;
@@ -218,7 +218,7 @@ Vector::Vector(const uint16_t l,const COEFF_DATA_TYPE data)
 	const size_t p0=((((size_t)l*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc(p0,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return;
+	if (Coeff==nullptr) return;
 
 	size=p0;
 	length=l;
@@ -240,14 +240,14 @@ Vector::Vector(const uint16_t l,const COEFF_DATA_TYPE data)
 
 Vector::Vector(const Vector &x)
 {
-	Coeff=NULL;
+	Coeff=nullptr;
 	length=0;
 	size=0;
 	data_type=DATA_NONE;
 
 	const uint16_t l=x.length;
 
-	if ((x.Coeff==NULL) || (l==0)) return;
+	if ((x.Coeff==nullptr) || (l==0)) return;
 
 	size_t coeff_size;
 
@@ -270,7 +270,7 @@ Vector::Vector(const Vector &x)
 	const size_t p0=((((size_t)l*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc(p0,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return;
+	if (Coeff==nullptr) return;
 
 	size=p0;
 	length=l;
@@ -300,7 +300,7 @@ Vector::~Vector(void)
 
 bool Vector::Create(void)
 {
-	if ((Coeff!=NULL) || (length==0)) return(false);
+	if ((Coeff!=nullptr) || (length==0)) return(false);
 
 	size_t coeff_size;
 
@@ -323,7 +323,7 @@ bool Vector::Create(void)
 	const size_t p0=((((size_t)length*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc(p0,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return(false);
+	if (Coeff==nullptr) return(false);
 
 	size=p0;
 
@@ -345,7 +345,7 @@ bool Vector::Create(void)
 
 bool Vector::Create(const uint16_t l,const COEFF_DATA_TYPE data)
 {
-	if ((Coeff!=NULL) || (l==0)) return(false);
+	if ((Coeff!=nullptr) || (l==0)) return(false);
 
 	size_t coeff_size;
 
@@ -368,7 +368,7 @@ bool Vector::Create(const uint16_t l,const COEFF_DATA_TYPE data)
 	const size_t p0=((((size_t)l*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc(p0,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return(false);
+	if (Coeff==nullptr) return(false);
 
 	size=p0;
 	length=l;
@@ -392,11 +392,11 @@ bool Vector::Create(const uint16_t l,const COEFF_DATA_TYPE data)
 
 bool Vector::Create(const Vector &x)
 {
-	if (Coeff!=NULL) return(false);
+	if (Coeff!=nullptr) return(false);
 
 	const uint16_t l=x.length;
 
-	if ((x.Coeff==NULL) || (l==0)) return(false);
+	if ((x.Coeff==nullptr) || (l==0)) return(false);
 
 	size_t coeff_size;
 
@@ -419,7 +419,7 @@ bool Vector::Create(const Vector &x)
 	const size_t p0=((((size_t)l*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc(p0,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return(false);
+	if (Coeff==nullptr) return(false);
 
 	size=p0;
 	length=l;
@@ -445,10 +445,10 @@ bool Vector::Create(const Vector &x)
 
 void Vector::Destroy(void)
 {
-	if (Coeff!=NULL)
+	if (Coeff!=nullptr)
 	{
 		_aligned_free(Coeff);
-		Coeff=NULL;
+		Coeff=nullptr;
 	}
 	length=0;
 	size=0;
@@ -458,11 +458,11 @@ void Vector::Destroy(void)
 
 bool Vector::CopyStrict(const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 
 	const uint16_t l=x.length;
 
-	if ((x.Coeff==NULL) || (l==0) || (l!=length) || (x.data_type!=data_type)) return(false);
+	if ((x.Coeff==nullptr) || (l==0) || (l!=length) || (x.data_type!=data_type)) return(false);
 
 	size_t coeff_size;
 
@@ -492,7 +492,7 @@ bool Vector::CopyStrict(const Vector &x)
 
 bool Vector::CopyRaw(const void *ptr)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (length==0)) return(false);
 
 	size_t coeff_size;
 
@@ -522,7 +522,7 @@ bool Vector::CopyRaw(const void *ptr)
 
 bool Vector::CopyRaw(const void *ptr,const uint16_t lgth)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (length==0) || (lgth>length)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (length==0) || (lgth>length)) return(false);
 
 	size_t coeff_size;
 
@@ -552,7 +552,7 @@ bool Vector::CopyRaw(const void *ptr,const uint16_t lgth)
 
 bool Vector::ExportRaw(void *ptr)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (length==0)) return(false);
 
 	size_t coeff_size;
 
@@ -582,7 +582,7 @@ bool Vector::ExportRaw(void *ptr)
 
 bool Vector::ExportRaw(void *ptr,const uint16_t lgth)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (length==0) || (lgth>length)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (length==0) || (lgth>length)) return(false);
 
 	size_t coeff_size;
 
@@ -612,7 +612,7 @@ bool Vector::ExportRaw(void *ptr,const uint16_t lgth)
 
 bool Vector::FillD(const double data)
 {
-	if ((Coeff==NULL) || (length==0) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (data_type!=DATA_DOUBLE)) return(false);
 
 	std::fill_n((double *)Coeff,length,data);
 
@@ -622,7 +622,7 @@ bool Vector::FillD(const double data)
 
 bool Vector::FillF(const float data)
 {
-	if ((Coeff==NULL) || (length==0) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (data_type!=DATA_FLOAT)) return(false);
 
 	std::fill_n((float *)Coeff,length,data);
 
@@ -632,7 +632,7 @@ bool Vector::FillF(const float data)
 
 bool Vector::FillZero(void)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 
 	switch(data_type)
 	{
@@ -647,7 +647,7 @@ bool Vector::FillZero(void)
 
 bool Vector::SetInfo(const uint16_t l,const COEFF_DATA_TYPE data)
 {
-	if ((Coeff!=NULL) || (length!=0) || (l==0) || (data_type==DATA_NONE)) return(false);
+	if ((Coeff!=nullptr) || (length!=0) || (l==0) || (data_type==DATA_NONE)) return(false);
 
 	length=l; data_type=data;
 
@@ -663,7 +663,7 @@ void Vector::GetInfo(uint16_t &l,COEFF_DATA_TYPE &data) const
 
 bool Vector::GetSafeD(const uint16_t i,double &d) const
 {
-	if ((Coeff==NULL) || (length==0) || (i>=length) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=DATA_DOUBLE)) return(false);
 
 	d=((double *)Coeff)[i];
 
@@ -673,7 +673,7 @@ bool Vector::GetSafeD(const uint16_t i,double &d) const
 
 bool Vector::SetSafeD(const uint16_t i,const double d)
 {
-	if ((Coeff==NULL) || (length==0) || (i>=length) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=DATA_DOUBLE)) return(false);
 
 	((double *)Coeff)[i]=d;
 
@@ -683,7 +683,7 @@ bool Vector::SetSafeD(const uint16_t i,const double d)
 
 bool Vector::GetSafeF(const uint16_t i,float &d) const
 {
-	if ((Coeff==NULL) || (length==0) || (i>=length) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=DATA_FLOAT)) return(false);
 
 	d=((float *)Coeff)[i];
 
@@ -693,7 +693,7 @@ bool Vector::GetSafeF(const uint16_t i,float &d) const
 
 bool Vector::SetSafeF(const uint16_t i,const float d)
 {
-	if ((Coeff==NULL) || (length==0) || (i>=length) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=DATA_FLOAT)) return(false);
 
 	((float *)Coeff)[i]=d;
 
@@ -737,7 +737,7 @@ Vector_Compute::Vector_Compute(const Vector_Compute &x):Vector(x)
 
 bool Vector_Compute::Product_AX(const Matrix &ma, const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!ma.AllocCheck() || !x.AllocCheck()) return(false);
 
 	if ((ma.GetColumns()!=x.GetLength()) || (length!=ma.GetLines()) || (ma.GetDataType()!=x.GetDataType())
@@ -756,7 +756,7 @@ bool Vector_Compute::Product_AX(const Matrix &ma, const Vector &x)
 
 bool Vector_Compute::Product_AX(const Matrix &ma)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((ma.GetColumns()!=ma.GetLines()) || (length!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -902,7 +902,7 @@ void Vector_Compute::ProductD_AX(const Matrix &ma, const Vector &x)
 
 bool Vector_Compute::Product_tAX(const Matrix &ma, const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!ma.AllocCheck() || !x.AllocCheck()) return(false);
 
 	if ((ma.GetLines()!=x.GetLength()) || (length!=ma.GetColumns()) || (ma.GetDataType()!=x.GetDataType())
@@ -921,7 +921,7 @@ bool Vector_Compute::Product_tAX(const Matrix &ma, const Vector &x)
 
 bool Vector_Compute::Product_tAX(const Matrix &ma)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((ma.GetColumns()!=ma.GetLines()) || (length!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -1119,7 +1119,7 @@ void Vector_Compute::ProductD_tAX(const Matrix &ma, const Vector &x)
 
 bool Vector_Compute::Mult(const double coef,const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck()) return(false);
 
 	if ((length!=x.GetLength()) || (x.GetDataType()!=data_type)) return(false);
@@ -1148,7 +1148,7 @@ bool Vector_Compute::Mult(const double coef,const Vector &x)
 
 bool Vector_Compute::Mult(const double coef)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 
 
 	if (coef==0.0)
@@ -1331,7 +1331,7 @@ void Vector_Compute::MultD(const double coef)
 
 bool Vector_Compute::Add(const double coef,const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck()) return(false);
 
 	if ((length!=x.GetLength()) || (x.GetDataType()!=data_type)) return(false);
@@ -1355,7 +1355,7 @@ bool Vector_Compute::Add(const double coef,const Vector &x)
 
 bool Vector_Compute::Add(const double coef)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 
 	if (coef==0.0) return(true);
 
@@ -1556,7 +1556,7 @@ void Vector_Compute::AddD(const double coef)
 
 bool Vector_Compute::Sub(const double coef,const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck()) return(false);
 
 	if ((length!=x.GetLength()) || (x.GetDataType()!=data_type)) return(false);
@@ -1580,7 +1580,7 @@ bool Vector_Compute::Sub(const double coef,const Vector &x)
 
 bool Vector_Compute::Sub(const double coef)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 
 	if (coef==0.0) return(true);
 
@@ -1781,7 +1781,7 @@ void Vector_Compute::SubD(const double coef)
 
 bool Vector_Compute::Add_X(const Vector &x,const Vector &y)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck() || !y.AllocCheck()) return(false);
 
 	if ((x.GetLength()!=y.GetLength()) || (length!=x.GetLength()) || (x.GetDataType()!=y.GetDataType())
@@ -1800,7 +1800,7 @@ bool Vector_Compute::Add_X(const Vector &x,const Vector &y)
 
 bool Vector_Compute::Add_X(const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck()) return(false);
 
 	if ((length!=x.GetLength()) || (x.GetDataType()!=data_type)) return(false);
@@ -1980,7 +1980,7 @@ void Vector_Compute::AddD_X(const Vector &x)
 
 bool Vector_Compute::Sub_X(const Vector &x,const Vector &y)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck() || !y.AllocCheck()) return(false);
 
 	if ((x.GetLength()!=y.GetLength()) || (length!=x.GetLength()) || (x.GetDataType()!=y.GetDataType())
@@ -1999,7 +1999,7 @@ bool Vector_Compute::Sub_X(const Vector &x,const Vector &y)
 
 bool Vector_Compute::Sub_X(const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck()) return(false);
 
 	if ((length!=x.GetLength()) || (x.GetDataType()!=data_type)) return(false);
@@ -2017,7 +2017,7 @@ bool Vector_Compute::Sub_X(const Vector &x)
 
 bool Vector_Compute::InvSub_X(const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck()) return(false);
 
 	if ((length!=x.GetLength()) || (x.GetDataType()!=data_type)) return(false);
@@ -2277,7 +2277,7 @@ void Vector_Compute::InvSubD_X(const Vector &x)
 
 bool Vector_Compute::Mult_X(const Vector &x,const Vector &y)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck() || !y.AllocCheck()) return(false);
 
 	if ((x.GetLength()!=y.GetLength()) || (length!=x.GetLength()) || (x.GetDataType()!=y.GetDataType())
@@ -2296,7 +2296,7 @@ bool Vector_Compute::Mult_X(const Vector &x,const Vector &y)
 
 bool Vector_Compute::Mult_X(const Vector &x)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck()) return(false);
 
 	if ((length!=x.GetLength()) || (x.GetDataType()!=data_type)) return(false);
@@ -2476,7 +2476,7 @@ void Vector_Compute::MultD_X(const Vector &x)
 
 bool Vector_Compute::Distance2(const Vector &x,double &result)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck()) return(false);
 
 	if ((length!=x.GetLength()) || (x.GetDataType()!=data_type)) return(false);
@@ -2599,7 +2599,7 @@ double Vector_Compute::Distance2D(const Vector &x)
 
 bool Vector_Compute::Distance1(const Vector &x,double &result)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 	if (!x.AllocCheck()) return(false);
 
 	if ((length!=x.GetLength()) || (x.GetDataType()!=data_type)) return(false);
@@ -2712,7 +2712,7 @@ double Vector_Compute::Distance1D(const Vector &x)
 
 bool Vector_Compute::Norme2(double &result)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 
 	switch(data_type)
 	{
@@ -2828,7 +2828,7 @@ double Vector_Compute::Norme2D(void)
 
 bool Vector_Compute::Norme1(double &result)
 {
-	if ((Coeff==NULL) || (length==0)) return(false);
+	if ((Coeff==nullptr) || (length==0)) return(false);
 
 	switch(data_type)
 	{
@@ -2939,7 +2939,7 @@ double Vector_Compute::Norme1D(void)
 
 Matrix::Matrix(void)
 {
-	Coeff=NULL;
+	Coeff=nullptr;
 	columns=0; lines=0;
 	size=0;
 	pitch=0;
@@ -2949,7 +2949,7 @@ Matrix::Matrix(void)
 
 Matrix::Matrix(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
 {
-	Coeff=NULL;
+	Coeff=nullptr;
 	columns=0; lines=0;
 	size=0;
 	pitch=0;
@@ -2978,7 +2978,7 @@ Matrix::Matrix(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
 	const ptrdiff_t p0=((((ptrdiff_t)c*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc((size_t)p0*(size_t)l,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return;
+	if (Coeff==nullptr) return;
 
 	size=(size_t)p0*(size_t)l;
 	pitch=p0;
@@ -3021,7 +3021,7 @@ Matrix::Matrix(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
 
 Matrix::Matrix(const Matrix &m)
 {
-	Coeff=NULL;
+	Coeff=nullptr;
 	columns=0; lines=0;
 	size=0;
 	pitch=0;
@@ -3029,7 +3029,7 @@ Matrix::Matrix(const Matrix &m)
 
 	const uint16_t c=m.columns,l=m.lines;
 
-	if ((m.Coeff==NULL) || (c==0) || (l==0)) return;
+	if ((m.Coeff==nullptr) || (c==0) || (l==0)) return;
 
 	size_t coeff_size;
 
@@ -3052,7 +3052,7 @@ Matrix::Matrix(const Matrix &m)
 	const ptrdiff_t p0=((((ptrdiff_t)c*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc((size_t)p0*(size_t)l,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return;
+	if (Coeff==nullptr) return;
 
 	size=(size_t)p0*(size_t)l;
 	pitch=p0;
@@ -3103,7 +3103,7 @@ Matrix::~Matrix(void)
 
 bool Matrix::Create(void)
 {
-	if ((Coeff!=NULL) || (columns==0) || (lines==0)) return(false);
+	if ((Coeff!=nullptr) || (columns==0) || (lines==0)) return(false);
 
 	size_t coeff_size;
 
@@ -3126,7 +3126,7 @@ bool Matrix::Create(void)
 	const ptrdiff_t p0=((((ptrdiff_t)columns*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc((size_t)p0*(size_t)lines,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return(false);
+	if (Coeff==nullptr) return(false);
 
 	size=(size_t)p0*(size_t)lines;
 	pitch=p0;
@@ -3169,11 +3169,11 @@ bool Matrix::Create(void)
 
 bool Matrix::Create(const Matrix &m)
 {
-	if (Coeff!=NULL) return(false);
+	if (Coeff!=nullptr) return(false);
 
 	const uint16_t c=m.columns,l=m.lines;
 
-	if ((m.Coeff==NULL) || (c==0) || (l==0)) return(false);
+	if ((m.Coeff==nullptr) || (c==0) || (l==0)) return(false);
 
 	size_t coeff_size;
 
@@ -3196,7 +3196,7 @@ bool Matrix::Create(const Matrix &m)
 	const ptrdiff_t p0=((((ptrdiff_t)c*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc((size_t)p0*(size_t)l,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return(false);
+	if (Coeff==nullptr) return(false);
 
 	size=(size_t)p0*(size_t)l;
 	pitch=p0;
@@ -3241,7 +3241,7 @@ bool Matrix::Create(const Matrix &m)
 
 bool Matrix::Create(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
 {
-	if ((Coeff!=NULL) || (c==0) || (l==0)) return(false);
+	if ((Coeff!=nullptr) || (c==0) || (l==0)) return(false);
 
 	size_t coeff_size;
 
@@ -3264,7 +3264,7 @@ bool Matrix::Create(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data
 	const ptrdiff_t p0=((((ptrdiff_t)c*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc((size_t)p0*(size_t)l,MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return(false);
+	if (Coeff==nullptr) return(false);
 
 	size=(size_t)p0*(size_t)l;
 	pitch=p0;
@@ -3308,10 +3308,10 @@ bool Matrix::Create(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data
 
 void Matrix::Destroy(void)
 {
-	if (Coeff!=NULL)
+	if (Coeff!=nullptr)
 	{
 		_aligned_free(Coeff);
-		Coeff=NULL;
+		Coeff=nullptr;
 	}
 	columns=0; lines=0;
 	size=0;
@@ -3324,7 +3324,7 @@ bool Matrix::FillD(const double data)
 {
 	const uint16_t l=lines,c=columns;
 
-	if ((Coeff==NULL) || (c==0) || (l==0) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (c==0) || (l==0) || (data_type!=DATA_DOUBLE)) return(false);
 
 	uint8_t *a=(uint8_t *)Coeff;
 
@@ -3342,7 +3342,7 @@ bool Matrix::FillF(const float data)
 {
 	const uint16_t l=lines,c=columns;
 
-	if ((Coeff==NULL) || (c==0) || (l==0) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (c==0) || (l==0) || (data_type!=DATA_FLOAT)) return(false);
 
 	uint8_t *a=(uint8_t *)Coeff;
 
@@ -3358,7 +3358,7 @@ bool Matrix::FillF(const float data)
 
 bool Matrix::FillZero(void)
 {
-	if ((Coeff==NULL) || (columns==0) || (lines==0)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0)) return(false);
 
 	uint8_t *a=(uint8_t *)Coeff;
 
@@ -3387,7 +3387,7 @@ bool Matrix::FillZero(void)
 
 bool Matrix::SetInfo(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
 {
-	if ((Coeff!=NULL) || (columns!=0) || (lines!=0) || (c==0) || (l==0) || (data_type==DATA_NONE)) return(false);
+	if ((Coeff!=nullptr) || (columns!=0) || (lines!=0) || (c==0) || (l==0) || (data_type==DATA_NONE)) return(false);
 
 	columns=c; lines=l; data_type=data;
 
@@ -3403,7 +3403,7 @@ void Matrix::GetInfo(uint16_t &l,uint16_t &c,COEFF_DATA_TYPE &data) const
 
 bool Matrix::GetSafeD(const uint16_t i,const uint16_t j,double &d) const
 {
-	if ((Coeff==NULL) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_DOUBLE)) return(false);
 
 	d=((double *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j];
 
@@ -3413,7 +3413,7 @@ bool Matrix::GetSafeD(const uint16_t i,const uint16_t j,double &d) const
 
 bool Matrix::SetSafeD(const uint16_t i,const uint16_t j,const double d)
 {
-	if ((Coeff==NULL) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_DOUBLE)) return(false);
 
 	((double *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]=d;
 
@@ -3423,7 +3423,7 @@ bool Matrix::SetSafeD(const uint16_t i,const uint16_t j,const double d)
 
 bool Matrix::GetSafeF(const uint16_t i,const uint16_t j,float &d) const
 {
-	if ((Coeff==NULL) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_FLOAT)) return(false);
 
 	d=((float *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j];
 
@@ -3433,7 +3433,7 @@ bool Matrix::GetSafeF(const uint16_t i,const uint16_t j,float &d) const
 
 bool Matrix::SetSafeF(const uint16_t i,const uint16_t j,const float d)
 {
-	if ((Coeff==NULL) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_FLOAT)) return(false);
 
 	((float *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]=d;
 
@@ -3443,11 +3443,11 @@ bool Matrix::SetSafeF(const uint16_t i,const uint16_t j,const float d)
 
 bool Matrix::CopyStrict(const Matrix &m)
 {
-	if ((Coeff==NULL) || (columns==0) || (lines==0)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0)) return(false);
 
 	const uint16_t c=m.columns,l=m.lines;
 
-	if ((m.Coeff==NULL) || (c==0) || (l==0) || (c!=columns) || (l!=lines) || (m.data_type!=data_type)) return(false);
+	if ((m.Coeff==nullptr) || (c==0) || (l==0) || (c!=columns) || (l!=lines) || (m.data_type!=data_type)) return(false);
 
 	size_t coeff_size;
 
@@ -3485,7 +3485,7 @@ bool Matrix::CopyStrict(const Matrix &m)
 
 bool Matrix::CopyRaw(const void *ptr)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (columns==0) || (lines==0)) return(false);
 
 	size_t coeff_size;
 
@@ -3522,7 +3522,7 @@ bool Matrix::CopyRaw(const void *ptr)
 
 bool Matrix::CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (columns==0) || (lines==0)) return(false);
 
 	size_t coeff_size;
 
@@ -3559,7 +3559,7 @@ bool Matrix::CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch)
 
 bool Matrix::CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln,const uint16_t co)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0) || (ln>lines) || (co>columns)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (columns==0) || (lines==0) || (ln>lines) || (co>columns)) return(false);
 
 	size_t coeff_size;
 
@@ -3596,7 +3596,7 @@ bool Matrix::CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln
 
 bool Matrix::ExportRaw(void *ptr)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (columns==0) || (lines==0)) return(false);
 
 	size_t coeff_size;
 
@@ -3633,7 +3633,7 @@ bool Matrix::ExportRaw(void *ptr)
 
 bool Matrix::ExportRaw(void *ptr,const ptrdiff_t ptr_pitch)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (columns==0) || (lines==0)) return(false);
 
 	size_t coeff_size;
 
@@ -3670,7 +3670,7 @@ bool Matrix::ExportRaw(void *ptr,const ptrdiff_t ptr_pitch)
 
 bool Matrix::ExportRaw(void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln,const uint16_t co)
 {
-	if ((Coeff==NULL) || (ptr==NULL) || (columns==0) || (lines==0) || (ln>lines) || (co>columns)) return(false);
+	if ((Coeff==nullptr) || (ptr==nullptr) || (columns==0) || (lines==0) || (ln>lines) || (co>columns)) return(false);
 
 	size_t coeff_size;
 
@@ -3753,9 +3753,9 @@ bool Matrix_Compute::CopyStrict(const Matrix_Compute &m)
 
 bool Matrix_Compute::CreateTranspose(const Matrix &m)
 {
-	if (Coeff!=NULL) return(false);
+	if (Coeff!=nullptr) return(false);
 
-	if ((m.GetPtrMatrix()==NULL) || (m.GetLines()==0) || (m.GetColumns()==0)) return(false);
+	if ((m.GetPtrMatrix()==nullptr) || (m.GetLines()==0) || (m.GetColumns()==0)) return(false);
 
 	size_t coeff_size;
 
@@ -3778,7 +3778,7 @@ bool Matrix_Compute::CreateTranspose(const Matrix &m)
 	const ptrdiff_t p0=((((ptrdiff_t)m.GetLines()*coeff_size)+MATRIX_ALIGN_SIZE-1) >> MATRIX_ALIGN_SHIFT) << MATRIX_ALIGN_SHIFT;
 
 	Coeff=(void *)_aligned_malloc((size_t)p0*(size_t)m.GetColumns(),MATRIX_ALIGN_SIZE);
-	if (Coeff==NULL) return(false);
+	if (Coeff==nullptr) return(false);
 
 	size=(size_t)p0*(size_t)m.GetColumns();
 	pitch=p0;
@@ -3838,7 +3838,7 @@ bool Matrix_Compute::CreateTranspose(const Matrix &m)
 
 bool Matrix_Compute::Mult(const double coef,const Matrix &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((columns!=ma.GetColumns()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -3867,7 +3867,7 @@ bool Matrix_Compute::Mult(const double coef,const Matrix &ma)
 
 bool Matrix_Compute::Mult(const double coef)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 
 	if (coef==0.0)
 	{
@@ -4151,7 +4151,7 @@ void Matrix_Compute::MultD(const double coef)
 
 bool Matrix_Compute::Add(const double coef,const Matrix &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((columns!=ma.GetColumns()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -4175,7 +4175,7 @@ bool Matrix_Compute::Add(const double coef,const Matrix &ma)
 
 bool Matrix_Compute::Add(const double coef)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 
 	if (coef==0.0) return(true);
 
@@ -4508,7 +4508,7 @@ void Matrix_Compute::AddD(const double coef)
 
 bool Matrix_Compute::Sub(const double coef,const Matrix &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((columns!=ma.GetColumns()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -4532,7 +4532,7 @@ bool Matrix_Compute::Sub(const double coef,const Matrix &ma)
 
 bool Matrix_Compute::Sub(const double coef)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 
 	if (coef==0.0) return(true);
 
@@ -4865,7 +4865,7 @@ void Matrix_Compute::SubD(const double coef)
 
 bool Matrix_Compute::Add_A(const Matrix &ma, const Matrix &mb)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck() || !mb.AllocCheck()) return(false);
 
 	if ((ma.GetColumns()!=mb.GetColumns()) || (ma.GetLines()!=mb.GetLines()) || (columns!=ma.GetColumns())
@@ -4884,7 +4884,7 @@ bool Matrix_Compute::Add_A(const Matrix &ma, const Matrix &mb)
 
 bool Matrix_Compute::Add_A(const Matrix &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((columns!=ma.GetColumns()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -5186,7 +5186,7 @@ void Matrix_Compute::AddD_A(const Matrix &ma)
 
 bool Matrix_Compute::Mult_A(const Matrix &ma, const Matrix &mb)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck() || !mb.AllocCheck()) return(false);
 
 	if ((ma.GetColumns()!=mb.GetColumns()) || (ma.GetLines()!=mb.GetLines()) || (columns!=ma.GetColumns())
@@ -5205,7 +5205,7 @@ bool Matrix_Compute::Mult_A(const Matrix &ma, const Matrix &mb)
 
 bool Matrix_Compute::Mult_A(const Matrix &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((columns!=ma.GetColumns()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -5507,7 +5507,7 @@ void Matrix_Compute::MultD_A(const Matrix &ma)
 
 bool Matrix_Compute::Sub_A(const Matrix &ma, const Matrix &mb)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck() || !mb.AllocCheck()) return(false);
 
 	if ((ma.GetColumns()!=mb.GetColumns()) || (ma.GetLines()!=mb.GetLines()) || (columns!=ma.GetColumns())
@@ -5526,7 +5526,7 @@ bool Matrix_Compute::Sub_A(const Matrix &ma, const Matrix &mb)
 
 bool Matrix_Compute::Sub_A(const Matrix &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((columns!=ma.GetColumns()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -5544,7 +5544,7 @@ bool Matrix_Compute::Sub_A(const Matrix &ma)
 
 bool Matrix_Compute::InvSub_A(const Matrix &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((columns!=ma.GetColumns()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -5982,7 +5982,7 @@ void Matrix_Compute::InvSubD_A(const Matrix &ma)
 
 bool Matrix_Compute::Product_AB(const Matrix &ma, const Matrix &mb)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck() || !mb.AllocCheck()) return(false);
 
 	if ((ma.GetColumns()!=mb.GetLines()) || (columns!=mb.GetColumns()) || (lines!=ma.GetLines())
@@ -6321,7 +6321,7 @@ void Matrix_Compute::ProductD_AB(const Matrix &ma, const Matrix &mb)
 
 bool Matrix_Compute::Product_AtB(const Matrix &ma,const Matrix &mb)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck() || !mb.AllocCheck()) return(false);
 
 	if ((ma.GetColumns()!=mb.GetColumns()) || (columns!=mb.GetLines()) || (lines!=ma.GetLines())
@@ -6532,7 +6532,7 @@ void Matrix_Compute::ProductD_AtB(const Matrix &ma,const Matrix &mb)
 
 bool Matrix_Compute::Product_tAA(const Matrix &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0) || (lines!=columns)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0) || (lines!=columns)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((lines!=ma.GetColumns()) || (ma.GetDataType()!=data_type)) return(false);
@@ -6556,7 +6556,7 @@ bool Matrix_Compute::Product_tAA(const Matrix &ma)
 
 bool Matrix_Compute::Product_tAA(void)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0) || (lines!=columns)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0) || (lines!=columns)) return(false);
 
 	Matrix_Compute a(*this),b;
 
@@ -6581,7 +6581,7 @@ bool Matrix_Compute::Inverse(const Matrix &ma)
 {
 	const uint16_t l=lines,c=columns;
 
-	if ((Coeff==NULL) || (lines==0) || (columns==0) || (columns!=lines)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0) || (columns!=lines)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((ma.GetColumns()!=ma.GetLines()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -6599,7 +6599,7 @@ bool Matrix_Compute::Inverse(const Matrix &ma)
 
 bool Matrix_Compute::Inverse(void)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0) || (columns!=lines)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0) || (columns!=lines)) return(false);
 
 	switch(data_type)
 	{
@@ -7004,7 +7004,7 @@ Return :
 */
 int8_t Matrix_Compute::InverseSafe(const Matrix_Compute &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0) || (columns!=lines)) return(-1);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0) || (columns!=lines)) return(-1);
 	if (!ma.AllocCheck()) return(-1);
 
 	if ((ma.GetColumns()!=ma.GetLines()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(-1);
@@ -7022,7 +7022,7 @@ int8_t Matrix_Compute::InverseSafe(const Matrix_Compute &ma)
 
 int8_t Matrix_Compute::InverseSafe(void)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0) || (columns!=lines)) return(-1);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0) || (columns!=lines)) return(-1);
 
 	switch(data_type)
 	{
@@ -7475,7 +7475,7 @@ int8_t Matrix_Compute::InverseSafeD(const Matrix_Compute &ma)
 
 bool Matrix_Compute::Transpose(const Matrix &ma)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((lines!=ma.GetColumns()) || (columns!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -7500,7 +7500,7 @@ bool Matrix_Compute::Transpose(const Matrix &ma)
 
 bool Matrix_Compute::Transpose(void)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0) || (lines!=columns)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0) || (lines!=columns)) return(false);
 
 	Matrix b(*this);
 
@@ -7757,7 +7757,7 @@ void Matrix_Compute::TransposeI8(const Matrix &ma)
 
 bool Matrix_Compute::Norme2(double &result)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 
 	switch(data_type)
 	{
@@ -7912,7 +7912,7 @@ double Matrix_Compute::Norme2D(void)
 
 bool Matrix_Compute::Norme1(double &result)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 
 	switch(data_type)
 	{
@@ -8059,7 +8059,7 @@ double Matrix_Compute::Norme1D(void)
 
 bool Matrix_Compute::Distance2(const Matrix &ma,double &result)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((columns!=ma.GetColumns()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);
@@ -8229,7 +8229,7 @@ double Matrix_Compute::Distance2D(const Matrix &ma)
 
 bool Matrix_Compute::Distance1(const Matrix &ma,double &result)
 {
-	if ((Coeff==NULL) || (lines==0) || (columns==0)) return(false);
+	if ((Coeff==nullptr) || (lines==0) || (columns==0)) return(false);
 	if (!ma.AllocCheck()) return(false);
 
 	if ((columns!=ma.GetColumns()) || (lines!=ma.GetLines()) || (ma.GetDataType()!=data_type)) return(false);

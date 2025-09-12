@@ -25,13 +25,13 @@
 #include <memory.h>
 #include <algorithm>
 
-// VS 2015
-#if _MSC_VER >= 1900
+ // VS 2013
+#if _MSC_VER >= 1800
 #define AVX2_BUILD_POSSIBLE
 #endif
 
-// VS 2019 v16.3
-#if _MSC_VER >= 1923
+// VS 2017 v15.3
+#if _MSC_VER >= 1911
 #define AVX512_BUILD_POSSIBLE
 #endif
 
@@ -5515,8 +5515,8 @@ bool Matrix_Compute::Sub_A(const Matrix &ma, const Matrix &mb)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : Sub_A(ma,mb); break;
-		case DATA_DOUBLE : Sub_A(ma,mb); break;
+		case DATA_FLOAT : SubF_A(ma,mb); break;
+		case DATA_DOUBLE : SubD_A(ma,mb); break;
 		default : return(false);
 	}
 
@@ -5533,8 +5533,8 @@ bool Matrix_Compute::Sub_A(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : Sub_A(ma); break;
-		case DATA_DOUBLE : Sub_A(ma); break;
+		case DATA_FLOAT : SubF_A(ma); break;
+		case DATA_DOUBLE : SubD_A(ma); break;
 		default : return(false);
 	}
 
@@ -5551,8 +5551,8 @@ bool Matrix_Compute::InvSub_A(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : InvSub_A(ma); break;
-		case DATA_DOUBLE : InvSub_A(ma); break;
+		case DATA_FLOAT : InvSubF_A(ma); break;
+		case DATA_DOUBLE : InvSubD_A(ma); break;
 		default : return(false);
 	}
 
@@ -6569,7 +6569,7 @@ bool Matrix_Compute::Product_tAA(void)
 	switch(data_type)
 	{
 		case DATA_FLOAT : ProductF_AB(b,a); break;
-		case DATA_DOUBLE : ProductF_AB(b,a); break;
+		case DATA_DOUBLE : ProductD_AB(b,a); break;
 		default : return(false);
 	}
 

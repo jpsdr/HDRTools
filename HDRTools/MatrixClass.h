@@ -96,9 +96,9 @@ public :
 	virtual ~Vector_Compute(void);
 
 	inline void SetSSE2(const bool val) {SSE2_Enable=val;}
-	inline void SetAVX(const bool val) {AVX_Enable=val;}
-	inline void SetAVX2(const bool val) {AVX2_Enable=val;}
-	inline void SetAVX512(const bool val) {AVX512_Enable=val;}
+	inline void SetAVX(const bool val) {AVX_Enable=val; if (val) {SSE2_Enable=true;}}
+	inline void SetAVX2(const bool val) {AVX2_Enable=val; if (val) {AVX_Enable=true; SSE2_Enable=true;}}
+	inline void SetAVX512(const bool val) {AVX512_Enable=val; if (val) {AVX2_Enable=true; AVX_Enable=true; SSE2_Enable=true;}}
 
 	bool Mult(const double coef,const Vector &x);
 	bool Mult(const double coef);
@@ -247,9 +247,9 @@ public :
 	virtual ~Matrix_Compute(void);
 
 	inline void SetSSE2(const bool val) {SSE2_Enable=val;}
-	inline void SetAVX(const bool val) {AVX_Enable=val;}
-	inline void SetAVX2(const bool val) {AVX2_Enable=val;}
-	inline void SetAVX512(const bool val) {AVX512_Enable=val;}
+	inline void SetAVX(const bool val) {AVX_Enable=val; if (val) {SSE2_Enable=true;} }
+	inline void SetAVX2(const bool val) {AVX2_Enable=val; if (val) {AVX_Enable=true; SSE2_Enable=true;}}
+	inline void SetAVX512(const bool val) {AVX512_Enable=val; if (val) {AVX2_Enable=true; AVX_Enable=true; SSE2_Enable=true;}}
 
 	bool CreateTranspose(const Matrix &m);
 	virtual bool CopyStrict(const Matrix_Compute &m);

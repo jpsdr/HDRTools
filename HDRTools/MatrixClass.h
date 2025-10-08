@@ -27,8 +27,10 @@
 #include <stdint.h>
 #include <math.h>
 
-typedef enum COEFF_DATA_TYPE_ {DATA_NONE,DATA_DOUBLE,DATA_FLOAT,DATA_UINT64,DATA_INT64,
-	DATA_UINT32,DATA_INT32,DATA_UINT16,DATA_INT16,DATA_UINT8,DATA_INT8} COEFF_DATA_TYPE;
+typedef enum MTRXLC_COEFF_DATA_TYPE_ {
+	MTRXLC_DATA_NONE,MTRXLC_DATA_DOUBLE,MTRXLC_DATA_FLOAT,MTRXLC_DATA_UINT64,MTRXLC_DATA_INT64,
+	MTRXLC_DATA_UINT32,MTRXLC_DATA_INT32,MTRXLC_DATA_UINT16,MTRXLC_DATA_INT16,
+	MTRXLC_DATA_UINT8,MTRXLC_DATA_INT8} MTRXLC_COEFF_DATA_TYPE;
 
 
 void SetCPUMatrixClass(const bool SSE2,const bool AVX,const bool AVX2,const bool AVX512);
@@ -38,13 +40,13 @@ class Vector
 {
 public :
 	Vector(void);
-	Vector(const uint16_t l,const COEFF_DATA_TYPE data);
+	Vector(const uint16_t l,const MTRXLC_COEFF_DATA_TYPE data);
 	Vector(const Vector &x);
 	virtual ~Vector(void);
 
 	inline bool AllocCheck(void) const {return(Coeff!=nullptr);}
 	bool Create(void);
-	bool Create(const uint16_t l,const COEFF_DATA_TYPE data);
+	bool Create(const uint16_t l,const MTRXLC_COEFF_DATA_TYPE data);
 	bool Create(const Vector &x);
 	bool CopyStrict(const Vector &x);
 	bool CopyRaw(const void *ptr);
@@ -55,9 +57,9 @@ public :
 	bool FillD(const double data);
 	bool FillF(const float data);
 	bool FillZero(void);
-	inline COEFF_DATA_TYPE GetDataType(void) const {return(data_type);}
-	bool SetInfo(const uint16_t l,const COEFF_DATA_TYPE data);
-	void GetInfo(uint16_t &l,COEFF_DATA_TYPE &data) const;
+	inline MTRXLC_COEFF_DATA_TYPE GetDataType(void) const {return(data_type);}
+	bool SetInfo(const uint16_t l,const MTRXLC_COEFF_DATA_TYPE data);
+	void GetInfo(uint16_t &l, MTRXLC_COEFF_DATA_TYPE &data) const;
 	inline uint16_t GetLength(void) const {return(length);}
 	inline void* GetPtrVector(void) const {return(Coeff);}
 	inline size_t GetDataSize(void) const {return(size);}
@@ -74,7 +76,7 @@ protected :
 	void *Coeff;
 	uint16_t length;
 	size_t size;
-	COEFF_DATA_TYPE data_type;
+	MTRXLC_COEFF_DATA_TYPE data_type;
 
 private :
 	Vector& operator = (const Vector &other);
@@ -91,7 +93,7 @@ protected :
 
 public :
 	Vector_Compute(void);
-	Vector_Compute(const uint16_t l,const COEFF_DATA_TYPE data);
+	Vector_Compute(const uint16_t l,const MTRXLC_COEFF_DATA_TYPE data);
 	Vector_Compute(const Vector_Compute &x);
 	virtual ~Vector_Compute(void);
 
@@ -182,15 +184,15 @@ class Matrix
 {
 public :
 	Matrix(void);
-	Matrix(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data);
+	Matrix(const uint16_t l,const uint16_t c,const MTRXLC_COEFF_DATA_TYPE data);
 	Matrix(const Matrix &m);
 	virtual ~Matrix(void);
 
 	inline bool AllocCheck(void) const {return(Coeff!=nullptr);}
 	bool Create(void);
-	bool Create(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data);
+	bool Create(const uint16_t l,const uint16_t c,const MTRXLC_COEFF_DATA_TYPE data);
 	bool Create(const Matrix &m);
-	virtual bool CopyStrict(const Matrix &m);
+	bool CopyStrict(const Matrix &m);
 	bool CopyRaw(const void *ptr);
 	bool CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch);
 	bool CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln,const uint16_t co);
@@ -201,9 +203,9 @@ public :
 	bool FillD(const double data);
 	bool FillF(const float data);
 	bool FillZero(void);
-	inline COEFF_DATA_TYPE GetDataType(void) const {return(data_type);}
-	bool SetInfo(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data);
-	void GetInfo(uint16_t &l,uint16_t &c,COEFF_DATA_TYPE &data) const;
+	inline MTRXLC_COEFF_DATA_TYPE GetDataType(void) const {return(data_type);}
+	bool SetInfo(const uint16_t l,const uint16_t c,const MTRXLC_COEFF_DATA_TYPE data);
+	void GetInfo(uint16_t &l,uint16_t &c, MTRXLC_COEFF_DATA_TYPE &data) const;
 	inline uint16_t GetLines(void) const {return(lines);}
 	inline uint16_t GetColumns(void) const {return(columns);}
 	inline void* GetPtrMatrix(void) const {return(Coeff);}
@@ -224,7 +226,7 @@ protected :
 	uint16_t columns,lines;
 	size_t size;
 	ptrdiff_t pitch;
-	COEFF_DATA_TYPE data_type;
+	MTRXLC_COEFF_DATA_TYPE data_type;
 
 	Matrix& operator=(const Matrix&){return(*this);}
 
@@ -242,7 +244,7 @@ protected :
 
 public :
 	Matrix_Compute(void);
-	Matrix_Compute(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data);
+	Matrix_Compute(const uint16_t l,const uint16_t c,const MTRXLC_COEFF_DATA_TYPE data);
 	Matrix_Compute(const Matrix_Compute &m);
 	virtual ~Matrix_Compute(void);
 
@@ -252,7 +254,7 @@ public :
 	inline void SetAVX512(const bool val) {AVX512_Enable=val; if (val) {AVX2_Enable=true; AVX_Enable=true; SSE2_Enable=true;}}
 
 	bool CreateTranspose(const Matrix &m);
-	virtual bool CopyStrict(const Matrix_Compute &m);
+	bool CopyStrict(const Matrix_Compute &m);
 	inline void SetZeroValue(const double z) {zero_value=fabs(z);}
 	inline double GetZeroValue(void) const {return(zero_value);}
 

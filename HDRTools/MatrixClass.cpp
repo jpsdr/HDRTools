@@ -25,6 +25,13 @@
 #include <memory.h>
 #include <algorithm>
 
+#define ASM_VS_ENABLE
+//#define USING_LINUX
+
+#if defined(ASM_VS_ENABLE) || defined(ASM_GCC_ENABLE)
+#define ASM_ENABLE
+#endif
+
  // VS 2013
 #if _MSC_VER >= 1800
 #define AVX2_BUILD_POSSIBLE
@@ -35,6 +42,7 @@
 #define AVX512_BUILD_POSSIBLE
 #endif
 
+#ifdef ASM_VS_ENABLE
 extern "C" void CoeffProductF_SSE2(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
 extern "C" void CoeffProductD_SSE2(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
 extern "C" void CoeffProduct2F_SSE2(const float *coeff_a,float *coeff_b,uint16_t lght);
@@ -165,6 +173,14 @@ extern "C" void VectorProdD_AVX512(const double *coeff_a,const double *coeff_b,d
 extern "C" void VectorProd2F_AVX512(float *coeff_a,const float *coeff_b,uint16_t lght);
 extern "C" void VectorProd2D_AVX512(double *coeff_a,const double *coeff_b,uint16_t lght);
 #endif
+// Endif AVX512
+#endif
+// Endif ASM
+
+#ifdef USING_LINUX
+#define _aligned_malloc(a,b) aligned_alloc(b,a) 
+#define _aligned_free(a) free(a)
+#endif
 
 #define MATRIX_ALIGN_SIZE 64
 #define MATRIX_ALIGN_SHIFT 6
@@ -184,16 +200,16 @@ Vector::Vector(void)
 	Coeff=nullptr;
 	length=0;
 	size=0;
-	data_type=DATA_NONE;
+	data_type=MTRXLC_DATA_NONE;
 }
 
 
-Vector::Vector(const uint16_t l,const COEFF_DATA_TYPE data)
+Vector::Vector(const uint16_t l,const MTRXLC_COEFF_DATA_TYPE data)
 {
 	Coeff=nullptr;
 	length=0;
 	size=0;
-	data_type=DATA_NONE;
+	data_type=MTRXLC_DATA_NONE;
 
 	if (l==0) return;
 
@@ -201,16 +217,16 @@ Vector::Vector(const uint16_t l,const COEFF_DATA_TYPE data)
 
 	switch(data)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return;
@@ -230,8 +246,8 @@ Vector::Vector(const uint16_t l,const COEFF_DATA_TYPE data)
 	{
 		switch(data_type)
 		{
-			case DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
-			case DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
+			case MTRXLC_DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
+			case MTRXLC_DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
 			default : memset(((uint8_t *)Coeff)+n0,0,n); break;
 		}
 	}
@@ -243,7 +259,7 @@ Vector::Vector(const Vector &x)
 	Coeff=nullptr;
 	length=0;
 	size=0;
-	data_type=DATA_NONE;
+	data_type=MTRXLC_DATA_NONE;
 
 	const uint16_t l=x.length;
 
@@ -253,16 +269,16 @@ Vector::Vector(const Vector &x)
 
 	switch(x.data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return;
@@ -282,8 +298,8 @@ Vector::Vector(const Vector &x)
 	{
 		switch(data_type)
 		{
-			case DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
-			case DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
+			case MTRXLC_DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
+			case MTRXLC_DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
 			default : memset(((uint8_t *)Coeff)+n0,0,n); break;
 		}
 	}
@@ -306,16 +322,16 @@ bool Vector::Create(void)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -333,8 +349,8 @@ bool Vector::Create(void)
 	{
 		switch(data_type)
 		{
-			case DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
-			case DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
+			case MTRXLC_DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
+			case MTRXLC_DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
 			default : memset(((uint8_t *)Coeff)+n0,0,n); break;
 		}
 	}
@@ -343,7 +359,7 @@ bool Vector::Create(void)
 }
 
 
-bool Vector::Create(const uint16_t l,const COEFF_DATA_TYPE data)
+bool Vector::Create(const uint16_t l,const MTRXLC_COEFF_DATA_TYPE data)
 {
 	if ((Coeff!=nullptr) || (l==0)) return(false);
 
@@ -351,16 +367,16 @@ bool Vector::Create(const uint16_t l,const COEFF_DATA_TYPE data)
 
 	switch(data)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -380,8 +396,8 @@ bool Vector::Create(const uint16_t l,const COEFF_DATA_TYPE data)
 	{
 		switch(data_type)
 		{
-			case DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
-			case DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
+			case MTRXLC_DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
+			case MTRXLC_DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
 			default : memset(((uint8_t *)Coeff)+n0,0,n); break;
 		}
 	}
@@ -402,16 +418,16 @@ bool Vector::Create(const Vector &x)
 
 	switch(x.data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -431,8 +447,8 @@ bool Vector::Create(const Vector &x)
 	{
 		switch(data_type)
 		{
-			case DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
-			case DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
+			case MTRXLC_DATA_FLOAT : std::fill_n((float *)(((uint8_t *)Coeff)+n0),n>>2,0.0f); break;
+			case MTRXLC_DATA_DOUBLE : std::fill_n((double *)(((uint8_t *)Coeff)+n0),n>>3,0.0); break;
 			default : memset(((uint8_t *)Coeff)+n0,0,n); break;
 		}
 	}
@@ -452,7 +468,7 @@ void Vector::Destroy(void)
 	}
 	length=0;
 	size=0;
-	data_type=DATA_NONE;
+	data_type= MTRXLC_DATA_NONE;
 }
 
 
@@ -468,16 +484,16 @@ bool Vector::CopyStrict(const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -498,16 +514,16 @@ bool Vector::CopyRaw(const void *ptr)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -528,16 +544,16 @@ bool Vector::CopyRaw(const void *ptr,const uint16_t lgth)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -558,16 +574,16 @@ bool Vector::ExportRaw(void *ptr)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -588,16 +604,16 @@ bool Vector::ExportRaw(void *ptr,const uint16_t lgth)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -612,7 +628,7 @@ bool Vector::ExportRaw(void *ptr,const uint16_t lgth)
 
 bool Vector::FillD(const double data)
 {
-	if ((Coeff==nullptr) || (length==0) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (data_type!=MTRXLC_DATA_DOUBLE)) return(false);
 
 	std::fill_n((double *)Coeff,length,data);
 
@@ -622,7 +638,7 @@ bool Vector::FillD(const double data)
 
 bool Vector::FillF(const float data)
 {
-	if ((Coeff==nullptr) || (length==0) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (data_type!=MTRXLC_DATA_FLOAT)) return(false);
 
 	std::fill_n((float *)Coeff,length,data);
 
@@ -636,8 +652,8 @@ bool Vector::FillZero(void)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : std::fill_n((float *)Coeff,length,0.0f); break;
-		case DATA_DOUBLE : std::fill_n((double *)Coeff,length,0.0); break;
+		case MTRXLC_DATA_FLOAT : std::fill_n((float *)Coeff,length,0.0f); break;
+		case MTRXLC_DATA_DOUBLE : std::fill_n((double *)Coeff,length,0.0); break;
 		default : memset(Coeff,0,size); break;
 	}
 
@@ -645,9 +661,9 @@ bool Vector::FillZero(void)
 }
 
 
-bool Vector::SetInfo(const uint16_t l,const COEFF_DATA_TYPE data)
+bool Vector::SetInfo(const uint16_t l,const MTRXLC_COEFF_DATA_TYPE data)
 {
-	if ((Coeff!=nullptr) || (length!=0) || (l==0) || (data_type==DATA_NONE)) return(false);
+	if ((Coeff!=nullptr) || (length!=0) || (l==0) || (data_type==MTRXLC_DATA_NONE)) return(false);
 
 	length=l; data_type=data;
 
@@ -655,7 +671,7 @@ bool Vector::SetInfo(const uint16_t l,const COEFF_DATA_TYPE data)
 }
 
 
-void Vector::GetInfo(uint16_t &l,COEFF_DATA_TYPE &data) const
+void Vector::GetInfo(uint16_t &l, MTRXLC_COEFF_DATA_TYPE &data) const
 {
 	l=length; data=data_type;
 }
@@ -663,7 +679,7 @@ void Vector::GetInfo(uint16_t &l,COEFF_DATA_TYPE &data) const
 
 bool Vector::GetSafeD(const uint16_t i,double &d) const
 {
-	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=MTRXLC_DATA_DOUBLE)) return(false);
 
 	d=((double *)Coeff)[i];
 
@@ -673,7 +689,7 @@ bool Vector::GetSafeD(const uint16_t i,double &d) const
 
 bool Vector::SetSafeD(const uint16_t i,const double d)
 {
-	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=MTRXLC_DATA_DOUBLE)) return(false);
 
 	((double *)Coeff)[i]=d;
 
@@ -683,7 +699,7 @@ bool Vector::SetSafeD(const uint16_t i,const double d)
 
 bool Vector::GetSafeF(const uint16_t i,float &d) const
 {
-	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=MTRXLC_DATA_FLOAT)) return(false);
 
 	d=((float *)Coeff)[i];
 
@@ -693,7 +709,7 @@ bool Vector::GetSafeF(const uint16_t i,float &d) const
 
 bool Vector::SetSafeF(const uint16_t i,const float d)
 {
-	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (length==0) || (i>=length) || (data_type!=MTRXLC_DATA_FLOAT)) return(false);
 
 	((float *)Coeff)[i]=d;
 
@@ -717,7 +733,7 @@ Vector_Compute::~Vector_Compute(void)
 }
 
 
-Vector_Compute::Vector_Compute(const uint16_t l,const COEFF_DATA_TYPE data):Vector(l,data)
+Vector_Compute::Vector_Compute(const uint16_t l,const MTRXLC_COEFF_DATA_TYPE data):Vector(l,data)
 {
 	SSE2_Enable=g_EnableSSE2;
 	AVX_Enable=g_EnableAVX;
@@ -745,8 +761,8 @@ bool Vector_Compute::Product_AX(const Matrix &ma, const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : ProductF_AX(ma,x); break;
-		case DATA_DOUBLE : ProductD_AX(ma,x); break;
+		case MTRXLC_DATA_FLOAT : ProductF_AX(ma,x); break;
+		case MTRXLC_DATA_DOUBLE : ProductD_AX(ma,x); break;
 		default : return(false);
 	}
 
@@ -767,8 +783,8 @@ bool Vector_Compute::Product_AX(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : ProductF_AX(ma,b); break;
-		case DATA_DOUBLE : ProductD_AX(ma,b); break;
+		case MTRXLC_DATA_FLOAT : ProductF_AX(ma,b); break;
+		case MTRXLC_DATA_DOUBLE : ProductD_AX(ma,b); break;
 		default : return(false);
 	}
 
@@ -784,6 +800,7 @@ void Vector_Compute::ProductF_AX(const Matrix &ma, const Vector &x)
 	float *c1=(float *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch();
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -822,6 +839,7 @@ void Vector_Compute::ProductF_AX(const Matrix &ma, const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const float *a1=(const float *)a0;
@@ -832,9 +850,11 @@ void Vector_Compute::ProductF_AX(const Matrix &ma, const Vector &x)
 					*c1++=s;
 					a0+=pa;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -846,6 +866,7 @@ void Vector_Compute::ProductD_AX(const Matrix &ma, const Vector &x)
 	double *c1=(double *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch();
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -884,6 +905,7 @@ void Vector_Compute::ProductD_AX(const Matrix &ma, const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const double *a1=(const double *)a0;
@@ -894,9 +916,11 @@ void Vector_Compute::ProductD_AX(const Matrix &ma, const Vector &x)
 					*c1++=s;
 					a0+=pa;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -910,8 +934,8 @@ bool Vector_Compute::Product_tAX(const Matrix &ma, const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : ProductF_tAX(ma,x); break;
-		case DATA_DOUBLE : ProductD_tAX(ma,x); break;
+		case MTRXLC_DATA_FLOAT : ProductF_tAX(ma,x); break;
+		case MTRXLC_DATA_DOUBLE : ProductD_tAX(ma,x); break;
 		default : return(false);
 	}
 
@@ -932,8 +956,8 @@ bool Vector_Compute::Product_tAX(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : ProductF_tAX(ma,b); break;
-		case DATA_DOUBLE : ProductD_tAX(ma,b); break;
+		case MTRXLC_DATA_FLOAT : ProductF_tAX(ma,b); break;
+		case MTRXLC_DATA_DOUBLE : ProductD_tAX(ma,b); break;
 		default : return(false);
 	}
 
@@ -947,6 +971,7 @@ void Vector_Compute::ProductF_tAX(const Matrix &ma, const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1006,6 +1031,7 @@ void Vector_Compute::ProductF_tAX(const Matrix &ma, const Vector &x)
 			}
 			else
 			{
+#endif
 				const uint8_t *a0=(uint8_t *)ma.GetPtrMatrix();
 				const ptrdiff_t pa=ma.GetPitch();
 
@@ -1023,9 +1049,11 @@ void Vector_Compute::ProductF_tAX(const Matrix &ma, const Vector &x)
 
 					a0+=sizeof(float);
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1035,6 +1063,7 @@ void Vector_Compute::ProductD_tAX(const Matrix &ma, const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1094,6 +1123,7 @@ void Vector_Compute::ProductD_tAX(const Matrix &ma, const Vector &x)
 			}
 			else
 			{
+#endif
 				const uint8_t *a0=(uint8_t *)ma.GetPtrMatrix();
 				const ptrdiff_t pa=ma.GetPitch();
 
@@ -1111,9 +1141,11 @@ void Vector_Compute::ProductD_tAX(const Matrix &ma, const Vector &x)
 
 					a0+=sizeof(double);
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1137,8 +1169,8 @@ bool Vector_Compute::Mult(const double coef,const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : MultF(coef,x); break;
-		case DATA_DOUBLE : MultD(coef,x); break;
+		case MTRXLC_DATA_FLOAT : MultF(coef,x); break;
+		case MTRXLC_DATA_DOUBLE : MultD(coef,x); break;
 		default : return(false);
 	}
 
@@ -1160,8 +1192,8 @@ bool Vector_Compute::Mult(const double coef)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : MultF(coef); break;
-		case DATA_DOUBLE : MultD(coef); break;
+		case MTRXLC_DATA_FLOAT : MultF(coef); break;
+		case MTRXLC_DATA_DOUBLE : MultD(coef); break;
 		default : return(false);
 	}
 
@@ -1176,6 +1208,7 @@ void Vector_Compute::MultF(const double coef, const Vector &x)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1202,11 +1235,14 @@ void Vector_Compute::MultF(const double coef, const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=b*x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1216,6 +1252,7 @@ void Vector_Compute::MultF(const double coef)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1242,11 +1279,14 @@ void Vector_Compute::MultF(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]*=b;
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1256,6 +1296,7 @@ void Vector_Compute::MultD(const double coef, const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1282,11 +1323,15 @@ void Vector_Compute::MultD(const double coef, const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=coef*x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
+
 }
 
 
@@ -1295,6 +1340,7 @@ void Vector_Compute::MultD(const double coef)
 	const uint16_t l=length;
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1321,11 +1367,14 @@ void Vector_Compute::MultD(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]*=coef;
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1344,8 +1393,8 @@ bool Vector_Compute::Add(const double coef,const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : AddF(coef,x); break;
-		case DATA_DOUBLE : AddD(coef,x); break;
+		case MTRXLC_DATA_FLOAT : AddF(coef,x); break;
+		case MTRXLC_DATA_DOUBLE : AddD(coef,x); break;
 		default : return(false);
 	}
 
@@ -1361,8 +1410,8 @@ bool Vector_Compute::Add(const double coef)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : AddF(coef); break;
-		case DATA_DOUBLE : AddD(coef); break;
+		case MTRXLC_DATA_FLOAT : AddF(coef); break;
+		case MTRXLC_DATA_DOUBLE : AddD(coef); break;
 		default : return(false);
 	}
 
@@ -1377,6 +1426,7 @@ void Vector_Compute::AddF(const double coef, const Vector &x)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1409,11 +1459,14 @@ void Vector_Compute::AddF(const double coef, const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=b+x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1423,6 +1476,7 @@ void Vector_Compute::AddF(const double coef)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1455,11 +1509,14 @@ void Vector_Compute::AddF(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]+=b;
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1469,6 +1526,7 @@ void Vector_Compute::AddD(const double coef, const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1501,11 +1559,14 @@ void Vector_Compute::AddD(const double coef, const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=coef+x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1514,6 +1575,7 @@ void Vector_Compute::AddD(const double coef)
 	const uint16_t l=length;
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1546,11 +1608,14 @@ void Vector_Compute::AddD(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]+=coef;
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1569,8 +1634,8 @@ bool Vector_Compute::Sub(const double coef,const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : SubF(coef,x); break;
-		case DATA_DOUBLE : SubD(coef,x); break;
+		case MTRXLC_DATA_FLOAT : SubF(coef,x); break;
+		case MTRXLC_DATA_DOUBLE : SubD(coef,x); break;
 		default : return(false);
 	}
 
@@ -1586,8 +1651,8 @@ bool Vector_Compute::Sub(const double coef)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : SubF(coef); break;
-		case DATA_DOUBLE : SubD(coef); break;
+		case MTRXLC_DATA_FLOAT : SubF(coef); break;
+		case MTRXLC_DATA_DOUBLE : SubD(coef); break;
 		default : return(false);
 	}
 
@@ -1602,6 +1667,7 @@ void Vector_Compute::SubF(const double coef, const Vector &x)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1634,11 +1700,14 @@ void Vector_Compute::SubF(const double coef, const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=b-x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1648,6 +1717,7 @@ void Vector_Compute::SubF(const double coef)
 	float *c1=(float *)Coeff;
 	float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1680,11 +1750,14 @@ void Vector_Compute::SubF(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=b-c1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1694,6 +1767,7 @@ void Vector_Compute::SubD(const double coef, const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1726,11 +1800,14 @@ void Vector_Compute::SubD(const double coef, const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=coef-x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1739,6 +1816,7 @@ void Vector_Compute::SubD(const double coef)
 	const uint16_t l=length;
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1771,11 +1849,14 @@ void Vector_Compute::SubD(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=coef-c1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1789,8 +1870,8 @@ bool Vector_Compute::Add_X(const Vector &x,const Vector &y)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : AddF_X(x,y); break;
-		case DATA_DOUBLE : AddD_X(x,y); break;
+		case MTRXLC_DATA_FLOAT : AddF_X(x,y); break;
+		case MTRXLC_DATA_DOUBLE : AddD_X(x,y); break;
 		default : return(false);
 	}
 
@@ -1807,8 +1888,8 @@ bool Vector_Compute::Add_X(const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : AddF_X(x); break;
-		case DATA_DOUBLE : AddD_X(x); break;
+		case MTRXLC_DATA_FLOAT : AddF_X(x); break;
+		case MTRXLC_DATA_DOUBLE : AddD_X(x); break;
 		default : return(false);
 	}
 
@@ -1823,6 +1904,7 @@ void Vector_Compute::AddF_X(const Vector &x,const Vector &y)
 	const float *y1=(const float *)y.GetPtrVector();
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1849,11 +1931,14 @@ void Vector_Compute::AddF_X(const Vector &x,const Vector &y)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=x1[i]+y1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1863,6 +1948,7 @@ void Vector_Compute::AddF_X(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1889,11 +1975,14 @@ void Vector_Compute::AddF_X(const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]+=x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1904,6 +1993,7 @@ void Vector_Compute::AddD_X(const Vector &x,const Vector &y)
 	const double *y1=(const double *)y.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1930,11 +2020,14 @@ void Vector_Compute::AddD_X(const Vector &x,const Vector &y)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=x1[i]+y1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1944,6 +2037,7 @@ void Vector_Compute::AddD_X(const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -1970,11 +2064,14 @@ void Vector_Compute::AddD_X(const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]+=x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -1988,8 +2085,8 @@ bool Vector_Compute::Sub_X(const Vector &x,const Vector &y)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : SubF_X(x,y); break;
-		case DATA_DOUBLE : SubD_X(x,y); break;
+		case MTRXLC_DATA_FLOAT : SubF_X(x,y); break;
+		case MTRXLC_DATA_DOUBLE : SubD_X(x,y); break;
 		default : return(false);
 	}
 
@@ -2006,8 +2103,8 @@ bool Vector_Compute::Sub_X(const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : SubF_X(x); break;
-		case DATA_DOUBLE : SubD_X(x); break;
+		case MTRXLC_DATA_FLOAT : SubF_X(x); break;
+		case MTRXLC_DATA_DOUBLE : SubD_X(x); break;
 		default : return(false);
 	}
 
@@ -2024,8 +2121,8 @@ bool Vector_Compute::InvSub_X(const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : InvSubF_X(x); break;
-		case DATA_DOUBLE : InvSubD_X(x); break;
+		case MTRXLC_DATA_FLOAT : InvSubF_X(x); break;
+		case MTRXLC_DATA_DOUBLE : InvSubD_X(x); break;
 		default : return(false);
 	}
 
@@ -2040,6 +2137,7 @@ void Vector_Compute::SubF_X(const Vector &x,const Vector &y)
 	const float *y1=(const float *)y.GetPtrVector();
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2066,11 +2164,14 @@ void Vector_Compute::SubF_X(const Vector &x,const Vector &y)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=x1[i]-y1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2080,6 +2181,7 @@ void Vector_Compute::SubF_X(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2106,11 +2208,14 @@ void Vector_Compute::SubF_X(const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]-=x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2120,6 +2225,7 @@ void Vector_Compute::InvSubF_X(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2146,11 +2252,14 @@ void Vector_Compute::InvSubF_X(const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=x1[i]-c1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2161,6 +2270,7 @@ void Vector_Compute::SubD_X(const Vector &x,const Vector &y)
 	const double *y1=(const double *)y.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2187,11 +2297,14 @@ void Vector_Compute::SubD_X(const Vector &x,const Vector &y)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=x1[i]-y1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2201,6 +2314,7 @@ void Vector_Compute::SubD_X(const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2227,11 +2341,14 @@ void Vector_Compute::SubD_X(const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]-=x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2241,6 +2358,7 @@ void Vector_Compute::InvSubD_X(const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2267,11 +2385,14 @@ void Vector_Compute::InvSubD_X(const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=x1[i]-c1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2285,8 +2406,8 @@ bool Vector_Compute::Mult_X(const Vector &x,const Vector &y)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : MultF_X(x,y); break;
-		case DATA_DOUBLE : MultD_X(x,y); break;
+		case MTRXLC_DATA_FLOAT : MultF_X(x,y); break;
+		case MTRXLC_DATA_DOUBLE : MultD_X(x,y); break;
 		default : return(false);
 	}
 
@@ -2303,8 +2424,8 @@ bool Vector_Compute::Mult_X(const Vector &x)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : MultF_X(x); break;
-		case DATA_DOUBLE : MultD_X(x); break;
+		case MTRXLC_DATA_FLOAT : MultF_X(x); break;
+		case MTRXLC_DATA_DOUBLE : MultD_X(x); break;
 		default : return(false);
 	}
 
@@ -2319,6 +2440,7 @@ void Vector_Compute::MultF_X(const Vector &x,const Vector &y)
 	const float *y1=(const float *)y.GetPtrVector();
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2345,11 +2467,14 @@ void Vector_Compute::MultF_X(const Vector &x,const Vector &y)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=x1[i]*y1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2359,6 +2484,7 @@ void Vector_Compute::MultF_X(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2385,11 +2511,14 @@ void Vector_Compute::MultF_X(const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]*=x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2400,6 +2529,7 @@ void Vector_Compute::MultD_X(const Vector &x,const Vector &y)
 	const double *y1=(const double *)y.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2426,11 +2556,14 @@ void Vector_Compute::MultD_X(const Vector &x,const Vector &y)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]=x1[i]*y1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2440,6 +2573,7 @@ void Vector_Compute::MultD_X(const Vector &x)
 	const double *x1=(const double *)x.GetPtrVector();
 	double *c1=(double *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2466,11 +2600,14 @@ void Vector_Compute::MultD_X(const Vector &x)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 					c1[i]*=x1[i];
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2483,8 +2620,8 @@ bool Vector_Compute::Distance2(const Vector &x,double &result)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : result=Distance2F(x); break;
-		case DATA_DOUBLE : result=Distance2D(x); break;
+		case MTRXLC_DATA_FLOAT : result=Distance2F(x); break;
+		case MTRXLC_DATA_DOUBLE : result=Distance2D(x); break;
 		default : return(false);
 	}
 
@@ -2498,6 +2635,7 @@ double Vector_Compute::Distance2F(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	const float *c1=(const float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2533,6 +2671,7 @@ double Vector_Compute::Distance2F(const Vector &x)
 			}
 			else
 			{
+#endif
 				double r=0.0;
 
 				for (uint16_t i=0; i<l; i++)
@@ -2543,9 +2682,11 @@ double Vector_Compute::Distance2F(const Vector &x)
 				}
 				r=sqrt(r);
 				return(r);
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2556,6 +2697,7 @@ double Vector_Compute::Distance2D(const Vector &x)
 	const double *c1=(const double *)Coeff;
 	double r;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2582,6 +2724,7 @@ double Vector_Compute::Distance2D(const Vector &x)
 			}
 			else
 			{
+#endif
 				r=0.0;
 				for (uint16_t i=0; i<l; i++)
 				{
@@ -2590,9 +2733,11 @@ double Vector_Compute::Distance2D(const Vector &x)
 					r+=d*d;
 				}
 				r=sqrt(r);
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(r);
 }
 
@@ -2606,8 +2751,8 @@ bool Vector_Compute::Distance1(const Vector &x,double &result)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : result=Distance1F(x); break;
-		case DATA_DOUBLE : result=Distance1D(x); break;
+		case MTRXLC_DATA_FLOAT : result=Distance1F(x); break;
+		case MTRXLC_DATA_DOUBLE : result=Distance1D(x); break;
 		default : return(false);
 	}
 
@@ -2621,6 +2766,7 @@ double Vector_Compute::Distance1F(const Vector &x)
 	const float *x1=(const float *)x.GetPtrVector();
 	const float *c1=(const float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2656,14 +2802,17 @@ double Vector_Compute::Distance1F(const Vector &x)
 			}
 			else
 			{
+#endif
 				double r=0.0;
 
 				for (uint16_t i=0; i<l; i++)
 					r+=fabs(c1[i]-x1[i]);
 				return(r);
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2674,6 +2823,7 @@ double Vector_Compute::Distance1D(const Vector &x)
 	const double *c1=(const double *)Coeff;
 	double r;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2700,12 +2850,15 @@ double Vector_Compute::Distance1D(const Vector &x)
 			}
 			else
 			{
+#endif
 				r=0.0;
 				for (uint16_t i=0; i<l; i++)
 					r+=fabs(c1[i]-x1[i]);
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(r);
 }
 
@@ -2716,8 +2869,8 @@ bool Vector_Compute::Norme2(double &result)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : result=Norme2F(); break;
-		case DATA_DOUBLE : result=Norme2D(); break;
+		case MTRXLC_DATA_FLOAT : result=Norme2F(); break;
+		case MTRXLC_DATA_DOUBLE : result=Norme2D(); break;
 		default : return(false);
 	}
 
@@ -2730,6 +2883,7 @@ double Vector_Compute::Norme2F(void)
 	const uint16_t l=length;
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2765,6 +2919,7 @@ double Vector_Compute::Norme2F(void)
 			}
 			else
 			{
+#endif
 				double r=0.0;
 
 				for (uint16_t i=0; i<l; i++)
@@ -2774,9 +2929,11 @@ double Vector_Compute::Norme2F(void)
 				}
 				r=sqrt(r);
 				return(r);
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2786,6 +2943,7 @@ double Vector_Compute::Norme2D(void)
 	double *c1=(double *)Coeff;
 	double r;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2812,6 +2970,7 @@ double Vector_Compute::Norme2D(void)
 			}
 			else
 			{
+#endif
 				r=0.0;
 				for (uint16_t i=0; i<l; i++)
 				{
@@ -2819,9 +2978,11 @@ double Vector_Compute::Norme2D(void)
 					r+=d*d;
 				}
 				r=sqrt(r);
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(r);
 }
 
@@ -2832,8 +2993,8 @@ bool Vector_Compute::Norme1(double &result)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : result=Norme1F(); break;
-		case DATA_DOUBLE : result=Norme1D(); break;
+		case MTRXLC_DATA_FLOAT : result=Norme1F(); break;
+		case MTRXLC_DATA_DOUBLE : result=Norme1D(); break;
 		default : return(false);
 	}
 
@@ -2846,6 +3007,7 @@ double Vector_Compute::Norme1F(void)
 	const uint16_t l=length;
 	float *c1=(float *)Coeff;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2881,14 +3043,17 @@ double Vector_Compute::Norme1F(void)
 			}
 			else
 			{
+#endif
 				double r=0.0;
 
 				for (uint16_t i=0; i<l; i++)
 					r+=fabs(c1[i]);
 				return(r);
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -2898,6 +3063,7 @@ double Vector_Compute::Norme1D(void)
 	double *c1=(double *)Coeff;
 	double r;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -2924,12 +3090,15 @@ double Vector_Compute::Norme1D(void)
 			}
 			else
 			{
+#endif
 				r=0.0;
 				for (uint16_t i=0; i<l; i++)
 					r+=fabs(c1[i]);
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(r);
 }
 
@@ -2943,17 +3112,17 @@ Matrix::Matrix(void)
 	columns=0; lines=0;
 	size=0;
 	pitch=0;
-	data_type=DATA_NONE;
+	data_type=MTRXLC_DATA_NONE;
 }
 
 
-Matrix::Matrix(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
+Matrix::Matrix(const uint16_t l,const uint16_t c,const MTRXLC_COEFF_DATA_TYPE data)
 {
 	Coeff=nullptr;
 	columns=0; lines=0;
 	size=0;
 	pitch=0;
-	data_type=DATA_NONE;
+	data_type=MTRXLC_DATA_NONE;
 
 	if ((c==0) || (l==0)) return;
 
@@ -2961,16 +3130,16 @@ Matrix::Matrix(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
 
 	switch(data)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return;
@@ -2993,14 +3162,14 @@ Matrix::Matrix(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
 
 		switch(data_type)
 		{
-			case DATA_FLOAT :
+			case MTRXLC_DATA_FLOAT :
 				for(uint16_t i=0; i<l; i++)
 				{
 					std::fill_n((float *)(a+n0),n>>2,0.0f);
 					a+=p0;
 				}
 				break;
-			case DATA_DOUBLE :
+			case MTRXLC_DATA_DOUBLE :
 				for(uint16_t i=0; i<l; i++)
 				{
 					std::fill_n((double *)(a+n0),n>>3,0.0);
@@ -3025,7 +3194,7 @@ Matrix::Matrix(const Matrix &m)
 	columns=0; lines=0;
 	size=0;
 	pitch=0;
-	data_type=DATA_NONE;
+	data_type=MTRXLC_DATA_NONE;
 
 	const uint16_t c=m.columns,l=m.lines;
 
@@ -3035,16 +3204,16 @@ Matrix::Matrix(const Matrix &m)
 
 	switch(m.data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return;
@@ -3067,14 +3236,14 @@ Matrix::Matrix(const Matrix &m)
 
 		switch(data_type)
 		{
-			case DATA_FLOAT :
+			case MTRXLC_DATA_FLOAT :
 				for(uint16_t i=0; i<l; i++)
 				{
 					std::fill_n((float *)(a+n0),n>>2,0.0f);
 					a+=p0;
 				}
 				break;
-			case DATA_DOUBLE :
+			case MTRXLC_DATA_DOUBLE :
 				for(uint16_t i=0; i<l; i++)
 				{
 					std::fill_n((double *)(a+n0),n>>3,0.0);
@@ -3109,16 +3278,16 @@ bool Matrix::Create(void)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3139,14 +3308,14 @@ bool Matrix::Create(void)
 
 		switch(data_type)
 		{
-			case DATA_FLOAT :
+			case MTRXLC_DATA_FLOAT :
 				for(uint16_t i=0; i<lines; i++)
 				{
 					std::fill_n((float *)(a+n0),n>>2,0.0f);
 					a+=p0;
 				}
 				break;
-			case DATA_DOUBLE :
+			case MTRXLC_DATA_DOUBLE :
 				for(uint16_t i=0; i<lines; i++)
 				{
 					std::fill_n((double *)(a+n0),n>>3,0.0);
@@ -3179,16 +3348,16 @@ bool Matrix::Create(const Matrix &m)
 
 	switch(m.data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3211,14 +3380,14 @@ bool Matrix::Create(const Matrix &m)
 
 		switch(data_type)
 		{
-			case DATA_FLOAT :
+			case MTRXLC_DATA_FLOAT :
 				for(uint16_t i=0; i<l; i++)
 				{
 					std::fill_n((float *)(a+n0),n>>2,0.0f);
 					a+=p0;
 				}
 				break;
-			case DATA_DOUBLE :
+			case MTRXLC_DATA_DOUBLE :
 				for(uint16_t i=0; i<l; i++)
 				{
 					std::fill_n((double *)(a+n0),n>>3,0.0);
@@ -3239,7 +3408,7 @@ bool Matrix::Create(const Matrix &m)
 }
 
 
-bool Matrix::Create(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
+bool Matrix::Create(const uint16_t l,const uint16_t c,const MTRXLC_COEFF_DATA_TYPE data)
 {
 	if ((Coeff!=nullptr) || (c==0) || (l==0)) return(false);
 
@@ -3247,16 +3416,16 @@ bool Matrix::Create(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data
 
 	switch(data)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3278,14 +3447,14 @@ bool Matrix::Create(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data
 
 		switch(data_type)
 		{
-			case DATA_FLOAT :
+			case MTRXLC_DATA_FLOAT :
 				for(uint16_t i=0; i<l; i++)
 				{
 					std::fill_n((float *)(a+n0),n>>2,0.0f);
 					a+=p0;
 				}
 				break;
-			case DATA_DOUBLE :
+			case MTRXLC_DATA_DOUBLE :
 				for(uint16_t i=0; i<l; i++)
 				{
 					std::fill_n((double *)(a+n0),n>>3,0.0);
@@ -3316,7 +3485,7 @@ void Matrix::Destroy(void)
 	columns=0; lines=0;
 	size=0;
 	pitch=0;
-	data_type=DATA_NONE;
+	data_type=MTRXLC_DATA_NONE;
 }
 
 
@@ -3324,7 +3493,7 @@ bool Matrix::FillD(const double data)
 {
 	const uint16_t l=lines,c=columns;
 
-	if ((Coeff==nullptr) || (c==0) || (l==0) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (c==0) || (l==0) || (data_type!=MTRXLC_DATA_DOUBLE)) return(false);
 
 	uint8_t *a=(uint8_t *)Coeff;
 
@@ -3342,7 +3511,7 @@ bool Matrix::FillF(const float data)
 {
 	const uint16_t l=lines,c=columns;
 
-	if ((Coeff==nullptr) || (c==0) || (l==0) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (c==0) || (l==0) || (data_type!=MTRXLC_DATA_FLOAT)) return(false);
 
 	uint8_t *a=(uint8_t *)Coeff;
 
@@ -3364,14 +3533,14 @@ bool Matrix::FillZero(void)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT :
+		case MTRXLC_DATA_FLOAT :
 			for(uint16_t i=0; i<lines; i++)
 			{
 				std::fill_n((float *)a,columns,0.0f);
 				a+=pitch;
 			}
 			break;
-		case DATA_DOUBLE :
+		case MTRXLC_DATA_DOUBLE :
 			for(uint16_t i=0; i<lines; i++)
 			{
 				std::fill_n((double *)a,columns,0.0);
@@ -3385,9 +3554,9 @@ bool Matrix::FillZero(void)
 }
 
 
-bool Matrix::SetInfo(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data)
+bool Matrix::SetInfo(const uint16_t l,const uint16_t c,const MTRXLC_COEFF_DATA_TYPE data)
 {
-	if ((Coeff!=nullptr) || (columns!=0) || (lines!=0) || (c==0) || (l==0) || (data_type==DATA_NONE)) return(false);
+	if ((Coeff!=nullptr) || (columns!=0) || (lines!=0) || (c==0) || (l==0) || (data_type==MTRXLC_DATA_NONE)) return(false);
 
 	columns=c; lines=l; data_type=data;
 
@@ -3395,7 +3564,7 @@ bool Matrix::SetInfo(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE dat
 }
 
 
-void Matrix::GetInfo(uint16_t &l,uint16_t &c,COEFF_DATA_TYPE &data) const
+void Matrix::GetInfo(uint16_t &l,uint16_t &c, MTRXLC_COEFF_DATA_TYPE &data) const
 {
 	c=columns; l=lines; data=data_type;
 }
@@ -3403,7 +3572,7 @@ void Matrix::GetInfo(uint16_t &l,uint16_t &c,COEFF_DATA_TYPE &data) const
 
 bool Matrix::GetSafeD(const uint16_t i,const uint16_t j,double &d) const
 {
-	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=MTRXLC_DATA_DOUBLE)) return(false);
 
 	d=((double *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j];
 
@@ -3413,7 +3582,7 @@ bool Matrix::GetSafeD(const uint16_t i,const uint16_t j,double &d) const
 
 bool Matrix::SetSafeD(const uint16_t i,const uint16_t j,const double d)
 {
-	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_DOUBLE)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=MTRXLC_DATA_DOUBLE)) return(false);
 
 	((double *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]=d;
 
@@ -3423,7 +3592,7 @@ bool Matrix::SetSafeD(const uint16_t i,const uint16_t j,const double d)
 
 bool Matrix::GetSafeF(const uint16_t i,const uint16_t j,float &d) const
 {
-	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=MTRXLC_DATA_FLOAT)) return(false);
 
 	d=((float *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j];
 
@@ -3433,7 +3602,7 @@ bool Matrix::GetSafeF(const uint16_t i,const uint16_t j,float &d) const
 
 bool Matrix::SetSafeF(const uint16_t i,const uint16_t j,const float d)
 {
-	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=DATA_FLOAT)) return(false);
+	if ((Coeff==nullptr) || (columns==0) || (lines==0) || (i>=lines) || (j>=columns) || (data_type!=MTRXLC_DATA_FLOAT)) return(false);
 
 	((float *)((uint8_t *)Coeff+(ptrdiff_t)i*pitch))[j]=d;
 
@@ -3453,16 +3622,16 @@ bool Matrix::CopyStrict(const Matrix &m)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3491,16 +3660,16 @@ bool Matrix::CopyRaw(const void *ptr)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3528,16 +3697,16 @@ bool Matrix::CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3565,16 +3734,16 @@ bool Matrix::CopyRaw(const void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3602,16 +3771,16 @@ bool Matrix::ExportRaw(void *ptr)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3639,16 +3808,16 @@ bool Matrix::ExportRaw(void *ptr,const ptrdiff_t ptr_pitch)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3676,16 +3845,16 @@ bool Matrix::ExportRaw(void *ptr,const ptrdiff_t ptr_pitch,const uint16_t ln,con
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3721,7 +3890,7 @@ Matrix_Compute::~Matrix_Compute(void)
 }
 
 
-Matrix_Compute::Matrix_Compute(const uint16_t l,const uint16_t c,const COEFF_DATA_TYPE data):Matrix(l,c,data)
+Matrix_Compute::Matrix_Compute(const uint16_t l,const uint16_t c,const MTRXLC_COEFF_DATA_TYPE data):Matrix(l,c,data)
 {
 	zero_value=0.0;
 	SSE2_Enable=g_EnableSSE2;
@@ -3761,16 +3930,16 @@ bool Matrix_Compute::CreateTranspose(const Matrix &m)
 
 	switch(m.GetDataType())
 	{
-		case DATA_FLOAT : coeff_size=sizeof(float); break;
-		case DATA_DOUBLE : coeff_size=sizeof(double); break;
-		case DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
-		case DATA_INT64 : coeff_size=sizeof(int64_t); break;
-		case DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
-		case DATA_INT32 : coeff_size=sizeof(int32_t); break;
-		case DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
-		case DATA_INT16 : coeff_size=sizeof(int16_t); break;
-		case DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
-		case DATA_INT8 : coeff_size=sizeof(int8_t); break;
+		case MTRXLC_DATA_FLOAT : coeff_size=sizeof(float); break;
+		case MTRXLC_DATA_DOUBLE : coeff_size=sizeof(double); break;
+		case MTRXLC_DATA_UINT64 : coeff_size=sizeof(uint64_t); break;
+		case MTRXLC_DATA_INT64 : coeff_size=sizeof(int64_t); break;
+		case MTRXLC_DATA_UINT32 : coeff_size=sizeof(uint32_t); break;
+		case MTRXLC_DATA_INT32 : coeff_size=sizeof(int32_t); break;
+		case MTRXLC_DATA_UINT16 : coeff_size=sizeof(uint16_t); break;
+		case MTRXLC_DATA_INT16 : coeff_size=sizeof(int16_t); break;
+		case MTRXLC_DATA_UINT8 : coeff_size=sizeof(uint8_t); break;
+		case MTRXLC_DATA_INT8 : coeff_size=sizeof(int8_t); break;
 		default : coeff_size=0; break;
 	}
 	if (coeff_size==0) return(false);
@@ -3793,14 +3962,14 @@ bool Matrix_Compute::CreateTranspose(const Matrix &m)
 
 		switch(data_type)
 		{
-			case DATA_FLOAT :
+			case MTRXLC_DATA_FLOAT :
 				for(uint16_t i=0; i<lines; i++)
 				{
 					std::fill_n((float *)(a+n0),n>>2,0.0f);
 					a+=p0;
 				}
 				break;
-			case DATA_DOUBLE :
+			case MTRXLC_DATA_DOUBLE :
 				for(uint16_t i=0; i<lines; i++)
 				{
 					std::fill_n((double *)(a+n0),n>>3,0.0);
@@ -3819,16 +3988,16 @@ bool Matrix_Compute::CreateTranspose(const Matrix &m)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : TransposeF(m); break;
-		case DATA_DOUBLE : TransposeD(m); break;
-		case DATA_UINT64 : TransposeU64(m); break;
-		case DATA_INT64 : TransposeI64(m); break;
-		case DATA_UINT32 : TransposeU32(m); break;
-		case DATA_INT32 : TransposeI32(m); break;
-		case DATA_UINT16 : TransposeU16(m); break;
-		case DATA_INT16 : TransposeI16(m); break;
-		case DATA_UINT8 : TransposeU8(m); break;
-		case DATA_INT8 : TransposeI8(m); break;
+		case MTRXLC_DATA_FLOAT : TransposeF(m); break;
+		case MTRXLC_DATA_DOUBLE : TransposeD(m); break;
+		case MTRXLC_DATA_UINT64 : TransposeU64(m); break;
+		case MTRXLC_DATA_INT64 : TransposeI64(m); break;
+		case MTRXLC_DATA_UINT32 : TransposeU32(m); break;
+		case MTRXLC_DATA_INT32 : TransposeI32(m); break;
+		case MTRXLC_DATA_UINT16 : TransposeU16(m); break;
+		case MTRXLC_DATA_INT16 : TransposeI16(m); break;
+		case MTRXLC_DATA_UINT8 : TransposeU8(m); break;
+		case MTRXLC_DATA_INT8 : TransposeI8(m); break;
 		default : return(false);
 	}
 
@@ -3856,8 +4025,8 @@ bool Matrix_Compute::Mult(const double coef,const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : MultF(coef,ma); break;
-		case DATA_DOUBLE : MultD(coef,ma); break;
+		case MTRXLC_DATA_FLOAT : MultF(coef,ma); break;
+		case MTRXLC_DATA_DOUBLE : MultD(coef,ma); break;
 		default : return(false);
 	}
 
@@ -3878,8 +4047,8 @@ bool Matrix_Compute::Mult(const double coef)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : MultF(coef); break;
-		case DATA_DOUBLE : MultD(coef); break;
+		case MTRXLC_DATA_FLOAT : MultF(coef); break;
+		case MTRXLC_DATA_DOUBLE : MultD(coef); break;
 		default : return(false);
 	}
 
@@ -3895,6 +4064,7 @@ void Matrix_Compute::MultF(const double coef,const Matrix &ma)
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 	const float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -3939,6 +4109,7 @@ void Matrix_Compute::MultF(const double coef,const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -3950,9 +4121,11 @@ void Matrix_Compute::MultF(const double coef,const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -3963,6 +4136,7 @@ void Matrix_Compute::MultD(const double coef,const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4007,6 +4181,7 @@ void Matrix_Compute::MultD(const double coef,const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -4018,9 +4193,11 @@ void Matrix_Compute::MultD(const double coef,const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4031,6 +4208,7 @@ void Matrix_Compute::MultF(const double coef)
 	const ptrdiff_t pc=pitch;
 	const float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4072,6 +4250,7 @@ void Matrix_Compute::MultF(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					float *c1=(float *)c;
@@ -4081,9 +4260,11 @@ void Matrix_Compute::MultF(const double coef)
 
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4093,6 +4274,7 @@ void Matrix_Compute::MultD(const double coef)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4134,6 +4316,7 @@ void Matrix_Compute::MultD(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					double *c1=(double *)c;
@@ -4143,9 +4326,11 @@ void Matrix_Compute::MultD(const double coef)
 
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4164,8 +4349,8 @@ bool Matrix_Compute::Add(const double coef,const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : AddF(coef,ma); break;
-		case DATA_DOUBLE : AddD(coef,ma); break;
+		case MTRXLC_DATA_FLOAT : AddF(coef,ma); break;
+		case MTRXLC_DATA_DOUBLE : AddD(coef,ma); break;
 		default : return(false);
 	}
 
@@ -4181,8 +4366,8 @@ bool Matrix_Compute::Add(const double coef)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : AddF(coef); break;
-		case DATA_DOUBLE : AddD(coef); break;
+		case MTRXLC_DATA_FLOAT : AddF(coef); break;
+		case MTRXLC_DATA_DOUBLE : AddD(coef); break;
 		default : return(false);
 	}
 
@@ -4198,6 +4383,7 @@ void Matrix_Compute::AddF(const double coef,const Matrix &ma)
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 	const float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4257,6 +4443,7 @@ void Matrix_Compute::AddF(const double coef,const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -4268,9 +4455,11 @@ void Matrix_Compute::AddF(const double coef,const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4281,6 +4470,7 @@ void Matrix_Compute::AddD(const double coef,const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4340,6 +4530,7 @@ void Matrix_Compute::AddD(const double coef,const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -4351,9 +4542,11 @@ void Matrix_Compute::AddD(const double coef,const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4364,6 +4557,7 @@ void Matrix_Compute::AddF(const double coef)
 	const ptrdiff_t pc=pitch;
 	const float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4417,6 +4611,7 @@ void Matrix_Compute::AddF(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					float *c1=(float *)c;
@@ -4426,9 +4621,11 @@ void Matrix_Compute::AddF(const double coef)
 
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4438,6 +4635,7 @@ void Matrix_Compute::AddD(const double coef)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4491,6 +4689,7 @@ void Matrix_Compute::AddD(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					double *c1=(double *)c;
@@ -4500,9 +4699,11 @@ void Matrix_Compute::AddD(const double coef)
 
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4521,8 +4722,8 @@ bool Matrix_Compute::Sub(const double coef,const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : SubF(coef,ma); break;
-		case DATA_DOUBLE : SubD(coef,ma); break;
+		case MTRXLC_DATA_FLOAT : SubF(coef,ma); break;
+		case MTRXLC_DATA_DOUBLE : SubD(coef,ma); break;
 		default : return(false);
 	}
 
@@ -4538,8 +4739,8 @@ bool Matrix_Compute::Sub(const double coef)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : SubF(coef); break;
-		case DATA_DOUBLE : SubD(coef); break;
+		case MTRXLC_DATA_FLOAT : SubF(coef); break;
+		case MTRXLC_DATA_DOUBLE : SubD(coef); break;
 		default : return(false);
 	}
 
@@ -4555,6 +4756,7 @@ void Matrix_Compute::SubF(const double coef,const Matrix &ma)
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 	const float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4614,6 +4816,7 @@ void Matrix_Compute::SubF(const double coef,const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -4625,9 +4828,11 @@ void Matrix_Compute::SubF(const double coef,const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4638,6 +4843,7 @@ void Matrix_Compute::SubD(const double coef,const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4697,6 +4903,7 @@ void Matrix_Compute::SubD(const double coef,const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -4708,9 +4915,11 @@ void Matrix_Compute::SubD(const double coef,const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4721,6 +4930,7 @@ void Matrix_Compute::SubF(const double coef)
 	const ptrdiff_t pc=pitch;
 	const float b=(float)coef;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4774,6 +4984,7 @@ void Matrix_Compute::SubF(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					float *c1=(float *)c;
@@ -4783,9 +4994,11 @@ void Matrix_Compute::SubF(const double coef)
 
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4795,6 +5008,7 @@ void Matrix_Compute::SubD(const double coef)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4848,6 +5062,7 @@ void Matrix_Compute::SubD(const double coef)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					double *c1=(double *)c;
@@ -4857,9 +5072,11 @@ void Matrix_Compute::SubD(const double coef)
 
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4873,8 +5090,8 @@ bool Matrix_Compute::Add_A(const Matrix &ma, const Matrix &mb)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : AddF_A(ma,mb); break;
-		case DATA_DOUBLE : AddD_A(ma,mb); break;
+		case MTRXLC_DATA_FLOAT : AddF_A(ma,mb); break;
+		case MTRXLC_DATA_DOUBLE : AddD_A(ma,mb); break;
 		default : return(false);
 	}
 
@@ -4891,8 +5108,8 @@ bool Matrix_Compute::Add_A(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : AddF_A(ma); break;
-		case DATA_DOUBLE : AddD_A(ma); break;
+		case MTRXLC_DATA_FLOAT : AddF_A(ma); break;
+		case MTRXLC_DATA_DOUBLE : AddD_A(ma); break;
 		default : return(false);
 	}
 
@@ -4908,6 +5125,7 @@ void Matrix_Compute::AddF_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -4955,6 +5173,7 @@ void Matrix_Compute::AddF_A(const Matrix &ma, const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -4968,9 +5187,11 @@ void Matrix_Compute::AddF_A(const Matrix &ma, const Matrix &mb)
 					b+=pb;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -4982,6 +5203,7 @@ void Matrix_Compute::AddD_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5029,6 +5251,7 @@ void Matrix_Compute::AddD_A(const Matrix &ma, const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -5042,9 +5265,11 @@ void Matrix_Compute::AddD_A(const Matrix &ma, const Matrix &mb)
 					b+=pb;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5055,6 +5280,7 @@ void Matrix_Compute::AddF_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5099,6 +5325,7 @@ void Matrix_Compute::AddF_A(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -5110,9 +5337,11 @@ void Matrix_Compute::AddF_A(const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5123,6 +5352,7 @@ void Matrix_Compute::AddD_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5167,6 +5397,7 @@ void Matrix_Compute::AddD_A(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -5178,9 +5409,11 @@ void Matrix_Compute::AddD_A(const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5194,8 +5427,8 @@ bool Matrix_Compute::Mult_A(const Matrix &ma, const Matrix &mb)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : MultF_A(ma,mb); break;
-		case DATA_DOUBLE : MultD_A(ma,mb); break;
+		case MTRXLC_DATA_FLOAT : MultF_A(ma,mb); break;
+		case MTRXLC_DATA_DOUBLE : MultD_A(ma,mb); break;
 		default : return(false);
 	}
 
@@ -5212,8 +5445,8 @@ bool Matrix_Compute::Mult_A(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : MultF_A(ma); break;
-		case DATA_DOUBLE : MultD_A(ma); break;
+		case MTRXLC_DATA_FLOAT : MultF_A(ma); break;
+		case MTRXLC_DATA_DOUBLE : MultD_A(ma); break;
 		default : return(false);
 	}
 
@@ -5229,6 +5462,7 @@ void Matrix_Compute::MultF_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5276,6 +5510,7 @@ void Matrix_Compute::MultF_A(const Matrix &ma, const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -5289,9 +5524,11 @@ void Matrix_Compute::MultF_A(const Matrix &ma, const Matrix &mb)
 					b+=pb;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5303,6 +5540,7 @@ void Matrix_Compute::MultD_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5350,6 +5588,7 @@ void Matrix_Compute::MultD_A(const Matrix &ma, const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -5363,9 +5602,11 @@ void Matrix_Compute::MultD_A(const Matrix &ma, const Matrix &mb)
 					b+=pb;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5376,6 +5617,7 @@ void Matrix_Compute::MultF_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5420,6 +5662,7 @@ void Matrix_Compute::MultF_A(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -5431,9 +5674,11 @@ void Matrix_Compute::MultF_A(const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5444,6 +5689,7 @@ void Matrix_Compute::MultD_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5488,6 +5734,7 @@ void Matrix_Compute::MultD_A(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -5499,9 +5746,11 @@ void Matrix_Compute::MultD_A(const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5515,8 +5764,8 @@ bool Matrix_Compute::Sub_A(const Matrix &ma, const Matrix &mb)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : SubF_A(ma,mb); break;
-		case DATA_DOUBLE : SubD_A(ma,mb); break;
+		case MTRXLC_DATA_FLOAT : SubF_A(ma,mb); break;
+		case MTRXLC_DATA_DOUBLE : SubD_A(ma,mb); break;
 		default : return(false);
 	}
 
@@ -5533,8 +5782,8 @@ bool Matrix_Compute::Sub_A(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : SubF_A(ma); break;
-		case DATA_DOUBLE : SubD_A(ma); break;
+		case MTRXLC_DATA_FLOAT : SubF_A(ma); break;
+		case MTRXLC_DATA_DOUBLE : SubD_A(ma); break;
 		default : return(false);
 	}
 
@@ -5551,8 +5800,8 @@ bool Matrix_Compute::InvSub_A(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : InvSubF_A(ma); break;
-		case DATA_DOUBLE : InvSubD_A(ma); break;
+		case MTRXLC_DATA_FLOAT : InvSubF_A(ma); break;
+		case MTRXLC_DATA_DOUBLE : InvSubD_A(ma); break;
 		default : return(false);
 	}
 
@@ -5568,6 +5817,7 @@ void Matrix_Compute::SubF_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5615,6 +5865,7 @@ void Matrix_Compute::SubF_A(const Matrix &ma, const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -5628,9 +5879,11 @@ void Matrix_Compute::SubF_A(const Matrix &ma, const Matrix &mb)
 					b+=pb;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5642,6 +5895,7 @@ void Matrix_Compute::SubD_A(const Matrix &ma, const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5689,6 +5943,7 @@ void Matrix_Compute::SubD_A(const Matrix &ma, const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -5702,9 +5957,11 @@ void Matrix_Compute::SubD_A(const Matrix &ma, const Matrix &mb)
 					b+=pb;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5715,6 +5972,7 @@ void Matrix_Compute::SubF_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5759,6 +6017,7 @@ void Matrix_Compute::SubF_A(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -5770,9 +6029,11 @@ void Matrix_Compute::SubF_A(const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5783,6 +6044,7 @@ void Matrix_Compute::InvSubF_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5827,6 +6089,7 @@ void Matrix_Compute::InvSubF_A(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *a1=(const float *)a;
@@ -5838,9 +6101,11 @@ void Matrix_Compute::InvSubF_A(const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5851,6 +6116,7 @@ void Matrix_Compute::SubD_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5895,6 +6161,7 @@ void Matrix_Compute::SubD_A(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -5906,9 +6173,11 @@ void Matrix_Compute::SubD_A(const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5919,6 +6188,7 @@ void Matrix_Compute::InvSubD_A(const Matrix &ma)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -5963,6 +6233,7 @@ void Matrix_Compute::InvSubD_A(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *a1=(const double *)a;
@@ -5974,9 +6245,11 @@ void Matrix_Compute::InvSubD_A(const Matrix &ma)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -5990,8 +6263,8 @@ bool Matrix_Compute::Product_AB(const Matrix &ma, const Matrix &mb)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : ProductF_AB(ma,mb); break;
-		case DATA_DOUBLE : ProductD_AB(ma,mb); break;
+		case MTRXLC_DATA_FLOAT : ProductF_AB(ma,mb); break;
+		case MTRXLC_DATA_DOUBLE : ProductD_AB(ma,mb); break;
 		default : return(false);
 	}
 
@@ -6011,6 +6284,7 @@ void Matrix_Compute::ProductF_AB(const Matrix &ma, const Matrix &mb)
 	const uint8_t *a0=a;
 	uint8_t *c0=c;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -6115,6 +6389,7 @@ void Matrix_Compute::ProductF_AB(const Matrix &ma, const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const float *b1=(const float *)b;
@@ -6153,9 +6428,11 @@ void Matrix_Compute::ProductF_AB(const Matrix &ma, const Matrix &mb)
 					}
 					b+=pb;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -6171,6 +6448,7 @@ void Matrix_Compute::ProductD_AB(const Matrix &ma, const Matrix &mb)
 	const uint8_t *a0=a;
 	uint8_t *c0=c;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -6275,6 +6553,7 @@ void Matrix_Compute::ProductD_AB(const Matrix &ma, const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<li; i++)
 				{
 					const double *b1=(const double *)b;
@@ -6313,9 +6592,11 @@ void Matrix_Compute::ProductD_AB(const Matrix &ma, const Matrix &mb)
 					}
 					b+=pb;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -6329,8 +6610,8 @@ bool Matrix_Compute::Product_AtB(const Matrix &ma,const Matrix &mb)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : ProductF_AtB(ma,mb); break;
-		case DATA_DOUBLE : ProductD_AtB(ma,mb); break;
+		case MTRXLC_DATA_FLOAT : ProductF_AtB(ma,mb); break;
+		case MTRXLC_DATA_DOUBLE : ProductD_AtB(ma,mb); break;
 		default : return(false);
 	}
 
@@ -6347,6 +6628,7 @@ void Matrix_Compute::ProductF_AtB(const Matrix &ma,const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -6409,6 +6691,7 @@ void Matrix_Compute::ProductF_AtB(const Matrix &ma,const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const float *a1=(const float *)a;
@@ -6428,9 +6711,11 @@ void Matrix_Compute::ProductF_AtB(const Matrix &ma,const Matrix &mb)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -6443,6 +6728,7 @@ void Matrix_Compute::ProductD_AtB(const Matrix &ma,const Matrix &mb)
 	uint8_t *c=(uint8_t *)Coeff;
 	const ptrdiff_t pa=ma.GetPitch(),pb=mb.GetPitch(),pc=pitch;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -6505,6 +6791,7 @@ void Matrix_Compute::ProductD_AtB(const Matrix &ma,const Matrix &mb)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const double *a1=(const double *)a;
@@ -6524,9 +6811,11 @@ void Matrix_Compute::ProductD_AtB(const Matrix &ma,const Matrix &mb)
 					a+=pa;
 					c+=pc;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 }
 
 
@@ -6545,8 +6834,8 @@ bool Matrix_Compute::Product_tAA(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : ProductF_AB(b,ma); break;
-		case DATA_DOUBLE : ProductD_AB(b,ma); break;
+		case MTRXLC_DATA_FLOAT : ProductF_AB(b,ma); break;
+		case MTRXLC_DATA_DOUBLE : ProductD_AB(b,ma); break;
 		default : return(false);
 	}
 
@@ -6568,8 +6857,8 @@ bool Matrix_Compute::Product_tAA(void)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : ProductF_AB(b,a); break;
-		case DATA_DOUBLE : ProductD_AB(b,a); break;
+		case MTRXLC_DATA_FLOAT : ProductF_AB(b,a); break;
+		case MTRXLC_DATA_DOUBLE : ProductD_AB(b,a); break;
 		default : return(false);
 	}
 
@@ -6588,8 +6877,8 @@ bool Matrix_Compute::Inverse(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : return(InverseF(ma)); break;
-		case DATA_DOUBLE : return(InverseD(ma)); break;
+		case MTRXLC_DATA_FLOAT : return(InverseF(ma)); break;
+		case MTRXLC_DATA_DOUBLE : return(InverseD(ma)); break;
 		default : return(false);
 	}
 
@@ -6603,8 +6892,8 @@ bool Matrix_Compute::Inverse(void)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : return(InverseF(*this)); break;
-		case DATA_DOUBLE : return(InverseD(*this)); break;
+		case MTRXLC_DATA_FLOAT : return(InverseF(*this)); break;
+		case MTRXLC_DATA_DOUBLE : return(InverseD(*this)); break;
 		default : return(false);
 	}
 
@@ -6639,6 +6928,7 @@ bool Matrix_Compute::InverseF(const Matrix &ma)
 
 	b0=b_;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -6752,6 +7042,7 @@ bool Matrix_Compute::InverseF(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					float *b2=(float *)b0;
@@ -6786,9 +7077,11 @@ bool Matrix_Compute::InverseF(const Matrix &ma)
 						b2[j]*=a;
 					b0+=pb;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 
 	b0=b_;
 	b0+=(ptrdiff_t)c*sizeof(float);
@@ -6831,6 +7124,7 @@ bool Matrix_Compute::InverseD(const Matrix &ma)
 
 	b0=b_;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -6944,6 +7238,7 @@ bool Matrix_Compute::InverseD(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					double *b2=(double *)b0;
@@ -6978,9 +7273,11 @@ bool Matrix_Compute::InverseD(const Matrix &ma)
 						b2[j]*=a;
 					b0+=pb;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 
 	b0=b_;
 	b0+=(ptrdiff_t)c*sizeof(double);
@@ -7011,8 +7308,8 @@ int8_t Matrix_Compute::InverseSafe(const Matrix_Compute &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : return(InverseSafeF(ma)); break;
-		case DATA_DOUBLE : return(InverseSafeD(ma)); break;
+		case MTRXLC_DATA_FLOAT : return(InverseSafeF(ma)); break;
+		case MTRXLC_DATA_DOUBLE : return(InverseSafeD(ma)); break;
 		default : return(-1);
 	}
 
@@ -7026,8 +7323,8 @@ int8_t Matrix_Compute::InverseSafe(void)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : return(InverseSafeF(*this)); break;
-		case DATA_DOUBLE : return(InverseSafeD(*this)); break;
+		case MTRXLC_DATA_FLOAT : return(InverseSafeF(*this)); break;
+		case MTRXLC_DATA_DOUBLE : return(InverseSafeD(*this)); break;
 		default : return(-1);
 	}
 
@@ -7069,6 +7366,7 @@ int8_t Matrix_Compute::InverseSafeF(const Matrix_Compute &ma)
 
 	b0=b_;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -7197,6 +7495,7 @@ int8_t Matrix_Compute::InverseSafeF(const Matrix_Compute &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					float *b2=(float *)b0;
@@ -7236,9 +7535,11 @@ int8_t Matrix_Compute::InverseSafeF(const Matrix_Compute &ma)
 						b2[j]*=a;
 					b0+=pb;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 
 	b0=b_;
 	b0+=(ptrdiff_t)c*sizeof(float);
@@ -7288,6 +7589,7 @@ int8_t Matrix_Compute::InverseSafeD(const Matrix_Compute &ma)
 
 	b0=b_;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -7416,6 +7718,7 @@ int8_t Matrix_Compute::InverseSafeD(const Matrix_Compute &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					double *b2=(double *)b0;
@@ -7455,9 +7758,11 @@ int8_t Matrix_Compute::InverseSafeD(const Matrix_Compute &ma)
 						b2[j]*=a;
 					b0+=pb;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 
 	b0=b_;
 	b0+=(ptrdiff_t)c*sizeof(double);
@@ -7482,16 +7787,16 @@ bool Matrix_Compute::Transpose(const Matrix &ma)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : TransposeF(ma); break;
-		case DATA_DOUBLE : TransposeD(ma); break;
-		case DATA_UINT64 : TransposeU64(ma); break;
-		case DATA_INT64 : TransposeI64(ma); break;
-		case DATA_UINT32 : TransposeU32(ma); break;
-		case DATA_INT32 : TransposeI32(ma); break;
-		case DATA_UINT16 : TransposeU16(ma); break;
-		case DATA_INT16 : TransposeI16(ma); break;
-		case DATA_UINT8 : TransposeU8(ma); break;
-		case DATA_INT8 : TransposeI8(ma); break;
+		case MTRXLC_DATA_FLOAT : TransposeF(ma); break;
+		case MTRXLC_DATA_DOUBLE : TransposeD(ma); break;
+		case MTRXLC_DATA_UINT64 : TransposeU64(ma); break;
+		case MTRXLC_DATA_INT64 : TransposeI64(ma); break;
+		case MTRXLC_DATA_UINT32 : TransposeU32(ma); break;
+		case MTRXLC_DATA_INT32 : TransposeI32(ma); break;
+		case MTRXLC_DATA_UINT16 : TransposeU16(ma); break;
+		case MTRXLC_DATA_INT16 : TransposeI16(ma); break;
+		case MTRXLC_DATA_UINT8 : TransposeU8(ma); break;
+		case MTRXLC_DATA_INT8 : TransposeI8(ma); break;
 		default : return(false);
 	}
 
@@ -7508,16 +7813,16 @@ bool Matrix_Compute::Transpose(void)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : TransposeF(b); break;
-		case DATA_DOUBLE : TransposeD(b); break;
-		case DATA_UINT64 : TransposeU64(b); break;
-		case DATA_INT64 : TransposeI64(b); break;
-		case DATA_UINT32 : TransposeU32(b); break;
-		case DATA_INT32 : TransposeI32(b); break;
-		case DATA_UINT16 : TransposeU16(b); break;
-		case DATA_INT16 : TransposeI16(b); break;
-		case DATA_UINT8 : TransposeU8(b); break;
-		case DATA_INT8 : TransposeI8(b); break;
+		case MTRXLC_DATA_FLOAT : TransposeF(b); break;
+		case MTRXLC_DATA_DOUBLE : TransposeD(b); break;
+		case MTRXLC_DATA_UINT64 : TransposeU64(b); break;
+		case MTRXLC_DATA_INT64 : TransposeI64(b); break;
+		case MTRXLC_DATA_UINT32 : TransposeU32(b); break;
+		case MTRXLC_DATA_INT32 : TransposeI32(b); break;
+		case MTRXLC_DATA_UINT16 : TransposeU16(b); break;
+		case MTRXLC_DATA_INT16 : TransposeI16(b); break;
+		case MTRXLC_DATA_UINT8 : TransposeU8(b); break;
+		case MTRXLC_DATA_INT8 : TransposeI8(b); break;
 		default : return(false);
 	}
 
@@ -7761,8 +8066,8 @@ bool Matrix_Compute::Norme2(double &result)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : result=Norme2F(); break;
-		case DATA_DOUBLE : result=Norme2D(); break;
+		case MTRXLC_DATA_FLOAT : result=Norme2F(); break;
+		case MTRXLC_DATA_DOUBLE : result=Norme2D(); break;
 		default : return(false);
 	}
 
@@ -7777,6 +8082,7 @@ double Matrix_Compute::Norme2F(void)
 	const ptrdiff_t p=pitch;
 	double s=0.0;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -7821,6 +8127,7 @@ double Matrix_Compute::Norme2F(void)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const float *c1=(const float *)c0;
@@ -7833,9 +8140,11 @@ double Matrix_Compute::Norme2F(void)
 					}
 					c0+=p;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(sqrt(s));
 }
 
@@ -7847,6 +8156,7 @@ double Matrix_Compute::Norme2D(void)
 	const ptrdiff_t p=pitch;
 	double s=0.0;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -7891,6 +8201,7 @@ double Matrix_Compute::Norme2D(void)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const double *c1=(const double *)c0;
@@ -7903,9 +8214,11 @@ double Matrix_Compute::Norme2D(void)
 					}
 					c0+=p;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(sqrt(s));
 }
 
@@ -7916,8 +8229,8 @@ bool Matrix_Compute::Norme1(double &result)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : result=Norme1F(); break;
-		case DATA_DOUBLE : result=Norme1D(); break;
+		case MTRXLC_DATA_FLOAT : result=Norme1F(); break;
+		case MTRXLC_DATA_DOUBLE : result=Norme1D(); break;
 		default : return(false);
 	}
 
@@ -7932,6 +8245,7 @@ double Matrix_Compute::Norme1F(void)
 	const ptrdiff_t p=pitch;
 	double s=0.0;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -7976,6 +8290,7 @@ double Matrix_Compute::Norme1F(void)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const float *c1=(const float *)c0;
@@ -7984,9 +8299,11 @@ double Matrix_Compute::Norme1F(void)
 						s+=fabs(c1[j]);
 					c0+=p;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(s);
 }
 
@@ -7998,6 +8315,7 @@ double Matrix_Compute::Norme1D(void)
 	const ptrdiff_t p=pitch;
 	double s=0.0;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -8042,6 +8360,7 @@ double Matrix_Compute::Norme1D(void)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const double *c1=(const double *)c0;
@@ -8050,9 +8369,11 @@ double Matrix_Compute::Norme1D(void)
 						s+=fabs(c1[j]);
 					c0+=p;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(s);
 }
 
@@ -8066,8 +8387,8 @@ bool Matrix_Compute::Distance2(const Matrix &ma,double &result)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : result=Distance2F(ma); break;
-		case DATA_DOUBLE : result=Distance2D(ma); break;
+		case MTRXLC_DATA_FLOAT : result=Distance2F(ma); break;
+		case MTRXLC_DATA_DOUBLE : result=Distance2D(ma); break;
 		default : return(false);
 	}
 
@@ -8083,6 +8404,7 @@ double Matrix_Compute::Distance2F(const Matrix &ma)
 	const ptrdiff_t p=pitch,pa=ma.GetPitch();
 	double s=0.0;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -8130,6 +8452,7 @@ double Matrix_Compute::Distance2F(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const float *c1=(const float *)c0;
@@ -8144,9 +8467,11 @@ double Matrix_Compute::Distance2F(const Matrix &ma)
 					a0+=pa;
 					c0+=p;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(sqrt(s));
 }
 
@@ -8159,6 +8484,7 @@ double Matrix_Compute::Distance2D(const Matrix &ma)
 	const ptrdiff_t p=pitch,pa=ma.GetPitch();
 	double s=0.0;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -8206,6 +8532,7 @@ double Matrix_Compute::Distance2D(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const double *c1=(const double *)c0;
@@ -8220,9 +8547,11 @@ double Matrix_Compute::Distance2D(const Matrix &ma)
 					a0+=pa;
 					c0+=p;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(sqrt(s));
 }
 
@@ -8236,8 +8565,8 @@ bool Matrix_Compute::Distance1(const Matrix &ma,double &result)
 
 	switch(data_type)
 	{
-		case DATA_FLOAT : result=Distance1F(ma); break;
-		case DATA_DOUBLE : result=Distance1D(ma); break;
+		case MTRXLC_DATA_FLOAT : result=Distance1F(ma); break;
+		case MTRXLC_DATA_DOUBLE : result=Distance1D(ma); break;
 		default : return(false);
 	}
 
@@ -8253,6 +8582,7 @@ double Matrix_Compute::Distance1F(const Matrix &ma)
 	const ptrdiff_t p=pitch,pa=ma.GetPitch();
 	double s=0.0;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -8300,6 +8630,7 @@ double Matrix_Compute::Distance1F(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const float *c1=(const float *)c0;
@@ -8310,9 +8641,11 @@ double Matrix_Compute::Distance1F(const Matrix &ma)
 					a0+=pa;
 					c0+=p;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(s);
 }
 
@@ -8325,6 +8658,7 @@ double Matrix_Compute::Distance1D(const Matrix &ma)
 	const ptrdiff_t p=pitch,pa=ma.GetPitch();
 	double s=0.0;
 
+#ifdef ASM_ENABLE
 #ifdef AVX512_BUILD_POSSIBLE
 	if (AVX512_Enable)
 	{
@@ -8372,6 +8706,7 @@ double Matrix_Compute::Distance1D(const Matrix &ma)
 			}
 			else
 			{
+#endif
 				for (uint16_t i=0; i<l; i++)
 				{
 					const double *c1=(const double *)c0;
@@ -8382,8 +8717,10 @@ double Matrix_Compute::Distance1D(const Matrix &ma)
 					a0+=pa;
 					c0+=p;
 				}
+#ifdef ASM_ENABLE
 			}
 		}
 	}
+#endif
 	return(s);
 }

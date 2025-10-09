@@ -14760,8 +14760,8 @@ bool ComputeXYZMatrix(float Rx,float Ry,float Gx,float Gy,float Bx,float By,floa
 	float Sr,Sg,Sb;
 	double Xmin,Xmax,Ymin,Ymax,Zmin,Zmax;
 
-	Vector_Compute x(3,MTRXLC_DATA_FLOAT),y(3,MTRXLC_DATA_FLOAT);
-	Matrix_Compute a(3,3,MTRXLC_DATA_FLOAT),b(3,3,MTRXLC_DATA_FLOAT);
+	Vector_Compute x(3,MTRXCL_DATA_FLOAT),y(3,MTRXCL_DATA_FLOAT);
+	Matrix_Compute a(3,3,MTRXCL_DATA_FLOAT),b(3,3,MTRXCL_DATA_FLOAT);
 
 	Y=1.0f; Xw=Y*(Wx/Wy); Yw=Y; Zw=Y*(1.0f-Wx-Wy)/Wy;
 	Yr=1.0f; Xr=Yr*(Rx/Ry); Zr=Yr*(1.0f-Rx-Ry)/Ry;
@@ -15019,8 +15019,8 @@ bool ComputeXYZScale(float Rx,float Ry,float Gx,float Gy,float Bx,float By,float
 	float Rmin,Rmax,Gmin,Gmax,Bmin,Bmax;
 	double Xmax,Ymax,Zmax;
 
-	Vector_Compute x(3,MTRXLC_DATA_FLOAT),y(3,MTRXLC_DATA_FLOAT);
-	Matrix_Compute a(3,3,MTRXLC_DATA_FLOAT);
+	Vector_Compute x(3,MTRXCL_DATA_FLOAT),y(3,MTRXCL_DATA_FLOAT);
+	Matrix_Compute a(3,3,MTRXCL_DATA_FLOAT);
 
 	Y=1.0f; Xw=Y*(Wx/Wy); Yw=Y; Zw=Y*(1.0f-Wx-Wy)/Wy;
 	Yr=1.0f; Xr=Yr*(Rx/Ry); Zr=Yr*(1.0f-Rx-Ry)/Ry;

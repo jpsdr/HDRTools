@@ -41,7 +41,6 @@ CoeffProductF_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 	
@@ -70,7 +69,6 @@ CoeffProduct2F_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 	
@@ -329,7 +327,6 @@ CoeffProductD_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 	
@@ -617,7 +614,6 @@ CoeffAddProductF_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 	
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 	
@@ -739,7 +735,6 @@ CoeffAddProductD_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 
@@ -861,7 +856,6 @@ CoeffAddF_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 	
@@ -890,7 +884,6 @@ CoeffAdd2F_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 	
@@ -1149,7 +1142,6 @@ CoeffAddD_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 	
@@ -1437,7 +1429,6 @@ CoeffSubF_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 	
@@ -1466,7 +1457,6 @@ CoeffSub2F_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 	
@@ -1725,7 +1715,6 @@ CoeffSubD_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 	
@@ -1754,7 +1743,6 @@ CoeffSub2D_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 	
@@ -2011,7 +1999,6 @@ VectorNorme2F_SSE2 proc public frame
 		
 	mov r9,rcx
 	xorps xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 		
@@ -2123,7 +2110,6 @@ VectorNorme2D_SSE2 proc public frame
 		
 	mov r9,rcx
 	xorpd xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 		
@@ -2231,7 +2217,6 @@ VectorDist2F_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorps xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 		
@@ -2429,9 +2414,9 @@ VectorDist2F_AVX_4:
 VectorDist2F_AVX endp
 
 
-;VectorDist2D_SSE2 proc coeff_a:dword,coeff_x:dword,result:dword,lgth:word
-; coeff_a = rcx
-; coeff_x = rdx
+;VectorDist2D_SSE2 proc coeff_x:dword,coeff_y:dword,result:dword,lgth:word
+; coeff_x = rcx
+; coeff_y = rdx
 ; result = r8
 ; lgth = r9d
 
@@ -2441,7 +2426,6 @@ VectorDist2D_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorpd xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 		
@@ -2464,9 +2448,9 @@ VectorDist2D_SSE2_1:
 VectorDist2D_SSE2 endp
 
 
-;VectorDist2D_AVX proc coeff_a:dword,coeff_x:dword,result:dword,lgth:word
-; coeff_a = rcx
-; coeff_x = rdx
+;VectorDist2D_AVX proc coeff_x:dword,coeff_y:dword,result:dword,lgth:word
+; coeff_x = rcx
+; coeff_y = rdx
 ; result = r8
 ; lgth = r9d
 
@@ -2645,7 +2629,6 @@ VectorNormeF_SSE2 proc public frame
 		
 	mov r9,rcx
 	xorps xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 		
@@ -2755,7 +2738,6 @@ VectorNormeD_SSE2 proc public frame
 		
 	mov r9,rcx
 	xorpd xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 		
@@ -2785,7 +2767,6 @@ VectorNormeD_AVX proc public frame
 	.endprolog
 
 	mov r9,rcx
-	xor rcx,rcx
 	mov rax,128
 	mov ecx,r8d
 	mov r10,32
@@ -2863,7 +2844,6 @@ VectorDistF_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorps xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 		
@@ -2980,9 +2960,9 @@ VectorDistF_AVX_3:
 VectorDistF_AVX endp
 
 
-;VectorDistD_SSE2 proc coeff_a:dword,coeff_x:dword,result:dword,lgth:word
-; coeff_a = rcx
-; coeff_x = rdx
+;VectorDistD_SSE2 proc coeff_x:dword,coeff_y:dword,result:dword,lgth:word
+; coeff_x = rcx
+; coeff_y = rdx
 ; result = r8
 ; lgth = r9d
 
@@ -2992,7 +2972,6 @@ VectorDistD_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorpd xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 		
@@ -3014,9 +2993,9 @@ VectorDistD_SSE2_1:
 VectorDistD_SSE2 endp
 
 
-;VectorDistD_AVX proc coeff_a:dword,coeff_x:dword,result:dword,lgth:word
-; coeff_a = rcx
-; coeff_x = rdx
+;VectorDistD_AVX proc coeff_x:dword,coeff_y:dword,result:dword,lgth:word
+; coeff_x = rcx
+; coeff_y = rdx
 ; result = r8
 ; lgth = r9d
 
@@ -3116,7 +3095,6 @@ VectorNorme1F_SSE2 proc public frame
 	mov r9,rcx
 	xorps xmm0,xmm0
 	movaps xmm2,XMMWORD ptr sign_bits_f_32
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 		
@@ -3221,7 +3199,6 @@ VectorNorme1D_SSE2 proc public frame
 	mov r9,rcx
 	xorpd xmm0,xmm0
 	movapd xmm2,XMMWORD ptr sign_bits_f_64
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r8d
 		
@@ -3322,7 +3299,6 @@ VectorDist1F_SSE2 proc public frame
 	mov r10,rcx
 	xorps xmm0,xmm0
 	movaps xmm2,XMMWORD ptr sign_bits_f_32
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 		
@@ -3440,9 +3416,9 @@ VectorDist1F_AVX_3:
 VectorDist1F_AVX endp
 
 
-;VectorDist1D_SSE2 proc coeff_a:dword,coeff_x:dword,result:dword,lgth:word
-; coeff_a = rcx
-; coeff_x = rdx
+;VectorDist1D_SSE2 proc coeff_x:dword,coeff_y:dword,result:dword,lgth:word
+; coeff_x = rcx
+; coeff_y = rdx
 ; result = r8
 ; lgth = r9d
 
@@ -3453,7 +3429,6 @@ VectorDist1D_SSE2 proc public frame
 	mov r10,rcx
 	xorpd xmm0,xmm0
 	movapd xmm2,XMMWORD ptr sign_bits_f_64
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 		
@@ -3475,9 +3450,9 @@ VectorDist1D_SSE2_1:
 VectorDist1D_SSE2 endp
 
 
-;VectorDist1D_AVX proc coeff_a:dword,coeff_x:dword,result:dword,lgth:word
-; coeff_a = rcx
-; coeff_x = rdx
+;VectorDist1D_AVX proc coeff_x:dword,coeff_y:dword,result:dword,lgth:word
+; coeff_x = rcx
+; coeff_y = rdx
 ; result = r8
 ; lgth = r9d
 
@@ -3578,7 +3553,6 @@ VectorProductF_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorps xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 		
@@ -3698,7 +3672,6 @@ VectorProductD_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorpd xmm0,xmm0
-	xor rcx,rcx
 	mov rax,16
 	mov ecx,r9d
 		
@@ -3813,7 +3786,6 @@ VectorAddF_SSE2 proc public frame
 
 	mov r10,rcx
 	mov r11,16
-	xor rcx,rcx
 	mov ecx,r9d
 	
 VectorAddF_SSE2_1:	
@@ -3842,7 +3814,6 @@ VectorSubF_SSE2 proc public frame
 
 	mov r10,rcx
 	mov r11,16
-	xor rcx,rcx
 	mov ecx,r9d
 	
 VectorSubF_SSE2_1:	
@@ -3871,7 +3842,6 @@ VectorProdF_SSE2 proc public frame
 
 	mov r10,rcx
 	mov r11,16
-	xor rcx,rcx
 	mov ecx,r9d
 	
 VectorProdF_SSE2_1:	
@@ -3899,7 +3869,6 @@ VectorAdd2F_SSE2 proc public frame
 
 	mov r9,rcx
 	mov r10,16
-	xor rcx,rcx
 	mov ecx,r8d
 	
 VectorAdd2F_SSE2_1:	
@@ -3926,7 +3895,6 @@ VectorSub2F_SSE2 proc public frame
 
 	mov r9,rcx
 	mov r10,16
-	xor rcx,rcx
 	mov ecx,r8d
 	
 VectorSub2F_SSE2_1:	
@@ -3953,7 +3921,6 @@ VectorInvSubF_SSE2 proc public frame
 
 	mov r9,rcx
 	mov r10,16
-	xor rcx,rcx
 	mov ecx,r8d
 	
 VectorInvSubF_SSE2_1:	
@@ -3980,7 +3947,6 @@ VectorProd2F_SSE2 proc public frame
 
 	mov r9,rcx
 	mov r10,16
-	xor rcx,rcx
 	mov ecx,r8d
 	
 VectorProd2F_SSE2_1:	
@@ -4525,7 +4491,6 @@ VectorAddD_SSE2 proc public frame
 
 	mov r10,rcx
 	mov r11,16
-	xor rcx,rcx
 	mov ecx,r9d
 	
 VectorAddD_SSE2_1:	
@@ -4554,7 +4519,6 @@ VectorSubD_SSE2 proc public frame
 
 	mov r10,rcx
 	mov r11,16
-	xor rcx,rcx
 	mov ecx,r9d
 	
 VectorSubD_SSE2_1:	
@@ -4583,7 +4547,6 @@ VectorProdD_SSE2 proc public frame
 
 	mov r10,rcx
 	mov r11,16
-	xor rcx,rcx
 	mov ecx,r9d
 	
 VectorProdD_SSE2_1:	
@@ -4638,7 +4601,6 @@ VectorSub2D_SSE2 proc public frame
 
 	mov r9,rcx
 	mov r10,16
-	xor rcx,rcx
 	mov ecx,r8d
 	
 VectorSub2D_SSE2_1:	
@@ -4665,7 +4627,6 @@ VectorInvSubD_SSE2 proc public frame
 
 	mov r9,rcx
 	mov r10,16
-	xor rcx,rcx
 	mov ecx,r8d
 	
 VectorInvSubD_SSE2_1:	

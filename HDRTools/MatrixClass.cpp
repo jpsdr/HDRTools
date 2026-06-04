@@ -27,22 +27,33 @@
 
 #define ASM_VS_ENABLE
 //#define USING_LINUX
+//#define ASM_GCC_ENABLE
 
 #if defined(ASM_VS_ENABLE) || defined(ASM_GCC_ENABLE)
 #define ASM_ENABLE
 #endif
 
+// If not Linux it's MSVC
+#if not defined(USING_LINUX)
+
  // VS 2013
 #if _MSC_VER >= 1800
 #define AVX2_BUILD_POSSIBLE
 #endif
-
 // VS 2017 v15.3
 #if _MSC_VER >= 1911
 #define AVX512_BUILD_POSSIBLE
 #endif
 
-#ifdef ASM_VS_ENABLE
+#else
+
+// Assume NASM version can at least build AVX/AVX2
+#define AVX2_BUILD_POSSIBLE
+//#define AVX512_BUILD_POSSIBLE
+
+#endif
+
+#ifdef ASM_ENABLE
 extern "C" void CoeffProductF_SSE2(const float *coeff_a,const float *coeff_b,float *coeff_c,uint16_t lght);
 extern "C" void CoeffProductD_SSE2(const double *coeff_a,const double *coeff_b,double *coeff_c,uint16_t lght);
 extern "C" void CoeffProduct2F_SSE2(const float *coeff_a,float *coeff_b,uint16_t lght);

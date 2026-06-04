@@ -24,6 +24,7 @@
 #define _MATRIX_CLASS_H
 
 #include <stdlib.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <math.h>
 

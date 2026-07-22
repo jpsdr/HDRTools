@@ -27,7 +27,7 @@
 
 #include "./ThreadPoolDef.h"
 
-#define THREADPOOL_VERSION "ThreadPool 1.4.5"
+#define THREADPOOL_VERSION "ThreadPool 1.4.6"
 
 #define MAX_PHYSICAL_CORES 64
 
@@ -36,6 +36,7 @@ typedef struct _MT_Data_Thread
 	Public_MT_Data_Thread *MTData;
 	uint8_t f_process,thread_Id;
 	HANDLE nextJob,jobFinished;
+	bool iError;
 } MT_Data_Thread;
 
 
@@ -89,6 +90,7 @@ class ThreadPool
 	DWORD tids[MAX_MT_THREADS];
 	ULONG_PTR ThreadMask[MAX_MT_THREADS];
 	bool ThreadSleep[MAX_MT_THREADS];
+	int CurrentThreadPriority[MAX_MT_THREADS];
 	ThreadLevelName nPriority;
 
 	bool Status_Ok;
@@ -96,7 +98,7 @@ class ThreadPool
 	
 	void FreeThreadPool(void);
 	void DestroyThreadPool(void);
-	void CreateThreadPool(uint8_t offset_core,uint8_t offset_ht,bool UseMaxPhysCore,bool SetAffinity,
+	bool CreateThreadPool(uint8_t offset_core,uint8_t offset_ht,bool UseMaxPhysCore,bool SetAffinity,
 		bool sleep,ThreadLevelName priority);
 
 	private :

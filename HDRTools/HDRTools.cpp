@@ -541,7 +541,7 @@ uint8_t CreateMTData(MT_Data_Info_HDRTools MT_Data[],uint8_t max_threads,uint8_t
 		return(1);
 	}
 
-	int32_t dh_Y,src_dh_UV,dst_dh_UV,h_y;
+	int32_t dh_Y,h_y;
 	uint8_t i,max=1;
 
 	dh_Y=(size_y+(int32_t)max_threads-1)/(int32_t)max_threads;

@@ -1711,10 +1711,10 @@ Convert_XYZ_Mobius_HDRtoSDR_AVX512_2:
 	
 	;vcmpleps zmm2,zmm0,zmm4
 	vxorps zmm2,zmm2,zmm2
-	vcmpps k0,zmm0,zmm4,2
+	vcmpps k1,zmm0,zmm4,2
 	vaddps zmm1,zmm0,zmm7
 	vaddps zmm3,zmm0,zmm6
-	vorps zmm2 {k0},zmm2,ZMMWORD ptr data_all_1
+	vorps zmm2 {k1},zmm2,ZMMWORD ptr data_all_1
 	vmulps zmm3,zmm3,zmm5
 	vdivps zmm3,zmm3,zmm1
 	vandps zmm0,zmm0,zmm2

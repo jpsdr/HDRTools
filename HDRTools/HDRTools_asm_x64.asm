@@ -88,7 +88,8 @@ LookupRGB32_RGB32HLG_2:
 	and rax,rbx
 	mov eax,dword ptr[rdx+4*rax]
 	stosd
-	loop LookupRGB32_RGB32HLG_2
+	dec ecx
+	jnz short LookupRGB32_RGB32HLG_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -141,7 +142,8 @@ LookupRGB32_RGB64HLG_2:
 	mov rax,qword ptr[rdx+8*rax]
 	stosq
 	xor rax,rax
-	loop LookupRGB32_RGB64HLG_2
+	dec ecx
+	jnz short LookupRGB32_RGB64HLG_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -197,7 +199,8 @@ LookupRGB32_RGB64HLGb_2:
 	mov rax,qword ptr[rdx+8*rax]
 	stosq
 	xor rax,rax
-	loop LookupRGB32_RGB64HLGb_2
+	dec ecx
+	jnz short LookupRGB32_RGB64HLGb_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -256,7 +259,8 @@ LookupRGB32_2:
 	mov al,byte ptr[rdx+rax]
 	stosb
 	movsb
-	loop LookupRGB32_2
+	dec ecx
+	jnz short LookupRGB32_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -316,7 +320,8 @@ LookupRGB32toRGB64_2:
 	lodsb
 	xor ax,ax
 	stosw
-	loop LookupRGB32toRGB64_2
+	dec ecx
+	jnz short LookupRGB32toRGB64_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -374,7 +379,8 @@ LookupRGB64_2:
 	mov ax,word ptr[rdx+2*rax]
 	stosw
 	movsw
-	loop LookupRGB64_2
+	dec ecx
+	jnz short LookupRGB64_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -425,7 +431,8 @@ Lookup_Planar8_2:
 	lodsb
 	mov al,byte ptr[rdx+rax]
 	stosb
-	loop Lookup_Planar8_2
+	dec ecx
+	jnz short Lookup_Planar8_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -476,7 +483,8 @@ Lookup_Planar16_2:
 	lodsw
 	mov ax,word ptr[rdx+2*rax]
 	stosw
-	loop Lookup_Planar16_2
+	dec ecx
+	jnz short Lookup_Planar16_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -527,7 +535,8 @@ Lookup_Planar32_2:
 	lodsd
 	mov eax,dword ptr[rdx+4*rax]
 	stosd
-	loop Lookup_Planar32_2
+	dec ecx
+	jnz short Lookup_Planar32_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -600,7 +609,8 @@ Lookup2_Planar32_2:
 	mov eax,dword ptr[rbx+4*r15]
 	mov dword ptr[r8],eax
 	add r8,r14
-	loop Lookup2_Planar32_2
+	dec ecx
+	jnz short Lookup2_Planar32_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -642,13 +652,14 @@ JPSDR_HDRTools_Move8to16 proc public frame
 	mov ecx,r8d
 	
 	stosb
-	dec rcx
+	dec ecx
 	jz short Move8to16_2
 	
 Move8to16_1:
 	lodsb
 	stosw
-	loop Move8to16_1
+	dec ecx
+	jnz short Move8to16_1
 	
 Move8to16_2:
 	
@@ -672,7 +683,6 @@ JPSDR_HDRTools_Move8to16_SSE2 proc public frame
 	.endprolog
 	
 	mov r9,rcx
-	mov r10,16
 	xor rax,rax
 	mov ecx,r8d
 	pxor xmm0,xmm0
@@ -685,8 +695,9 @@ Move8to16_SSE2_1:
 	punpckhbw xmm3,xmm1
 	movdqa XMMWORD ptr [r9+2*rax],xmm2
 	movdqa XMMWORD ptr [r9+2*rax+16],xmm3
-	add rax,r10
-	loop Move8to16_SSE2_1
+	add rax,16
+	dec ecx
+	jnz short Move8to16_SSE2_1
 	
 	ret
 	
@@ -709,11 +720,10 @@ JPSDR_HDRTools_Move8to16_AVX proc public frame
 	mov r10,rcx
 	mov r9,rdx
 	xor rax,rax
-	mov rdx,32
 	mov ecx,r8d
 	vpxor xmm6,xmm6,xmm6
 	
-	shr rcx,1
+	shr ecx,1
 	jz short Move8to16_AVX_1
 		
 Move8to16_AVX_loop_1:
@@ -727,8 +737,9 @@ Move8to16_AVX_loop_1:
 	vmovdqa XMMWORD ptr[r10+2*rax+16],xmm1
 	vmovdqa XMMWORD ptr[r10+2*rax+32],xmm2
 	vmovdqa XMMWORD ptr[r10+2*rax+48],xmm3
-	add rax,rdx
-	loop Move8to16_AVX_loop_1
+	add rax,32
+	dec ecx
+	jnz short Move8to16_AVX_loop_1
 	
 Move8to16_AVX_1:
 	test r8d,1
@@ -770,7 +781,6 @@ JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_SSE2 proc public frame
 	mov r10,rcx				; r10=src1
 	xor rax,rax	
 	mov ecx,r9d	
-	mov r11,16
 	
 Convert_Planar420_to_Planar422_8_SSE2_1:
 	movdqa xmm0,XMMWORD ptr[r10+rax]
@@ -783,8 +793,9 @@ Convert_Planar420_to_Planar422_8_SSE2_1:
 	pavgb xmm0,xmm2
 	
 	movdqa XMMWORD ptr[r8+rax],xmm0
-	add rax,r11
-	loop Convert_Planar420_to_Planar422_8_SSE2_1
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar420_to_Planar422_8_SSE2_1
 	
 	ret
 
@@ -801,12 +812,11 @@ JPSDR_HDRTools_Convert_Planar420_to_Planar422_8to16_SSE2 proc public frame
 
 	.endprolog
 		
-	pcmpeqb xmm3,xmm3
+	pcmpeqb xmm4,xmm4
 	
 	mov r10,rcx				; r10=src1
 	xor rax,rax	
 	mov ecx,r9d	
-	mov r11,8
 	
 Convert_Planar420_to_Planar422_8to16_SSE2_1:
 	movq xmm0,qword ptr[r10+rax]
@@ -825,8 +835,9 @@ Convert_Planar420_to_Planar422_8to16_SSE2_1:
 	pavgw xmm2,xmm0
 	
 	movdqa XMMWORD ptr[r8+2*rax],xmm2
-	add rax,r11
-	loop Convert_Planar420_to_Planar422_8to16_SSE2_1
+	add rax,8
+	dec ecx
+	jnz short Convert_Planar420_to_Planar422_8to16_SSE2_1
 	
 	ret
 
@@ -848,7 +859,6 @@ JPSDR_HDRTools_Convert_Planar420_to_Planar422_8_AVX proc public frame
 	mov r10,rcx				; r10=src1
 	xor rax,rax	
 	mov ecx,r9d	
-	mov r11,16
 	
 Convert_Planar420_to_Planar422_8_AVX_1:
 	vmovdqa xmm0,XMMWORD ptr[r10+rax]
@@ -860,8 +870,9 @@ Convert_Planar420_to_Planar422_8_AVX_1:
 	vpavgb xmm2,xmm2,xmm0
 	
 	vmovdqa XMMWORD ptr[r8+rax],xmm2
-	add rax,r11
-	loop Convert_Planar420_to_Planar422_8_AVX_1
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar420_to_Planar422_8_AVX_1
 	
 	ret
 
@@ -890,9 +901,8 @@ JPSDR_HDRTools_Convert_Planar420_to_Planar422_8to16_AVX proc public frame
 	mov r10,rcx				; r10=src1
 	xor rax,rax	
 	mov ecx,r9d	
-	mov r11,16
 
-	shr rcx,1
+	shr ecx,1
 	jz short Convert_Planar420_to_Planar422_8to16_AVX_1
 
 Convert_Planar420_to_Planar422_8to16_AVX_loop_1:
@@ -916,8 +926,9 @@ Convert_Planar420_to_Planar422_8to16_AVX_loop_1:
 
 	vmovdqa XMMWORD ptr[r8+2*rax],xmm2
 	vmovdqa XMMWORD ptr[r8+2*rax+16],xmm7
-	add rax,r11
-	loop Convert_Planar420_to_Planar422_8to16_AVX_loop_1
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar420_to_Planar422_8to16_AVX_loop_1
 
 Convert_Planar420_to_Planar422_8to16_AVX_1:
 	test r9d,1
@@ -963,7 +974,6 @@ JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_SSE2 proc public frame
 	mov r10,rcx				; r10=src1
 	xor rax,rax	
 	mov ecx,r9d	
-	mov r11,16
 	
 Convert_Planar420_to_Planar422_16_SSE2_1:
 	movdqa xmm0,XMMWORD ptr[r10+rax]
@@ -976,8 +986,9 @@ Convert_Planar420_to_Planar422_16_SSE2_1:
 	pavgw xmm0,xmm2
 	
 	movdqa XMMWORD ptr[r8+rax],xmm0
-	add rax,r11
-	loop Convert_Planar420_to_Planar422_16_SSE2_1
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar420_to_Planar422_16_SSE2_1
 	
 	ret
 
@@ -999,7 +1010,6 @@ JPSDR_HDRTools_Convert_Planar420_to_Planar422_16_AVX proc public frame
 	mov r10,rcx				; r10=src1
 	xor rax,rax	
 	mov ecx,r9d	
-	mov r11,16
 	
 Convert_Planar420_to_Planar422_16_AVX_1:
 	vmovdqa xmm0,XMMWORD ptr[r10+rax]
@@ -1011,8 +1021,9 @@ Convert_Planar420_to_Planar422_16_AVX_1:
 	vpavgw xmm2,xmm2,xmm0
 	
 	vmovdqa XMMWORD ptr[r8+rax],xmm2
-	add rax,r11
-	loop Convert_Planar420_to_Planar422_16_AVX_1
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar420_to_Planar422_16_AVX_1
 	
 	ret
 
@@ -1031,7 +1042,6 @@ JPSDR_HDRTools_Convert_Planar422_to_Planar444_8_SSE2 proc public frame
 	mov r9,rcx				; r9=src
 	xor rax,rax	
 	mov ecx,r8d	
-	mov r10,16
 	
 Convert_Planar422_to_Planar444_8_SSE2_1:
 	movdqa xmm0,XMMWORD ptr[r9+rax]
@@ -1044,8 +1054,9 @@ Convert_Planar422_to_Planar444_8_SSE2_1:
 	
 	movdqa XMMWORD ptr[rdx+2*rax],xmm2
 	movdqa XMMWORD ptr[rdx+2*rax+16],xmm3
-	add rax,r10
-	loop Convert_Planar422_to_Planar444_8_SSE2_1
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar422_to_Planar444_8_SSE2_1
 	
 	ret
 
@@ -1064,7 +1075,6 @@ JPSDR_HDRTools_Convert_Planar422_to_Planar444_8_AVX proc public frame
 	mov r9,rcx				; r9=src
 	xor rax,rax	
 	mov ecx,r8d	
-	mov r10,16
 	
 Convert_Planar422_to_Planar444_8_AVX_1:
 	vmovdqa xmm0,XMMWORD ptr[r9+rax]
@@ -1075,8 +1085,9 @@ Convert_Planar422_to_Planar444_8_AVX_1:
 	
 	vmovdqa XMMWORD ptr[rdx+2*rax],xmm2
 	vmovdqa XMMWORD ptr[rdx+2*rax+16],xmm3
-	add rax,r10
-	loop Convert_Planar422_to_Planar444_8_AVX_1
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar422_to_Planar444_8_AVX_1
 	
 	ret
 
@@ -1095,7 +1106,6 @@ JPSDR_HDRTools_Convert_Planar422_to_Planar444_8to16_SSE2 proc public frame
 	mov r9,rcx				; r9=src
 	xor rax,rax	
 	mov ecx,r8d	
-	mov r10,32
 	xor r11,r11
 	
 Convert_Planar422_to_Planar444_8to16_SSE2_1:
@@ -1114,8 +1124,9 @@ Convert_Planar422_to_Planar444_8to16_SSE2_1:
 	movdqa XMMWORD ptr[rdx+r11],xmm2
 	movdqa XMMWORD ptr[rdx+r11+16],xmm0
 	inc rax
-	add r11,r10
-	loop Convert_Planar422_to_Planar444_8to16_SSE2_1
+	add r11,32
+	dec ecx
+	jnz short Convert_Planar422_to_Planar444_8to16_SSE2_1
 	
 	ret
 
@@ -1135,7 +1146,6 @@ JPSDR_HDRTools_Convert_Planar422_to_Planar444_8to16_AVX proc public frame
 	mov r9,rcx				; r9=src
 	xor rax,rax	
 	mov ecx,r8d	
-	mov r10,32
 	xor r11,r11
 	
 Convert_Planar422_to_Planar444_8to16_AVX_1:
@@ -1151,8 +1161,9 @@ Convert_Planar422_to_Planar444_8to16_AVX_1:
 	vmovdqa XMMWORD ptr[rdx+r11],xmm2
 	vmovdqa XMMWORD ptr[rdx+r11+16],xmm3
 	inc rax
-	add r11,r10
-	loop Convert_Planar422_to_Planar444_8to16_AVX_1
+	add r11,32
+	dec ecx
+	jnz short Convert_Planar422_to_Planar444_8to16_AVX_1
 	
 	ret
 
@@ -1171,7 +1182,6 @@ JPSDR_HDRTools_Convert_Planar422_to_Planar444_16_SSE2 proc public frame
 	mov r9,rcx				; r9=src
 	xor rax,rax	
 	mov ecx,r8d	
-	mov r10,16
 	
 Convert_Planar422_to_Planar444_16_SSE2_1:
 	movdqa xmm0,XMMWORD ptr[r9+rax]
@@ -1184,8 +1194,9 @@ Convert_Planar422_to_Planar444_16_SSE2_1:
 	
 	movdqa XMMWORD ptr[rdx+2*rax],xmm2
 	movdqa XMMWORD ptr[rdx+2*rax+16],xmm3
-	add rax,r10
-	loop Convert_Planar422_to_Planar444_16_SSE2_1
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar422_to_Planar444_16_SSE2_1
 	
 	ret
 
@@ -1204,7 +1215,6 @@ JPSDR_HDRTools_Convert_Planar422_to_Planar444_16_AVX proc public frame
 	mov r9,rcx				; r9=src
 	xor rax,rax	
 	mov ecx,r8d	
-	mov r10,16
 	
 Convert_Planar422_to_Planar444_16_AVX_1:
 	vmovdqa xmm0,XMMWORD ptr[r9+rax]
@@ -1215,8 +1225,9 @@ Convert_Planar422_to_Planar444_16_AVX_1:
 	
 	vmovdqa XMMWORD ptr[rdx+2*rax],xmm2
 	vmovdqa XMMWORD ptr[rdx+2*rax+16],xmm3
-	add rax,r10
-	loop Convert_Planar422_to_Planar444_16_AVX_1
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar422_to_Planar444_16_AVX_1
 	
 	ret
 
@@ -1254,10 +1265,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -1279,8 +1286,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d
 	shr r8d,2					;r8d=w0
@@ -1345,16 +1350,16 @@ Convert_YV24toRGB32_SSE2_2:
 	movzx edx,byte ptr[r12+3] ; rbx=Y r15=U rdx=V
 	movzx eax,word ptr[r10+2*rbx]
 	add ax,word ptr[r10+2*rdx+512]
-	add rsi,r13
+	add rsi,4
 	pinsrw xmm2,eax,6
 	movzx eax,word ptr[r10+2*rbx]
 	add ax,word ptr[r10+2*r15+1024]
 	add ax,word ptr[r10+2*rdx+1536]
-	add r11,r13
+	add r11,4
 	pinsrw xmm2,eax,5
 	movzx eax,word ptr[r10+2*rbx]
 	add ax,word ptr[r10+2*r15+2048]
-	add r12,r13
+	add r12,4
 	pinsrw xmm2,eax,4
 	
 	paddsw xmm0,xmm1
@@ -1365,7 +1370,7 @@ Convert_YV24toRGB32_SSE2_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_YV24toRGB32_SSE2_2
@@ -1402,7 +1407,7 @@ Convert_YV24toRGB32_SSE2_3:
 	
 	movd dword ptr[rdi],xmm0
 	
-	add rdi,r13
+	add rdi,4
 	
 	jmp Convert_YV24toRGB32_SSE2_5
 	
@@ -1474,7 +1479,7 @@ Convert_YV24toRGB32_SSE2_4:
 	
 	movd dword ptr[rdi],xmm0
 	
-	add rdi,r13
+	add rdi,4
 	
 Convert_YV24toRGB32_SSE2_5:	
 	add rsi,src_modulo_y
@@ -1485,8 +1490,6 @@ Convert_YV24toRGB32_SSE2_5:
 	jnz Convert_YV24toRGB32_SSE2_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -1529,10 +1532,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -1556,8 +1555,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d
 	shr r8d,2					;r8d=w0
@@ -1619,16 +1616,16 @@ Convert_YV24toRGB32_AVX_2:
 	movzx edx,byte ptr[r12+3] ; rbx=Y r15=U rdx=V
 	movzx eax,word ptr[r10+2*rbx]
 	add ax,word ptr[r10+2*rdx+512]
-	add rsi,r13
+	add rsi,4
 	vpinsrw xmm2,xmm2,eax,6
 	movzx eax,word ptr[r10+2*rbx]
 	add ax,word ptr[r10+2*r15+1024]
 	add ax,word ptr[r10+2*rdx+1536]
-	add r11,r13
+	add r11,4
 	vpinsrw xmm2,xmm2,eax,5
 	movzx eax,word ptr[r10+2*rbx]
 	add ax,word ptr[r10+2*r15+2048]
-	add r12,r13
+	add r12,4
 	vpinsrw xmm2,xmm2,eax,4
 	
 	vpaddsw xmm0,xmm0,xmm1
@@ -1639,7 +1636,7 @@ Convert_YV24toRGB32_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm3
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_YV24toRGB32_AVX_2
@@ -1674,7 +1671,7 @@ Convert_YV24toRGB32_AVX_3:
 	
 	vmovd dword ptr[rdi],xmm3
 	
-	add rdi,r13
+	add rdi,4
 	
 	jmp Convert_YV24toRGB32_AVX_5
 	
@@ -1744,7 +1741,7 @@ Convert_YV24toRGB32_AVX_4:
 	
 	vmovd dword ptr[rdi],xmm3
 	
-	add rdi,r13
+	add rdi,4
 	
 Convert_YV24toRGB32_AVX_5:	
 	add rsi,src_modulo_y
@@ -1755,8 +1752,6 @@ Convert_YV24toRGB32_AVX_5:
 	jnz Convert_YV24toRGB32_AVX_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -1799,10 +1794,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -1821,8 +1812,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,2
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -1859,16 +1848,16 @@ Convert_8_YV24toRGB64_SSE41_2:
 	movzx edx,byte ptr[r12+1] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+1024]
-	add rsi,r13
+	add rsi,2
 	pinsrd xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+2048]
 	add eax,dword ptr[r10+4*rdx+3072]
-	add r11,r13
+	add r11,2
 	pinsrd xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+4096]
-	add r12,r13
+	add r12,2
 	pinsrd xmm2,eax,0
 
 	paddd xmm0,xmm1
@@ -1879,7 +1868,7 @@ Convert_8_YV24toRGB64_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_8_YV24toRGB64_SSE41_2
@@ -1924,8 +1913,6 @@ Convert_8_YV24toRGB64_SSE41_4:
 	jnz Convert_8_YV24toRGB64_SSE41_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -1968,10 +1955,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -1990,8 +1973,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -2028,16 +2009,16 @@ Convert_10_YV24toRGB64_SSE41_2:
 	movzx edx,word ptr[r12+2] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+4096]
-	add rsi,r13
+	add rsi,4
 	pinsrd xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+8192]
 	add eax,dword ptr[r10+4*rdx+12288]
-	add r11,r13
+	add r11,4
 	pinsrd xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+16384]
-	add r12,r13
+	add r12,4
 	pinsrd xmm2,eax,0
 
 	paddd xmm0,xmm1
@@ -2048,7 +2029,7 @@ Convert_10_YV24toRGB64_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_10_YV24toRGB64_SSE41_2
@@ -2093,8 +2074,6 @@ Convert_10_YV24toRGB64_SSE41_4:
 	jnz Convert_10_YV24toRGB64_SSE41_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -2137,10 +2116,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -2159,8 +2134,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -2197,16 +2170,16 @@ Convert_12_YV24toRGB64_SSE41_2:
 	movzx edx,word ptr[r12+2] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+16384]
-	add rsi,r13
+	add rsi,4
 	pinsrd xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+32768]
 	add eax,dword ptr[r10+4*rdx+49152]
-	add r11,r13
+	add r11,4
 	pinsrd xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+65536]
-	add r12,r13
+	add r12,4
 	pinsrd xmm2,eax,0
 	
 	paddd xmm0,xmm1
@@ -2217,7 +2190,7 @@ Convert_12_YV24toRGB64_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_12_YV24toRGB64_SSE41_2
@@ -2262,8 +2235,6 @@ Convert_12_YV24toRGB64_SSE41_4:
 	jnz Convert_12_YV24toRGB64_SSE41_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -2306,10 +2277,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -2328,8 +2295,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -2366,16 +2331,16 @@ Convert_14_YV24toRGB64_SSE41_2:
 	movzx edx,word ptr[r12+2] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+65536]
-	add rsi,r13
+	add rsi,4
 	pinsrd xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+131072]
 	add eax,dword ptr[r10+4*rdx+196608]
-	add r11,r13
+	add r11,4
 	pinsrd xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+262144]
-	add r12,r13
+	add r12,4
 	pinsrd xmm2,eax,0
 	
 	paddd xmm0,xmm1
@@ -2386,7 +2351,7 @@ Convert_14_YV24toRGB64_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_14_YV24toRGB64_SSE41_2
@@ -2431,8 +2396,6 @@ Convert_14_YV24toRGB64_SSE41_4:
 	jnz Convert_14_YV24toRGB64_SSE41_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -2475,10 +2438,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -2497,8 +2456,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -2535,16 +2492,16 @@ Convert_16_YV24toRGB64_SSE41_2:
 	movzx edx,word ptr[r12+2] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+262144]
-	add rsi,r13
+	add rsi,4
 	pinsrd xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+524288]
 	add eax,dword ptr[r10+4*rdx+786432]
-	add r11,r13
+	add r11,4
 	pinsrd xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+1048576]
-	add r12,r13
+	add r12,4
 	pinsrd xmm2,eax,0
 	
 	paddd xmm0,xmm1
@@ -2555,7 +2512,7 @@ Convert_16_YV24toRGB64_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_16_YV24toRGB64_SSE41_2
@@ -2600,8 +2557,6 @@ Convert_16_YV24toRGB64_SSE41_4:
 	jnz Convert_16_YV24toRGB64_SSE41_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -2644,10 +2599,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -2668,8 +2619,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,2
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -2703,16 +2652,16 @@ Convert_8_YV24toRGB64_AVX_2:
 	movzx edx,byte ptr[r12+1] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+1024]
-	add rsi,r13
+	add rsi,2
 	vpinsrd xmm2,xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+2048]
 	add eax,dword ptr[r10+4*rdx+3072]
-	add r11,r13
+	add r11,2
 	vpinsrd xmm2,xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+4096]
-	add r12,r13
+	add r12,2
 	vpinsrd xmm2,xmm2,eax,0
 	
 	vpaddd xmm0,xmm0,xmm1
@@ -2723,7 +2672,7 @@ Convert_8_YV24toRGB64_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm3
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_8_YV24toRGB64_AVX_2
@@ -2766,8 +2715,6 @@ Convert_8_YV24toRGB64_AVX_4:
 	jnz Convert_8_YV24toRGB64_AVX_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -2810,10 +2757,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -2834,8 +2777,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -2869,16 +2810,16 @@ Convert_10_YV24toRGB64_AVX_2:
 	movzx edx,word ptr[r12+2] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+4096]
-	add rsi,r13
+	add rsi,4
 	vpinsrd xmm2,xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+8192]
 	add eax,dword ptr[r10+4*rdx+12288]
-	add r11,r13
+	add r11,4
 	vpinsrd xmm2,xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+16384]
-	add r12,r13
+	add r12,4
 	vpinsrd xmm2,xmm2,eax,0
 	
 	vpaddd xmm0,xmm0,xmm1
@@ -2889,7 +2830,7 @@ Convert_10_YV24toRGB64_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm3
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_10_YV24toRGB64_AVX_2
@@ -2932,8 +2873,6 @@ Convert_10_YV24toRGB64_AVX_4:
 	jnz Convert_10_YV24toRGB64_AVX_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -2976,10 +2915,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -3000,8 +2935,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -3035,16 +2968,16 @@ Convert_12_YV24toRGB64_AVX_2:
 	movzx edx,word ptr[r12+2] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+16384]
-	add rsi,r13
+	add rsi,4
 	vpinsrd xmm2,xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+32768]
 	add eax,dword ptr[r10+4*rdx+49152]
-	add r11,r13
+	add r11,4
 	vpinsrd xmm2,xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+65536]
-	add r12,r13
+	add r12,4
 	vpinsrd xmm2,xmm2,eax,0
 	
 	vpaddd xmm0,xmm0,xmm1
@@ -3055,7 +2988,7 @@ Convert_12_YV24toRGB64_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm3
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_12_YV24toRGB64_AVX_2
@@ -3098,8 +3031,6 @@ Convert_12_YV24toRGB64_AVX_4:
 	jnz Convert_12_YV24toRGB64_AVX_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -3142,10 +3073,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -3166,8 +3093,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -3201,16 +3126,16 @@ Convert_14_YV24toRGB64_AVX_2:
 	movzx edx,word ptr[r12+2] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+65536]
-	add rsi,r13
+	add rsi,4
 	vpinsrd xmm2,xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+131072]
 	add eax,dword ptr[r10+4*rdx+196608]
-	add r11,r13
+	add r11,4
 	vpinsrd xmm2,xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+262144]
-	add r12,r13
+	add r12,4
 	vpinsrd xmm2,xmm2,eax,0
 	
 	vpaddd xmm0,xmm0,xmm1
@@ -3221,7 +3146,7 @@ Convert_14_YV24toRGB64_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm3
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_14_YV24toRGB64_AVX_2
@@ -3264,8 +3189,6 @@ Convert_14_YV24toRGB64_AVX_4:
 	jnz Convert_14_YV24toRGB64_AVX_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -3308,10 +3231,6 @@ dst_modulo equ qword ptr[rbp+120]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -3332,8 +3251,6 @@ dst_modulo equ qword ptr[rbp+120]
 	mov rdi,r9
 	mov r9d,w
 	mov r10,lookup
-	mov r13,4
-	mov r14,16
 	
 	mov r8d,r9d					;r8d=w0
 	shr r8d,1
@@ -3367,16 +3284,16 @@ Convert_16_YV24toRGB64_AVX_2:
 	movzx edx,word ptr[r12+2] ; rbx=Y r15=U rdx=V
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*rdx+262144]
-	add rsi,r13
+	add rsi,4
 	vpinsrd xmm2,xmm2,eax,2
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+524288]
 	add eax,dword ptr[r10+4*rdx+786432]
-	add r11,r13
+	add r11,4
 	vpinsrd xmm2,xmm2,eax,1
 	mov eax,dword ptr[r10+4*rbx]
 	add eax,dword ptr[r10+4*r15+1048576]
-	add r12,r13
+	add r12,4
 	vpinsrd xmm2,xmm2,eax,0
 	
 	vpaddd xmm0,xmm0,xmm1	
@@ -3387,7 +3304,7 @@ Convert_16_YV24toRGB64_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm3
 	
-	add rdi,r14
+	add rdi,16
 	
 	dec ecx
 	jnz Convert_16_YV24toRGB64_AVX_2
@@ -3430,8 +3347,6 @@ Convert_16_YV24toRGB64_AVX_4:
 	jnz Convert_16_YV24toRGB64_AVX_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -3852,8 +3767,6 @@ dst_pitch equ qword ptr[rbp+88]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
@@ -3862,8 +3775,8 @@ dst_pitch equ qword ptr[rbp+88]
 	.pushreg r14
 	push r15
 	.pushreg r15
-	sub rsp,32
-	.allocstack 32
+	sub rsp,40
+	.allocstack 40
 	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	movdqa XMMWORD ptr[rsp+16],xmm7
@@ -3880,7 +3793,6 @@ dst_pitch equ qword ptr[rbp+88]
 	mov r13,src_pitch_G
 	mov r14,src_pitch_B
 	mov r15,dst_pitch
-	mov rbx,4
 	mov r10d,h
 	
 Convert_RGBPStoRGB64_SSE41_1:
@@ -3910,8 +3822,9 @@ Convert_RGBPStoRGB64_SSE41_2:
 	punpckhwd xmm1,xmm2             	;0R4G4B40R3G3B3
 	movdqa XMMWORD ptr[r9+8*rax],xmm0
 	movdqa XMMWORD ptr[r9+8*rax+16],xmm1
-	add rax,rbx
-loop Convert_RGBPStoRGB64_SSE41_2
+	add rax,4
+	dec ecx
+	jnz short Convert_RGBPStoRGB64_SSE41_2
 
 Convert_RGBPStoRGB64_SSE41_3:
 	mov ecx,r11d
@@ -3959,13 +3872,12 @@ Convert_RGBPStoRGB64_SSE41_5:
 	
 	movdqa xmm7,XMMWORD ptr[rsp+16]
 	movdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,32
+	add rsp,40
 	
 	pop r15
 	pop r14
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -3995,8 +3907,6 @@ dst_pitch equ qword ptr[rbp+88]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
@@ -4005,8 +3915,8 @@ dst_pitch equ qword ptr[rbp+88]
 	.pushreg r14
 	push r15
 	.pushreg r15
-	sub rsp,32
-	.allocstack 32
+	sub rsp,40
+	.allocstack 40
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -4023,7 +3933,6 @@ dst_pitch equ qword ptr[rbp+88]
 	mov r13,src_pitch_G
 	mov r14,src_pitch_B
 	mov r15,dst_pitch
-	mov rbx,8
 	mov r10d,h
 	
 Convert_RGBPStoRGB64_AVX_1:
@@ -4143,7 +4052,7 @@ Convert_RGBPStoRGB64_AVX_7:
 	
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,32
+	add rsp,40
 	
 	vzeroupper
 	
@@ -4151,7 +4060,6 @@ Convert_RGBPStoRGB64_AVX_7:
 	pop r14
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -4198,10 +4106,6 @@ Max_V equ word ptr[rbp+168]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -4245,8 +4149,6 @@ Max_V equ word ptr[rbp+168]
 	mov rdi,rdx				;rdi=dst_y
 	mov r11,r8				;r11=dst_u
 	mov r12,r9				;r12=dst_v
-	mov r13,2
-	mov r14,8
 	mov r9d,w
 	
 	xor rdx,rdx
@@ -4300,15 +4202,15 @@ Convert_RGB32toYV24_SSE2_2:
 	packuswb xmm0,xmm4
 	
 	pextrw eax,xmm0,0
-	add rsi,r14
+	add rsi,8
 	mov word ptr[rdi],ax
 	pextrw eax,xmm0,1
-	add rdi,r13
+	add rdi,2
 	mov word ptr[r11],ax
 	pextrw eax,xmm0,2
-	add r11,r13
+	add r11,2
 	mov word ptr[r12],ax	
-	add r12,r13
+	add r12,2
 	
 	dec ecx
 	jnz Convert_RGB32toYV24_SSE2_2
@@ -4359,8 +4261,6 @@ Convert_RGB32toYV24_SSE2_4:
 	jnz Convert_RGB32toYV24_SSE2_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -4410,10 +4310,6 @@ Max_V equ word ptr[rbp+168]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -4457,8 +4353,6 @@ Max_V equ word ptr[rbp+168]
 	mov rdi,rdx				;rdi=dst_y
 	mov r11,r8				;r11=dst_u
 	mov r12,r9				;r12=dst_v
-	mov r13,2
-	mov r14,8
 	mov r9d,w
 	
 	xor rdx,rdx
@@ -4512,15 +4406,15 @@ Convert_RGB32toYV24_AVX_2:
 	vpackuswb xmm0,xmm0,xmm4
 	
 	vpextrw eax,xmm0,0
-	add rsi,r14
+	add rsi,8
 	mov word ptr[rdi],ax
 	vpextrw eax,xmm0,1
-	add rdi,r13
+	add rdi,2
 	mov word ptr[r11],ax
 	vpextrw eax,xmm0,2
-	add r11,r13
+	add r11,2
 	mov word ptr[r12],ax	
-	add r12,r13
+	add r12,2
 	
 	dec ecx
 	jnz Convert_RGB32toYV24_AVX_2
@@ -4571,8 +4465,6 @@ Convert_RGB32toYV24_AVX_4:
 	jnz Convert_RGB32toYV24_AVX_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -4622,10 +4514,6 @@ Max_V equ word ptr[rbp+168]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -4665,8 +4553,6 @@ Max_V equ word ptr[rbp+168]
 	mov rdi,rdx				;rdi=dst_y
 	mov r11,r8				;r11=dst_u
 	mov r12,r9				;r12=dst_v
-	mov r13,4
-	mov r14,16
 	mov r9d,w
 	
 	xor rax,rax
@@ -4726,15 +4612,15 @@ Convert_RGB64toYV24_SSE41_2:
 	pminuw xmm0,xmm3
 	
 	pextrd eax,xmm0,0
-	add rsi,r14
+	add rsi,16
 	mov dword ptr[rdi],eax
 	pextrd eax,xmm0,1
-	add rdi,r13
+	add rdi,4
 	mov dword ptr[r11],eax
 	pextrd eax,xmm0,2
-	add r11,r13
+	add r11,4
 	mov dword ptr[r12],eax	
-	add r12,r13
+	add r12,4
 	
 	dec ecx
 	jnz Convert_RGB64toYV24_SSE41_2
@@ -4786,8 +4672,6 @@ Convert_RGB64toYV24_SSE41_4:
 	jnz Convert_RGB64toYV24_SSE41_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -4837,10 +4721,6 @@ Max_V equ word ptr[rbp+168]
 	.pushreg rbx
 	push r12
 	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -4880,8 +4760,6 @@ Max_V equ word ptr[rbp+168]
 	mov rdi,rdx				;rdi=dst_y
 	mov r11,r8				;r11=dst_u
 	mov r12,r9				;r12=dst_v
-	mov r13,4
-	mov r14,16
 	mov r9d,w
 	
 	xor rax,rax
@@ -4941,15 +4819,15 @@ Convert_RGB64toYV24_AVX_2:
 	vpminuw xmm0,xmm0,xmm3
 	
 	vpextrd eax,xmm0,0
-	add rsi,r14
+	add rsi,16
 	mov dword ptr[rdi],eax
 	vpextrd eax,xmm0,1
-	add rdi,r13
+	add rdi,4
 	mov dword ptr[r11],eax
 	vpextrd eax,xmm0,2
-	add r11,r13
+	add r11,4
 	mov dword ptr[r12],eax	
-	add r12,r13
+	add r12,4
 	
 	dec ecx
 	jnz Convert_RGB64toYV24_AVX_2
@@ -5001,8 +4879,6 @@ Convert_RGB64toYV24_AVX_4:
 	jnz Convert_RGB64toYV24_AVX_1
 
 	pop r15
-	pop r14
-	pop r13
 	pop r12
 	pop rbx
 	pop rsi
@@ -5053,7 +4929,8 @@ Convert_Planar444_to_Planar422_8_2:
 	add ax,dx
 	shr ax,1
 	stosb
-	loop Convert_Planar444_to_Planar422_8_2
+	dec ecx
+	jnz short Convert_Planar444_to_Planar422_8_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -5108,7 +4985,8 @@ Convert_Planar444_to_Planar422_16_2:
 	add eax,edx
 	shr eax,1
 	stosw
-	loop Convert_Planar444_to_Planar422_16_2
+	dec ecx
+	jnz short Convert_Planar444_to_Planar422_16_2
 	
 	add rsi,r10
 	add rdi,r11
@@ -5142,8 +5020,6 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rsi
 	push rdi
 	.pushreg rdi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	.endprolog		
@@ -5155,8 +5031,7 @@ dst_pitch equ qword ptr[rbp+56]
 	shr r10d,1
 	mov r11,src_pitch
 	mov r12,dst_pitch
-	mov rbx,16
-	add rdx,rbx
+	add rdx,16
 
 Convert_Planar444_to_Planar422_8_SSE2_1:
 	xor rax,rax
@@ -5178,8 +5053,9 @@ Convert_Planar444_to_Planar422_8_SSE2_2:
 	packuswb xmm0,xmm2
 	
 	movdqa XMMWORD ptr[rdi+rax],xmm0
-	add rax,rbx
-	loop Convert_Planar444_to_Planar422_8_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar444_to_Planar422_8_SSE2_2
 	
 Convert_Planar444_to_Planar422_8_SSE2_3:	
 	test r8d,1
@@ -5199,10 +5075,9 @@ Convert_Planar444_to_Planar422_8_SSE2_4:
 	add rdx,r11
 	add rdi,r12
 	dec r9d
-	jnz short Convert_Planar444_to_Planar422_8_SSE2_1
+	jnz Convert_Planar444_to_Planar422_8_SSE2_1
 
 	pop r12
-	pop rbx
 	pop rdi
 	pop rsi
 	pop rbp
@@ -5230,8 +5105,6 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rsi
 	push rdi
 	.pushreg rdi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	.endprolog		
@@ -5243,8 +5116,7 @@ dst_pitch equ qword ptr[rbp+56]
 	shr r10d,1
 	mov r11,src_pitch
 	mov r12,dst_pitch
-	mov rbx,16
-	add rdx,rbx
+	add rdx,16
 
 Convert_Planar444_to_Planar422_16_SSE41_1:
 	xor rax,rax
@@ -5266,8 +5138,9 @@ Convert_Planar444_to_Planar422_16_SSE41_2:
 	packusdw xmm0,xmm2
 	
 	movdqa XMMWORD ptr[rdi+rax],xmm0
-	add rax,rbx
-	loop Convert_Planar444_to_Planar422_16_SSE41_2
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar444_to_Planar422_16_SSE41_2
 	
 Convert_Planar444_to_Planar422_16_SSE41_3:	
 	test r8d,1
@@ -5287,10 +5160,9 @@ Convert_Planar444_to_Planar422_16_SSE41_4:
 	add rdx,r11
 	add rdi,r12
 	dec r9d
-	jnz short Convert_Planar444_to_Planar422_16_SSE41_1
+	jnz Convert_Planar444_to_Planar422_16_SSE41_1
 
 	pop r12
-	pop rbx
 	pop rdi
 	pop rsi
 	pop rbp
@@ -5318,8 +5190,6 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rsi
 	push rdi
 	.pushreg rdi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	.endprolog		
@@ -5331,8 +5201,7 @@ dst_pitch equ qword ptr[rbp+56]
 	shr r10d,1
 	mov r11,src_pitch
 	mov r12,dst_pitch
-	mov rbx,16
-	add rdx,rbx
+	add rdx,16
 
 Convert_Planar444_to_Planar422_8_AVX_1:
 	xor rax,rax
@@ -5352,8 +5221,9 @@ Convert_Planar444_to_Planar422_8_AVX_2:
 	vpackuswb xmm0,xmm0,xmm2
 	
 	vmovdqa XMMWORD ptr[rdi+rax],xmm0
-	add rax,rbx
-	loop Convert_Planar444_to_Planar422_8_AVX_2
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar444_to_Planar422_8_AVX_2
 	
 Convert_Planar444_to_Planar422_8_AVX_3:	
 	test r8d,1
@@ -5375,7 +5245,6 @@ Convert_Planar444_to_Planar422_8_AVX_4:
 	jnz short Convert_Planar444_to_Planar422_8_AVX_1
 
 	pop r12
-	pop rbx
 	pop rdi
 	pop rsi
 	pop rbp
@@ -5403,8 +5272,6 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rsi
 	push rdi
 	.pushreg rdi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	.endprolog		
@@ -5416,8 +5283,7 @@ dst_pitch equ qword ptr[rbp+56]
 	shr r10d,1
 	mov r11,src_pitch
 	mov r12,dst_pitch
-	mov rbx,16
-	add rdx,rbx
+	add rdx,16
 
 Convert_Planar444_to_Planar422_16_AVX_1:
 	xor rax,rax
@@ -5437,8 +5303,9 @@ Convert_Planar444_to_Planar422_16_AVX_2:
 	vpackusdw xmm0,xmm0,xmm2
 	
 	vmovdqa XMMWORD ptr[rdi+rax],xmm0
-	add rax,rbx
-	loop Convert_Planar444_to_Planar422_16_AVX_2
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar444_to_Planar422_16_AVX_2
 	
 Convert_Planar444_to_Planar422_16_AVX_3:	
 	test r8d,1
@@ -5460,7 +5327,6 @@ Convert_Planar444_to_Planar422_16_AVX_4:
 	jnz short Convert_Planar444_to_Planar422_16_AVX_1
 
 	pop r12
-	pop rbx
 	pop rdi
 	pop rsi
 	pop rbp
@@ -5487,15 +5353,12 @@ dst_pitch equ qword ptr[rbp+64]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	.endprolog		
 	
 	mov rsi,rcx
 	mov r10d,h
-	mov rbx,16
 	mov r11,src_pitch2
 	mov r12,dst_pitch
 
@@ -5508,8 +5371,9 @@ Convert_Planar422_to_Planar420_8_SSE2_2:
 	pavgb xmm0,XMMWORD ptr[rdx+rax]
 	
 	movdqa XMMWORD ptr[r8+rax],xmm0
-	add rax,rbx
-	loop Convert_Planar422_to_Planar420_8_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar422_to_Planar420_8_SSE2_2
 	
 	add rsi,r11
 	add rdx,r11
@@ -5518,7 +5382,6 @@ Convert_Planar422_to_Planar420_8_SSE2_2:
 	jnz short Convert_Planar422_to_Planar420_8_SSE2_1
 
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -5544,15 +5407,12 @@ dst_pitch equ qword ptr[rbp+64]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	.endprolog		
 	
 	mov rsi,rcx
 	mov r10d,h
-	mov rbx,16
 	mov r11,src_pitch2
 	mov r12,dst_pitch
 
@@ -5565,8 +5425,9 @@ Convert_Planar422_to_Planar420_16_SSE2_2:
 	pavgw xmm0,XMMWORD ptr[rdx+rax]
 	
 	movdqa XMMWORD ptr[r8+rax],xmm0
-	add rax,rbx
-	loop Convert_Planar422_to_Planar420_16_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar422_to_Planar420_16_SSE2_2
 	
 	add rsi,r11
 	add rdx,r11
@@ -5575,7 +5436,6 @@ Convert_Planar422_to_Planar420_16_SSE2_2:
 	jnz short Convert_Planar422_to_Planar420_16_SSE2_1
 
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -5601,15 +5461,12 @@ dst_pitch equ qword ptr[rbp+64]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	.endprolog		
 	
 	mov rsi,rcx
 	mov r10d,h
-	mov rbx,16
 	mov r11,src_pitch2
 	mov r12,dst_pitch
 
@@ -5622,8 +5479,9 @@ Convert_Planar422_to_Planar420_8_AVX_2:
 	vpavgb xmm0,xmm0,XMMWORD ptr[rdx+rax]
 	
 	vmovdqa XMMWORD ptr[r8+rax],xmm0
-	add rax,rbx
-	loop Convert_Planar422_to_Planar420_8_AVX_2
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar422_to_Planar420_8_AVX_2
 	
 	add rsi,r11
 	add rdx,r11
@@ -5632,7 +5490,6 @@ Convert_Planar422_to_Planar420_8_AVX_2:
 	jnz short Convert_Planar422_to_Planar420_8_AVX_1
 
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -5658,15 +5515,12 @@ dst_pitch equ qword ptr[rbp+64]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	.endprolog		
 	
 	mov rsi,rcx
 	mov r10d,h
-	mov rbx,16
 	mov r11,src_pitch2
 	mov r12,dst_pitch
 
@@ -5679,8 +5533,9 @@ Convert_Planar422_to_Planar420_16_AVX_2:
 	vpavgw xmm0,xmm0,XMMWORD ptr[rdx+rax]
 	
 	vmovdqa XMMWORD ptr[r8+rax],xmm0
-	add rax,rbx
-	loop Convert_Planar422_to_Planar420_16_AVX_2
+	add rax,16
+	dec ecx
+	jnz short Convert_Planar422_to_Planar420_16_AVX_2
 	
 	add rsi,r11
 	add rdx,r11
@@ -5689,7 +5544,6 @@ Convert_Planar422_to_Planar420_16_AVX_2:
 	jnz short Convert_Planar422_to_Planar420_16_AVX_1
 
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -5729,8 +5583,6 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg r12
 	push r13
 	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -5741,7 +5593,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov rdi,rdx				;rdi=dst
 	mov r12,src_modulo
 	mov r13,dst_modulo
-	mov r14,16
 	
 	xor rdx,rdx
 	xor rbx,rbx
@@ -5826,8 +5677,8 @@ Convert_PackedXYZ_8_SSE2_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 	
-	add rsi,r14
-	add rdi,r14
+	add rsi,16
+	add rdi,16
 
 	dec ecx
 	jnz Convert_PackedXYZ_8_SSE2_2
@@ -5941,7 +5792,6 @@ Convert_PackedXYZ_8_SSE2_5:
 	jnz Convert_PackedXYZ_8_SSE2_1
 
 	pop r15
-	pop r14
 	pop r13
 	pop r12
 	pop rbx
@@ -5980,8 +5830,6 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg r12
 	push r13
 	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -5992,7 +5840,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov rdi,rdx				;rdi=dst
 	mov r12,src_modulo
 	mov r13,dst_modulo
-	mov r14,16
 	
 	xor rdx,rdx
 	xor rbx,rbx
@@ -6078,8 +5925,8 @@ Convert_PackedXYZ_8_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm2
 	
-	add rsi,r14
-	add rdi,r14
+	add rsi,16
+	add rdi,16
 
 	dec ecx
 	jnz Convert_PackedXYZ_8_AVX_2
@@ -6191,7 +6038,6 @@ Convert_PackedXYZ_8_AVX_5:
 	jnz Convert_PackedXYZ_8_AVX_1
 
 	pop r15
-	pop r14
 	pop r13
 	pop r12
 	pop rbx
@@ -6230,8 +6076,6 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg r12
 	push r13
 	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -6242,7 +6086,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov rdi,rdx				;rdi=dst
 	mov r12,src_modulo
 	mov r13,dst_modulo
-	mov r14,16
 	
 	xor rdx,rdx
 	xor rbx,rbx
@@ -6297,8 +6140,8 @@ Convert_PackedXYZ_16_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 	
-	add rsi,r14
-	add rdi,r14
+	add rsi,16
+	add rdi,16
 
 	dec ecx
 	jnz Convert_PackedXYZ_16_SSE41_2
@@ -6339,7 +6182,6 @@ Convert_PackedXYZ_16_SSE41_4:
 	jnz Convert_PackedXYZ_16_SSE41_1
 
 	pop r15
-	pop r14
 	pop r13
 	pop r12
 	pop rbx
@@ -6378,8 +6220,6 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg r12
 	push r13
 	.pushreg r13
-	push r14
-	.pushreg r14
 	push r15
 	.pushreg r15
 	.endprolog
@@ -6390,7 +6230,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov rdi,rdx				;rdi=dst
 	mov r12,src_modulo
 	mov r13,dst_modulo
-	mov r14,16
 	
 	vpxor xmm0,xmm0,xmm0
 	vpxor xmm1,xmm1,xmm1
@@ -6445,8 +6284,8 @@ Convert_PackedXYZ_16_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm2
 	
-	add rsi,r14
-	add rdi,r14
+	add rsi,16
+	add rdi,16
 
 	dec ecx
 	jnz Convert_PackedXYZ_16_AVX_2
@@ -6486,7 +6325,6 @@ Convert_PackedXYZ_16_AVX_4:
 	jnz Convert_PackedXYZ_16_AVX_1
 
 	pop r15
-	pop r14
 	pop r13
 	pop r12
 	pop rbx
@@ -6528,8 +6366,6 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
@@ -6553,7 +6389,6 @@ dst_modulo3 equ qword ptr[rbp+128]
 	mov r13,src_modulo3
 	mov r14,dst_modulo1
 	mov r15d,w
-	mov rbx,4
 	
 Convert_PlanarRGBtoXYZ_32_SSE2_1:
 	mov ecx,r15d
@@ -6571,22 +6406,23 @@ Convert_PlanarRGBtoXYZ_32_SSE2_2:
 	mulps xmm5,xmm2
 	
 	addps xmm3,xmm4
-	add rsi,rbx
+	add rsi,4
 	addps xmm3,xmm5	
-	add rdx,rbx
+	add rdx,4
 	movhlps xmm4,xmm3
 	
 	movss dword ptr[r9],xmm3
-	add r8,rbx
+	add r8,4
 	shufps xmm3,xmm3,1
 	movss dword ptr[rdi],xmm4
 	movss dword ptr[r10],xmm3
 	
-	add r9,rbx
-	add rdi,rbx
-	add r10,rbx
+	add r9,4
+	add rdi,4
+	add r10,4
 	
-	loop Convert_PlanarRGBtoXYZ_32_SSE2_2
+	dec ecx
+	jnz short Convert_PlanarRGBtoXYZ_32_SSE2_2
 
 	add rsi,r11
 	add rdx,r12
@@ -6603,7 +6439,6 @@ Convert_PlanarRGBtoXYZ_32_SSE2_2:
 	pop r14
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -6642,8 +6477,6 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
@@ -6652,8 +6485,8 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg r14
 	push r15
 	.pushreg r15
-	sub rsp,40
-	.allocstack 40
+	sub rsp,32
+	.allocstack 32
 	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	movdqa XMMWORD ptr[rsp+16],xmm7
@@ -6675,7 +6508,6 @@ dst_modulo3 equ qword ptr[rbp+128]
 	mov r13,src_modulo3
 	mov r14,dst_modulo1
 	mov r15d,w
-	mov rbx,4
 	
 Convert_PlanarXYZtoRGB_32_SSE2_1:
 	mov ecx,r15d
@@ -6693,24 +6525,25 @@ Convert_PlanarXYZtoRGB_32_SSE2_2:
 	mulps xmm5,xmm2
 	
 	addps xmm3,xmm4
-	add rsi,rbx
+	add rsi,4
 	addps xmm3,xmm5
 	maxps xmm3,xmm6
 	minps xmm3,xmm7	
-	add rdx,rbx
+	add rdx,4
 	movhlps xmm4,xmm3
 	
 	movss dword ptr[r9],xmm3
-	add r8,rbx
+	add r8,4
 	shufps xmm3,xmm3,1
 	movss dword ptr[rdi],xmm4
 	movss dword ptr[r10],xmm3
 	
-	add r9,rbx
-	add rdi,rbx
-	add r10,rbx
+	add r9,4
+	add rdi,4
+	add r10,4
 	
-	loop Convert_PlanarXYZtoRGB_32_SSE2_2
+	dec ecx
+	jnz short Convert_PlanarXYZtoRGB_32_SSE2_2
 
 	add rsi,r11
 	add rdx,r12
@@ -6725,13 +6558,12 @@ Convert_PlanarXYZtoRGB_32_SSE2_2:
 	
 	movdqa xmm7,XMMWORD ptr[rsp+16]
 	movdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,40
+	add rsp,32
 	
 	pop r15
 	pop r14
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -6770,8 +6602,6 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
@@ -6780,8 +6610,8 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg r14
 	push r15
 	.pushreg r15
-	sub rsp,24
-	.allocstack 24
+	sub rsp,16
+	.allocstack 16
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	.endprolog
@@ -6801,7 +6631,6 @@ dst_modulo3 equ qword ptr[rbp+128]
 	mov r15d,w
 	mov r14d,r15d
 	shr r14d,1
-	mov rbx,8
 	
 Convert_PlanarRGBtoXYZ_32_AVX_1:
 	or r14d,r14d
@@ -6828,14 +6657,14 @@ Convert_PlanarRGBtoXYZ_32_AVX_2:
 	vmulps ymm5,ymm5,ymm2
 
 	vaddps ymm3,ymm3,ymm4
-	add rsi,rbx
+	add rsi,8
 	vaddps ymm3,ymm3,ymm5
-	add rdx,rbx
+	add rdx,8
 	vextractf128 xmm6,ymm3,1
 
 	vmovhlps xmm4,xmm4,xmm3
 	vmovss dword ptr[r9],xmm3
-	add r8,rbx
+	add r8,8
 	vshufps xmm3,xmm3,xmm3,1
 	vmovss dword ptr[rdi],xmm4
 	vmovss dword ptr[r10],xmm3
@@ -6846,9 +6675,9 @@ Convert_PlanarRGBtoXYZ_32_AVX_2:
 	vmovss dword ptr[rdi+4],xmm4
 	vmovss dword ptr[r10+4],xmm6
 	
-	add r9,rbx
-	add rdi,rbx
-	add r10,rbx
+	add r9,8
+	add rdi,8
+	add r10,8
 	
 	dec ecx
 	jnz Convert_PlanarRGBtoXYZ_32_AVX_2
@@ -6894,7 +6723,7 @@ Convert_PlanarRGBtoXYZ_32_AVX_4:
 	jnz Convert_PlanarRGBtoXYZ_32_AVX_1
 	
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,24
+	add rsp,16
 
 	vzeroupper
 	
@@ -6902,7 +6731,6 @@ Convert_PlanarRGBtoXYZ_32_AVX_4:
 	pop r14
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -6941,8 +6769,6 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
@@ -6951,8 +6777,8 @@ dst_modulo3 equ qword ptr[rbp+128]
 	.pushreg r14
 	push r15
 	.pushreg r15
-	sub rsp,56
-	.allocstack 56
+	sub rsp,48
+	.allocstack 48
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -6978,7 +6804,6 @@ dst_modulo3 equ qword ptr[rbp+128]
 	mov r15d,w
 	mov r14d,r15d
 	shr r14d,1
-	mov rbx,8
 	
 Convert_PlanarXYZtoRGB_32_AVX_1:
 	or r14d,r14d
@@ -7005,16 +6830,16 @@ Convert_PlanarXYZtoRGB_32_AVX_2:
 	vmulps ymm5,ymm5,ymm2
 
 	vaddps ymm3,ymm3,ymm4
-	add rsi,rbx
+	add rsi,8
 	vaddps ymm3,ymm3,ymm5
 	vmaxps ymm3,ymm3,ymm8
 	vminps ymm3,ymm3,ymm7
-	add rdx,rbx
+	add rdx,8
 	vextractf128 xmm6,ymm3,1
 
 	vmovhlps xmm4,xmm4,xmm3
 	vmovss dword ptr[r9],xmm3
-	add r8,rbx
+	add r8,8
 	vshufps xmm3,xmm3,xmm3,1
 	vmovss dword ptr[rdi],xmm4
 	vmovss dword ptr[r10],xmm3
@@ -7025,9 +6850,9 @@ Convert_PlanarXYZtoRGB_32_AVX_2:
 	vmovss dword ptr[rdi+4],xmm4
 	vmovss dword ptr[r10+4],xmm6
 	
-	add r9,rbx
-	add rdi,rbx
-	add r10,rbx
+	add r9,8
+	add rdi,8
+	add r10,8
 	
 	dec ecx
 	jnz Convert_PlanarXYZtoRGB_32_AVX_2
@@ -7077,7 +6902,7 @@ Convert_PlanarXYZtoRGB_32_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,56
+	add rsp,48
 
 	vzeroupper
 	
@@ -7085,7 +6910,6 @@ Convert_PlanarXYZtoRGB_32_AVX_4:
 	pop r14
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -7118,14 +6942,6 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	.endprolog
 
 	mov rsi,rcx
@@ -7133,20 +6949,14 @@ dst_pitch equ qword ptr[rbp+56]
 	mov r10,src_pitch
 	mov r11,dst_pitch
 	
-	mov ebx,r8d
-	shr ebx,2
+	mov edx,r8d
+	shr edx,2
 	
 	movdqa xmm2,XMMWORD ptr data_w_128
 	movdqa xmm3,XMMWORD ptr data_dw_RGB32
 	
-	mov rdx,16
-	mov r12,8
-	mov r13,2
-	mov r14,1
-	
-	
 Convert_RGB64toRGB32_SSE2_1:
-	mov ecx,ebx
+	mov ecx,edx
 	xor rax,rax	
 	or ecx,ecx
 	jz short Convert_RGB64toRGB32_SSE2_3
@@ -7161,11 +6971,12 @@ Convert_RGB64toRGB32_SSE2_2:
 	packuswb xmm0,xmm1
 	pand xmm0,xmm3
 	movdqa XMMWORD ptr[rdi+rax],xmm0
-	add rax,rdx
-	loop Convert_RGB64toRGB32_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGB64toRGB32_SSE2_2
 	
 Convert_RGB64toRGB32_SSE2_3:
-	test r8d,r13d
+	test r8d,2
 	jz short Convert_RGB64toRGB32_SSE2_4
 	
 	movdqa xmm0,XMMWORD ptr[rsi+2*rax]
@@ -7174,10 +6985,10 @@ Convert_RGB64toRGB32_SSE2_3:
 	packuswb xmm0,xmm0
 	pand xmm0,xmm3
 	movq qword ptr[rdi+rax],xmm0
-	add rax,r12
+	add rax,8
 	
 Convert_RGB64toRGB32_SSE2_4:
-	test r8d,r14d
+	test r8d,1
 	jz short Convert_RGB64toRGB32_SSE2_5
 
 	movq xmm0,qword ptr[rsi+2*rax]
@@ -7193,10 +7004,6 @@ Convert_RGB64toRGB32_SSE2_5:
 	dec r9d
 	jnz Convert_RGB64toRGB32_SSE2_1
 	
-	pop r14
-	pop r13
-	pop r12
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -7224,14 +7031,6 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	.endprolog
 
 	mov rsi,rcx
@@ -7239,20 +7038,14 @@ dst_pitch equ qword ptr[rbp+56]
 	mov r10,src_pitch
 	mov r11,dst_pitch
 	
-	mov ebx,r8d
-	shr ebx,2
+	mov edx,r8d
+	shr edx,2
 	
 	vmovdqa xmm2,XMMWORD ptr data_w_128
 	vmovdqa xmm3,XMMWORD ptr data_dw_RGB32
 	
-	mov rdx,16
-	mov r12,8
-	mov r13,2
-	mov r14,1
-	
-	
 Convert_RGB64toRGB32_AVX_1:
-	mov ecx,ebx
+	mov ecx,edx
 	xor rax,rax	
 	or ecx,ecx
 	jz short Convert_RGB64toRGB32_AVX_3
@@ -7265,11 +7058,12 @@ Convert_RGB64toRGB32_AVX_2:
 	vpackuswb xmm0,xmm0,xmm1
 	vpand xmm0,xmm0,xmm3
 	vmovdqa XMMWORD ptr[rdi+rax],xmm0
-	add rax,rdx
-	loop Convert_RGB64toRGB32_AVX_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGB64toRGB32_AVX_2
 	
 Convert_RGB64toRGB32_AVX_3:
-	test r8d,r13d
+	test r8d,2
 	jz short Convert_RGB64toRGB32_AVX_4
 	
 	vpaddusw xmm0,xmm2,XMMWORD ptr[rsi+2*rax]
@@ -7277,10 +7071,10 @@ Convert_RGB64toRGB32_AVX_3:
 	vpackuswb xmm0,xmm0,xmm0
 	vpand xmm0,xmm0,xmm3
 	vmovq qword ptr[rdi+rax],xmm0
-	add rax,r12
+	add rax,8
 	
 Convert_RGB64toRGB32_AVX_4:
-	test r8d,r14d
+	test r8d,1
 	jz short Convert_RGB64toRGB32_AVX_5
 
 	vmovq xmm0,qword ptr[rsi+2*rax]
@@ -7294,12 +7088,8 @@ Convert_RGB64toRGB32_AVX_5:
 	add rsi,r10
 	add rdi,r11
 	dec r9d
-	jnz short Convert_RGB64toRGB32_AVX_1
+	jnz Convert_RGB64toRGB32_AVX_1
 	
-	pop r14
-	pop r13
-	pop r12
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -7331,14 +7121,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	pxor xmm1,xmm1
@@ -7349,8 +7135,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,32
-	mov r15,16
 	xor rax,rax
 
 Convert_RGB32toPlaneY16_SSE2_1:
@@ -7423,8 +7207,8 @@ Convert_RGB32toPlaneY16_SSE2_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm2
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,32
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_RGB32toPlaneY16_SSE2_2
@@ -7469,7 +7253,7 @@ Convert_RGB32toPlaneY16_SSE2_3:
 	
 	movq qword ptr[rdi],xmm2
 
-	add rsi,r15
+	add rsi,16
 	add rdi,8
 	
 Convert_RGB32toPlaneY16_SSE2_4:
@@ -7530,10 +7314,8 @@ Convert_RGB32toPlaneY16_SSE2_6:
 	dec r9d
 	jnz Convert_RGB32toPlaneY16_SSE2_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -7566,14 +7348,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	vpxor xmm1,xmm1,xmm1
@@ -7584,8 +7362,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,32
-	mov r15,16
 	xor rax,rax
 
 Convert_RGB32toPlaneY16_AVX_1:
@@ -7657,8 +7433,8 @@ Convert_RGB32toPlaneY16_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm0
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,32
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_RGB32toPlaneY16_AVX_2
@@ -7702,7 +7478,7 @@ Convert_RGB32toPlaneY16_AVX_3:
 	
 	vmovq qword ptr[rdi],xmm0
 
-	add rsi,r15
+	add rsi,16
 	add rdi,8
 	
 Convert_RGB32toPlaneY16_AVX_4:
@@ -7761,10 +7537,8 @@ Convert_RGB32toPlaneY16_AVX_6:
 	dec r9d
 	jnz Convert_RGB32toPlaneY16_AVX_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -7797,14 +7571,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	pxor xmm1,xmm1
@@ -7817,8 +7587,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,64
-	mov r15,16
 	xor rax,rax
 
 Convert_RGB64toPlaneY16_SSE41_1:
@@ -7894,8 +7662,8 @@ Convert_RGB64toPlaneY16_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,64
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_RGB64toPlaneY16_SSE41_2
@@ -7969,7 +7737,7 @@ Convert_RGB64toPlaneY16_SSE41_4:
 	
 	movd dword ptr[rdi],xmm0
 
-	add rsi,r15
+	add rsi,16
 	add rdi,4
 	
 Convert_RGB64toPlaneY16_SSE41_5:
@@ -8001,10 +7769,8 @@ Convert_RGB64toPlaneY16_SSE41_6:
 	dec r9d
 	jnz Convert_RGB64toPlaneY16_SSE41_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -8037,14 +7803,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	vpxor xmm1,xmm1,xmm1
@@ -8057,8 +7819,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,64
-	mov r15,16
 	xor rax,rax
 
 Convert_RGB64toPlaneY16_AVX_1:
@@ -8134,8 +7894,8 @@ Convert_RGB64toPlaneY16_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm0
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,64
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_RGB64toPlaneY16_AVX_2
@@ -8209,7 +7969,7 @@ Convert_RGB64toPlaneY16_AVX_4:
 	
 	vmovd dword ptr[rdi],xmm0
 
-	add rsi,r15
+	add rsi,16
 	add rdi,4
 	
 Convert_RGB64toPlaneY16_AVX_5:
@@ -8241,10 +8001,8 @@ Convert_RGB64toPlaneY16_AVX_6:
 	dec r9d
 	jnz Convert_RGB64toPlaneY16_AVX_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -8277,14 +8035,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	pxor xmm1,xmm1
@@ -8297,8 +8051,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,32
-	mov r15,16
 	xor rax,rax
 
 Convert_10_RGB64toPlaneY32_SSE41_1:
@@ -8345,8 +8097,8 @@ Convert_10_RGB64toPlaneY32_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,32
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_10_RGB64toPlaneY32_SSE41_2
@@ -8379,7 +8131,7 @@ Convert_10_RGB64toPlaneY32_SSE41_3:
 	
 	movq qword ptr[rdi],xmm0
 
-	add rsi,r15
+	add rsi,16
 	add rdi,8
 	
 Convert_10_RGB64toPlaneY32_SSE41_4:
@@ -8412,10 +8164,8 @@ Convert_10_RGB64toPlaneY32_SSE41_5:
 	dec r9d
 	jnz Convert_10_RGB64toPlaneY32_SSE41_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -8448,14 +8198,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	vpxor xmm1,xmm1,xmm1
@@ -8468,8 +8214,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,32
-	mov r15,16
 	xor rax,rax
 
 Convert_10_RGB64toPlaneY32_AVX_1:
@@ -8516,8 +8260,8 @@ Convert_10_RGB64toPlaneY32_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm0
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,32
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_10_RGB64toPlaneY32_AVX_2
@@ -8550,7 +8294,7 @@ Convert_10_RGB64toPlaneY32_AVX_3:
 	
 	vmovq qword ptr[rdi],xmm0
 
-	add rsi,r15
+	add rsi,16
 	add rdi,8
 	
 Convert_10_RGB64toPlaneY32_AVX_4:
@@ -8583,10 +8327,8 @@ Convert_10_RGB64toPlaneY32_AVX_5:
 	dec r9d
 	jnz Convert_10_RGB64toPlaneY32_AVX_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -8619,14 +8361,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	pxor xmm1,xmm1
@@ -8639,8 +8377,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,32
-	mov r15,16
 	xor rax,rax
 
 Convert_12_RGB64toPlaneY32_SSE41_1:
@@ -8687,8 +8423,8 @@ Convert_12_RGB64toPlaneY32_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,32
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_12_RGB64toPlaneY32_SSE41_2
@@ -8721,7 +8457,7 @@ Convert_12_RGB64toPlaneY32_SSE41_3:
 	
 	movq qword ptr[rdi],xmm0
 
-	add rsi,r15
+	add rsi,16
 	add rdi,8
 	
 Convert_12_RGB64toPlaneY32_SSE41_4:
@@ -8754,10 +8490,8 @@ Convert_12_RGB64toPlaneY32_SSE41_5:
 	dec r9d
 	jnz Convert_12_RGB64toPlaneY32_SSE41_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -8790,14 +8524,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	vpxor xmm1,xmm1,xmm1
@@ -8810,8 +8540,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,32
-	mov r15,16
 	xor rax,rax
 
 Convert_12_RGB64toPlaneY32_AVX_1:
@@ -8858,8 +8586,8 @@ Convert_12_RGB64toPlaneY32_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm0
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,32
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_12_RGB64toPlaneY32_AVX_2
@@ -8892,7 +8620,7 @@ Convert_12_RGB64toPlaneY32_AVX_3:
 	
 	vmovq qword ptr[rdi],xmm0
 
-	add rsi,r15
+	add rsi,16
 	add rdi,8
 	
 Convert_12_RGB64toPlaneY32_AVX_4:
@@ -8925,10 +8653,8 @@ Convert_12_RGB64toPlaneY32_AVX_5:
 	dec r9d
 	jnz Convert_12_RGB64toPlaneY32_AVX_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -8961,14 +8687,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	pxor xmm1,xmm1
@@ -8979,8 +8701,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,32
-	mov r15,16
 	xor rax,rax
 
 Convert_16_RGB64toPlaneY32_SSE41_1:
@@ -9024,8 +8744,8 @@ Convert_16_RGB64toPlaneY32_SSE41_2:
 	
 	movdqa XMMWORD ptr[rdi],xmm0
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,32
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_16_RGB64toPlaneY32_SSE41_2
@@ -9055,7 +8775,7 @@ Convert_16_RGB64toPlaneY32_SSE41_3:
 	
 	movq qword ptr[rdi],xmm0
 
-	add rsi,r15
+	add rsi,16
 	add rdi,8
 	
 Convert_16_RGB64toPlaneY32_SSE41_4:
@@ -9085,10 +8805,8 @@ Convert_16_RGB64toPlaneY32_SSE41_5:
 	dec r9d
 	jnz Convert_16_RGB64toPlaneY32_SSE41_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -9121,14 +8839,10 @@ dst_modulo equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
 	push r13
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog
 
 	vpxor xmm1,xmm1,xmm1
@@ -9139,8 +8853,6 @@ dst_modulo equ qword ptr[rbp+64]
 	mov r14,lookup
 	mov r10,src_modulo
 	mov r11,dst_modulo
-	mov r12,32
-	mov r15,16
 	xor rax,rax
 
 Convert_16_RGB64toPlaneY32_AVX_1:
@@ -9184,8 +8896,8 @@ Convert_16_RGB64toPlaneY32_AVX_2:
 	
 	vmovdqa XMMWORD ptr[rdi],xmm0
 
-	add rsi,r12
-	add rdi,r15
+	add rsi,32
+	add rdi,16
 	
 	dec r13d
 	jnz Convert_16_RGB64toPlaneY32_AVX_2
@@ -9215,7 +8927,7 @@ Convert_16_RGB64toPlaneY32_AVX_3:
 	
 	vmovq qword ptr[rdi],xmm0
 
-	add rsi,r15
+	add rsi,16
 	add rdi,8
 	
 Convert_16_RGB64toPlaneY32_AVX_4:
@@ -9245,10 +8957,8 @@ Convert_16_RGB64toPlaneY32_AVX_5:
 	dec r9d
 	jnz Convert_16_RGB64toPlaneY32_AVX_1
 
-	pop r15
 	pop r14
 	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rdi
@@ -9277,25 +8987,19 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
-	push r12
-	.pushreg r12
 	.endprolog
 
 	movdqa xmm1,XMMWORD ptr data_w_128
 
 	mov rsi,rcx
 	mov rdi,rdx
-	mov ebx,r8d
+	mov edx,r8d
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	shr ebx,1
-	mov rdx,16
-	mov r12,1
+	shr edx,1
 
 Convert_RGB64_16toRGB64_8_SSE2_1:
-	mov ecx,ebx
+	mov ecx,edx
 	xor rax,rax
 	or ecx,ecx
 	jz short Convert_RGB64_16toRGB64_8_SSE2_3
@@ -9305,11 +9009,12 @@ Convert_RGB64_16toRGB64_8_SSE2_2:
 	paddusw xmm0,xmm1
 	psrlw xmm0,8
 	movdqa XMMWORD ptr[rdi+rax],xmm0
-	add rax,rdx
-	loop Convert_RGB64_16toRGB64_8_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGB64_16toRGB64_8_SSE2_2
 
 Convert_RGB64_16toRGB64_8_SSE2_3:
-	test r8d,r12d
+	test r8d,1
 	jz short Convert_RGB64_16toRGB64_8_SSE2_4
 
 	movq xmm0,qword ptr[rsi+rax]
@@ -9323,8 +9028,6 @@ Convert_RGB64_16toRGB64_8_SSE2_4:
 	dec r9d
 	jnz short Convert_RGB64_16toRGB64_8_SSE2_1
 	
-	pop r12
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -9352,22 +9055,19 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	vmovdqa xmm4,XMMWORD ptr data_w_128
 
 	mov rsi,rcx
 	mov rdi,rdx
-	mov ebx,r8d
+	mov edx,r8d
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	shr ebx,1
-	mov rdx,64
+	shr edx,1
 
 Convert_RGB64_16toRGB64_8_AVX_loop_1:
-	mov ecx,ebx
+	mov ecx,edx
 	xor rax,rax
 
 	shr ecx,2
@@ -9386,11 +9086,12 @@ Convert_RGB64_16toRGB64_8_AVX_loop_2:
 	vmovdqa XMMWORD ptr[rdi+rax+16],xmm1
 	vmovdqa XMMWORD ptr[rdi+rax+32],xmm2
 	vmovdqa XMMWORD ptr[rdi+rax+48],xmm3
-	add rax,rdx
-	loop Convert_RGB64_16toRGB64_8_AVX_loop_2
+	add rax,64
+	dec ecx
+	jnz short Convert_RGB64_16toRGB64_8_AVX_loop_2
 
 Convert_RGB64_16toRGB64_8_AVX_3:
-	test ebx,2
+	test edx,2
 	jz short Convert_RGB64_16toRGB64_8_AVX_4
 
 	vpaddusw xmm0,xmm4,XMMWORD ptr[rsi+rax]
@@ -9402,7 +9103,7 @@ Convert_RGB64_16toRGB64_8_AVX_3:
 	add rax,32
 
 Convert_RGB64_16toRGB64_8_AVX_4:
-	test ebx,1
+	test edx,1
 	jz short Convert_RGB64_16toRGB64_8_AVX_5
 
 	vpaddusw xmm0,xmm4,XMMWORD ptr[rsi+rax]
@@ -9425,7 +9126,6 @@ Convert_RGB64_16toRGB64_8_AVX_6:
 	dec r9d
 	jnz Convert_RGB64_16toRGB64_8_AVX_loop_1
 	
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -9453,22 +9153,19 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	movdqa xmm1,XMMWORD ptr data_w_32
 
 	mov rsi,rcx
 	mov rdi,rdx
-	mov ebx,r8d
+	mov edx,r8d
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	shr ebx,1
-	mov rdx,16
+	shr edx,1
 
 Convert_RGB64_16toRGB64_10_SSE2_1:
-	mov ecx,ebx
+	mov ecx,edx
 	xor rax,rax
 	or ecx,ecx
 	jz short Convert_RGB64_16toRGB64_10_SSE2_3
@@ -9478,8 +9175,9 @@ Convert_RGB64_16toRGB64_10_SSE2_2:
 	paddusw xmm0,xmm1
 	psrlw xmm0,6
 	movdqa XMMWORD ptr[rdi+rax],xmm0
-	add rax,rdx
-	loop Convert_RGB64_16toRGB64_10_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGB64_16toRGB64_10_SSE2_2
 	
 Convert_RGB64_16toRGB64_10_SSE2_3:
 	test r8d,1
@@ -9496,7 +9194,6 @@ Convert_RGB64_16toRGB64_10_SSE2_4:
 	dec r9d
 	jnz short Convert_RGB64_16toRGB64_10_SSE2_1
 	
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -9524,22 +9221,19 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	vmovdqa xmm4,XMMWORD ptr data_w_32
 
 	mov rsi,rcx
 	mov rdi,rdx
-	mov ebx,r8d
+	mov edx,r8d
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	shr ebx,1
-	mov rdx,64
+	shr edx,1
 
 Convert_RGB64_16toRGB64_10_AVX_loop_1:
-	mov ecx,ebx
+	mov ecx,edx
 	xor rax,rax
 
 	shr ecx,2
@@ -9558,11 +9252,12 @@ Convert_RGB64_16toRGB64_10_AVX_loop_2:
 	vmovdqa XMMWORD ptr[rdi+rax+16],xmm1
 	vmovdqa XMMWORD ptr[rdi+rax+32],xmm2
 	vmovdqa XMMWORD ptr[rdi+rax+48],xmm3
-	add rax,rdx
-	loop Convert_RGB64_16toRGB64_10_AVX_loop_2
+	add rax,64
+	dec ecx
+	jnz short Convert_RGB64_16toRGB64_10_AVX_loop_2
 
 Convert_RGB64_16toRGB64_10_AVX_3:
-	test ebx,2
+	test edx,2
 	jz short Convert_RGB64_16toRGB64_10_AVX_4
 
 	vpaddusw xmm0,xmm4,XMMWORD ptr[rsi+rax]
@@ -9574,7 +9269,7 @@ Convert_RGB64_16toRGB64_10_AVX_3:
 	add rax,32
 
 Convert_RGB64_16toRGB64_10_AVX_4:
-	test ebx,1
+	test edx,1
 	jz short Convert_RGB64_16toRGB64_10_AVX_5
 
 	vpaddusw xmm0,xmm4,XMMWORD ptr[rsi+rax]
@@ -9597,7 +9292,6 @@ Convert_RGB64_16toRGB64_10_AVX_6:
 	dec r9d
 	jnz Convert_RGB64_16toRGB64_10_AVX_loop_1
 	
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -9625,25 +9319,19 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
-	push r12
-	.pushreg r12
 	.endprolog
 
 	movdqa xmm1,XMMWORD ptr data_w_8
 
 	mov rsi,rcx
 	mov rdi,rdx
-	mov ebx,r8d
+	mov edx,r8d
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	shr ebx,1
-	mov rdx,16
-	mov r12,1
+	shr edx,1
 
 Convert_RGB64_16toRGB64_12_SSE2_1:
-	mov ecx,ebx
+	mov ecx,edx
 	xor rax,rax
 	or ecx,ecx
 	jz short Convert_RGB64_16toRGB64_12_SSE2_3
@@ -9653,11 +9341,12 @@ Convert_RGB64_16toRGB64_12_SSE2_2:
 	paddusw xmm0,xmm1
 	psrlw xmm0,4
 	movdqa XMMWORD ptr[rdi+rax],xmm0
-	add rax,rdx
-	loop Convert_RGB64_16toRGB64_12_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGB64_16toRGB64_12_SSE2_2
 
 Convert_RGB64_16toRGB64_12_SSE2_3:
-	test r8d,r12d
+	test r8d,1
 	jz short Convert_RGB64_16toRGB64_12_SSE2_4
 
 	movq xmm0,qword ptr[rsi+rax]
@@ -9671,8 +9360,6 @@ Convert_RGB64_16toRGB64_12_SSE2_4:
 	dec r9d
 	jnz short Convert_RGB64_16toRGB64_12_SSE2_1
 
-	pop r12
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -9700,24 +9387,19 @@ dst_pitch equ qword ptr[rbp+56]
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
-	push r12
-	.pushreg r12
 	.endprolog
 
 	vmovdqa xmm4,XMMWORD ptr data_w_8
 
 	mov rsi,rcx
 	mov rdi,rdx
-	mov ebx,r8d
+	mov edx,r8d
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	shr ebx,1
-	mov rdx,64
+	shr edx,1
 
 Convert_RGB64_16toRGB64_12_AVX_loop_1:
-	mov ecx,ebx
+	mov ecx,edx
 	xor rax,rax
 
 	shr ecx,2
@@ -9736,11 +9418,12 @@ Convert_RGB64_16toRGB64_12_AVX_loop_2:
 	vmovdqa XMMWORD ptr[rdi+rax+16],xmm1
 	vmovdqa XMMWORD ptr[rdi+rax+32],xmm2
 	vmovdqa XMMWORD ptr[rdi+rax+48],xmm3
-	add rax,rdx
-	loop Convert_RGB64_16toRGB64_12_AVX_loop_2
+	add rax,64
+	dec ecx
+	jnz short Convert_RGB64_16toRGB64_12_AVX_loop_2
 
 Convert_RGB64_16toRGB64_12_AVX_3:
-	test ebx,2
+	test edx,2
 	jz short Convert_RGB64_16toRGB64_12_AVX_4
 
 	vpaddusw xmm0,xmm4,XMMWORD ptr[rsi+rax]
@@ -9752,7 +9435,7 @@ Convert_RGB64_16toRGB64_12_AVX_3:
 	add rax,32
 
 Convert_RGB64_16toRGB64_12_AVX_4:
-	test ebx,1
+	test edx,1
 	jz short Convert_RGB64_16toRGB64_12_AVX_5
 
 	vpaddusw xmm0,xmm4,XMMWORD ptr[rsi+rax]
@@ -9775,7 +9458,6 @@ Convert_RGB64_16toRGB64_12_AVX_6:
 	dec r9d
 	jnz Convert_RGB64_16toRGB64_12_AVX_loop_1
 	
-	pop rbx
 	pop rsi
 	pop rdi
 	pop rbp
@@ -9803,8 +9485,6 @@ Coeff equ qword ptr[rbp+64]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	mov rsi,Coeff
@@ -9815,7 +9495,6 @@ Coeff equ qword ptr[rbp+64]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,64
 
 Scale_HLG_SSE2_loop_1:
 	xor rax,rax
@@ -9842,8 +9521,9 @@ Scale_HLG_SSE2_loop_2:
 	movdqa XMMWORD ptr[rdx+rax+32],xmm2
 	movdqa XMMWORD ptr[rdx+rax+48],xmm3
 
-	add rax,rbx
-	loop Scale_HLG_SSE2_loop_2
+	add rax,64
+	dec ecx
+	jnz short Scale_HLG_SSE2_loop_2
 
 Scale_HLG_SSE2_1:
 	test r8d,2
@@ -9875,7 +9555,6 @@ Scale_HLG_SSE2_3:
 	dec r9d
 	jnz Scale_HLG_SSE2_loop_1
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -9937,7 +9616,8 @@ Scale_HLG_AVX_loop_2:
 	vmovdqa YMMWORD ptr[rdx+rax+96],ymm3	
 
 	add rax,rbx
-	loop Scale_HLG_AVX_loop_2
+	dec ecx
+	jnz short Scale_HLG_AVX_loop_2
 
 Scale_HLG_AVX_1:
 	test r8d,2
@@ -9993,8 +9673,6 @@ dst_pitch equ qword ptr[rbp+56]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	movaps xmm4,XMMWORD ptr data_f_1048575
@@ -10002,7 +9680,6 @@ dst_pitch equ qword ptr[rbp+56]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,64
 
 Scale_20_float_SSE2_loop_1:
 	xor rax,rax
@@ -10033,8 +9710,9 @@ Scale_20_float_SSE2_loop_2:
 	movdqa XMMWORD ptr[rdx+rax+32],xmm2
 	movdqa XMMWORD ptr[rdx+rax+46],xmm3
 
-	add rax,rbx
-	loop Scale_20_float_SSE2_loop_2
+	add rax,64
+	dec ecx
+	jnz short Scale_20_float_SSE2_loop_2
 
 Scale_20_float_SSE2_1:
 	test r8d,2
@@ -10069,7 +9747,6 @@ Scale_20_float_SSE2_3:
 	dec r9d
 	jnz Scale_20_float_SSE2_loop_1
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -10131,7 +9808,8 @@ Scale_20_float_AVX_loop_2:
 	vmovdqa YMMWORD ptr[rdx+rax+96],ymm3
 
 	add rax,rbx
-	loop Scale_20_float_AVX_loop_2
+	dec ecx
+	jnz short Scale_20_float_AVX_loop_2
 
 Scale_20_float_AVX_1:
 	test r8d,2
@@ -10206,8 +9884,6 @@ Coeff_B equ qword ptr[rbp+112]
 	.pushreg r12
 	push r13
 	.pushreg r13
-	push r14
-	.pushreg r14
 	.endprolog	
 	
 	mov rsi,Coeff_R
@@ -10227,10 +9903,9 @@ Coeff_B equ qword ptr[rbp+112]
 	mov r11,src_pitch_R
 	mov r12,src_pitch_G
 	mov r13,src_pitch_B
-	mov r14,dst_pitch
+	mov rdx,dst_pitch
 	
 	mov ebx,w4
-	mov rdx,16
 	
 Convert_RGBPStoPlaneY32F_SSE2_1:
 	xor rax,rax
@@ -10246,17 +9921,17 @@ Convert_RGBPStoPlaneY32F_SSE2_2:
 	addps xmm0,xmm2
 	movdqa XMMWORD ptr [rdi+rax],xmm0
 	
-	add rax,rdx
-	loop Convert_RGBPStoPlaneY32F_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGBPStoPlaneY32F_SSE2_2
 	
 	add rsi,r11
 	add r9,r12
 	add r8,r13
-	add rdi,r14
+	add rdi,rdx
 	dec r10d
 	jnz short Convert_RGBPStoPlaneY32F_SSE2_1
 	
-	pop r14
 	pop r13
 	pop r12
 	pop rbx
@@ -10301,10 +9976,8 @@ Coeff_B equ qword ptr[rbp+112]
 	.pushreg r12
 	push r13
 	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,16
-	.allocstack 16
+	sub rsp,24
+	.allocstack 24
 	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0	
 	.endprolog	
@@ -10327,10 +10000,9 @@ Coeff_B equ qword ptr[rbp+112]
 	mov r11,src_pitch_R
 	mov r12,src_pitch_G
 	mov r13,src_pitch_B
-	mov r14,dst_pitch
+	mov rdx,dst_pitch
 	
 	mov ebx,w4
-	mov rdx,16
 	
 Convert_RGBPStoPlaneY32D_SSE2_1:
 	xor rax,rax
@@ -10348,20 +10020,20 @@ Convert_RGBPStoPlaneY32D_SSE2_2:
 	cvtps2dq xmm0,xmm0	
 	movdqa XMMWORD ptr [rdi+rax],xmm0
 	
-	add rax,rdx
-	loop Convert_RGBPStoPlaneY32D_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGBPStoPlaneY32D_SSE2_2
 	
 	add rsi,r11
 	add r9,r12
 	add r8,r13
-	add rdi,r14
+	add rdi,rdx
 	dec r10d
 	jnz short Convert_RGBPStoPlaneY32D_SSE2_1
 	
 	movdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,16
+	add rsp,24
 	
-	pop r14
 	pop r13
 	pop r12
 	pop rbx
@@ -10406,8 +10078,6 @@ Coeff_B equ qword ptr[rbp+112]
 	.pushreg r12
 	push r13
 	.pushreg r13
-	push r14
-	.pushreg r14
 	.endprolog	
 	
 	mov rsi,Coeff_R
@@ -10424,10 +10094,9 @@ Coeff_B equ qword ptr[rbp+112]
 	mov r11,src_pitch_R
 	mov r12,src_pitch_G
 	mov r13,src_pitch_B
-	mov r14,dst_pitch
+	mov rdx,dst_pitch
 	
 	mov ebx,w8
-	mov rdx,32
 	
 Convert_RGBPStoPlaneY32F_AVX_1:
 	xor rax,rax
@@ -10440,19 +10109,19 @@ Convert_RGBPStoPlaneY32F_AVX_2:
 	vaddps ymm0,ymm0,ymm2
 	vmovdqa YMMWORD ptr [rdi+rax],ymm0
 	
-	add rax,rdx
-	loop Convert_RGBPStoPlaneY32F_AVX_2
+	add rax,32
+	dec ecx
+	jnz short Convert_RGBPStoPlaneY32F_AVX_2
 	
 	add rsi,r11
 	add r9,r12
 	add r8,r13
-	add rdi,r14
+	add rdi,rdx
 	dec r10d
 	jnz short Convert_RGBPStoPlaneY32F_AVX_1
 	
 	vzeroupper
 	
-	pop r14
 	pop r13
 	pop r12
 	pop rbx
@@ -10497,10 +10166,8 @@ Coeff_B equ qword ptr[rbp+112]
 	.pushreg r12
 	push r13
 	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,16
-	.allocstack 16
+	sub rsp,24
+	.allocstack 24
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0	
 	.endprolog	
@@ -10520,10 +10187,9 @@ Coeff_B equ qword ptr[rbp+112]
 	mov r11,src_pitch_R
 	mov r12,src_pitch_G
 	mov r13,src_pitch_B
-	mov r14,dst_pitch
+	mov rdx,dst_pitch
 	
 	mov ebx,w8
-	mov rdx,32
 	
 Convert_RGBPStoPlaneY32D_AVX_1:
 	xor rax,rax
@@ -10538,22 +10204,22 @@ Convert_RGBPStoPlaneY32D_AVX_2:
 	vcvtps2dq ymm0,ymm0
 	vmovdqa YMMWORD ptr [rdi+rax],ymm0
 	
-	add rax,rdx
-	loop Convert_RGBPStoPlaneY32D_AVX_2
+	add rax,32
+	dec ecx
+	jnz short Convert_RGBPStoPlaneY32D_AVX_2
 	
 	add rsi,r11
 	add r9,r12
 	add r8,r13
-	add rdi,r14
+	add rdi,rdx
 	dec r10d
 	jnz short Convert_RGBPStoPlaneY32D_AVX_1
 	
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,16
+	add rsp,24
 
 	vzeroupper
 	
-	pop r14
 	pop r13
 	pop r12
 	pop rbx
@@ -10584,20 +10250,14 @@ src_pitchY equ qword ptr[rbp+56]
 	.pushreg rsi
 	push rdi
 	.pushreg rdi
-	push rbx
-	.pushreg rbx
-	push r12
-	.pushreg r12
 	.endprolog	
 	
 	mov rdi,rcx
 	mov rsi,rdx
 	mov r10d,r8d
 	mov r11,dst_pitch
-	mov r12,src_pitchY
-	mov rdx,8
+	mov rdx,src_pitchY
 	shr r10d,1
-	mov rbx,1
 	pxor xmm4,xmm4
 	
 Convert_16_RGB64_HLG_OOTF_SSE41_1:
@@ -10624,11 +10284,12 @@ Convert_16_RGB64_HLG_OOTF_SSE41_2:
 	packusdw xmm2,xmm3
 	movdqa XMMWORD ptr[rdi+2*rax],xmm2
 	
-	add rax,rdx
-	loop Convert_16_RGB64_HLG_OOTF_SSE41_2
+	add rax,8
+	dec ecx
+	jnz short Convert_16_RGB64_HLG_OOTF_SSE41_2
 	
 Convert_16_RGB64_HLG_OOTF_SSE41_3:
-	test r8d,ebx
+	test r8d,1
 	jz short Convert_16_RGB64_HLG_OOTF_SSE41_4
 	
 	movss xmm0,dword ptr[rsi+rax]
@@ -10643,12 +10304,10 @@ Convert_16_RGB64_HLG_OOTF_SSE41_3:
 	
 Convert_16_RGB64_HLG_OOTF_SSE41_4:
 	add rdi,r11
-	add rsi,r12
+	add rsi,rdx
 	dec r9d
 	jnz Convert_16_RGB64_HLG_OOTF_SSE41_1
 	
-	pop r12
-	pop rbx
 	pop rdi
 	pop rsi
 	pop rbp
@@ -10676,20 +10335,14 @@ src_pitchY equ qword ptr[rbp+56]
 	.pushreg rsi
 	push rdi
 	.pushreg rdi
-	push rbx
-	.pushreg rbx
-	push r12
-	.pushreg r12
 	.endprolog	
 	
 	mov rdi,rcx
 	mov rsi,rdx
 	mov r10d,r8d
 	mov r11,dst_pitch
-	mov r12,src_pitchY
-	mov rdx,8
+	mov rdx,src_pitchY
 	shr r10d,1
-	mov rbx,1
 	vpxor xmm4,xmm4,xmm4
 	
 Convert_16_RGB64_HLG_OOTF_AVX_1:
@@ -10713,11 +10366,12 @@ Convert_16_RGB64_HLG_OOTF_AVX_2:
 	vpackusdw xmm2,xmm2,xmm3
 	vmovdqa XMMWORD ptr[rdi+2*rax],xmm2
 	
-	add rax,rdx
-	loop Convert_16_RGB64_HLG_OOTF_AVX_2
+	add rax,8
+	dec ecx
+	jnz short Convert_16_RGB64_HLG_OOTF_AVX_2
 	
 Convert_16_RGB64_HLG_OOTF_AVX_3:
-	test r8d,ebx
+	test r8d,1
 	jz short Convert_16_RGB64_HLG_OOTF_AVX_4
 	
 	vbroadcastss xmm0,dword ptr[rsi+rax]
@@ -10731,14 +10385,12 @@ Convert_16_RGB64_HLG_OOTF_AVX_3:
 	
 Convert_16_RGB64_HLG_OOTF_AVX_4:
 	add rdi,r11
-	add rsi,r12
+	add rsi,rdx
 	dec r9d
 	jnz Convert_16_RGB64_HLG_OOTF_AVX_1
 	
 	vzeroupper
 	
-	pop r12
-	pop rbx
 	pop rdi
 	pop rsi
 	pop rbp
@@ -10777,8 +10429,6 @@ src_pitchY equ qword ptr[rbp+88]
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog	
 	
 	mov rsi,r9		; srcY
@@ -10789,10 +10439,9 @@ src_pitchY equ qword ptr[rbp+88]
 	mov r12,dst_pitch_R
 	mov r13,dst_pitch_G
 	mov r14,dst_pitch_B
-	mov r15,src_pitchY
+	mov rdx,src_pitchY
 	
 	mov ebx,w4
-	mov rdx,16
 	
 Convert_RGBPS_HLG_OOTF_SSE2_1:
 	xor rax,rax
@@ -10809,18 +10458,18 @@ Convert_RGBPS_HLG_OOTF_SSE2_2:
 	movaps XMMWORD ptr[r10+rax],xmm2
 	movaps XMMWORD ptr[r8+rax],xmm3
 	
-	add rax,rdx
-	loop Convert_RGBPS_HLG_OOTF_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGBPS_HLG_OOTF_SSE2_2
 	
 	add r9,r12
 	add r10,r13
 	add r8,r14
-	add rsi,r15
+	add rsi,rdx
 	dec r11d
 	
 	jnz short Convert_RGBPS_HLG_OOTF_SSE2_1
 	
-	pop r15
 	pop r14
 	pop r13
 	pop r12
@@ -10862,8 +10511,6 @@ src_pitchY equ qword ptr[rbp+88]
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog	
 	
 	mov rsi,r9		; srcY
@@ -10874,10 +10521,9 @@ src_pitchY equ qword ptr[rbp+88]
 	mov r12,dst_pitch_R
 	mov r13,dst_pitch_G
 	mov r14,dst_pitch_B
-	mov r15,src_pitchY
+	mov rdx,src_pitchY
 	
 	mov ebx,w8
-	mov rdx,32
 	
 Convert_RGBPS_HLG_OOTF_AVX_1:
 	xor rax,rax
@@ -10891,20 +10537,20 @@ Convert_RGBPS_HLG_OOTF_AVX_2:
 	vmovaps YMMWORD ptr[r10+rax],ymm2
 	vmovaps YMMWORD ptr[r8+rax],ymm3
 	
-	add rax,rdx
-	loop Convert_RGBPS_HLG_OOTF_AVX_2
+	add rax,32
+	dec ecx
+	jnz short Convert_RGBPS_HLG_OOTF_AVX_2
 	
 	add r9,r12
 	add r10,r13
 	add r8,r14
-	add rsi,r15
+	add rsi,rdx
 	dec r11d
 	
 	jnz short Convert_RGBPS_HLG_OOTF_AVX_1
 	
 	vzeroupper
 	
-	pop r15
 	pop r14
 	pop r13
 	pop r12
@@ -10946,8 +10592,6 @@ src_pitchY equ qword ptr[rbp+88]
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog	
 	
 	mov rsi,r9		; srcY
@@ -10958,11 +10602,10 @@ src_pitchY equ qword ptr[rbp+88]
 	mov r12,dst_pitch_R
 	mov r13,dst_pitch_G
 	mov r14,dst_pitch_B
-	mov r15,src_pitchY
+	mov rdx,src_pitchY
 	movaps xmm4,XMMWORD ptr data_f_1
 	
 	mov ebx,w4
-	mov rdx,16
 	
 Convert_RGBPS_HLG_OOTF_Scale_SSE2_1:
 	xor rax,rax
@@ -10982,18 +10625,18 @@ Convert_RGBPS_HLG_OOTF_Scale_SSE2_2:
 	movaps XMMWORD ptr[r10+rax],xmm2
 	movaps XMMWORD ptr[r8+rax],xmm3
 	
-	add rax,rdx
-	loop Convert_RGBPS_HLG_OOTF_Scale_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGBPS_HLG_OOTF_Scale_SSE2_2
 	
 	add r9,r12
 	add r10,r13
 	add r8,r14
-	add rsi,r15
+	add rsi,rdx
 	dec r11d
 	
 	jnz short Convert_RGBPS_HLG_OOTF_Scale_SSE2_1
 	
-	pop r15
 	pop r14
 	pop r13
 	pop r12
@@ -11035,8 +10678,6 @@ src_pitchY equ qword ptr[rbp+88]
 	.pushreg r13
 	push r14
 	.pushreg r14
-	push r15
-	.pushreg r15
 	.endprolog	
 	
 	mov rsi,r9		; srcY
@@ -11047,11 +10688,10 @@ src_pitchY equ qword ptr[rbp+88]
 	mov r12,dst_pitch_R
 	mov r13,dst_pitch_G
 	mov r14,dst_pitch_B
-	mov r15,src_pitchY
+	mov rdx,src_pitchY
 	vmovaps ymm4,YMMWORD ptr data_f_1
 	
 	mov ebx,w8
-	mov rdx,32
 	
 Convert_RGBPS_HLG_OOTF_Scale_AVX_1:
 	xor rax,rax
@@ -11068,20 +10708,20 @@ Convert_RGBPS_HLG_OOTF_Scale_AVX_2:
 	vmovaps YMMWORD ptr[r10+rax],ymm2
 	vmovaps YMMWORD ptr[r8+rax],ymm3
 	
-	add rax,rdx
-	loop Convert_RGBPS_HLG_OOTF_Scale_AVX_2
+	add rax,32
+	dec ecx
+	jnz short Convert_RGBPS_HLG_OOTF_Scale_AVX_2
 	
 	add r9,r12
 	add r10,r13
 	add r8,r14
-	add rsi,r15
+	add rsi,rdx
 	dec r11d
 	
 	jnz short Convert_RGBPS_HLG_OOTF_Scale_AVX_1
 	
 	vzeroupper
 	
-	pop r15
 	pop r14
 	pop r13
 	pop r12
@@ -11118,8 +10758,6 @@ Coeff equ qword ptr[rbp+72]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	mov rsi,ValMin
@@ -11136,7 +10774,6 @@ Coeff equ qword ptr[rbp+72]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Scale_20_XYZ_SSE2_1:
 	xor rax,rax
@@ -11150,15 +10787,15 @@ Scale_20_XYZ_SSE2_2:
 	cvtps2dq xmm0,xmm0
 	movdqa XMMWORD ptr[rdx+rax],xmm0
 	
-	add rax,rbx
-	loop Scale_20_XYZ_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Scale_20_XYZ_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
 	dec r9d
 	jnz short Scale_20_XYZ_SSE2_1
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -11186,8 +10823,6 @@ Coeff equ qword ptr[rbp+72]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	mov rsi,ValMin
@@ -11204,7 +10839,6 @@ Coeff equ qword ptr[rbp+72]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Scale_20_XYZ_SSE41_1:
 	xor rax,rax
@@ -11218,15 +10852,15 @@ Scale_20_XYZ_SSE41_2:
 	pmaxsd xmm0,xmm4
 	movdqa XMMWORD ptr[rdx+rax],xmm0
 	
-	add rax,rbx
-	loop Scale_20_XYZ_SSE41_2
+	add rax,16
+	dec ecx
+	jnz short Scale_20_XYZ_SSE41_2
 	
 	add rsi,r10
 	add rdx,r11
 	dec r9d
 	jnz short Scale_20_XYZ_SSE41_1
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -11254,8 +10888,6 @@ Coeff equ qword ptr[rbp+72]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	mov rsi,ValMin
@@ -11270,7 +10902,6 @@ Coeff equ qword ptr[rbp+72]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,32
 	
 Scale_20_XYZ_AVX_1:
 	xor rax,rax
@@ -11283,8 +10914,9 @@ Scale_20_XYZ_AVX_2:
 	vcvtps2dq ymm0,ymm0
 	vmovdqa YMMWORD ptr[rdx+rax],ymm0
 	
-	add rax,rbx
-	loop Scale_20_XYZ_AVX_2
+	add rax,32
+	dec ecx
+	jnz short Scale_20_XYZ_AVX_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -11293,7 +10925,6 @@ Scale_20_XYZ_AVX_2:
 	
 	vzeroupper
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -11318,8 +10949,6 @@ dst_pitch equ qword ptr[rbp+56]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	movaps xmm1,XMMWORD ptr data_f_1048575
@@ -11328,7 +10957,6 @@ dst_pitch equ qword ptr[rbp+56]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Scale_20_RGB_SSE2_1:
 	xor rax,rax
@@ -11341,15 +10969,15 @@ Scale_20_RGB_SSE2_2:
 	cvtps2dq xmm0,xmm0
 	movdqa XMMWORD ptr[rdx+rax],xmm0
 	
-	add rax,rbx
-	loop Scale_20_RGB_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Scale_20_RGB_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
 	dec r9d
 	jnz short Scale_20_RGB_SSE2_1
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -11374,8 +11002,6 @@ dst_pitch equ qword ptr[rbp+56]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	movaps xmm1,XMMWORD ptr data_f_1048575
@@ -11385,7 +11011,6 @@ dst_pitch equ qword ptr[rbp+56]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Scale_20_RGB_SSE41_1:
 	xor rax,rax
@@ -11398,15 +11023,15 @@ Scale_20_RGB_SSE41_2:
 	pmaxsd xmm0,xmm3
 	movdqa XMMWORD ptr[rdx+rax],xmm0
 	
-	add rax,rbx
-	loop Scale_20_RGB_SSE41_2
+	add rax,16
+	dec ecx
+	jnz short Scale_20_RGB_SSE41_2
 	
 	add rsi,r10
 	add rdx,r11
 	dec r9d
 	jnz short Scale_20_RGB_SSE41_1
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -11433,8 +11058,6 @@ Coeff equ qword ptr[rbp+72]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	vmovaps ymm1,YMMWORD ptr data_f_1048575
@@ -11443,7 +11066,6 @@ Coeff equ qword ptr[rbp+72]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,32
 	
 Scale_20_RGB_AVX_1:
 	xor rax,rax
@@ -11455,8 +11077,9 @@ Scale_20_RGB_AVX_2:
 	vcvtps2dq ymm0,ymm0
 	vmovdqa YMMWORD ptr[rdx+rax],ymm0
 	
-	add rax,rbx
-	loop Scale_20_RGB_AVX_2
+	add rax,32
+	dec ecx
+	jnz short Scale_20_RGB_AVX_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -11465,7 +11088,6 @@ Scale_20_RGB_AVX_2:
 	
 	vzeroupper
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -11492,8 +11114,6 @@ Coeff equ qword ptr[rbp+64]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	mov rsi,Coeff
@@ -11503,7 +11123,6 @@ Coeff equ qword ptr[rbp+64]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Convert_XYZ_HDRtoSDR_32_SSE2_1:
 	xor rax,rax
@@ -11513,15 +11132,15 @@ Convert_XYZ_HDRtoSDR_32_SSE2_2:
 	mulps xmm0,xmm1
 	movaps XMMWORD ptr[rdx+rax],xmm0
 	
-	add rax,rbx
-	loop Convert_XYZ_HDRtoSDR_32_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_XYZ_HDRtoSDR_32_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
 	dec r9d
 	jnz short Convert_XYZ_HDRtoSDR_32_SSE2_1
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -11550,12 +11169,6 @@ Coeff equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	.endprolog
 
 	mov rsi,Coeff
@@ -11565,9 +11178,6 @@ Coeff equ qword ptr[rbp+64]
 	mov r10,src_pitch
 	mov r11,dst_pitch
 	mov rbx,128
-	mov r12,64
-	mov r13,2
-	mov r14,1
 	
 Convert_XYZ_HDRtoSDR_32_AVX_loop_1:
 	mov ecx,r8d
@@ -11587,10 +11197,11 @@ Convert_XYZ_HDRtoSDR_32_AVX_loop_2:
 	vmovaps YMMWORD ptr[rdx+rax+96],ymm3
 	
 	add rax,rbx
-	loop Convert_XYZ_HDRtoSDR_32_AVX_loop_2
+	dec ecx
+	jnz short Convert_XYZ_HDRtoSDR_32_AVX_loop_2
 
 Convert_XYZ_HDRtoSDR_32_AVX_1:
-	test r8d,r13d
+	test r8d,2
 	jz short Convert_XYZ_HDRtoSDR_32_AVX_2
 
 	vmulps ymm0,ymm4,YMMWORD ptr[rsi+rax]
@@ -11598,10 +11209,10 @@ Convert_XYZ_HDRtoSDR_32_AVX_1:
 	vmovaps YMMWORD ptr[rdx+rax],ymm0
 	vmovaps YMMWORD ptr[rdx+rax+32],ymm1
 	
-	add rax,r12
+	add rax,64
 
 Convert_XYZ_HDRtoSDR_32_AVX_2:
-	test r8d,r14d
+	test r8d,1
 	jz short Convert_XYZ_HDRtoSDR_32_AVX_3
 
 	vmulps ymm0,ymm4,YMMWORD ptr[rsi+rax]
@@ -11611,13 +11222,10 @@ Convert_XYZ_HDRtoSDR_32_AVX_3:
 	add rsi,r10
 	add rdx,r11
 	dec r9d
-	jnz short Convert_XYZ_HDRtoSDR_32_AVX_loop_1
+	jnz Convert_XYZ_HDRtoSDR_32_AVX_loop_1
 	
 	vzeroupper
 	
-	pop r14
-	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rbp
@@ -11645,8 +11253,6 @@ Coeff equ qword ptr[rbp+64]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	mov rsi,Coeff
@@ -11656,7 +11262,6 @@ Coeff equ qword ptr[rbp+64]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Convert_XYZ_SDRtoHDR_32_SSE2_1:
 	xor rax,rax
@@ -11666,15 +11271,15 @@ Convert_XYZ_SDRtoHDR_32_SSE2_2:
 	mulps xmm0,xmm1
 	movaps XMMWORD ptr[rdx+rax],xmm0
 	
-	add rax,rbx
-	loop Convert_XYZ_SDRtoHDR_32_SSE2_2
+	add rax,16
+	dec ecx
+	jns short Convert_XYZ_SDRtoHDR_32_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
 	dec r9d
 	jnz short Convert_XYZ_SDRtoHDR_32_SSE2_1
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -11703,12 +11308,6 @@ Coeff equ qword ptr[rbp+64]
 	.pushreg rsi
 	push rbx
 	.pushreg rbx
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
 	.endprolog
 
 	mov rsi,Coeff
@@ -11718,9 +11317,6 @@ Coeff equ qword ptr[rbp+64]
 	mov r10,src_pitch
 	mov r11,dst_pitch
 	mov rbx,128
-	mov r12,64
-	mov r13,2
-	mov r14,1
 
 Convert_XYZ_SDRtoHDR_32_AVX_loop_1:
 	mov ecx,r8d
@@ -11740,10 +11336,11 @@ Convert_XYZ_SDRtoHDR_32_AVX_loop_2:
 	vmovaps YMMWORD ptr[rdx+rax+96],ymm3
 	
 	add rax,rbx
-	loop Convert_XYZ_SDRtoHDR_32_AVX_loop_2
+	dec ecx
+	jnz short Convert_XYZ_SDRtoHDR_32_AVX_loop_2
 
 Convert_XYZ_SDRtoHDR_32_AVX_1:
-	test r8d,r13d
+	test r8d,2
 	jz short Convert_XYZ_SDRtoHDR_32_AVX_2
 
 	vmulps ymm0,ymm4,YMMWORD ptr[rsi+rax]
@@ -11751,10 +11348,10 @@ Convert_XYZ_SDRtoHDR_32_AVX_1:
 	vmovaps YMMWORD ptr[rdx+rax],ymm0
 	vmovaps YMMWORD ptr[rdx+rax+32],ymm1
 	
-	add rax,r12
+	add rax,64
 
 Convert_XYZ_SDRtoHDR_32_AVX_2:
-	test r8d,r14d
+	test r8d,1
 	jz short Convert_XYZ_SDRtoHDR_32_AVX_3
 
 	vmulps ymm0,ymm4,YMMWORD ptr[rsi+rax]
@@ -11764,13 +11361,10 @@ Convert_XYZ_SDRtoHDR_32_AVX_3:
 	add rsi,r10
 	add rdx,r11
 	dec r9d
-	jnz short Convert_XYZ_SDRtoHDR_32_AVX_loop_1
+	jnz Convert_XYZ_SDRtoHDR_32_AVX_loop_1
 	
 	vzeroupper
 	
-	pop r14
-	pop r13
-	pop r12
 	pop rbx
 	pop rsi
 	pop rbp
@@ -11803,10 +11397,8 @@ Coeff6 equ qword ptr[rbp+104]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
-	sub rsp,48
-	.allocstack 48
+	sub rsp,56
+	.allocstack 56
 	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	movdqa XMMWORD ptr[rsp+16],xmm7
@@ -11837,7 +11429,6 @@ Coeff6 equ qword ptr[rbp+104]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Convert_XYZ_Hable_HDRtoSDR_SSE2_1:
 	xor rax,rax
@@ -11860,8 +11451,9 @@ Convert_XYZ_Hable_HDRtoSDR_SSE2_2:
 	
 	movaps XMMWORD ptr[rdx+rax],xmm8
 	
-	add rax,rbx
-	loop Convert_XYZ_Hable_HDRtoSDR_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_XYZ_Hable_HDRtoSDR_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -11871,9 +11463,8 @@ Convert_XYZ_Hable_HDRtoSDR_SSE2_2:
 	movdqa xmm8,XMMWORD ptr[rsp+32]
 	movdqa xmm7,XMMWORD ptr[rsp+16]
 	movdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	add rsp,56
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -11905,10 +11496,6 @@ Coeff6 equ qword ptr[rbp+104]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rdi
-	.pushreg rdi
-	push rbx
-	.pushreg rbx
 	sub rsp,104
 	.allocstack 104
 	vmovdqa XMMWORD ptr[rsp],xmm6
@@ -11939,11 +11526,8 @@ Coeff6 equ qword ptr[rbp+104]
 	vbroadcastss ymm11,dword ptr[rsi]
 	
 	mov rsi,rcx
-	mov rdi,rdx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,64
-	mov rdx,1
 	
 Convert_XYZ_Hable_HDRtoSDR_AVX_loop_1:
 	mov ecx,r8d
@@ -11978,14 +11562,15 @@ Convert_XYZ_Hable_HDRtoSDR_AVX_loop_2:
 	vsubps ymm2,ymm2,ymm11
 	vsubps ymm5,ymm5,ymm11
 	
-	vmovaps YMMWORD ptr [rdi+rax],ymm2
-	vmovaps YMMWORD ptr [rdi+rax+32],ymm5
+	vmovaps YMMWORD ptr [rdx+rax],ymm2
+	vmovaps YMMWORD ptr [rdx+rax+32],ymm5
 
-	add rax,rbx
-	loop Convert_XYZ_Hable_HDRtoSDR_AVX_loop_2
+	add rax,64
+	dec ecx
+	jnz short Convert_XYZ_Hable_HDRtoSDR_AVX_loop_2
 
 Convert_XYZ_Hable_HDRtoSDR_AVX_1:
-	test ebx,edx
+	test r8d,1
 	jz short Convert_XYZ_Hable_HDRtoSDR_AVX_2
 
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
@@ -12002,11 +11587,11 @@ Convert_XYZ_Hable_HDRtoSDR_AVX_1:
 	vdivps ymm2,ymm2,ymm1
 	vsubps ymm2,ymm2,ymm11
 	
-	vmovaps YMMWORD ptr [rdi+rax],ymm2
+	vmovaps YMMWORD ptr [rdx+rax],ymm2
 	
 Convert_XYZ_Hable_HDRtoSDR_AVX_2:
 	add rsi,r10
-	add rdi,r11
+	add rdx,r11
 	dec r9d
 	jnz Convert_XYZ_Hable_HDRtoSDR_AVX_loop_1
 	
@@ -12020,8 +11605,6 @@ Convert_XYZ_Hable_HDRtoSDR_AVX_2:
 
 	vzeroupper
 	
-	pop rbx
-	pop rdi
 	pop rsi
 	pop rbp
 
@@ -12051,10 +11634,8 @@ Coeff4 equ qword ptr[rbp+88]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
-	sub rsp,48
-	.allocstack 48
+	sub rsp,56
+	.allocstack 56
 	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	movdqa XMMWORD ptr[rsp+16],xmm7
@@ -12081,7 +11662,6 @@ Coeff4 equ qword ptr[rbp+88]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Convert_XYZ_Mobius_HDRtoSDR_SSE2_1:
 	xor rax,rax
@@ -12104,8 +11684,9 @@ Convert_XYZ_Mobius_HDRtoSDR_SSE2_2:
 	
 	movaps XMMWORD ptr [rdx+rax],xmm0
 	
-	add rax,rbx
-	loop Convert_XYZ_Mobius_HDRtoSDR_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_XYZ_Mobius_HDRtoSDR_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -12115,9 +11696,8 @@ Convert_XYZ_Mobius_HDRtoSDR_SSE2_2:
 	movdqa xmm8,XMMWORD ptr[rsp+32]
 	movdqa xmm7,XMMWORD ptr[rsp+16]
 	movdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	add rsp,56
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -12147,10 +11727,6 @@ Coeff4 equ qword ptr[rbp+88]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rdi
-	.pushreg rdi
-	push rbx
-	.pushreg rbx
 	sub rsp,120
 	.allocstack 120
 	vmovdqa XMMWORD ptr[rsp],xmm6
@@ -12181,11 +11757,8 @@ Coeff4 equ qword ptr[rbp+88]
 	vmovaps ymm12,YMMWORD ptr data_all_1
 	
 	mov rsi,rcx
-	mov rdi,rdx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,64
-	mov rdx,1
 	
 Convert_XYZ_Mobius_HDRtoSDR_AVX_loop_1:
 	mov ecx,r8d
@@ -12217,14 +11790,15 @@ Convert_XYZ_Mobius_HDRtoSDR_AVX_loop_2:
 	vorps ymm0,ymm0,ymm3
 	vorps ymm4,ymm4,ymm7
 	
-	vmovaps YMMWORD ptr [rdi+rax],ymm0
-	vmovaps YMMWORD ptr [rdi+rax+32],ymm4
+	vmovaps YMMWORD ptr [rdx+rax],ymm0
+	vmovaps YMMWORD ptr [rdx+rax+32],ymm4
 
-	add rax,rbx
-	loop Convert_XYZ_Mobius_HDRtoSDR_AVX_loop_2
+	add rax,64
+	dec ecx
+	jnz short Convert_XYZ_Mobius_HDRtoSDR_AVX_loop_2
 
 Convert_XYZ_Mobius_HDRtoSDR_AVX_1:
-	test r8d,edx
+	test r8d,1
 	jz short Convert_XYZ_Mobius_HDRtoSDR_AVX_2
 
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
@@ -12239,11 +11813,11 @@ Convert_XYZ_Mobius_HDRtoSDR_AVX_1:
 	vandps ymm3,ymm3,ymm2
 	vorps ymm0,ymm0,ymm3
 	
-	vmovaps YMMWORD ptr [rdi+rax],ymm0
+	vmovaps YMMWORD ptr [rdx+rax],ymm0
 
 Convert_XYZ_Mobius_HDRtoSDR_AVX_2:
 	add rsi,r10
-	add rdi,r11
+	add rdx,r11
 	dec r9d
 	jnz Convert_XYZ_Mobius_HDRtoSDR_AVX_loop_1
 
@@ -12258,8 +11832,6 @@ Convert_XYZ_Mobius_HDRtoSDR_AVX_2:
 
 	vzeroupper
 	
-	pop rbx
-	pop rdi
 	pop rsi
 	pop rbp
 
@@ -12287,8 +11859,6 @@ Coeff2 equ qword ptr[rbp+72]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	.endprolog
 
 	mov rsi,Coeff1
@@ -12301,7 +11871,6 @@ Coeff2 equ qword ptr[rbp+72]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Convert_XYZ_Reinhard_HDRtoSDR_SSE2_1:
 	xor rax,rax
@@ -12316,15 +11885,15 @@ Convert_XYZ_Reinhard_HDRtoSDR_SSE2_2:
 	
 	movaps XMMWORD ptr [rdx+rax],xmm1
 	
-	add rax,rbx
-	loop Convert_XYZ_Reinhard_HDRtoSDR_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_XYZ_Reinhard_HDRtoSDR_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
 	dec r9d
 	jnz short Convert_XYZ_Reinhard_HDRtoSDR_SSE2_1
 
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -12352,10 +11921,6 @@ Coeff2 equ qword ptr[rbp+72]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rdi
-	.pushreg rdi
-	push rbx
-	.pushreg rbx
 	.endprolog
 	
 	mov rsi,Coeff1
@@ -12364,11 +11929,8 @@ Coeff2 equ qword ptr[rbp+72]
 	vbroadcastss ymm5,dword ptr[rsi]
 	
 	mov rsi,rcx
-	mov rdi,rdx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,64
-	mov rdx,1
 	
 Convert_XYZ_Reinhard_HDRtoSDR_AVX_loop_1:
 	mov ecx,r8d
@@ -12388,14 +11950,15 @@ Convert_XYZ_Reinhard_HDRtoSDR_AVX_loop_2:
 	vmulps ymm0,ymm0,ymm4
 	vmulps ymm2,ymm2,ymm4
 	
-	vmovaps YMMWORD ptr [rdi+rax],ymm0
-	vmovaps YMMWORD ptr [rdi+rax+32],ymm2
+	vmovaps YMMWORD ptr [rdx+rax],ymm0
+	vmovaps YMMWORD ptr [rdx+rax+32],ymm2
 
-	add rax,rbx
-	loop Convert_XYZ_Reinhard_HDRtoSDR_AVX_loop_2
+	add rax,64
+	dec ecx
+	jnz short Convert_XYZ_Reinhard_HDRtoSDR_AVX_loop_2
 
 Convert_XYZ_Reinhard_HDRtoSDR_AVX_1:
-	test r8d,edx
+	test r8d,1
 	jz short Convert_XYZ_Reinhard_HDRtoSDR_AVX_2
 
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
@@ -12404,18 +11967,16 @@ Convert_XYZ_Reinhard_HDRtoSDR_AVX_1:
 	vdivps ymm0,ymm0,ymm1
 	vmulps ymm0,ymm0,ymm4
 	
-	vmovaps YMMWORD ptr [rdi+rax],ymm0
+	vmovaps YMMWORD ptr [rdx+rax],ymm0
 
 Convert_XYZ_Reinhard_HDRtoSDR_AVX_2:
 	add rsi,r10
-	add rdi,r11
+	add rdx,r11
 	dec r9d
 	jnz short Convert_XYZ_Reinhard_HDRtoSDR_AVX_loop_1
 	
 	vzeroupper
 	
-	pop rbx
-	pop rdi
 	pop rsi
 	pop rbp
 
@@ -12447,14 +12008,12 @@ CoeffZ equ qword ptr[rbp+104]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
 	.pushreg r13
-	sub rsp,32
-	.allocstack 32
+	sub rsp,40
+	.allocstack 40
 	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	movdqa XMMWORD ptr[rsp+16],xmm7
@@ -12485,7 +12044,6 @@ CoeffZ equ qword ptr[rbp+104]
 	mov r11,dst_pitch1
 	mov r12,dst_pitch2
 	mov r13d,h
-	mov rbx,16
 	
 BT2446C_16_XYZ_SSE2_1:
 	xor rax,rax
@@ -12508,8 +12066,9 @@ BT2446C_16_XYZ_SSE2_2:
 	movdqa XMMWORD ptr[rdx+rax],xmm0
 	movdqa XMMWORD ptr[r8+rax],xmm1
 	
-	add rax,rbx
-	loop BT2446C_16_XYZ_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short BT2446C_16_XYZ_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -12519,11 +12078,10 @@ BT2446C_16_XYZ_SSE2_2:
 	
 	movdqa xmm7,XMMWORD ptr[rsp+16]
 	movdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,32
+	add rsp,40
 	
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -12555,14 +12113,12 @@ CoeffZ equ qword ptr[rbp+104]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
 	.pushreg r13
-	sub rsp,32
-	.allocstack 32
+	sub rsp,40
+	.allocstack 40
 	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	movdqa XMMWORD ptr[rsp+16],xmm7
@@ -12593,7 +12149,6 @@ CoeffZ equ qword ptr[rbp+104]
 	mov r11,dst_pitch1
 	mov r12,dst_pitch2
 	mov r13d,h
-	mov rbx,16
 	
 BT2446C_16_XYZ_SSE41_1:
 	xor rax,rax
@@ -12616,8 +12171,9 @@ BT2446C_16_XYZ_SSE41_2:
 	movdqa XMMWORD ptr[rdx+rax],xmm0
 	movdqa XMMWORD ptr[r8+rax],xmm1
 	
-	add rax,rbx
-	loop BT2446C_16_XYZ_SSE41_2
+	add rax,16
+	dec ecx
+	jnz short BT2446C_16_XYZ_SSE41_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -12627,11 +12183,10 @@ BT2446C_16_XYZ_SSE41_2:
 	
 	movdqa xmm7,XMMWORD ptr[rsp+16]
 	movdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,32
+	add rsp,40
 	
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -12663,14 +12218,12 @@ CoeffZ equ qword ptr[rbp+104]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
 	.pushreg r13
-	sub rsp,48
-	.allocstack 48
+	sub rsp,56
+	.allocstack 56
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -12680,14 +12233,14 @@ CoeffZ equ qword ptr[rbp+104]
 	.endprolog
 
 	mov rsi,ValMinX
-	vbroadcastss xmm2,dword ptr[rsi]
+	vbroadcastss ymm2,dword ptr[rsi]
 	mov rsi,CoeffX
-	vbroadcastss xmm3,dword ptr[rsi]
+	vbroadcastss ymm3,dword ptr[rsi]
 
 	mov rsi,ValMinZ
 	vbroadcastss ymm4,dword ptr[rsi]
 	mov rsi,CoeffZ
-	vbroadcastss xmm5,dword ptr[rsi]
+	vbroadcastss ymm5,dword ptr[rsi]
 	
 	vmovaps ymm6,YMMWORD ptr data_f_65535
 	vmovaps ymm7,YMMWORD ptr data_f_0
@@ -12699,7 +12252,6 @@ CoeffZ equ qword ptr[rbp+104]
 	mov r11,dst_pitch1
 	mov r12,dst_pitch2
 	mov r13d,h
-	mov rbx,32
 	
 BT2446C_16_XYZ_AVX_1:
 	xor rax,rax
@@ -12721,8 +12273,9 @@ BT2446C_16_XYZ_AVX_2:
 	vmovdqa YMMWORD ptr[rdx+rax],ymm0
 	vmovdqa YMMWORD ptr[r8+rax],ymm1
 	
-	add rax,rbx
-	loop BT2446C_16_XYZ_AVX_2
+	add rax,32
+	dec ecx
+	jnz short BT2446C_16_XYZ_AVX_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -12733,13 +12286,12 @@ BT2446C_16_XYZ_AVX_2:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	add rsp,56
 
 	vzeroupper
 	
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -12769,8 +12321,6 @@ dst_pitch2 equ qword ptr[rbp+88]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
@@ -12788,7 +12338,6 @@ dst_pitch2 equ qword ptr[rbp+88]
 	mov r13,dst_pitch2
 	mov r14d,w4
 	mov r15d,h
-	mov rbx,16
 	
 BT2446C_32_XYZ_SSE2_1:
 	xor rax,rax
@@ -12801,8 +12350,9 @@ BT2446C_32_XYZ_SSE2_2:
 	movaps XMMWORD ptr[r8+rax],xmm0
 	movaps XMMWORD ptr[r9+rax],xmm1
 	
-	add rax,rbx
-	loop BT2446C_32_XYZ_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short BT2446C_32_XYZ_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -12815,7 +12365,6 @@ BT2446C_32_XYZ_SSE2_2:
 	pop r14
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -12845,8 +12394,6 @@ dst_pitch2 equ qword ptr[rbp+88]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
 	push r12
 	.pushreg r12
 	push r13
@@ -12864,7 +12411,6 @@ dst_pitch2 equ qword ptr[rbp+88]
 	mov r13,dst_pitch2
 	mov r14d,w8
 	mov r15d,h
-	mov rbx,64
 	
 BT2446C_32_XYZ_AVX_loop_1:
 	mov ecx,r14d
@@ -12885,8 +12431,9 @@ BT2446C_32_XYZ_AVX_loop_2:
 	vmovaps YMMWORD ptr[r9+rax],ymm1
 	vmovaps YMMWORD ptr[r9+rax+32],ymm4
 	
-	add rax,rbx
-	loop BT2446C_32_XYZ_AVX_loop_2
+	add rax,64
+	dec ecx
+	jnz short BT2446C_32_XYZ_AVX_loop_2
 
 BT2446C_32_XYZ_AVX_1:
 	test r14d,1
@@ -12910,7 +12457,6 @@ BT2446C_32_XYZ_AVX_2:
 	pop r14
 	pop r13
 	pop r12
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -12941,10 +12487,8 @@ Coeff5 equ qword ptr[rbp+96]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
-	sub rsp,32
-	.allocstack 32
+	sub rsp,40
+	.allocstack 40
 	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	movdqa XMMWORD ptr[rsp+16],xmm7
@@ -12970,7 +12514,6 @@ Coeff5 equ qword ptr[rbp+96]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Convert_XYZ_ACES_HDRtoSDR_SSE2_1:
 	xor rax,rax
@@ -12993,8 +12536,9 @@ Convert_XYZ_ACES_HDRtoSDR_SSE2_2:
 	
 	movaps XMMWORD ptr[rdx+rax],xmm1
 	
-	add rax,rbx
-	loop Convert_XYZ_ACES_HDRtoSDR_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_XYZ_ACES_HDRtoSDR_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -13003,9 +12547,8 @@ Convert_XYZ_ACES_HDRtoSDR_SSE2_2:
 	
 	movdqa xmm7,XMMWORD ptr[rsp+16]
 	movdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,32
+	add rsp,40
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -13036,10 +12579,6 @@ Coeff5 equ qword ptr[rbp+96]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rdi
-	.pushreg rdi
-	push rbx
-	.pushreg rbx
 	sub rsp,88
 	.allocstack 88
 	vmovdqa XMMWORD ptr[rsp],xmm6
@@ -13066,11 +12605,8 @@ Coeff5 equ qword ptr[rbp+96]
 	vbroadcastss ymm10,dword ptr[rsi]
 	
 	mov rsi,rcx
-	mov rdi,rdx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,64
-	mov rdx,1
 	
 Convert_XYZ_ACES_HDRtoSDR_AVX_loop_1:
 	mov ecx,r8d
@@ -13101,14 +12637,15 @@ Convert_XYZ_ACES_HDRtoSDR_AVX_loop_2:
 	vdivps ymm1,ymm1,ymm2
 	vdivps ymm4,ymm4,ymm5
 
-	vmovaps YMMWORD ptr [rdi+rax],ymm1
-	vmovaps YMMWORD ptr [rdi+rax+32],ymm4
+	vmovaps YMMWORD ptr [rdx+rax],ymm1
+	vmovaps YMMWORD ptr [rdx+rax+32],ymm4
 
-	add rax,rbx
-	loop Convert_XYZ_ACES_HDRtoSDR_AVX_loop_2
+	add rax,64
+	dec ecx
+	jnz short Convert_XYZ_ACES_HDRtoSDR_AVX_loop_2
 
 Convert_XYZ_ACES_HDRtoSDR_AVX_1:
-	test r8d,edx
+	test r8d,1
 	jz short Convert_XYZ_ACES_HDRtoSDR_AVX_2
 
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
@@ -13123,11 +12660,11 @@ Convert_XYZ_ACES_HDRtoSDR_AVX_1:
 	
 	vdivps ymm1,ymm1,ymm2
 	
-	vmovaps YMMWORD ptr [rdi+rax],ymm1
+	vmovaps YMMWORD ptr [rdx+rax],ymm1
 
 Convert_XYZ_ACES_HDRtoSDR_AVX_2:
 	add rsi,r10
-	add rdi,r11
+	add rdx,r11
 	dec r9d
 	jnz Convert_XYZ_ACES_HDRtoSDR_AVX_loop_1
 	
@@ -13140,8 +12677,6 @@ Convert_XYZ_ACES_HDRtoSDR_AVX_2:
 
 	vzeroupper
 	
-	pop rbx
-	pop rdi
 	pop rsi
 	pop rbp
 
@@ -13172,10 +12707,8 @@ Coeff5 equ qword ptr[rbp+96]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rbx
-	.pushreg rbx
-	sub rsp,32
-	.allocstack 32
+	sub rsp,40
+	.allocstack 40
 	movdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	movdqa XMMWORD ptr[rsp+16],xmm7
@@ -13201,7 +12734,6 @@ Coeff5 equ qword ptr[rbp+96]
 	mov rsi,rcx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,16
 	
 Convert_RGB_ACES_HDRtoSDR_SSE2_1:
 	xor rax,rax
@@ -13224,8 +12756,9 @@ Convert_RGB_ACES_HDRtoSDR_SSE2_2:
 	
 	movaps XMMWORD ptr[rdx+rax],xmm1
 	
-	add rax,rbx
-	loop Convert_RGB_ACES_HDRtoSDR_SSE2_2
+	add rax,16
+	dec ecx
+	jnz short Convert_RGB_ACES_HDRtoSDR_SSE2_2
 	
 	add rsi,r10
 	add rdx,r11
@@ -13234,9 +12767,8 @@ Convert_RGB_ACES_HDRtoSDR_SSE2_2:
 	
 	movdqa xmm7,XMMWORD ptr[rsp+16]
 	movdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,32
+	add rsp,40
 	
-	pop rbx
 	pop rsi
 	pop rbp
 
@@ -13267,10 +12799,6 @@ Coeff5 equ qword ptr[rbp+96]
 	mov rbp,rsp
 	push rsi
 	.pushreg rsi
-	push rdi
-	.pushreg rdi
-	push rbx
-	.pushreg rbx
 	sub rsp,88
 	.allocstack 88
 	vmovdqa XMMWORD ptr[rsp],xmm6
@@ -13297,11 +12825,8 @@ Coeff5 equ qword ptr[rbp+96]
 	vbroadcastss ymm10,dword ptr[rsi]
 
 	mov rsi,rcx
-	mov rdi,rdx
 	mov r10,src_pitch
 	mov r11,dst_pitch
-	mov rbx,64
-	mov rdx,1
 
 Convert_RGB_ACES_HDRtoSDR_AVX_loop_1:
 	mov ecx,r8d
@@ -13332,14 +12857,15 @@ Convert_RGB_ACES_HDRtoSDR_AVX_loop_2:
 	vdivps ymm1,ymm1,ymm2
 	vdivps ymm4,ymm4,ymm5
 
-	vmovaps YMMWORD ptr [rdi+rax],ymm1
-	vmovaps YMMWORD ptr [rdi+rax+32],ymm4
+	vmovaps YMMWORD ptr [rdx+rax],ymm1
+	vmovaps YMMWORD ptr [rdx+rax+32],ymm4
 
-	add rax,rbx
-	loop Convert_RGB_ACES_HDRtoSDR_AVX_loop_2
+	add rax,64
+	dec ecx
+	jnz short Convert_RGB_ACES_HDRtoSDR_AVX_loop_2
 
 Convert_RGB_ACES_HDRtoSDR_AVX_1:
-	test r8d,edx
+	test r8d,1
 	jz short Convert_RGB_ACES_HDRtoSDR_AVX_2
 
 	vmovaps ymm0,YMMWORD ptr[rsi+rax]
@@ -13354,11 +12880,11 @@ Convert_RGB_ACES_HDRtoSDR_AVX_1:
 
 	vdivps ymm1,ymm1,ymm2
 
-	vmovaps YMMWORD ptr [rdi+rax],ymm1
+	vmovaps YMMWORD ptr [rdx+rax],ymm1
 
 Convert_RGB_ACES_HDRtoSDR_AVX_2:
 	add rsi,r10
-	add rdi,r11
+	add rdx,r11
 	dec r9d
 	jnz Convert_RGB_ACES_HDRtoSDR_AVX_loop_1
 	
@@ -13371,14 +12897,11 @@ Convert_RGB_ACES_HDRtoSDR_AVX_2:
 
 	vzeroupper
 
-	pop rbx
-	pop rdi
 	pop rsi
 	pop rbp
 
 	ret
 
 JPSDR_HDRTools_Convert_RGB_ACES_HDRtoSDR_AVX endp
-
 
 end

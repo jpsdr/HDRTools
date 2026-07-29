@@ -10513,7 +10513,7 @@ JPSDR_HDRTools_BT2446C_16_XYZ_AVX proc src:dword,dst1:dword,dst2:dword,w8:dword,
 	mov esi,ValMinZ
 	vbroadcastss ymm4,dword ptr[esi]
 	mov esi,CoeffZ
-	vbroadcastss xmm5,dword ptr[esi]
+	vbroadcastss ymm5,dword ptr[esi]
 	
 	vmovaps ymm6,YMMWORD ptr data_f_65535
 	vmovaps ymm7,YMMWORD ptr data_f_0

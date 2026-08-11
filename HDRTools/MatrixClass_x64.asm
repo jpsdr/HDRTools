@@ -41,16 +41,16 @@ CoeffProductF_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	mov rax,16
 	mov ecx,r9d
 	
 CoeffProductF_SSE2_1:	
 	movaps xmm1,XMMWORD ptr[rdx]
-	add rdx,rax
+	add rdx,16
 	mulps xmm1,xmm0
 	movaps XMMWORD ptr[r8],xmm1
-	add r8,rax
-	loop CoeffProductF_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short CoeffProductF_SSE2_1
 	
 	ret
 	
@@ -69,15 +69,15 @@ CoeffProduct2F_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	mov rax,16
 	mov ecx,r8d
 	
 CoeffProduct2F_SSE2_1:	
 	movaps xmm1,XMMWORD ptr[rdx]
 	mulps xmm1,xmm0
 	movaps XMMWORD ptr[rdx],xmm1
-	add rdx,rax
-	loop CoeffProduct2F_SSE2_1
+	add rdx,16
+	dec ecx
+	jnz short CoeffProduct2F_SSE2_1
 	
 	ret
 	
@@ -96,14 +96,8 @@ CoeffProductF_AVX proc public frame
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,48
-	.allocstack 48
+	sub rsp,56
+	.allocstack 56
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -119,50 +113,48 @@ CoeffProductF_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffProductF_AVX_1
 
 CoeffProductF_AVX_loop_1:
 	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vmulps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vmulps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vmulps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vmulps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vmulps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmulps ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vmulps ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vmulps ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vmulps ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vmulps ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vmulps ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vmulps ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovaps YMMWORD ptr[rdi],ymm1
-	vmovaps YMMWORD ptr[rdi+r8],ymm2
-	vmovaps YMMWORD ptr[rdi+r9],ymm3
-	vmovaps YMMWORD ptr[rdi+r10],ymm4
+	vmovaps YMMWORD ptr[rdi+32],ymm2
+	vmovaps YMMWORD ptr[rdi+64],ymm3
+	vmovaps YMMWORD ptr[rdi+96],ymm4
 	vmovaps YMMWORD ptr[rdi+r11],ymm5
-	vmovaps YMMWORD ptr[rdi+r12],ymm6
-	vmovaps YMMWORD ptr[rdi+r13],ymm7
-	vmovaps YMMWORD ptr[rdi+r14],ymm8
+	vmovaps YMMWORD ptr[rdi+r8],ymm6
+	vmovaps YMMWORD ptr[rdi+r9],ymm7
+	vmovaps YMMWORD ptr[rdi+r10],ymm8
 	add rsi,rax
 	add rdi,rax
-	loop CoeffProductF_AVX_loop_1
+	dec ecx
+	jnz short CoeffProductF_AVX_loop_1
 
 CoeffProductF_AVX_1:
 	test edx,4
 	jz short CoeffProductF_AVX_2
 
 	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vmulps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vmulps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vmulps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vmulps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vmulps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovaps YMMWORD ptr[rdi],ymm1
-	vmovaps YMMWORD ptr[rdi+r8],ymm2
-	vmovaps YMMWORD ptr[rdi+r9],ymm3
-	vmovaps YMMWORD ptr[rdi+r10],ymm4
+	vmovaps YMMWORD ptr[rdi+32],ymm2
+	vmovaps YMMWORD ptr[rdi+64],ymm3
+	vmovaps YMMWORD ptr[rdi+96],ymm4
 	add rsi,r11
 	add rdi,r11
 
@@ -171,11 +163,11 @@ CoeffProductF_AVX_2:
 	jz short CoeffProductF_AVX_3
 
 	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulps ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vmulps ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovaps YMMWORD ptr[rdi],ymm1
-	vmovaps YMMWORD ptr[rdi+r8],ymm2
-	add rsi,r9
-	add rdi,r9
+	vmovaps YMMWORD ptr[rdi+32],ymm2
+	add rsi,64
+	add rdi,64
 
 CoeffProductF_AVX_3:
 	test edx,1
@@ -188,13 +180,10 @@ CoeffProductF_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	add rsp,56
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 	pop rdi
 
@@ -212,14 +201,8 @@ CoeffProduct2F_AVX proc public frame
 
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,56
-	.allocstack 56
+	sub rsp,48
+	.allocstack 48
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -234,49 +217,47 @@ CoeffProduct2F_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffProduct2F_AVX_1
 
 CoeffProduct2F_AVX_loop_1:
 	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vmulps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vmulps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vmulps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vmulps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vmulps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmulps ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vmulps ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vmulps ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vmulps ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vmulps ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vmulps ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vmulps ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovaps YMMWORD ptr[rsi],ymm1
-	vmovaps YMMWORD ptr[rsi+r8],ymm2
-	vmovaps YMMWORD ptr[rsi+r9],ymm3
-	vmovaps YMMWORD ptr[rsi+r10],ymm4
+	vmovaps YMMWORD ptr[rsi+32],ymm2
+	vmovaps YMMWORD ptr[rsi+64],ymm3
+	vmovaps YMMWORD ptr[rsi+96],ymm4
 	vmovaps YMMWORD ptr[rsi+r11],ymm5
-	vmovaps YMMWORD ptr[rsi+r12],ymm6
-	vmovaps YMMWORD ptr[rsi+r13],ymm7
-	vmovaps YMMWORD ptr[rsi+r14],ymm8
+	vmovaps YMMWORD ptr[rsi+r8],ymm6
+	vmovaps YMMWORD ptr[rsi+r9],ymm7
+	vmovaps YMMWORD ptr[rsi+r10],ymm8
 	add rsi,rax
-	loop CoeffProduct2F_AVX_loop_1
+	dec ecx
+	jnz short CoeffProduct2F_AVX_loop_1
 
 CoeffProduct2F_AVX_1:
 	test edx,4
 	jz short CoeffProduct2F_AVX_2
 
 	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vmulps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vmulps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vmulps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vmulps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vmulps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovaps YMMWORD ptr[rsi],ymm1
-	vmovaps YMMWORD ptr[rsi+r8],ymm2
-	vmovaps YMMWORD ptr[rsi+r9],ymm3
-	vmovaps YMMWORD ptr[rsi+r10],ymm4
+	vmovaps YMMWORD ptr[rsi+32],ymm2
+	vmovaps YMMWORD ptr[rsi+64],ymm3
+	vmovaps YMMWORD ptr[rsi+96],ymm4
 	add rsi,r11
 
 CoeffProduct2F_AVX_2:
@@ -284,10 +265,10 @@ CoeffProduct2F_AVX_2:
 	jz short CoeffProduct2F_AVX_3
 
 	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulps ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vmulps ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovaps YMMWORD ptr[rsi],ymm1
-	vmovaps YMMWORD ptr[rsi+r8],ymm2
-	add rsi,r9
+	vmovaps YMMWORD ptr[rsi+32],ymm2
+	add rsi,64
 
 CoeffProduct2F_AVX_3:
 	test edx,1
@@ -300,13 +281,10 @@ CoeffProduct2F_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,56
+	add rsp,48
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 	
 	ret
@@ -327,16 +305,16 @@ CoeffProductD_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	mov rax,16
 	mov ecx,r9d
 	
 CoeffProductD_SSE2_1:	
 	movapd xmm1,XMMWORD ptr[rdx]
-	add rdx,rax
+	add rdx,16
 	mulpd xmm1,xmm0
 	movapd XMMWORD ptr[r8],xmm1
-	add r8,rax
-	loop CoeffProductD_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short CoeffProductD_SSE2_1
 	
 	ret
 	
@@ -355,16 +333,15 @@ CoeffProduct2D_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	xor rcx,rcx
-	mov rax,16
 	mov ecx,r8d
 	
 CoeffProduct2D_SSE2_1:	
 	movapd xmm1,XMMWORD ptr[rdx]
 	mulpd xmm1,xmm0
 	movapd XMMWORD ptr[rdx],xmm1
-	add rdx,rax
-	loop CoeffProduct2D_SSE2_1
+	add rdx,16
+	dec ecx
+	jnz short CoeffProduct2D_SSE2_1
 	
 	ret
 	
@@ -383,14 +360,8 @@ CoeffProductD_AVX proc public frame
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,48
-	.allocstack 48
+	sub rsp,56
+	.allocstack 56
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -406,50 +377,48 @@ CoeffProductD_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffProductD_AVX_1
 	
 CoeffProductD_AVX_loop_1:
 	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vmulpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vmulpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmulpd ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vmulpd ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vmulpd ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vmulpd ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vmulpd ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vmulpd ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vmulpd ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovapd YMMWORD ptr[rdi],ymm1
-	vmovapd YMMWORD ptr[rdi+r8],ymm2
-	vmovapd YMMWORD ptr[rdi+r9],ymm3
-	vmovapd YMMWORD ptr[rdi+r10],ymm4
+	vmovapd YMMWORD ptr[rdi+32],ymm2
+	vmovapd YMMWORD ptr[rdi+64],ymm3
+	vmovapd YMMWORD ptr[rdi+96],ymm4
 	vmovapd YMMWORD ptr[rdi+r11],ymm5
-	vmovapd YMMWORD ptr[rdi+r12],ymm6
-	vmovapd YMMWORD ptr[rdi+r13],ymm7
-	vmovapd YMMWORD ptr[rdi+r14],ymm8
+	vmovapd YMMWORD ptr[rdi+r8],ymm6
+	vmovapd YMMWORD ptr[rdi+r9],ymm7
+	vmovapd YMMWORD ptr[rdi+r10],ymm8
 	add rsi,rax
 	add rdi,rax
-	loop CoeffProductD_AVX_loop_1
+	dec ecx
+	jnz short CoeffProductD_AVX_loop_1
 
 CoeffProductD_AVX_1:
 	test edx,4
 	jz short CoeffProductD_AVX_2
 
 	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vmulpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vmulpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovapd YMMWORD ptr[rdi],ymm1
-	vmovapd YMMWORD ptr[rdi+r8],ymm2
-	vmovapd YMMWORD ptr[rdi+r9],ymm3
-	vmovapd YMMWORD ptr[rdi+r10],ymm4
+	vmovapd YMMWORD ptr[rdi+32],ymm2
+	vmovapd YMMWORD ptr[rdi+64],ymm3
+	vmovapd YMMWORD ptr[rdi+96],ymm4
 	add rsi,r11
 	add rdi,r11
 
@@ -458,11 +427,11 @@ CoeffProductD_AVX_2:
 	jz short CoeffProductD_AVX_3
 
 	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovapd YMMWORD ptr[rdi],ymm1
-	vmovapd YMMWORD ptr[rdi+r8],ymm2
-	add rsi,r9
-	add rdi,r9
+	vmovapd YMMWORD ptr[rdi+32],ymm2
+	add rsi,64
+	add rdi,64
 
 CoeffProductD_AVX_3:
 	test edx,1
@@ -475,13 +444,10 @@ CoeffProductD_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	add rsp,56
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 	pop rdi
 
@@ -499,14 +465,8 @@ CoeffProduct2D_AVX proc public frame
 
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,56
-	.allocstack 56
+	sub rsp,48
+	.allocstack 48
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -521,49 +481,47 @@ CoeffProduct2D_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffProduct2D_AVX_1
 
 CoeffProduct2D_AVX_loop_1:
 	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vmulpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vmulpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmulpd ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vmulpd ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vmulpd ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vmulpd ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vmulpd ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vmulpd ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vmulpd ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovapd YMMWORD ptr[rsi],ymm1
-	vmovapd YMMWORD ptr[rsi+r8],ymm2
-	vmovapd YMMWORD ptr[rsi+r9],ymm3
-	vmovapd YMMWORD ptr[rsi+r10],ymm4
+	vmovapd YMMWORD ptr[rsi+32],ymm2
+	vmovapd YMMWORD ptr[rsi+64],ymm3
+	vmovapd YMMWORD ptr[rsi+96],ymm4
 	vmovapd YMMWORD ptr[rsi+r11],ymm5
-	vmovapd YMMWORD ptr[rsi+r12],ymm6
-	vmovapd YMMWORD ptr[rsi+r13],ymm7
-	vmovapd YMMWORD ptr[rsi+r14],ymm8
+	vmovapd YMMWORD ptr[rsi+r8],ymm6
+	vmovapd YMMWORD ptr[rsi+r9],ymm7
+	vmovapd YMMWORD ptr[rsi+r10],ymm8
 	add rsi,rax
-	loop CoeffProduct2D_AVX_loop_1
+	dec ecx
+	jnz short CoeffProduct2D_AVX_loop_1
 
 CoeffProduct2D_AVX_1:
 	test edx,4
 	jz short CoeffProduct2D_AVX_2
 
 	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vmulpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vmulpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovapd YMMWORD ptr[rsi],ymm1
-	vmovapd YMMWORD ptr[rsi+r8],ymm2
-	vmovapd YMMWORD ptr[rsi+r9],ymm3
-	vmovapd YMMWORD ptr[rsi+r10],ymm4
+	vmovapd YMMWORD ptr[rsi+32],ymm2
+	vmovapd YMMWORD ptr[rsi+64],ymm3
+	vmovapd YMMWORD ptr[rsi+96],ymm4
 	add rsi,r11
 
 CoeffProduct2D_AVX_2:
@@ -571,10 +529,10 @@ CoeffProduct2D_AVX_2:
 	jz short CoeffProduct2D_AVX_3
 
 	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vmulpd ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovapd YMMWORD ptr[rsi],ymm1
-	vmovapd YMMWORD ptr[rsi+r8],ymm2
-	add rsi,r9
+	vmovapd YMMWORD ptr[rsi+32],ymm2
+	add rsi,64
 
 CoeffProduct2D_AVX_3:
 	test edx,1
@@ -587,13 +545,10 @@ CoeffProduct2D_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,56
+	add rsp,48
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 
 	ret
@@ -614,18 +569,18 @@ CoeffAddProductF_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 	
-	mov rax,16
 	mov ecx,r9d
 	
 CoeffAddProductF_SSE2_1:	
 	movaps xmm1,XMMWORD ptr[rdx]
 	movaps xmm2,XMMWORD ptr[r8]
 	mulps xmm1,xmm0
-	add rdx,rax
+	add rdx,16
 	addps xmm2,xmm1
 	movaps XMMWORD ptr[r8],xmm2
-	add r8,rax
-	loop CoeffAddProductF_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short CoeffAddProductF_SSE2_1
 	
 	ret
 	
@@ -640,10 +595,6 @@ CoeffAddProductF_SSE2 endp
 
 CoeffAddProductF_AVX proc public frame
 
-	push rdi
-	.pushreg rdi
-	push rsi
-	.pushreg rsi
 	sub rsp,56
 	.allocstack 56
 	vmovdqa XMMWORD ptr[rsp],xmm6
@@ -656,55 +607,52 @@ CoeffAddProductF_AVX proc public frame
 
 	vbroadcastss ymm0,dword ptr[rcx]
 
-	mov rsi,rdx 	; coeff_b
-	mov rdi,r8		; coeff_c
+	mov r10,rdx 	; coeff_b
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,128
-	mov r8,32
-	mov r9,64
-	mov r10,96
 
 	shr ecx,2
 	jz short CoeffAddProductF_AVX_1
 
 CoeffAddProductF_AVX_loop_1:
-	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulps ymm3,ymm0,YMMWORD ptr[rsi+r8]
-	vmulps ymm5,ymm0,YMMWORD ptr[rsi+r9]
-	vmulps ymm7,ymm0,YMMWORD ptr[rsi+r10]
-	vaddps ymm2,ymm1,YMMWORD ptr[rdi]
-	vaddps ymm4,ymm3,YMMWORD ptr[rdi+r8]
-	vaddps ymm6,ymm5,YMMWORD ptr[rdi+r9]
-	vaddps ymm8,ymm7,YMMWORD ptr[rdi+r10]
-	vmovaps YMMWORD ptr[rdi],ymm2
-	vmovaps YMMWORD ptr[rdi+r8],ymm4
-	vmovaps YMMWORD ptr[rdi+r9],ymm6
-	vmovaps YMMWORD ptr[rdi+r10],ymm8
-	add rsi,rax
-	add rdi,rax
-	loop CoeffAddProductF_AVX_loop_1
+	vmulps ymm1,ymm0,YMMWORD ptr[r10]
+	vmulps ymm3,ymm0,YMMWORD ptr[r10+32]
+	vmulps ymm5,ymm0,YMMWORD ptr[r10+64]
+	vmulps ymm7,ymm0,YMMWORD ptr[r10+96]
+	vaddps ymm2,ymm1,YMMWORD ptr[r8]
+	vaddps ymm4,ymm3,YMMWORD ptr[r8+32]
+	vaddps ymm6,ymm5,YMMWORD ptr[r8+64]
+	vaddps ymm8,ymm7,YMMWORD ptr[r8+96]
+	vmovaps YMMWORD ptr[r8],ymm2
+	vmovaps YMMWORD ptr[r8+32],ymm4
+	vmovaps YMMWORD ptr[r8+64],ymm6
+	vmovaps YMMWORD ptr[r8+96],ymm8
+	add r10,rax
+	add r8,rax
+	dec ecx
+	jnz short CoeffAddProductF_AVX_loop_1
 
 CoeffAddProductF_AVX_1:
 	test edx,2
 	jz short CoeffAddProductF_AVX_2
 
-	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulps ymm3,ymm0,YMMWORD ptr[rsi+r8]
-	vaddps ymm2,ymm1,YMMWORD ptr[rdi]
-	vaddps ymm4,ymm3,YMMWORD ptr[rdi+r8]
-	vmovaps YMMWORD ptr[rdi],ymm2
-	vmovaps YMMWORD ptr[rdi+r8],ymm4
-	add rsi,r9
-	add rdi,r9
+	vmulps ymm1,ymm0,YMMWORD ptr[r10]
+	vmulps ymm3,ymm0,YMMWORD ptr[r10+32]
+	vaddps ymm2,ymm1,YMMWORD ptr[r8]
+	vaddps ymm4,ymm3,YMMWORD ptr[r8+32]
+	vmovaps YMMWORD ptr[r8],ymm2
+	vmovaps YMMWORD ptr[r8+32],ymm4
+	add r10,64
+	add r8,64
 
 CoeffAddProductF_AVX_2:
 	test edx,1
 	jz short CoeffAddProductF_AVX_3
 
-	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddps ymm2,ymm1,YMMWORD ptr[rdi]
-	vmovaps YMMWORD ptr[rdi],ymm2
+	vmulps ymm1,ymm0,YMMWORD ptr[r10]
+	vaddps ymm2,ymm1,YMMWORD ptr[r8]
+	vmovaps YMMWORD ptr[r8],ymm2
 
 CoeffAddProductF_AVX_3:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
@@ -713,9 +661,6 @@ CoeffAddProductF_AVX_3:
 	add rsp,56
 
 	vzeroupper
-
-	pop rsi
-	pop rdi
 
 	ret
 
@@ -735,18 +680,18 @@ CoeffAddProductD_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	mov rax,16
 	mov ecx,r9d
 
 CoeffAddProductD_SSE2_1:	
 	movapd xmm1,XMMWORD ptr[rdx]
 	movapd xmm2,XMMWORD ptr[r8]
 	mulpd xmm1,xmm0
-	add rdx,rax
+	add rdx,16
 	addpd xmm2,xmm1
 	movapd XMMWORD ptr[r8],xmm2
-	add r8,rax
-	loop CoeffAddProductD_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short CoeffAddProductD_SSE2_1
 	
 	ret
 	
@@ -761,10 +706,6 @@ CoeffAddProductD_SSE2 endp
 
 CoeffAddProductD_AVX proc public frame
 
-	push rdi
-	.pushreg rdi
-	push rsi
-	.pushreg rsi
 	sub rsp,56
 	.allocstack 56
 	vmovdqa XMMWORD ptr[rsp],xmm6
@@ -777,55 +718,52 @@ CoeffAddProductD_AVX proc public frame
 
 	vbroadcastsd ymm0,qword ptr[rcx]
 
-	mov rsi,rdx 	; coeff_b
-	mov rdi,r8		; coeff_c
+	mov r10,rdx 	; coeff_b
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,128
-	mov r8,32
-	mov r9,64
-	mov r10,96
 
 	shr ecx,2
 	jz short CoeffAddProductD_AVX_1
 
 CoeffAddProductD_AVX_loop_1:
-	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+r8]
-	vmulpd ymm5,ymm0,YMMWORD ptr[rsi+r9]
-	vmulpd ymm7,ymm0,YMMWORD ptr[rsi+r10]
-	vaddpd ymm2,ymm1,YMMWORD ptr[rdi]
-	vaddpd ymm4,ymm3,YMMWORD ptr[rdi+r8]
-	vaddpd ymm6,ymm5,YMMWORD ptr[rdi+r9]
-	vaddpd ymm8,ymm7,YMMWORD ptr[rdi+r10]
-	vmovapd YMMWORD ptr[rdi],ymm2
-	vmovapd YMMWORD ptr[rdi+r8],ymm4
-	vmovapd YMMWORD ptr[rdi+r9],ymm6
-	vmovapd YMMWORD ptr[rdi+r10],ymm8
-	add rsi,rax
-	add rdi,rax
-	loop CoeffAddProductD_AVX_loop_1
+	vmulpd ymm1,ymm0,YMMWORD ptr[r10]
+	vmulpd ymm3,ymm0,YMMWORD ptr[r10+32]
+	vmulpd ymm5,ymm0,YMMWORD ptr[r10+64]
+	vmulpd ymm7,ymm0,YMMWORD ptr[r10+96]
+	vaddpd ymm2,ymm1,YMMWORD ptr[r8]
+	vaddpd ymm4,ymm3,YMMWORD ptr[r8+32]
+	vaddpd ymm6,ymm5,YMMWORD ptr[r8+64]
+	vaddpd ymm8,ymm7,YMMWORD ptr[r8+96]
+	vmovapd YMMWORD ptr[r8],ymm2
+	vmovapd YMMWORD ptr[r8+32],ymm4
+	vmovapd YMMWORD ptr[r8+64],ymm6
+	vmovapd YMMWORD ptr[r8+96],ymm8
+	add r10,rax
+	add r8,rax
+	dec ecx
+	jnz short CoeffAddProductD_AVX_loop_1
 
 CoeffAddProductD_AVX_1:
 	test edx,2
 	jz short CoeffAddProductD_AVX_2
 
-	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vmulpd ymm3,ymm0,YMMWORD ptr[rsi+r8]
-	vaddpd ymm2,ymm1,YMMWORD ptr[rdi]
-	vaddpd ymm4,ymm3,YMMWORD ptr[rdi+r8]
-	vmovapd YMMWORD ptr[rdi],ymm2
-	vmovapd YMMWORD ptr[rdi+r8],ymm4
-	add rsi,r9
-	add rdi,r9
+	vmulpd ymm1,ymm0,YMMWORD ptr[r10]
+	vmulpd ymm3,ymm0,YMMWORD ptr[r10+32]
+	vaddpd ymm2,ymm1,YMMWORD ptr[r8]
+	vaddpd ymm4,ymm3,YMMWORD ptr[r8+32]
+	vmovapd YMMWORD ptr[r8],ymm2
+	vmovapd YMMWORD ptr[r8+32],ymm4
+	add r10,64
+	add r8,64
 
 CoeffAddProductD_AVX_2:
 	test edx,1
 	jz short CoeffAddProductD_AVX_3
 
-	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddpd ymm2,ymm1,YMMWORD ptr[rdi]
-	vmovapd YMMWORD ptr[rdi],ymm2
+	vmulpd ymm1,ymm0,YMMWORD ptr[r10]
+	vaddpd ymm2,ymm1,YMMWORD ptr[r8]
+	vmovapd YMMWORD ptr[r8],ymm2
 
 CoeffAddProductD_AVX_3:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
@@ -834,9 +772,6 @@ CoeffAddProductD_AVX_3:
 	add rsp,56
 
 	vzeroupper
-
-	pop rsi
-	pop rdi
 
 	ret
 
@@ -856,16 +791,16 @@ CoeffAddF_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	mov rax,16
 	mov ecx,r9d
 	
 CoeffAddF_SSE2_1:	
 	movaps xmm1,XMMWORD ptr[rdx]
-	add rdx,rax
+	add rdx,16
 	addps xmm1,xmm0
 	movaps XMMWORD ptr[r8],xmm1
-	add r8,rax
-	loop CoeffAddF_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short CoeffAddF_SSE2_1
 	
 	ret
 	
@@ -884,15 +819,15 @@ CoeffAdd2F_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	mov rax,16
 	mov ecx,r8d
 	
 CoeffAdd2F_SSE2_1:	
 	movaps xmm1,XMMWORD ptr[rdx]
 	addps xmm1,xmm0
 	movaps XMMWORD ptr[rdx],xmm1
-	add rdx,rax
-	loop CoeffAdd2F_SSE2_1
+	add rdx,16
+	dec ecx
+	jnz short CoeffAdd2F_SSE2_1
 	
 	ret
 	
@@ -911,14 +846,8 @@ CoeffAddF_AVX proc public frame
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,48
-	.allocstack 48
+	sub rsp,56
+	.allocstack 56
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -934,50 +863,48 @@ CoeffAddF_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffAddF_AVX_1
 
 CoeffAddF_AVX_loop_1:
 	vaddps ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vaddps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vaddps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vaddps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vaddps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vaddps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vaddps ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vaddps ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vaddps ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vaddps ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vaddps ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vaddps ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vaddps ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovaps YMMWORD ptr[rdi],ymm1
-	vmovaps YMMWORD ptr[rdi+r8],ymm2
-	vmovaps YMMWORD ptr[rdi+r9],ymm3
-	vmovaps YMMWORD ptr[rdi+r10],ymm4
+	vmovaps YMMWORD ptr[rdi+32],ymm2
+	vmovaps YMMWORD ptr[rdi+64],ymm3
+	vmovaps YMMWORD ptr[rdi+96],ymm4
 	vmovaps YMMWORD ptr[rdi+r11],ymm5
-	vmovaps YMMWORD ptr[rdi+r12],ymm6
-	vmovaps YMMWORD ptr[rdi+r13],ymm7
-	vmovaps YMMWORD ptr[rdi+r14],ymm8
+	vmovaps YMMWORD ptr[rdi+r8],ymm6
+	vmovaps YMMWORD ptr[rdi+r9],ymm7
+	vmovaps YMMWORD ptr[rdi+r10],ymm8
 	add rsi,rax
 	add rdi,rax
-	loop CoeffAddF_AVX_loop_1
+	dec ecx
+	jnz short CoeffAddF_AVX_loop_1
 
 CoeffAddF_AVX_1:
 	test edx,4
 	jz short CoeffAddF_AVX_2
 
 	vaddps ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vaddps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vaddps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vaddps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vaddps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vaddps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovaps YMMWORD ptr[rdi],ymm1
-	vmovaps YMMWORD ptr[rdi+r8],ymm2
-	vmovaps YMMWORD ptr[rdi+r9],ymm3
-	vmovaps YMMWORD ptr[rdi+r10],ymm4
+	vmovaps YMMWORD ptr[rdi+32],ymm2
+	vmovaps YMMWORD ptr[rdi+64],ymm3
+	vmovaps YMMWORD ptr[rdi+96],ymm4
 	add rsi,r11
 	add rdi,r11
 
@@ -986,11 +913,11 @@ CoeffAddF_AVX_2:
 	jz short CoeffAddF_AVX_3
 
 	vaddps ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddps ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vaddps ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovaps YMMWORD ptr[rdi],ymm1
-	vmovaps YMMWORD ptr[rdi+r8],ymm2
-	add rsi,r9
-	add rdi,r9
+	vmovaps YMMWORD ptr[rdi+32],ymm2
+	add rsi,64
+	add rdi,64
 
 CoeffAddF_AVX_3:
 	test edx,1
@@ -1003,13 +930,10 @@ CoeffAddF_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	add rsp,56
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 	pop rdi
 
@@ -1027,14 +951,8 @@ CoeffAdd2F_AVX proc public frame
 
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,56
-	.allocstack 56
+	sub rsp,48
+	.allocstack 48
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -1049,49 +967,47 @@ CoeffAdd2F_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffAdd2F_AVX_1
 
 CoeffAdd2F_AVX_loop_1:
 	vaddps ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vaddps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vaddps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vaddps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vaddps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vaddps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vaddps ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vaddps ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vaddps ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vaddps ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vaddps ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vaddps ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vaddps ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovaps YMMWORD ptr[rsi],ymm1
-	vmovaps YMMWORD ptr[rsi+r8],ymm2
-	vmovaps YMMWORD ptr[rsi+r9],ymm3
-	vmovaps YMMWORD ptr[rsi+r10],ymm4
+	vmovaps YMMWORD ptr[rsi+32],ymm2
+	vmovaps YMMWORD ptr[rsi+64],ymm3
+	vmovaps YMMWORD ptr[rsi+96],ymm4
 	vmovaps YMMWORD ptr[rsi+r11],ymm5
-	vmovaps YMMWORD ptr[rsi+r12],ymm6
-	vmovaps YMMWORD ptr[rsi+r13],ymm7
-	vmovaps YMMWORD ptr[rsi+r14],ymm8
+	vmovaps YMMWORD ptr[rsi+r8],ymm6
+	vmovaps YMMWORD ptr[rsi+r9],ymm7
+	vmovaps YMMWORD ptr[rsi+r10],ymm8
 	add rsi,rax
-	loop CoeffAdd2F_AVX_loop_1
+	dec ecx
+	jnz short CoeffAdd2F_AVX_loop_1
 
 CoeffAdd2F_AVX_1:
 	test edx,4
 	jz short CoeffAdd2F_AVX_2
 
 	vaddps ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vaddps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vaddps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vaddps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vaddps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vaddps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovaps YMMWORD ptr[rsi],ymm1
-	vmovaps YMMWORD ptr[rsi+r8],ymm2
-	vmovaps YMMWORD ptr[rsi+r9],ymm3
-	vmovaps YMMWORD ptr[rsi+r10],ymm4
+	vmovaps YMMWORD ptr[rsi+32],ymm2
+	vmovaps YMMWORD ptr[rsi+64],ymm3
+	vmovaps YMMWORD ptr[rsi+96],ymm4
 	add rsi,r11
 
 CoeffAdd2F_AVX_2:
@@ -1099,10 +1015,10 @@ CoeffAdd2F_AVX_2:
 	jz short CoeffAdd2F_AVX_3
 
 	vaddps ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddps ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vaddps ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovaps YMMWORD ptr[rsi],ymm1
-	vmovaps YMMWORD ptr[rsi+r8],ymm2
-	add rsi,r9
+	vmovaps YMMWORD ptr[rsi+32],ymm2
+	add rsi,64
 
 CoeffAdd2F_AVX_3:
 	test edx,1
@@ -1115,13 +1031,10 @@ CoeffAdd2F_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,56
+	add rsp,48
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 
 	ret
@@ -1142,16 +1055,16 @@ CoeffAddD_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	mov rax,16
 	mov ecx,r9d
 	
 CoeffAddD_SSE2_1:	
 	movapd xmm1,XMMWORD ptr[rdx]
-	add rdx,rax
+	add rdx,16
 	addpd xmm1,xmm0
 	movapd XMMWORD ptr[r8],xmm1
-	add r8,rax
-	loop CoeffAddD_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short CoeffAddD_SSE2_1
 	
 	ret
 	
@@ -1170,16 +1083,15 @@ CoeffAdd2D_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	xor rcx,rcx
-	mov rax,16
 	mov ecx,r8d
 	
 CoeffAdd2D_SSE2_1:	
 	movapd xmm1,XMMWORD ptr[rdx]
 	addpd xmm1,xmm0
 	movapd XMMWORD ptr[rdx],xmm1
-	add rdx,rax
-	loop CoeffAdd2D_SSE2_1
+	add rdx,16
+	dec ecx
+	jnz short CoeffAdd2D_SSE2_1
 	
 	ret
 	
@@ -1198,14 +1110,8 @@ CoeffAddD_AVX proc public frame
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,48
-	.allocstack 48
+	sub rsp,56
+	.allocstack 56
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -1221,50 +1127,48 @@ CoeffAddD_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffAddD_AVX_1
 
 CoeffAddD_AVX_loop_1:
 	vaddpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vaddpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vaddpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vaddpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vaddpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vaddpd ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vaddpd ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vaddpd ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vaddpd ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vaddpd ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vaddpd ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vaddpd ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovapd YMMWORD ptr[rdi],ymm1
-	vmovapd YMMWORD ptr[rdi+r8],ymm2
-	vmovapd YMMWORD ptr[rdi+r9],ymm3
-	vmovapd YMMWORD ptr[rdi+r10],ymm4
+	vmovapd YMMWORD ptr[rdi+32],ymm2
+	vmovapd YMMWORD ptr[rdi+64],ymm3
+	vmovapd YMMWORD ptr[rdi+96],ymm4
 	vmovapd YMMWORD ptr[rdi+r11],ymm5
-	vmovapd YMMWORD ptr[rdi+r12],ymm6
-	vmovapd YMMWORD ptr[rdi+r13],ymm7
-	vmovapd YMMWORD ptr[rdi+r14],ymm8
+	vmovapd YMMWORD ptr[rdi+r8],ymm6
+	vmovapd YMMWORD ptr[rdi+r9],ymm7
+	vmovapd YMMWORD ptr[rdi+r10],ymm8
 	add rsi,rax
 	add rdi,rax
-	loop CoeffAddD_AVX_loop_1
+	dec ecx
+	jnz short CoeffAddD_AVX_loop_1
 
 CoeffAddD_AVX_1:
 	test edx,4
 	jz short CoeffAddD_AVX_2
 
 	vaddpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vaddpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vaddpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vaddpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vaddpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovapd YMMWORD ptr[rdi],ymm1
-	vmovapd YMMWORD ptr[rdi+r8],ymm2
-	vmovapd YMMWORD ptr[rdi+r9],ymm3
-	vmovapd YMMWORD ptr[rdi+r10],ymm4
+	vmovapd YMMWORD ptr[rdi+32],ymm2
+	vmovapd YMMWORD ptr[rdi+64],ymm3
+	vmovapd YMMWORD ptr[rdi+96],ymm4
 	add rsi,r11
 	add rdi,r11
 
@@ -1273,11 +1177,11 @@ CoeffAddD_AVX_2:
 	jz short CoeffAddD_AVX_3
 
 	vaddpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovapd YMMWORD ptr[rdi],ymm1
-	vmovapd YMMWORD ptr[rdi+r8],ymm2
-	add rsi,r9
-	add rdi,r9
+	vmovapd YMMWORD ptr[rdi+32],ymm2
+	add rsi,64
+	add rdi,64
 
 CoeffAddD_AVX_3:
 	test edx,1
@@ -1290,13 +1194,10 @@ CoeffAddD_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	add rsp,56
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 	pop rdi
 
@@ -1314,14 +1215,8 @@ CoeffAdd2D_AVX proc public frame
 
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,56
-	.allocstack 56
+	sub rsp,48
+	.allocstack 48
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -1336,49 +1231,47 @@ CoeffAdd2D_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffAdd2D_AVX_1
 
 CoeffAdd2D_AVX_loop_1:
 	vaddpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vaddpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vaddpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vaddpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vaddpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vaddpd ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vaddpd ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vaddpd ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vaddpd ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vaddpd ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vaddpd ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vaddpd ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovapd YMMWORD ptr[rsi],ymm1
-	vmovapd YMMWORD ptr[rsi+r8],ymm2
-	vmovapd YMMWORD ptr[rsi+r9],ymm3
-	vmovapd YMMWORD ptr[rsi+r10],ymm4
+	vmovapd YMMWORD ptr[rsi+32],ymm2
+	vmovapd YMMWORD ptr[rsi+64],ymm3
+	vmovapd YMMWORD ptr[rsi+96],ymm4
 	vmovapd YMMWORD ptr[rsi+r11],ymm5
-	vmovapd YMMWORD ptr[rsi+r12],ymm6
-	vmovapd YMMWORD ptr[rsi+r13],ymm7
-	vmovapd YMMWORD ptr[rsi+r14],ymm8
+	vmovapd YMMWORD ptr[rsi+r8],ymm6
+	vmovapd YMMWORD ptr[rsi+r9],ymm7
+	vmovapd YMMWORD ptr[rsi+r10],ymm8
 	add rsi,rax
-	loop CoeffAdd2D_AVX_loop_1
+	dec ecx
+	jnz short CoeffAdd2D_AVX_loop_1
 
 CoeffAdd2D_AVX_1:
 	test edx,4
 	jz short CoeffAdd2D_AVX_2
 
 	vaddpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vaddpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vaddpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vaddpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vaddpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovapd YMMWORD ptr[rsi],ymm1
-	vmovapd YMMWORD ptr[rsi+r8],ymm2
-	vmovapd YMMWORD ptr[rsi+r9],ymm3
-	vmovapd YMMWORD ptr[rsi+r10],ymm4
+	vmovapd YMMWORD ptr[rsi+32],ymm2
+	vmovapd YMMWORD ptr[rsi+64],ymm3
+	vmovapd YMMWORD ptr[rsi+96],ymm4
 	add rsi,r11
 
 CoeffAdd2D_AVX_2:
@@ -1386,10 +1279,10 @@ CoeffAdd2D_AVX_2:
 	jz short CoeffAdd2D_AVX_3
 
 	vaddpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vaddpd ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovapd YMMWORD ptr[rsi],ymm1
-	vmovapd YMMWORD ptr[rsi+r8],ymm2
-	add rsi,r9
+	vmovapd YMMWORD ptr[rsi+32],ymm2
+	add rsi,64
 
 CoeffAdd2D_AVX_3:
 	test edx,1
@@ -1402,13 +1295,10 @@ CoeffAdd2D_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,56
+	add rsp,48
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 
 	ret
@@ -1429,16 +1319,16 @@ CoeffSubF_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	mov rax,16
 	mov ecx,r9d
 	
 CoeffSubF_SSE2_1:	
 	movaps xmm1,xmm0
 	subps xmm1,XMMWORD ptr[rdx]
-	add rdx,rax
+	add rdx,16
 	movaps XMMWORD ptr[r8],xmm1
-	add r8,rax
-	loop CoeffSubF_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short CoeffSubF_SSE2_1
 	
 	ret
 	
@@ -1457,15 +1347,15 @@ CoeffSub2F_SSE2 proc public frame
 	movss xmm0,dword ptr[rcx]
 	pshufd xmm0,xmm0,0
 
-	mov rax,16
 	mov ecx,r8d
 	
 CoeffSub2F_SSE2_1:	
 	movaps xmm1,xmm0
 	subps xmm1,XMMWORD ptr[rdx]
 	movaps XMMWORD ptr[rdx],xmm1
-	add rdx,rax
-	loop CoeffSub2F_SSE2_1
+	add rdx,16
+	dec ecx
+	jnz short CoeffSub2F_SSE2_1
 	
 	ret
 	
@@ -1484,14 +1374,8 @@ CoeffSubF_AVX proc public frame
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,48
-	.allocstack 48
+	sub rsp,56
+	.allocstack 56
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -1507,50 +1391,48 @@ CoeffSubF_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffSubF_AVX_1
 
 CoeffSubF_AVX_loop_1:
 	vsubps ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vsubps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vsubps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vsubps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vsubps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vsubps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vsubps ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vsubps ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vsubps ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vsubps ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vsubps ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vsubps ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vsubps ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovaps YMMWORD ptr[rdi],ymm1
-	vmovaps YMMWORD ptr[rdi+r8],ymm2
-	vmovaps YMMWORD ptr[rdi+r9],ymm3
-	vmovaps YMMWORD ptr[rdi+r10],ymm4
+	vmovaps YMMWORD ptr[rdi+32],ymm2
+	vmovaps YMMWORD ptr[rdi+64],ymm3
+	vmovaps YMMWORD ptr[rdi+96],ymm4
 	vmovaps YMMWORD ptr[rdi+r11],ymm5
-	vmovaps YMMWORD ptr[rdi+r12],ymm6
-	vmovaps YMMWORD ptr[rdi+r13],ymm7
-	vmovaps YMMWORD ptr[rdi+r14],ymm8
+	vmovaps YMMWORD ptr[rdi+r8],ymm6
+	vmovaps YMMWORD ptr[rdi+r9],ymm7
+	vmovaps YMMWORD ptr[rdi+r10],ymm8
 	add rsi,rax
 	add rdi,rax
-	loop CoeffSubF_AVX_loop_1
+	dec ecx
+	jnz short CoeffSubF_AVX_loop_1
 
 CoeffSubF_AVX_1:
 	test edx,4
 	jz short CoeffSubF_AVX_2
 
 	vsubps ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vsubps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vsubps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vsubps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vsubps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vsubps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovaps YMMWORD ptr[rdi],ymm1
-	vmovaps YMMWORD ptr[rdi+r8],ymm2
-	vmovaps YMMWORD ptr[rdi+r9],ymm3
-	vmovaps YMMWORD ptr[rdi+r10],ymm4
+	vmovaps YMMWORD ptr[rdi+32],ymm2
+	vmovaps YMMWORD ptr[rdi+64],ymm3
+	vmovaps YMMWORD ptr[rdi+96],ymm4
 	add rsi,r11
 	add rdi,r11
 
@@ -1559,11 +1441,11 @@ CoeffSubF_AVX_2:
 	jz short CoeffSubF_AVX_3
 
 	vsubps ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubps ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vsubps ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovaps YMMWORD ptr[rdi],ymm1
-	vmovaps YMMWORD ptr[rdi+r8],ymm2
-	add rsi,r9
-	add rdi,r9
+	vmovaps YMMWORD ptr[rdi+32],ymm2
+	add rsi,64
+	add rdi,64
 
 CoeffSubF_AVX_3:
 	test edx,1
@@ -1576,13 +1458,10 @@ CoeffSubF_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	add rsp,56
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 	pop rdi
 
@@ -1600,14 +1479,8 @@ CoeffSub2F_AVX proc public frame
 
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,56
-	.allocstack 56
+	sub rsp,48
+	.allocstack 48
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -1622,49 +1495,47 @@ CoeffSub2F_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffSub2F_AVX_1
 
 CoeffSub2F_AVX_loop_1:
 	vsubps ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vsubps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vsubps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vsubps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vsubps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vsubps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vsubps ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vsubps ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vsubps ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vsubps ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vsubps ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vsubps ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vsubps ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovaps YMMWORD ptr[rsi],ymm1
-	vmovaps YMMWORD ptr[rsi+r8],ymm2
-	vmovaps YMMWORD ptr[rsi+r9],ymm3
-	vmovaps YMMWORD ptr[rsi+r10],ymm4
+	vmovaps YMMWORD ptr[rsi+32],ymm2
+	vmovaps YMMWORD ptr[rsi+64],ymm3
+	vmovaps YMMWORD ptr[rsi+96],ymm4
 	vmovaps YMMWORD ptr[rsi+r11],ymm5
-	vmovaps YMMWORD ptr[rsi+r12],ymm6
-	vmovaps YMMWORD ptr[rsi+r13],ymm7
-	vmovaps YMMWORD ptr[rsi+r14],ymm8
+	vmovaps YMMWORD ptr[rsi+r8],ymm6
+	vmovaps YMMWORD ptr[rsi+r9],ymm7
+	vmovaps YMMWORD ptr[rsi+r10],ymm8
 	add rsi,rax
-	loop CoeffSub2F_AVX_loop_1
+	dec ecx
+	jnz short CoeffSub2F_AVX_loop_1
 
 CoeffSub2F_AVX_1:
 	test edx,4
 	jz short CoeffSub2F_AVX_2
 
 	vsubps ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubps ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vsubps ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vsubps ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vsubps ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vsubps ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vsubps ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovaps YMMWORD ptr[rsi],ymm1
-	vmovaps YMMWORD ptr[rsi+r8],ymm2
-	vmovaps YMMWORD ptr[rsi+r9],ymm3
-	vmovaps YMMWORD ptr[rsi+r10],ymm4
+	vmovaps YMMWORD ptr[rsi+32],ymm2
+	vmovaps YMMWORD ptr[rsi+64],ymm3
+	vmovaps YMMWORD ptr[rsi+96],ymm4
 	add rsi,r11
 
 CoeffSub2F_AVX_2:
@@ -1672,10 +1543,10 @@ CoeffSub2F_AVX_2:
 	jz short CoeffSub2F_AVX_3
 
 	vsubps ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubps ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vsubps ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovaps YMMWORD ptr[rsi],ymm1
-	vmovaps YMMWORD ptr[rsi+r8],ymm2
-	add rsi,r8
+	vmovaps YMMWORD ptr[rsi+32],ymm2
+	add rsi,32
 
 CoeffSub2F_AVX_3:
 	test edx,1
@@ -1688,13 +1559,10 @@ CoeffSub2F_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,56
+	add rsp,48
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 
 	ret
@@ -1715,16 +1583,16 @@ CoeffSubD_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	mov rax,16
 	mov ecx,r9d
 	
 CoeffSubD_SSE2_1:	
 	movapd xmm1,xmm0
 	subpd xmm1,XMMWORD ptr[rdx]
-	add rdx,rax
+	add rdx,16
 	movapd XMMWORD ptr[r8],xmm1
-	add r8,rax
-	loop CoeffSubD_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short CoeffSubD_SSE2_1
 	
 	ret
 	
@@ -1743,15 +1611,15 @@ CoeffSub2D_SSE2 proc public frame
 	movsd xmm0,qword ptr[rcx]
 	movlhps xmm0,xmm0
 	
-	mov rax,16
 	mov ecx,r8d
 	
 CoeffSub2D_SSE2_1:	
 	movapd xmm1,xmm0
 	subpd xmm1,XMMWORD ptr[rdx]
 	movapd XMMWORD ptr[rdx],xmm1
-	add rdx,rax
-	loop CoeffSub2D_SSE2_1
+	add rdx,16
+	dec ecx
+	jnz short CoeffSub2D_SSE2_1
 	
 	ret
 	
@@ -1770,14 +1638,8 @@ CoeffSubD_AVX proc public frame
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,48
-	.allocstack 48
+	sub rsp,56
+	.allocstack 56
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -1793,50 +1655,48 @@ CoeffSubD_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffSubD_AVX_1
 
 CoeffSubD_AVX_loop_1:
 	vsubpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vsubpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vsubpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vsubpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vsubpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vsubpd ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vsubpd ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vsubpd ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vsubpd ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vsubpd ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vsubpd ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vsubpd ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovapd YMMWORD ptr[rdi],ymm1
-	vmovapd YMMWORD ptr[rdi+r8],ymm2
-	vmovapd YMMWORD ptr[rdi+r9],ymm3
-	vmovapd YMMWORD ptr[rdi+r10],ymm4
+	vmovapd YMMWORD ptr[rdi+32],ymm2
+	vmovapd YMMWORD ptr[rdi+64],ymm3
+	vmovapd YMMWORD ptr[rdi+96],ymm4
 	vmovapd YMMWORD ptr[rdi+r11],ymm5
-	vmovapd YMMWORD ptr[rdi+r12],ymm6
-	vmovapd YMMWORD ptr[rdi+r13],ymm7
-	vmovapd YMMWORD ptr[rdi+r14],ymm8
+	vmovapd YMMWORD ptr[rdi+r8],ymm6
+	vmovapd YMMWORD ptr[rdi+r9],ymm7
+	vmovapd YMMWORD ptr[rdi+r10],ymm8
 	add rsi,rax
 	add rdi,rax
-	loop CoeffSubD_AVX_loop_1
+	dec ecx
+	jnz short CoeffSubD_AVX_loop_1
 
 CoeffSubD_AVX_1:
 	test edx,4
 	jz short CoeffSubD_AVX_2
 
 	vsubpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vsubpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vsubpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vsubpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vsubpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovapd YMMWORD ptr[rdi],ymm1
-	vmovapd YMMWORD ptr[rdi+r8],ymm2
-	vmovapd YMMWORD ptr[rdi+r9],ymm3
-	vmovapd YMMWORD ptr[rdi+r10],ymm4
+	vmovapd YMMWORD ptr[rdi+32],ymm2
+	vmovapd YMMWORD ptr[rdi+64],ymm3
+	vmovapd YMMWORD ptr[rdi+96],ymm4
 	add rsi,r11
 	add rdi,r11
 
@@ -1845,11 +1705,11 @@ CoeffSubD_AVX_2:
 	jz short CoeffSubD_AVX_3
 
 	vsubpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovapd YMMWORD ptr[rdi],ymm1
-	vmovapd YMMWORD ptr[rdi+r8],ymm2
-	add rsi,r9
-	add rdi,r9
+	vmovapd YMMWORD ptr[rdi+32],ymm2
+	add rsi,64
+	add rdi,64
 
 CoeffSubD_AVX_3:
 	test edx,1
@@ -1862,13 +1722,10 @@ CoeffSubD_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,48
+	add rsp,56
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 	pop rdi
 
@@ -1886,14 +1743,8 @@ CoeffSub2D_AVX proc public frame
 
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,56
-	.allocstack 56
+	sub rsp,48
+	.allocstack 48
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -1908,49 +1759,47 @@ CoeffSub2D_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	shr ecx,3
 	jz short CoeffSub2D_AVX_1
 
 CoeffSub2D_AVX_loop_1:
 	vsubpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vsubpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vsubpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vsubpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vsubpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vsubpd ymm5,ymm0,YMMWORD ptr[rsi+r11]
-	vsubpd ymm6,ymm0,YMMWORD ptr[rsi+r12]
-	vsubpd ymm7,ymm0,YMMWORD ptr[rsi+r13]
-	vsubpd ymm8,ymm0,YMMWORD ptr[rsi+r14]
+	vsubpd ymm6,ymm0,YMMWORD ptr[rsi+r8]
+	vsubpd ymm7,ymm0,YMMWORD ptr[rsi+r9]
+	vsubpd ymm8,ymm0,YMMWORD ptr[rsi+r10]
 	vmovapd YMMWORD ptr[rsi],ymm1
-	vmovapd YMMWORD ptr[rsi+r8],ymm2
-	vmovapd YMMWORD ptr[rsi+r9],ymm3
-	vmovapd YMMWORD ptr[rsi+r10],ymm4
+	vmovapd YMMWORD ptr[rsi+32],ymm2
+	vmovapd YMMWORD ptr[rsi+64],ymm3
+	vmovapd YMMWORD ptr[rsi+96],ymm4
 	vmovapd YMMWORD ptr[rsi+r11],ymm5
-	vmovapd YMMWORD ptr[rsi+r12],ymm6
-	vmovapd YMMWORD ptr[rsi+r13],ymm7
-	vmovapd YMMWORD ptr[rsi+r14],ymm8
+	vmovapd YMMWORD ptr[rsi+r8],ymm6
+	vmovapd YMMWORD ptr[rsi+r9],ymm7
+	vmovapd YMMWORD ptr[rsi+r10],ymm8
 	add rsi,rax
-	loop CoeffSub2D_AVX_loop_1
+	dec ecx
+	jnz short CoeffSub2D_AVX_loop_1
 
 CoeffSub2D_AVX_1:
 	test edx,4
 	jz short CoeffSub2D_AVX_2
 
 	vsubpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
-	vsubpd ymm3,ymm0,YMMWORD ptr[rsi+r9]
-	vsubpd ymm4,ymm0,YMMWORD ptr[rsi+r10]
+	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+32]
+	vsubpd ymm3,ymm0,YMMWORD ptr[rsi+64]
+	vsubpd ymm4,ymm0,YMMWORD ptr[rsi+96]
 	vmovapd YMMWORD ptr[rsi],ymm1
-	vmovapd YMMWORD ptr[rsi+r8],ymm2
-	vmovapd YMMWORD ptr[rsi+r9],ymm3
-	vmovapd YMMWORD ptr[rsi+r10],ymm4
+	vmovapd YMMWORD ptr[rsi+32],ymm2
+	vmovapd YMMWORD ptr[rsi+64],ymm3
+	vmovapd YMMWORD ptr[rsi+96],ymm4
 	add rsi,r11
 
 CoeffSub2D_AVX_2:
@@ -1958,10 +1807,10 @@ CoeffSub2D_AVX_2:
 	jz short CoeffSub2D_AVX_3
 
 	vsubpd ymm1,ymm0,YMMWORD ptr[rsi]
-	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+r8]
+	vsubpd ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovapd YMMWORD ptr[rsi],ymm1
-	vmovapd YMMWORD ptr[rsi+r8],ymm2
-	add rsi,r9
+	vmovapd YMMWORD ptr[rsi+32],ymm2
+	add rsi,64
 
 CoeffSub2D_AVX_3:
 	test edx,1
@@ -1974,13 +1823,10 @@ CoeffSub2D_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,56
+	add rsp,48
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 
 	ret
@@ -1999,15 +1845,15 @@ VectorNorme2F_SSE2 proc public frame
 		
 	mov r9,rcx
 	xorps xmm0,xmm0
-	mov rax,16
 	mov ecx,r8d
 		
 VectorNorme2F_SSE2_1:
 	movaps xmm1,XMMWORD ptr[r9]
 	mulps xmm1,xmm1
-	add r9,rax
+	add r9,16
 	addps xmm0,xmm1
-	loop VectorNorme2F_SSE2_1
+	dec ecx
+	jnz short VectorNorme2F_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addps xmm0,xmm1
@@ -2034,8 +1880,6 @@ VectorNorme2F_AVX proc public frame
 	mov r9,rcx 		; coeff_x
 	mov rax,128
 	mov ecx,r8d		; lgth
-	mov r10,32
-	mov r11,96
 
 	vxorps ymm0,ymm0,ymm0
 
@@ -2044,9 +1888,9 @@ VectorNorme2F_AVX proc public frame
 
 VectorNorme2F_AVX_loop_1:
 	vmovaps ymm1,YMMWORD ptr[r9]
-	vmovaps ymm2,YMMWORD ptr[r9+r10]
-	vmovaps ymm3,YMMWORD ptr[r9+2*r10]
-	vmovaps ymm4,YMMWORD ptr[r9+r11]
+	vmovaps ymm2,YMMWORD ptr[r9+32]
+	vmovaps ymm3,YMMWORD ptr[r9+64]
+	vmovaps ymm4,YMMWORD ptr[r9+96]
 
 	vmulps ymm1,ymm1,ymm1
 	vmulps ymm2,ymm2,ymm2
@@ -2058,14 +1902,15 @@ VectorNorme2F_AVX_loop_1:
 	vaddps ymm1,ymm1,ymm3
 	add r9,rax
 	vaddps ymm0,ymm0,ymm1
-	loop VectorNorme2F_AVX_loop_1
+	dec ecx
+	jnz short VectorNorme2F_AVX_loop_1
 
 VectorNorme2F_AVX_1:
 	test r8d,2
 	jz short VectorNorme2F_AVX_2
 
 	vmovaps ymm1,YMMWORD ptr[r9]
-	vmovaps ymm2,YMMWORD ptr[r9+r10]
+	vmovaps ymm2,YMMWORD ptr[r9+32]
 	vmulps ymm1,ymm1,ymm1
 	vmulps ymm2,ymm2,ymm2
 
@@ -2110,15 +1955,15 @@ VectorNorme2D_SSE2 proc public frame
 		
 	mov r9,rcx
 	xorpd xmm0,xmm0
-	mov rax,16
 	mov ecx,r8d
 		
 VectorNorme2D_SSE2_1:
 	movapd xmm1,XMMWORD ptr[r9]
 	mulpd xmm1,xmm1
-	add r9,rax
+	add r9,16
 	addpd xmm0,xmm1
-	loop VectorNorme2D_SSE2_1
+	dec ecx
+	jnz short VectorNorme2D_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addsd xmm0,xmm1
@@ -2142,8 +1987,6 @@ VectorNorme2D_AVX proc public frame
 	mov r9,rcx 		; coeff_x
 	mov rax,128
 	mov ecx,r8d		; lgth
-	mov r10,32
-	mov r11,96
 
 	vxorps ymm0,ymm0,ymm0
 
@@ -2152,9 +1995,9 @@ VectorNorme2D_AVX proc public frame
 
 VectorNorme2D_AVX_loop_1:
 	vmovapd ymm1,YMMWORD ptr[r9]
-	vmovapd ymm2,YMMWORD ptr[r9+r10]
-	vmovapd ymm3,YMMWORD ptr[r9+2*r10]
-	vmovapd ymm4,YMMWORD ptr[r9+r11]
+	vmovapd ymm2,YMMWORD ptr[r9+32]
+	vmovapd ymm3,YMMWORD ptr[r9+64]
+	vmovapd ymm4,YMMWORD ptr[r9+96]
 
 	vmulpd ymm1,ymm1,ymm1
 	vmulpd ymm2,ymm2,ymm2
@@ -2166,14 +2009,15 @@ VectorNorme2D_AVX_loop_1:
 	vaddpd ymm1,ymm1,ymm3
 	add r9,rax
 	vaddpd ymm0,ymm0,ymm1
-	loop VectorNorme2D_AVX_loop_1
+	dec ecx
+	jnz short VectorNorme2D_AVX_loop_1
 
 VectorNorme2D_AVX_1:
 	test r8d,2
 	jz short VectorNorme2D_AVX_2
 
 	vmovapd ymm1,YMMWORD ptr[r9]
-	vmovapd ymm2,YMMWORD ptr[r9+r10]
+	vmovapd ymm2,YMMWORD ptr[r9+32]
 	vmulpd ymm1,ymm1,ymm1
 	vmulpd ymm2,ymm2,ymm2
 
@@ -2217,17 +2061,17 @@ VectorDist2F_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorps xmm0,xmm0
-	mov rax,16
 	mov ecx,r9d
 		
 VectorDist2F_SSE2_1:
 	movaps xmm1,XMMWORD ptr[r10]
 	subps xmm1,XMMWORD ptr[rdx]
-	add r10,rax
+	add r10,16
 	mulps xmm1,xmm1
-	add rdx,rax
+	add rdx,16
 	addps xmm0,xmm1
-	loop VectorDist2F_SSE2_1
+	dec ecx
+	jnz short VectorDist2F_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addps xmm0,xmm1
@@ -2256,14 +2100,8 @@ VectorDist2F_AVX proc public frame
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,56
-	.allocstack 56
+	sub rsp,48
+	.allocstack 48
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -2278,13 +2116,10 @@ VectorDist2F_AVX proc public frame
 	mov ecx,r9d		; lgth
 	mov edx,r9d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	vxorps ymm0,ymm0,ymm0
 
@@ -2293,22 +2128,22 @@ VectorDist2F_AVX proc public frame
 
 VectorDist2F_AVX_loop_1:
 	vmovaps ymm1,YMMWORD ptr[rsi]
-	vmovaps ymm2,YMMWORD ptr[rsi+r8]
-	vmovaps ymm3,YMMWORD ptr[rsi+r9]
-	vmovaps ymm4,YMMWORD ptr[rsi+r10]
+	vmovaps ymm2,YMMWORD ptr[rsi+32]
+	vmovaps ymm3,YMMWORD ptr[rsi+64]
+	vmovaps ymm4,YMMWORD ptr[rsi+96]
 	vmovaps ymm5,YMMWORD ptr[rsi+r11]
-	vmovaps ymm6,YMMWORD ptr[rsi+r12]
-	vmovaps ymm7,YMMWORD ptr[rsi+r13]
-	vmovaps ymm8,YMMWORD ptr[rsi+r14]
+	vmovaps ymm6,YMMWORD ptr[rsi+r8]
+	vmovaps ymm7,YMMWORD ptr[rsi+r9]
+	vmovaps ymm8,YMMWORD ptr[rsi+r10]
 
 	vsubps ymm1,ymm1,YMMWORD ptr[rdi]
-	vsubps ymm2,ymm2,YMMWORD ptr[rdi+r8]
-	vsubps ymm3,ymm3,YMMWORD ptr[rdi+r9]
-	vsubps ymm4,ymm4,YMMWORD ptr[rdi+r10]
+	vsubps ymm2,ymm2,YMMWORD ptr[rdi+32]
+	vsubps ymm3,ymm3,YMMWORD ptr[rdi+64]
+	vsubps ymm4,ymm4,YMMWORD ptr[rdi+96]
 	vsubps ymm5,ymm5,YMMWORD ptr[rdi+r11]
-	vsubps ymm6,ymm6,YMMWORD ptr[rdi+r12]
-	vsubps ymm7,ymm7,YMMWORD ptr[rdi+r13]
-	vsubps ymm8,ymm8,YMMWORD ptr[rdi+r14]
+	vsubps ymm6,ymm6,YMMWORD ptr[rdi+r8]
+	vsubps ymm7,ymm7,YMMWORD ptr[rdi+r9]
+	vsubps ymm8,ymm8,YMMWORD ptr[rdi+r10]
 
 	vmulps ymm1,ymm1,ymm1
 	vmulps ymm2,ymm2,ymm2
@@ -2338,14 +2173,14 @@ VectorDist2F_AVX_1:
 	jz short VectorDist2F_AVX_2
 
 	vmovaps ymm1,YMMWORD ptr[rsi]
-	vmovaps ymm2,YMMWORD ptr[rsi+r8]
-	vmovaps ymm3,YMMWORD ptr[rsi+r9]
-	vmovaps ymm4,YMMWORD ptr[rsi+r10]
+	vmovaps ymm2,YMMWORD ptr[rsi+32]
+	vmovaps ymm3,YMMWORD ptr[rsi+64]
+	vmovaps ymm4,YMMWORD ptr[rsi+96]
 
 	vsubps ymm1,ymm1,YMMWORD ptr[rdi]
-	vsubps ymm2,ymm2,YMMWORD ptr[rdi+r8]
-	vsubps ymm3,ymm3,YMMWORD ptr[rdi+r9]
-	vsubps ymm4,ymm4,YMMWORD ptr[rdi+r10]
+	vsubps ymm2,ymm2,YMMWORD ptr[rdi+32]
+	vsubps ymm3,ymm3,YMMWORD ptr[rdi+64]
+	vsubps ymm4,ymm4,YMMWORD ptr[rdi+96]
 
 	vmulps ymm1,ymm1,ymm1
 	vmulps ymm2,ymm2,ymm2
@@ -2364,15 +2199,15 @@ VectorDist2F_AVX_2:
 	jz short VectorDist2F_AVX_3
 
 	vmovaps ymm1,YMMWORD ptr[rsi]
-	vmovaps ymm2,YMMWORD ptr[rsi+r8]
+	vmovaps ymm2,YMMWORD ptr[rsi+32]
 	vsubps ymm1,ymm1,YMMWORD ptr[rdi]
-	vsubps ymm2,ymm2,YMMWORD ptr[rdi+r8]
+	vsubps ymm2,ymm2,YMMWORD ptr[rdi+32]
 	vmulps ymm1,ymm1,ymm1
 	vmulps ymm2,ymm2,ymm2
 
-	add rsi,r9
+	add rsi,64
 	vaddps ymm1,ymm1,ymm2
-	add rdi,r9
+	add rdi,64
 	vaddps ymm0,ymm0,ymm1
 
 VectorDist2F_AVX_3:
@@ -2398,13 +2233,10 @@ VectorDist2F_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,56
+	add rsp,48
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 	pop rdi
 	pop rbx
@@ -2426,17 +2258,17 @@ VectorDist2D_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorpd xmm0,xmm0
-	mov rax,16
 	mov ecx,r9d
 		
 VectorDist2D_SSE2_1:
 	movapd xmm1,XMMWORD ptr[r10]
 	subpd xmm1,XMMWORD ptr[rdx]
-	add r10,rax
+	add r10,16
 	mulpd xmm1,xmm1
-	add rdx,rax
+	add rdx,16
 	addpd xmm0,xmm1
-	loop VectorDist2D_SSE2_1
+	dec ecx
+	jnz short VectorDist2D_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addsd xmm0,xmm1
@@ -2462,14 +2294,8 @@ VectorDist2D_AVX proc public frame
 	.pushreg rdi
 	push rsi
 	.pushreg rsi
-	push r12
-	.pushreg r12
-	push r13
-	.pushreg r13
-	push r14
-	.pushreg r14
-	sub rsp,56
-	.allocstack 56
+	sub rsp,48
+	.allocstack 48
 	vmovdqa XMMWORD ptr[rsp],xmm6
 	.savexmm128 xmm6,0
 	vmovdqa XMMWORD ptr[rsp+16],xmm7
@@ -2484,13 +2310,10 @@ VectorDist2D_AVX proc public frame
 	mov ecx,r9d		; lgth
 	mov edx,r9d		; lgth
 	mov rax,256
-	mov r8,32
-	mov r9,64
-	mov r10,96
 	mov r11,128
-	mov r12,160
-	mov r13,192
-	mov r14,224
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 	vxorpd ymm0,ymm0,ymm0
 
@@ -2499,22 +2322,22 @@ VectorDist2D_AVX proc public frame
 
 VectorDist2D_AVX_loop_1:
 	vmovapd ymm1,YMMWORD ptr[rsi]
-	vmovapd ymm2,YMMWORD ptr[rsi+r8]
-	vmovapd ymm3,YMMWORD ptr[rsi+r9]
-	vmovapd ymm4,YMMWORD ptr[rsi+r10]
+	vmovapd ymm2,YMMWORD ptr[rsi+32]
+	vmovapd ymm3,YMMWORD ptr[rsi+64]
+	vmovapd ymm4,YMMWORD ptr[rsi+96]
 	vmovapd ymm5,YMMWORD ptr[rsi+r11]
-	vmovapd ymm6,YMMWORD ptr[rsi+r12]
-	vmovapd ymm7,YMMWORD ptr[rsi+r13]
-	vmovapd ymm8,YMMWORD ptr[rsi+r14]
+	vmovapd ymm6,YMMWORD ptr[rsi+r8]
+	vmovapd ymm7,YMMWORD ptr[rsi+r9]
+	vmovapd ymm8,YMMWORD ptr[rsi+r10]
 
 	vsubpd ymm1,ymm1,YMMWORD ptr[rdi]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rdi+r8]
-	vsubpd ymm3,ymm3,YMMWORD ptr[rdi+r9]
-	vsubpd ymm4,ymm4,YMMWORD ptr[rdi+r10]
+	vsubpd ymm2,ymm2,YMMWORD ptr[rdi+32]
+	vsubpd ymm3,ymm3,YMMWORD ptr[rdi+64]
+	vsubpd ymm4,ymm4,YMMWORD ptr[rdi+96]
 	vsubpd ymm5,ymm5,YMMWORD ptr[rdi+r11]
-	vsubpd ymm6,ymm6,YMMWORD ptr[rdi+r12]
-	vsubpd ymm7,ymm7,YMMWORD ptr[rdi+r13]
-	vsubpd ymm8,ymm8,YMMWORD ptr[rdi+r14]
+	vsubpd ymm6,ymm6,YMMWORD ptr[rdi+r8]
+	vsubpd ymm7,ymm7,YMMWORD ptr[rdi+r9]
+	vsubpd ymm8,ymm8,YMMWORD ptr[rdi+r10]
 
 	vmulpd ymm1,ymm1,ymm1
 	vmulpd ymm2,ymm2,ymm2
@@ -2544,14 +2367,14 @@ VectorDist2D_AVX_1:
 	jz short VectorDist2D_AVX_2
 
 	vmovapd ymm1,YMMWORD ptr[rsi]
-	vmovapd ymm2,YMMWORD ptr[rsi+r8]
-	vmovapd ymm3,YMMWORD ptr[rsi+r9]
-	vmovapd ymm4,YMMWORD ptr[rsi+r10]
+	vmovapd ymm2,YMMWORD ptr[rsi+32]
+	vmovapd ymm3,YMMWORD ptr[rsi+64]
+	vmovapd ymm4,YMMWORD ptr[rsi+96]
 
 	vsubpd ymm1,ymm1,YMMWORD ptr[rdi]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rdi+r8]
-	vsubpd ymm3,ymm3,YMMWORD ptr[rdi+r9]
-	vsubpd ymm4,ymm4,YMMWORD ptr[rdi+r10]
+	vsubpd ymm2,ymm2,YMMWORD ptr[rdi+32]
+	vsubpd ymm3,ymm3,YMMWORD ptr[rdi+64]
+	vsubpd ymm4,ymm4,YMMWORD ptr[rdi+96]
 
 	vmulpd ymm1,ymm1,ymm1
 	vmulpd ymm2,ymm2,ymm2
@@ -2570,15 +2393,15 @@ VectorDist2D_AVX_2:
 	jz short VectorDist2D_AVX_3
 
 	vmovapd ymm1,YMMWORD ptr[rsi]
-	vmovapd ymm2,YMMWORD ptr[rsi+r8]
+	vmovapd ymm2,YMMWORD ptr[rsi+32]
 	vsubpd ymm1,ymm1,YMMWORD ptr[rdi]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rdi+r8]
+	vsubpd ymm2,ymm2,YMMWORD ptr[rdi+32]
 	vmulpd ymm1,ymm1,ymm1
 	vmulpd ymm2,ymm2,ymm2
 
-	add rsi,r9
+	add rsi,64
 	vaddpd ymm1,ymm1,ymm2
-	add rdi,r9
+	add rdi,64
 	vaddpd ymm0,ymm0,ymm1
 
 VectorDist2D_AVX_3:
@@ -2602,13 +2425,10 @@ VectorDist2D_AVX_4:
 	vmovdqa xmm8,XMMWORD ptr[rsp+32]
 	vmovdqa xmm7,XMMWORD ptr[rsp+16]
 	vmovdqa xmm6,XMMWORD ptr[rsp]
-	add rsp,56
+	add rsp,48
 
 	vzeroupper
 
-	pop r14
-	pop r13
-	pop r12
 	pop rsi
 	pop rdi
 	pop rbx
@@ -2629,15 +2449,15 @@ VectorNormeF_SSE2 proc public frame
 		
 	mov r9,rcx
 	xorps xmm0,xmm0
-	mov rax,16
 	mov ecx,r8d
 		
 VectorNormeF_SSE2_1:
 	movaps xmm1,XMMWORD ptr[r9]
 	mulps xmm1,xmm1
-	add r9,rax
+	add r9,16
 	addps xmm0,xmm1
-	loop VectorNormeF_SSE2_1
+	dec ecx
+	jnz short VectorNormeF_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addps xmm0,xmm1
@@ -2663,8 +2483,6 @@ VectorNormeF_AVX proc public frame
 	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r10,32
-	mov r11,96
 
 	vxorps ymm0,ymm0,ymm0
 
@@ -2673,9 +2491,9 @@ VectorNormeF_AVX proc public frame
 
 VectorNormeF_AVX_loop_1:
 	vmovaps ymm1,YMMWORD ptr[r9]
-	vmovaps ymm2,YMMWORD ptr[r9+r10]
-	vmovaps ymm3,YMMWORD ptr[r9+2*r10]
-	vmovaps ymm4,YMMWORD ptr[r9+r11]
+	vmovaps ymm2,YMMWORD ptr[r9+32]
+	vmovaps ymm3,YMMWORD ptr[r9+64]
+	vmovaps ymm4,YMMWORD ptr[r9+96]
 
 	vmulps ymm1,ymm1,ymm1
 	vmulps ymm2,ymm2,ymm2
@@ -2687,14 +2505,15 @@ VectorNormeF_AVX_loop_1:
 	vaddps ymm1,ymm1,ymm3
 	add r9,rax
 	vaddps ymm0,ymm0,ymm1
-	loop VectorNormeF_AVX_loop_1
+	dec ecx
+	jnz short VectorNormeF_AVX_loop_1
 
 VectorNormeF_AVX_1:
 	test r8d,2
 	jz short VectorNormeF_AVX_2
 
 	vmovaps ymm1,YMMWORD ptr[r9]
-	vmovaps ymm2,YMMWORD ptr[r9+r10]
+	vmovaps ymm2,YMMWORD ptr[r9+32]
 	vmulps ymm1,ymm1,ymm1
 	vmulps ymm2,ymm2,ymm2
 
@@ -2738,15 +2557,15 @@ VectorNormeD_SSE2 proc public frame
 		
 	mov r9,rcx
 	xorpd xmm0,xmm0
-	mov rax,16
 	mov ecx,r8d
 		
 VectorNormeD_SSE2_1:
 	movapd xmm1,XMMWORD ptr[r9]
 	mulpd xmm1,xmm1
-	add r9,rax
+	add r9,16
 	addpd xmm0,xmm1
-	loop VectorNormeD_SSE2_1
+	dec ecx
+	jnz short VectorNormeD_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addsd xmm0,xmm1
@@ -2769,8 +2588,6 @@ VectorNormeD_AVX proc public frame
 	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r10,32
-	mov r11,96
 
 	vxorpd ymm0,ymm0,ymm0
 
@@ -2779,9 +2596,9 @@ VectorNormeD_AVX proc public frame
 
 VectorNormeD_AVX_loop_1:
 	vmovapd ymm1,YMMWORD ptr[r9]
-	vmovapd ymm2,YMMWORD ptr[r9+r10]
-	vmovapd ymm3,YMMWORD ptr[r9+2*r10]
-	vmovapd ymm4,YMMWORD ptr[r9+r11]
+	vmovapd ymm2,YMMWORD ptr[r9+32]
+	vmovapd ymm3,YMMWORD ptr[r9+64]
+	vmovapd ymm4,YMMWORD ptr[r9+96]
 
 	vmulpd ymm1,ymm1,ymm1
 	vmulpd ymm2,ymm2,ymm2
@@ -2794,14 +2611,15 @@ VectorNormeD_AVX_loop_1:
 	add r9,rax
 	vaddpd ymm0,ymm0,ymm1
 
-	loop VectorNormeD_AVX_loop_1
+	dec ecx
+	jnz short VectorNormeD_AVX_loop_1
 
 VectorNormeD_AVX_1:
 	test r8d,2
 	jz short VectorNormeD_AVX_2
 
 	vmovapd ymm1,YMMWORD ptr[r9]
-	vmovapd ymm2,YMMWORD ptr[r9+r10]
+	vmovapd ymm2,YMMWORD ptr[r9+32]
 	vmulpd ymm1,ymm1,ymm1
 	vmulpd ymm2,ymm2,ymm2
 
@@ -2844,17 +2662,17 @@ VectorDistF_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorps xmm0,xmm0
-	mov rax,16
 	mov ecx,r9d
 		
 VectorDistF_SSE2_1:
 	movaps xmm1,XMMWORD ptr[r10]
 	subps xmm1,XMMWORD ptr[rdx]
-	add r10,rax
+	add r10,16
 	mulps xmm1,xmm1
-	add rdx,rax
+	add rdx,16
 	addps xmm0,xmm1
-	loop VectorDistF_SSE2_1
+	dec ecx
+	jnz short VectorDistF_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addps xmm0,xmm1
@@ -2883,8 +2701,6 @@ VectorDistF_AVX proc public frame
 	mov rsi,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	vxorps ymm0,ymm0,ymm0
 
@@ -2893,14 +2709,14 @@ VectorDistF_AVX proc public frame
 
 VectorDistF_AVX_loop_1:
 	vmovaps ymm1,YMMWORD ptr[rsi]
-	vmovaps ymm2,YMMWORD ptr[rsi+r10]
-	vmovaps ymm3,YMMWORD ptr[rsi+2*r10]
-	vmovaps ymm4,YMMWORD ptr[rsi+r11]
+	vmovaps ymm2,YMMWORD ptr[rsi+32]
+	vmovaps ymm3,YMMWORD ptr[rsi+64]
+	vmovaps ymm4,YMMWORD ptr[rsi+96]
 
 	vsubps ymm1,ymm1,YMMWORD ptr[rdx]
-	vsubps ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vsubps ymm3,ymm3,YMMWORD ptr[rdx+2*r10]
-	vsubps ymm4,ymm4,YMMWORD ptr[rdx+r11]
+	vsubps ymm2,ymm2,YMMWORD ptr[rdx+32]
+	vsubps ymm3,ymm3,YMMWORD ptr[rdx+64]
+	vsubps ymm4,ymm4,YMMWORD ptr[rdx+96]
 
 	vmulps ymm1,ymm1,ymm1
 	vmulps ymm2,ymm2,ymm2
@@ -2914,16 +2730,17 @@ VectorDistF_AVX_loop_1:
 	add rdx,rax
 	vaddps ymm0,ymm0,ymm1
 
-	loop VectorDistF_AVX_loop_1
+	dec ecx
+	jnz short VectorDistF_AVX_loop_1
 
 VectorDistF_AVX_1:
 	test r9d,2
 	jz short VectorDistF_AVX_2
 
 	vmovaps ymm1,YMMWORD ptr[rsi]
-	vmovaps ymm2,YMMWORD ptr[rsi+r10]
+	vmovaps ymm2,YMMWORD ptr[rsi+32]
 	vsubps ymm1,ymm1,YMMWORD ptr[rdx]
-	vsubps ymm2,ymm2,YMMWORD ptr[rdx+r10]
+	vsubps ymm2,ymm2,YMMWORD ptr[rdx+32]
 	vmulps ymm1,ymm1,ymm1
 	vmulps ymm2,ymm2,ymm2
 
@@ -2972,17 +2789,17 @@ VectorDistD_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorpd xmm0,xmm0
-	mov rax,16
 	mov ecx,r9d
 		
 VectorDistD_SSE2_1:
 	movapd xmm1,XMMWORD ptr[r10]
 	subpd xmm1,XMMWORD ptr[rdx]
-	add r10,rax
+	add r10,16
 	mulpd xmm1,xmm1
-	add rdx,rax
+	add rdx,16
 	addpd xmm0,xmm1
-	loop VectorDistD_SSE2_1
+	dec ecx
+	jnz short VectorDistD_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addsd xmm0,xmm1
@@ -3008,8 +2825,6 @@ VectorDistD_AVX proc public frame
 	mov rsi,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	vxorpd ymm0,ymm0,ymm0
 
@@ -3018,14 +2833,14 @@ VectorDistD_AVX proc public frame
 
 VectorDistD_AVX_loop_1:
 	vmovapd ymm1,YMMWORD ptr[rsi]
-	vmovapd ymm2,YMMWORD ptr[rsi+r10]
-	vmovapd ymm3,YMMWORD ptr[rsi+2*r10]
-	vmovapd ymm4,YMMWORD ptr[rsi+r11]
+	vmovapd ymm2,YMMWORD ptr[rsi+32]
+	vmovapd ymm3,YMMWORD ptr[rsi+64]
+	vmovapd ymm4,YMMWORD ptr[rsi+96]
 
 	vsubpd ymm1,ymm1,YMMWORD ptr[rdx]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vsubpd ymm3,ymm3,YMMWORD ptr[rdx+2*r10]
-	vsubpd ymm4,ymm4,YMMWORD ptr[rdx+r11]
+	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+32]
+	vsubpd ymm3,ymm3,YMMWORD ptr[rdx+64]
+	vsubpd ymm4,ymm4,YMMWORD ptr[rdx+96]
 
 	vmulpd ymm1,ymm1,ymm1
 	vmulpd ymm2,ymm2,ymm2
@@ -3039,16 +2854,17 @@ VectorDistD_AVX_loop_1:
 	add rdx,rax
 	vaddpd ymm0,ymm0,ymm1
 
-	loop VectorDistD_AVX_loop_1
+	dec ecx
+	jnz short VectorDistD_AVX_loop_1
 
 VectorDistD_AVX_1:
 	test r9d,2
 	jz short VectorDistD_AVX_2
 
 	vmovapd ymm1,YMMWORD ptr[rsi]
-	vmovapd ymm2,YMMWORD ptr[rsi+r10]
+	vmovapd ymm2,YMMWORD ptr[rsi+32]
 	vsubpd ymm1,ymm1,YMMWORD ptr[rdx]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+r10]
+	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+32]
 	vmulpd ymm1,ymm1,ymm1
 	vmulpd ymm2,ymm2,ymm2
 
@@ -3095,16 +2911,16 @@ VectorNorme1F_SSE2 proc public frame
 	mov r9,rcx
 	xorps xmm0,xmm0
 	movaps xmm2,XMMWORD ptr sign_bits_f_32
-	mov rax,16
 	mov ecx,r8d
 		
 VectorNorme1F_SSE2_1:
 	movaps xmm1,XMMWORD ptr[r9]
 	andps xmm1,xmm2
-	add r9,rax
+	add r9,16
 	addps xmm0,xmm1
-	loop VectorNorme1F_SSE2_1
-		
+	dec ecx
+	jnz short VectorNorme1F_SSE2_1
+
 	movhlps xmm1,xmm0
 	addps xmm0,xmm1
 	movaps xmm1,xmm0
@@ -3128,8 +2944,6 @@ VectorNorme1F_AVX proc public frame
 
 	mov r9,rcx
 	mov rax,128
-	mov r10,32
-	mov r11,96
 	mov ecx,r8d
 
 	vxorps ymm0,ymm0,ymm0
@@ -3140,9 +2954,9 @@ VectorNorme1F_AVX proc public frame
 
 VectorNorme1F_AVX_loop_1:
 	vandps ymm1,ymm5,YMMWORD ptr[r9]
-	vandps ymm2,ymm5,YMMWORD ptr[r9+r10]
-	vandps ymm3,ymm5,YMMWORD ptr[r9+2*r10]
-	vandps ymm4,ymm5,YMMWORD ptr[r9+r11]
+	vandps ymm2,ymm5,YMMWORD ptr[r9+32]
+	vandps ymm3,ymm5,YMMWORD ptr[r9+64]
+	vandps ymm4,ymm5,YMMWORD ptr[r9+96]
 
 	vaddps ymm1,ymm1,ymm2
 	vaddps ymm3,ymm3,ymm4
@@ -3150,14 +2964,15 @@ VectorNorme1F_AVX_loop_1:
 	add r9,rax
 	vaddps ymm0,ymm0,ymm1
 
-	loop VectorNorme1F_AVX_loop_1
+	dec ecx
+	jnz short VectorNorme1F_AVX_loop_1
 
 VectorNorme1F_AVX_1:
 	test r8d,2
 	jz short VectorNorme1F_AVX_2
 
 	vandps ymm1,ymm5,YMMWORD ptr[r9]
-	vandps ymm2,ymm5,YMMWORD ptr[r9+r10]
+	vandps ymm2,ymm5,YMMWORD ptr[r9+32]
 
 	vaddps ymm1,ymm1,ymm2
 	add r9,64
@@ -3199,15 +3014,15 @@ VectorNorme1D_SSE2 proc public frame
 	mov r9,rcx
 	xorpd xmm0,xmm0
 	movapd xmm2,XMMWORD ptr sign_bits_f_64
-	mov rax,16
 	mov ecx,r8d
 		
 VectorNorme1D_SSE2_1:
 	movapd xmm1,XMMWORD ptr[r9]
 	andpd xmm1,xmm2
-	add r9,rax
+	add r9,16
 	addpd xmm0,xmm1
-	loop VectorNorme1D_SSE2_1
+	dec ecx
+	jnz short VectorNorme1D_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addsd xmm0,xmm1
@@ -3229,8 +3044,6 @@ VectorNorme1D_AVX proc public frame
 
 	mov r9,rcx
 	mov rax,128
-	mov r10,32
-	mov r11,96
 	mov ecx,r8d
 
 	vxorpd ymm0,ymm0,ymm0
@@ -3241,9 +3054,9 @@ VectorNorme1D_AVX proc public frame
 
 VectorNorme1D_AVX_loop_1:
 	vandpd ymm1,ymm5,YMMWORD ptr[r9]
-	vandpd ymm2,ymm5,YMMWORD ptr[r9+r10]
-	vandpd ymm3,ymm5,YMMWORD ptr[r9+2*r10]
-	vandpd ymm4,ymm5,YMMWORD ptr[r9+r11]
+	vandpd ymm2,ymm5,YMMWORD ptr[r9+32]
+	vandpd ymm3,ymm5,YMMWORD ptr[r9+64]
+	vandpd ymm4,ymm5,YMMWORD ptr[r9+96]
 
 	vaddpd ymm1,ymm1,ymm2
 	vaddpd ymm3,ymm3,ymm4
@@ -3251,14 +3064,15 @@ VectorNorme1D_AVX_loop_1:
 	add r9,rax
 	vaddpd ymm0,ymm0,ymm1
 
-	loop VectorNorme1D_AVX_loop_1
+	dec ecx
+	jnz short VectorNorme1D_AVX_loop_1
 
 VectorNorme1D_AVX_1:
 	test r8d,2
 	jz short VectorNorme1D_AVX_2
 
 	vandpd ymm1,ymm5,YMMWORD ptr[r9]
-	vandpd ymm2,ymm5,YMMWORD ptr[r9+r10]
+	vandpd ymm2,ymm5,YMMWORD ptr[r9+32]
 
 	vaddpd ymm1,ymm1,ymm2
 	add r9,64
@@ -3299,17 +3113,17 @@ VectorDist1F_SSE2 proc public frame
 	mov r10,rcx
 	xorps xmm0,xmm0
 	movaps xmm2,XMMWORD ptr sign_bits_f_32
-	mov rax,16
 	mov ecx,r9d
 		
 VectorDist1F_SSE2_1:
 	movaps xmm1,XMMWORD ptr[r10]
 	subps xmm1,XMMWORD ptr[rdx]
-	add r10,rax
+	add r10,16
 	andps xmm1,xmm2
-	add rdx,rax
+	add rdx,16
 	addps xmm0,xmm1
-	loop VectorDist1F_SSE2_1
+	dec ecx
+	jnz short VectorDist1F_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addps xmm0,xmm1
@@ -3338,8 +3152,6 @@ VectorDist1F_AVX proc public frame
 	mov rsi,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	vxorps ymm0,ymm0,ymm0
 	vmovaps ymm5,YMMWORD ptr sign_bits_f_32
@@ -3349,14 +3161,14 @@ VectorDist1F_AVX proc public frame
 
 VectorDist1F_AVX_loop_1:
 	vmovaps ymm1,YMMWORD ptr[rsi]
-	vmovaps ymm2,YMMWORD ptr[rsi+r10]
-	vmovaps ymm3,YMMWORD ptr[rsi+2*r10]
-	vmovaps ymm4,YMMWORD ptr[rsi+r11]
+	vmovaps ymm2,YMMWORD ptr[rsi+32]
+	vmovaps ymm3,YMMWORD ptr[rsi+64]
+	vmovaps ymm4,YMMWORD ptr[rsi+96]
 
 	vsubps ymm1,ymm1,YMMWORD ptr[rdx]
-	vsubps ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vsubps ymm3,ymm3,YMMWORD ptr[rdx+2*r10]
-	vsubps ymm4,ymm4,YMMWORD ptr[rdx+r11]
+	vsubps ymm2,ymm2,YMMWORD ptr[rdx+32]
+	vsubps ymm3,ymm3,YMMWORD ptr[rdx+64]
+	vsubps ymm4,ymm4,YMMWORD ptr[rdx+96]
 
 	vandps ymm1,ymm1,ymm5
 	vandps ymm2,ymm2,ymm5
@@ -3370,16 +3182,17 @@ VectorDist1F_AVX_loop_1:
 	add rdx,rax
 	vaddps ymm0,ymm0,ymm1
 
-	loop VectorDist1F_AVX_loop_1
+	dec ecx
+	jnz short VectorDist1F_AVX_loop_1
 
 VectorDist1F_AVX_1:
 	test r9d,2
 	jz short VectorDist1F_AVX_2
 
 	vmovaps ymm1,YMMWORD ptr[rsi]
-	vmovaps ymm2,YMMWORD ptr[rsi+r10]
+	vmovaps ymm2,YMMWORD ptr[rsi+32]
 	vsubps ymm1,ymm1,YMMWORD ptr[rdx]
-	vsubps ymm2,ymm2,YMMWORD ptr[rdx+r10]
+	vsubps ymm2,ymm2,YMMWORD ptr[rdx+32]
 	vandps ymm1,ymm1,ymm5
 	vandps ymm2,ymm2,ymm5
 
@@ -3429,17 +3242,17 @@ VectorDist1D_SSE2 proc public frame
 	mov r10,rcx
 	xorpd xmm0,xmm0
 	movapd xmm2,XMMWORD ptr sign_bits_f_64
-	mov rax,16
 	mov ecx,r9d
 		
 VectorDist1D_SSE2_1:
 	movapd xmm1,XMMWORD ptr[r10]
 	subpd xmm1,XMMWORD ptr[rdx]
-	add r10,rax
+	add r10,16
 	andpd xmm1,xmm2
-	add rdx,rax
+	add rdx,16
 	addpd xmm0,xmm1
-	loop VectorDist1D_SSE2_1
+	dec ecx
+	jnz short VectorDist1D_SSE2_1
 		
 	movhlps xmm1,xmm0
 	addsd xmm0,xmm1
@@ -3465,8 +3278,6 @@ VectorDist1D_AVX proc public frame
 	mov rsi,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	vxorpd ymm0,ymm0,ymm0
 	vmovapd ymm5,YMMWORD ptr sign_bits_f_64
@@ -3476,13 +3287,13 @@ VectorDist1D_AVX proc public frame
 
 VectorDist1D_AVX_loop_1:
 	vmovapd ymm1,YMMWORD ptr[rsi]
-	vmovapd ymm2,YMMWORD ptr[rsi+r10]
-	vmovapd ymm3,YMMWORD ptr[rsi+2*r10]
+	vmovapd ymm2,YMMWORD ptr[rsi+32]
+	vmovapd ymm3,YMMWORD ptr[rsi+64]
 	vmovapd ymm4,YMMWORD ptr[rsi+96]
 
 	vsubpd ymm1,ymm1,YMMWORD ptr[rdx]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vsubpd ymm3,ymm3,YMMWORD ptr[rdx+2*r10]
+	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+32]
+	vsubpd ymm3,ymm3,YMMWORD ptr[rdx+64]
 	vsubpd ymm4,ymm4,YMMWORD ptr[rdx+96]
 
 	vandpd ymm1,ymm1,ymm5
@@ -3497,16 +3308,17 @@ VectorDist1D_AVX_loop_1:
 	add rdx,rax
 	vaddpd ymm0,ymm0,ymm1
 
-	loop VectorDist1D_AVX_loop_1
+	dec ecx
+	jnz short VectorDist1D_AVX_loop_1
 
 VectorDist1D_AVX_1:
 	test r9d,2
 	jz short VectorDist1D_AVX_2
 
 	vmovapd ymm1,YMMWORD ptr[rsi]
-	vmovapd ymm2,YMMWORD ptr[rsi+r10]
+	vmovapd ymm2,YMMWORD ptr[rsi+32]
 	vsubpd ymm1,ymm1,YMMWORD ptr[rdx]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+r10]
+	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+32]
 	vandpd ymm1,ymm1,ymm5
 	vandpd ymm2,ymm2,ymm5
 
@@ -3553,17 +3365,17 @@ VectorProductF_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorps xmm0,xmm0
-	mov rax,16
 	mov ecx,r9d
 		
 VectorProductF_SSE2_1:
 	movaps xmm1,XMMWORD ptr[r10]
-	add r10,rax
+	add r10,16
 	mulps xmm1,XMMWORD ptr[rdx]
-	add rdx,rax
+	add rdx,16
 	addps xmm0,xmm1
-	loop VectorProductF_SSE2_1
-		
+	dec ecx
+	jnz short VectorProductF_SSE2_1
+
 	movhlps xmm1,xmm0
 	addps xmm0,xmm1
 	movaps xmm1,xmm0
@@ -3591,8 +3403,6 @@ VectorProductF_AVX proc public frame
 	mov rsi,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	vxorps ymm0,ymm0,ymm0
 
@@ -3601,14 +3411,14 @@ VectorProductF_AVX proc public frame
 
 VectorProductF_AVX_loop_1:
 	vmovaps ymm1,YMMWORD ptr[rsi]
-	vmovaps ymm2,YMMWORD ptr[rsi+r10]
-	vmovaps ymm3,YMMWORD ptr[rsi+2*r10]
-	vmovaps ymm4,YMMWORD ptr[rsi+r11]
+	vmovaps ymm2,YMMWORD ptr[rsi+32]
+	vmovaps ymm3,YMMWORD ptr[rsi+64]
+	vmovaps ymm4,YMMWORD ptr[rsi+96]
 
 	vmulps ymm1,ymm1,YMMWORD ptr[rdx]
-	vmulps ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vmulps ymm3,ymm3,YMMWORD ptr[rdx+2*r10]
-	vmulps ymm4,ymm4,YMMWORD ptr[rdx+r11]
+	vmulps ymm2,ymm2,YMMWORD ptr[rdx+32]
+	vmulps ymm3,ymm3,YMMWORD ptr[rdx+64]
+	vmulps ymm4,ymm4,YMMWORD ptr[rdx+96]
 
 	vaddps ymm1,ymm1,ymm2
 	vaddps ymm3,ymm3,ymm4
@@ -3617,16 +3427,17 @@ VectorProductF_AVX_loop_1:
 	add rdx,rax
 	vaddps ymm0,ymm0,ymm1
 
-	loop VectorProductF_AVX_loop_1
+	dec ecx
+	jnz short VectorProductF_AVX_loop_1
 
 VectorProductF_AVX_1:
 	test r9d,2
 	jz short VectorProductF_AVX_2
 
 	vmovaps ymm1,YMMWORD ptr[rsi]
-	vmovaps ymm2,YMMWORD ptr[rsi+r10]
+	vmovaps ymm2,YMMWORD ptr[rsi+32]
 	vmulps ymm1,ymm1,YMMWORD ptr[rdx]
-	vmulps ymm2,ymm2,YMMWORD ptr[rdx+r10]
+	vmulps ymm2,ymm2,YMMWORD ptr[rdx+32]
 
 	add rsi,64
 	vaddps ymm1,ymm1,ymm2
@@ -3672,17 +3483,17 @@ VectorProductD_SSE2 proc public frame
 		
 	mov r10,rcx
 	xorpd xmm0,xmm0
-	mov rax,16
 	mov ecx,r9d
 		
 VectorProductD_SSE2_1:
 	movapd xmm1,XMMWORD ptr[r10]
-	add r10,rax
+	add r10,16
 	mulpd xmm1,XMMWORD ptr[rdx]
-	add rdx,rax
+	add rdx,16
 	addpd xmm0,xmm1
-	loop VectorProductD_SSE2_1
-		
+	dec ecx
+	jnz short VectorProductD_SSE2_1
+
 	movhlps xmm1,xmm0
 	addsd xmm0,xmm1
 	movsd qword ptr[r8],xmm0
@@ -3707,8 +3518,6 @@ VectorProductD_AVX proc public frame
 	mov rsi,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	vxorpd ymm0,ymm0,ymm0
 
@@ -3717,14 +3526,14 @@ VectorProductD_AVX proc public frame
 
 VectorProductD_AVX_loop_1:
 	vmovapd ymm1,YMMWORD ptr[rsi]
-	vmovapd ymm2,YMMWORD ptr[rsi+r10]
-	vmovapd ymm3,YMMWORD ptr[rsi+2*r10]
-	vmovapd ymm4,YMMWORD ptr[rsi+r11]
+	vmovapd ymm2,YMMWORD ptr[rsi+32]
+	vmovapd ymm3,YMMWORD ptr[rsi+64]
+	vmovapd ymm4,YMMWORD ptr[rsi+96]
 
 	vmulpd ymm1,ymm1,YMMWORD ptr[rdx]
-	vmulpd ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vmulpd ymm3,ymm3,YMMWORD ptr[rdx+2*r10]
-	vmulpd ymm4,ymm4,YMMWORD ptr[rdx+r11]
+	vmulpd ymm2,ymm2,YMMWORD ptr[rdx+32]
+	vmulpd ymm3,ymm3,YMMWORD ptr[rdx+64]
+	vmulpd ymm4,ymm4,YMMWORD ptr[rdx+96]
 
 	vaddpd ymm1,ymm1,ymm2
 	vaddpd ymm3,ymm3,ymm4
@@ -3733,16 +3542,17 @@ VectorProductD_AVX_loop_1:
 	add rdx,rax
 	vaddpd ymm0,ymm0,ymm1
 
-	loop VectorProductD_AVX_loop_1
+	dec ecx
+	jnz short VectorProductD_AVX_loop_1
 
 VectorProductD_AVX_1:
 	test r9d,2
 	jz short VectorProductD_AVX_2
 
 	vmovapd ymm1,YMMWORD ptr[rsi]
-	vmovapd ymm2,YMMWORD ptr[rsi+r10]
+	vmovapd ymm2,YMMWORD ptr[rsi+32]
 	vmulpd ymm1,ymm1,YMMWORD ptr[rdx]
-	vmulpd ymm2,ymm2,YMMWORD ptr[rdx+r10]
+	vmulpd ymm2,ymm2,YMMWORD ptr[rdx+32]
 
 	add rsi,64
 	vaddpd ymm1,ymm1,ymm2
@@ -3785,17 +3595,17 @@ VectorAddF_SSE2 proc public frame
 	.endprolog
 
 	mov r10,rcx
-	mov r11,16
 	mov ecx,r9d
 	
 VectorAddF_SSE2_1:	
 	movaps xmm0,XMMWORD ptr[r10]
-	add r10,r11
+	add r10,16
 	addps xmm0,XMMWORD ptr[rdx]
-	add rdx,r11
+	add rdx,16
 	movaps XMMWORD ptr[r8],xmm0
-	add r8,r11
-	loop VectorAddF_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short VectorAddF_SSE2_1
 	
 	ret
 	
@@ -3813,17 +3623,17 @@ VectorSubF_SSE2 proc public frame
 	.endprolog
 
 	mov r10,rcx
-	mov r11,16
 	mov ecx,r9d
 	
 VectorSubF_SSE2_1:	
 	movaps xmm0,XMMWORD ptr[r10]
-	add r10,r11
+	add r10,16
 	subps xmm0,XMMWORD ptr[rdx]
-	add rdx,r11
+	add rdx,16
 	movaps XMMWORD ptr[r8],xmm0
-	add r8,r11
-	loop VectorSubF_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short VectorSubF_SSE2_1
 	
 	ret
 	
@@ -3841,17 +3651,17 @@ VectorProdF_SSE2 proc public frame
 	.endprolog
 
 	mov r10,rcx
-	mov r11,16
 	mov ecx,r9d
 	
 VectorProdF_SSE2_1:	
 	movaps xmm0,XMMWORD ptr[r10]
-	add r10,r11
+	add r10,16
 	mulps xmm0,XMMWORD ptr[rdx]
-	add rdx,r11
+	add rdx,16
 	movaps XMMWORD ptr[r8],xmm0
-	add r8,r11
-	loop VectorProdF_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short VectorProdF_SSE2_1
 	
 	ret
 	
@@ -3868,16 +3678,16 @@ VectorAdd2F_SSE2 proc public frame
 	.endprolog
 
 	mov r9,rcx
-	mov r10,16
 	mov ecx,r8d
 	
 VectorAdd2F_SSE2_1:	
 	movaps xmm0,XMMWORD ptr[r9]
 	addps xmm0,XMMWORD ptr[rdx]
-	add rdx,r10
+	add rdx,16
 	movaps XMMWORD ptr[r9],xmm0
-	add r9,r10
-	loop VectorAdd2F_SSE2_1
+	add r9,16
+	dec ecx
+	jnz short VectorAdd2F_SSE2_1
 	
 	ret
 	
@@ -3894,16 +3704,16 @@ VectorSub2F_SSE2 proc public frame
 	.endprolog
 
 	mov r9,rcx
-	mov r10,16
 	mov ecx,r8d
 	
 VectorSub2F_SSE2_1:	
 	movaps xmm0,XMMWORD ptr[r9]
 	subps xmm0,XMMWORD ptr[rdx]
-	add rdx,r10
+	add rdx,16
 	movaps XMMWORD ptr[r9],xmm0
-	add r9,r10
-	loop VectorSub2F_SSE2_1
+	add r9,16
+	dec ecx
+	jnz short VectorSub2F_SSE2_1
 	
 	ret
 	
@@ -3920,16 +3730,16 @@ VectorInvSubF_SSE2 proc public frame
 	.endprolog
 
 	mov r9,rcx
-	mov r10,16
 	mov ecx,r8d
 	
 VectorInvSubF_SSE2_1:	
 	movaps xmm0,XMMWORD ptr[rdx]
 	subps xmm0,XMMWORD ptr[r9]
-	add rdx,r10
+	add rdx,16
 	movaps XMMWORD ptr[r9],xmm0
-	add r9,r10
-	loop VectorInvSubF_SSE2_1
+	add r9,16
+	dec ecx
+	jnz short VectorInvSubF_SSE2_1
 	
 	ret
 	
@@ -3946,16 +3756,16 @@ VectorProd2F_SSE2 proc public frame
 	.endprolog
 
 	mov r9,rcx
-	mov r10,16
 	mov ecx,r8d
 	
 VectorProd2F_SSE2_1:	
 	movaps xmm0,XMMWORD ptr[r9]
 	mulps xmm0,XMMWORD ptr[rdx]
-	add rdx,r10
+	add rdx,16
 	movaps XMMWORD ptr[r9],xmm0
-	add r9,r10
-	loop VectorProd2F_SSE2_1
+	add r9,16
+	dec ecx
+	jnz short VectorProd2F_SSE2_1
 	
 	ret
 	
@@ -3977,43 +3787,42 @@ VectorAddF_AVX proc public frame
 	mov rsi,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorAddF_AVX_1
 
 VectorAddF_AVX_loop_1:
 	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r10]
-	vmovaps ymm2,YMMWORD ptr[rsi+2*r10]
-	vmovaps ymm3,YMMWORD ptr[rsi+r11]
+	vmovaps ymm1,YMMWORD ptr[rsi+32]
+	vmovaps ymm2,YMMWORD ptr[rsi+64]
+	vmovaps ymm3,YMMWORD ptr[rsi+96]
 
 	vaddps ymm0,ymm0,YMMWORD ptr[rdx]
-	vaddps ymm1,ymm1,YMMWORD ptr[rdx+r10]
-	vaddps ymm2,ymm2,YMMWORD ptr[rdx+2*r10]
-	vaddps ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vaddps ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vaddps ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vaddps ymm3,ymm3,YMMWORD ptr[rdx+96]
 
 	vmovaps YMMWORD ptr[r8],ymm0
-	vmovaps YMMWORD ptr[r8+r10],ymm1
-	vmovaps YMMWORD ptr[r8+2*r10],ymm2
-	vmovaps YMMWORD ptr[r8+r11],ymm3
+	vmovaps YMMWORD ptr[r8+32],ymm1
+	vmovaps YMMWORD ptr[r8+64],ymm2
+	vmovaps YMMWORD ptr[r8+96],ymm3
 
 	add rsi,rax
 	add rdx,rax
 	add r8,rax
-	loop VectorAddF_AVX_loop_1
+	dec ecx
+	jnz short VectorAddF_AVX_loop_1
 
 VectorAddF_AVX_1:
 	test r9d,2
 	jz short VectorAddF_AVX_2
 
 	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r10]
+	vmovaps ymm1,YMMWORD ptr[rsi+32]
 	vaddps ymm0,ymm0,YMMWORD ptr[rdx]
-	vaddps ymm1,ymm1,YMMWORD ptr[rdx+r10]
+	vaddps ymm1,ymm1,YMMWORD ptr[rdx+32]
 	vmovaps YMMWORD ptr[r8],ymm0
-	vmovaps YMMWORD ptr[r8+r10],ymm1
+	vmovaps YMMWORD ptr[r8+32],ymm1
 
 	add rsi,64
 	add rdx,64
@@ -4052,43 +3861,42 @@ VectorSubF_AVX proc public frame
 	mov rsi,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorSubF_AVX_1
 
 VectorSubF_AVX_loop_1:
 	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r10]
-	vmovaps ymm2,YMMWORD ptr[rsi+2*r10]
-	vmovaps ymm3,YMMWORD ptr[rsi+r11]
+	vmovaps ymm1,YMMWORD ptr[rsi+32]
+	vmovaps ymm2,YMMWORD ptr[rsi+64]
+	vmovaps ymm3,YMMWORD ptr[rsi+96]
 
 	vsubps ymm0,ymm0,YMMWORD ptr[rdx]
-	vsubps ymm1,ymm1,YMMWORD ptr[rdx+r10]
-	vsubps ymm2,ymm2,YMMWORD ptr[rdx+2*r10]
-	vsubps ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vsubps ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vsubps ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vsubps ymm3,ymm3,YMMWORD ptr[rdx+96]
 
 	vmovaps YMMWORD ptr[r8],ymm0
-	vmovaps YMMWORD ptr[r8+r10],ymm1
-	vmovaps YMMWORD ptr[r8+2*r10],ymm2
-	vmovaps YMMWORD ptr[r8+r11],ymm3
+	vmovaps YMMWORD ptr[r8+32],ymm1
+	vmovaps YMMWORD ptr[r8+64],ymm2
+	vmovaps YMMWORD ptr[r8+96],ymm3
 
 	add rsi,rax
 	add rdx,rax
 	add r8,rax
-	loop VectorSubF_AVX_loop_1
+	dec ecx
+	jnz short VectorSubF_AVX_loop_1
 
 VectorSubF_AVX_1:
 	test r9d,2
 	jz short VectorSubF_AVX_2
 
 	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r10]
+	vmovaps ymm1,YMMWORD ptr[rsi+32]
 	vsubps ymm0,ymm0,YMMWORD ptr[rdx]
-	vsubps ymm1,ymm1,YMMWORD ptr[rdx+r10]
+	vsubps ymm1,ymm1,YMMWORD ptr[rdx+32]
 	vmovaps YMMWORD ptr[r8],ymm0
-	vmovaps YMMWORD ptr[r8+r10],ymm1
+	vmovaps YMMWORD ptr[r8+32],ymm1
 
 	add rsi,64
 	add rdx,64
@@ -4127,43 +3935,42 @@ VectorProdF_AVX proc public frame
 	mov rsi,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorProdF_AVX_1
 
 VectorProdF_AVX_loop_1:
 	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r10]
-	vmovaps ymm2,YMMWORD ptr[rsi+2*r10]
-	vmovaps ymm3,YMMWORD ptr[rsi+r11]
+	vmovaps ymm1,YMMWORD ptr[rsi+32]
+	vmovaps ymm2,YMMWORD ptr[rsi+64]
+	vmovaps ymm3,YMMWORD ptr[rsi+96]
 
 	vmulps ymm0,ymm0,YMMWORD ptr[rdx]
-	vmulps ymm1,ymm1,YMMWORD ptr[rdx+r10]
-	vmulps ymm2,ymm2,YMMWORD ptr[rdx+2*r10]
-	vmulps ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vmulps ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmulps ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vmulps ymm3,ymm3,YMMWORD ptr[rdx+96]
 
 	vmovaps YMMWORD ptr[r8],ymm0
-	vmovaps YMMWORD ptr[r8+r10],ymm1
-	vmovaps YMMWORD ptr[r8+2*r10],ymm2
-	vmovaps YMMWORD ptr[r8+r11],ymm3
+	vmovaps YMMWORD ptr[r8+32],ymm1
+	vmovaps YMMWORD ptr[r8+64],ymm2
+	vmovaps YMMWORD ptr[r8+96],ymm3
 
 	add rsi,rax
 	add rdx,rax
 	add r8,rax
-	loop VectorProdF_AVX_loop_1
+	dec ecx
+	jnz short VectorProdF_AVX_loop_1
 
 VectorProdF_AVX_1:
 	test r9d,2
 	jz short VectorProdF_AVX_2
 
 	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r10]
+	vmovaps ymm1,YMMWORD ptr[rsi+32]
 	vmulps ymm0,ymm0,YMMWORD ptr[rdx]
-	vmulps ymm1,ymm1,YMMWORD ptr[rdx+r10]
+	vmulps ymm1,ymm1,YMMWORD ptr[rdx+32]
 	vmovaps YMMWORD ptr[r8],ymm0
-	vmovaps YMMWORD ptr[r8+r10],ymm1
+	vmovaps YMMWORD ptr[r8+32],ymm1
 
 	add rsi,64
 	add rdx,64
@@ -4194,66 +4001,60 @@ VectorProdF_AVX endp
 
 VectorAdd2F_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r9,32
-	mov r10,64
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorAdd2F_AVX_1
 
 VectorAdd2F_AVX_loop_1:
-	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r9]
-	vmovaps ymm2,YMMWORD ptr[rsi+r10]
-	vmovaps ymm3,YMMWORD ptr[rsi+r11]
+	vmovaps ymm0,YMMWORD ptr[r9]
+	vmovaps ymm1,YMMWORD ptr[r9+32]
+	vmovaps ymm2,YMMWORD ptr[r9+64]
+	vmovaps ymm3,YMMWORD ptr[r9+96]
 
 	vaddps ymm0,ymm0,YMMWORD ptr[rdx]
-	vaddps ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vaddps ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vaddps ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vaddps ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vaddps ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vaddps ymm3,ymm3,YMMWORD ptr[rdx+96]
 
-	vmovaps YMMWORD ptr[rsi],ymm0
-	vmovaps YMMWORD ptr[rsi+r9],ymm1
-	vmovaps YMMWORD ptr[rsi+r10],ymm2
-	vmovaps YMMWORD ptr[rsi+r11],ymm3
+	vmovaps YMMWORD ptr[r9],ymm0
+	vmovaps YMMWORD ptr[r9+32],ymm1
+	vmovaps YMMWORD ptr[r9+64],ymm2
+	vmovaps YMMWORD ptr[r9+96],ymm3
 
 	add rdx,rax
-	add rsi,rax
-	loop VectorAdd2F_AVX_loop_1
+	add r9,rax
+	dec ecx
+	jnz short VectorAdd2F_AVX_loop_1
 
 VectorAdd2F_AVX_1:
 	test r8d,2
 	jz short VectorAdd2F_AVX_2
 
-	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r9]
+	vmovaps ymm0,YMMWORD ptr[r9]
+	vmovaps ymm1,YMMWORD ptr[r9+32]
 	vaddps ymm0,ymm0,YMMWORD ptr[rdx]
-	vaddps ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vmovaps YMMWORD ptr[rsi],ymm0
-	vmovaps YMMWORD ptr[rsi+r9],ymm1
+	vaddps ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmovaps YMMWORD ptr[r9],ymm0
+	vmovaps YMMWORD ptr[r9+32],ymm1
 
-	add rdx,r10
-	add rsi,r10
+	add rdx,64
+	add r9,64
 
 VectorAdd2F_AVX_2:
 	test r8d,1
 	jz short VectorAdd2F_AVX_3
 
-	vmovaps ymm0,YMMWORD ptr[rsi]
+	vmovaps ymm0,YMMWORD ptr[r9]
 	vaddps ymm0,ymm0,YMMWORD ptr[rdx]
-	vmovaps YMMWORD ptr[rsi],ymm0
+	vmovaps YMMWORD ptr[r9],ymm0
 
 VectorAdd2F_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -4267,66 +4068,60 @@ VectorAdd2F_AVX endp
 
 VectorSub2F_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r9,32
-	mov r10,64
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorSub2F_AVX_1
 
 VectorSub2F_AVX_loop_1:
-	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r9]
-	vmovaps ymm2,YMMWORD ptr[rsi+r10]
-	vmovaps ymm3,YMMWORD ptr[rsi+r11]
+	vmovaps ymm0,YMMWORD ptr[r9]
+	vmovaps ymm1,YMMWORD ptr[r9+32]
+	vmovaps ymm2,YMMWORD ptr[r9+64]
+	vmovaps ymm3,YMMWORD ptr[r9+96]
 
 	vsubps ymm0,ymm0,YMMWORD ptr[rdx]
-	vsubps ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vsubps ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vsubps ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vsubps ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vsubps ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vsubps ymm3,ymm3,YMMWORD ptr[rdx+96]
 
-	vmovaps YMMWORD ptr[rsi],ymm0
-	vmovaps YMMWORD ptr[rsi+r9],ymm1
-	vmovaps YMMWORD ptr[rsi+r10],ymm2
-	vmovaps YMMWORD ptr[rsi+r11],ymm3
+	vmovaps YMMWORD ptr[r9],ymm0
+	vmovaps YMMWORD ptr[r9+32],ymm1
+	vmovaps YMMWORD ptr[r9+64],ymm2
+	vmovaps YMMWORD ptr[r9+96],ymm3
 
 	add rdx,rax
-	add rsi,rax
-	loop VectorSub2F_AVX_loop_1
+	add r9,rax
+	dec ecx
+	jnz short VectorSub2F_AVX_loop_1
 
 VectorSub2F_AVX_1:
 	test r8d,2
 	jz short VectorSub2F_AVX_2
 
-	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r9]
+	vmovaps ymm0,YMMWORD ptr[r9]
+	vmovaps ymm1,YMMWORD ptr[r9+32]
 	vsubps ymm0,ymm0,YMMWORD ptr[rdx]
-	vsubps ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vmovaps YMMWORD ptr[rsi],ymm0
-	vmovaps YMMWORD ptr[rsi+r9],ymm1
+	vsubps ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmovaps YMMWORD ptr[r9],ymm0
+	vmovaps YMMWORD ptr[r9+32],ymm1
 
-	add rdx,r10
-	add rsi,r10
+	add rdx,64
+	add r9,64
 
 VectorSub2F_AVX_2:
 	test r8d,1
 	jz short VectorSub2F_AVX_3
 
-	vmovaps ymm0,YMMWORD ptr[rsi]
+	vmovaps ymm0,YMMWORD ptr[r9]
 	vsubps ymm0,ymm0,YMMWORD ptr[rdx]
-	vmovaps YMMWORD ptr[rsi],ymm0
+	vmovaps YMMWORD ptr[r9],ymm0
 
 VectorSub2F_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -4340,66 +4135,60 @@ VectorSub2F_AVX endp
 
 VectorInvSubF_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r9,32
-	mov r10,64
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorInvSubF_AVX_1
 
 VectorInvSubF_AVX_loop_1:
 	vmovaps ymm0,YMMWORD ptr[rdx]
-	vmovaps ymm1,YMMWORD ptr[rdx+r9]
-	vmovaps ymm2,YMMWORD ptr[rdx+r10]
-	vmovaps ymm3,YMMWORD ptr[rdx+r11]
+	vmovaps ymm1,YMMWORD ptr[rdx+32]
+	vmovaps ymm2,YMMWORD ptr[rdx+64]
+	vmovaps ymm3,YMMWORD ptr[rdx+96]
 
-	vsubps ymm0,ymm0,YMMWORD ptr[rsi]
-	vsubps ymm1,ymm1,YMMWORD ptr[rsi+r9]
-	vsubps ymm2,ymm2,YMMWORD ptr[rsi+r10]
-	vsubps ymm3,ymm3,YMMWORD ptr[rsi+r11]
+	vsubps ymm0,ymm0,YMMWORD ptr[r9]
+	vsubps ymm1,ymm1,YMMWORD ptr[r9+32]
+	vsubps ymm2,ymm2,YMMWORD ptr[r9+64]
+	vsubps ymm3,ymm3,YMMWORD ptr[r9+96]
 
-	vmovaps YMMWORD ptr[rsi],ymm0
-	vmovaps YMMWORD ptr[rsi+r9],ymm1
-	vmovaps YMMWORD ptr[rsi+r10],ymm2
-	vmovaps YMMWORD ptr[rsi+r11],ymm3
+	vmovaps YMMWORD ptr[r9],ymm0
+	vmovaps YMMWORD ptr[r9+32],ymm1
+	vmovaps YMMWORD ptr[r9+64],ymm2
+	vmovaps YMMWORD ptr[r9+96],ymm3
 
 	add rdx,rax
-	add rsi,rax
-	loop VectorInvSubF_AVX_loop_1
+	add r9,rax
+	dec ecx
+	jnz short VectorInvSubF_AVX_loop_1
 
 VectorInvSubF_AVX_1:
 	test r8d,2
 	jz short VectorInvSubF_AVX_2
 
 	vmovaps ymm0,YMMWORD ptr[rdx]
-	vmovaps ymm1,YMMWORD ptr[rdx+r9]
-	vsubps ymm0,ymm0,YMMWORD ptr[rsi]
-	vsubps ymm1,ymm1,YMMWORD ptr[rsi+r9]
-	vmovaps YMMWORD ptr[rsi],ymm0
-	vmovaps YMMWORD ptr[rsi+r9],ymm1
+	vmovaps ymm1,YMMWORD ptr[rdx+32]
+	vsubps ymm0,ymm0,YMMWORD ptr[r9]
+	vsubps ymm1,ymm1,YMMWORD ptr[r9+32]
+	vmovaps YMMWORD ptr[r9],ymm0
+	vmovaps YMMWORD ptr[r9+32],ymm1
 
-	add rdx,r10
-	add rsi,r10
+	add rdx,64
+	add r9,64
 
 VectorInvSubF_AVX_2:
 	test r8d,1
 	jz short VectorInvSubF_AVX_3
 
 	vmovaps ymm0,YMMWORD ptr[rdx]
-	vsubps ymm0,ymm0,YMMWORD ptr[rsi]
-	vmovaps YMMWORD ptr[rsi],ymm0
+	vsubps ymm0,ymm0,YMMWORD ptr[r9]
+	vmovaps YMMWORD ptr[r9],ymm0
 
 VectorInvSubF_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -4413,66 +4202,60 @@ VectorInvSubF_AVX endp
 
 VectorProd2F_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r9,32
-	mov r10,64
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorProd2F_AVX_1
 
 VectorProd2F_AVX_loop_1:
-	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r9]
-	vmovaps ymm2,YMMWORD ptr[rsi+r10]
-	vmovaps ymm3,YMMWORD ptr[rsi+r11]
+	vmovaps ymm0,YMMWORD ptr[r9]
+	vmovaps ymm1,YMMWORD ptr[r9+32]
+	vmovaps ymm2,YMMWORD ptr[r9+64]
+	vmovaps ymm3,YMMWORD ptr[r9+96]
 
 	vmulps ymm0,ymm0,YMMWORD ptr[rdx]
-	vmulps ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vmulps ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vmulps ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vmulps ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmulps ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vmulps ymm3,ymm3,YMMWORD ptr[rdx+96]
 
-	vmovaps YMMWORD ptr[rsi],ymm0
-	vmovaps YMMWORD ptr[rsi+r9],ymm1
-	vmovaps YMMWORD ptr[rsi+r10],ymm2
-	vmovaps YMMWORD ptr[rsi+r11],ymm3
+	vmovaps YMMWORD ptr[r9],ymm0
+	vmovaps YMMWORD ptr[r9+32],ymm1
+	vmovaps YMMWORD ptr[r9+64],ymm2
+	vmovaps YMMWORD ptr[r9+96],ymm3
 
 	add rdx,rax
-	add rsi,rax
-	loop VectorProd2F_AVX_loop_1
+	add r9,rax
+	dec ecx
+	jnz short VectorProd2F_AVX_loop_1
 
 VectorProd2F_AVX_1:
 	test r8d,2
 	jz short VectorProd2F_AVX_2
 
-	vmovaps ymm0,YMMWORD ptr[rsi]
-	vmovaps ymm1,YMMWORD ptr[rsi+r9]
+	vmovaps ymm0,YMMWORD ptr[r9]
+	vmovaps ymm1,YMMWORD ptr[r9+32]
 	vmulps ymm0,ymm0,YMMWORD ptr[rdx]
-	vmulps ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vmovaps YMMWORD ptr[rsi],ymm0
-	vmovaps YMMWORD ptr[rsi+r9],ymm1
+	vmulps ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmovaps YMMWORD ptr[r9],ymm0
+	vmovaps YMMWORD ptr[r9+32],ymm1
 
-	add rdx,r10
-	add rsi,r10
+	add rdx,64
+	add r9,64
 
 VectorProd2F_AVX_2:
 	test r8d,1
 	jz short VectorProd2F_AVX_3
 
-	vmovaps ymm0,YMMWORD ptr[rsi]
+	vmovaps ymm0,YMMWORD ptr[r9]
 	vmulps ymm0,ymm0,YMMWORD ptr[rdx]
-	vmovaps YMMWORD ptr[rsi],ymm0
+	vmovaps YMMWORD ptr[r9],ymm0
 
 VectorProd2F_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -4490,17 +4273,17 @@ VectorAddD_SSE2 proc public frame
 	.endprolog
 
 	mov r10,rcx
-	mov r11,16
 	mov ecx,r9d
 	
 VectorAddD_SSE2_1:	
 	movapd xmm0,XMMWORD ptr[r10]
-	add r10,r11
+	add r10,16
 	addpd xmm0,XMMWORD ptr[rdx]
-	add rdx,r11
+	add rdx,16
 	movapd XMMWORD ptr[r8],xmm0
-	add r8,r11
-	loop VectorAddD_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short VectorAddD_SSE2_1
 	
 	ret
 	
@@ -4518,17 +4301,17 @@ VectorSubD_SSE2 proc public frame
 	.endprolog
 
 	mov r10,rcx
-	mov r11,16
 	mov ecx,r9d
 	
 VectorSubD_SSE2_1:	
 	movapd xmm0,XMMWORD ptr[r10]
-	add r10,r11
+	add r10,16
 	subpd xmm0,XMMWORD ptr[rdx]
-	add rdx,r11
+	add rdx,16
 	movapd XMMWORD ptr[r8],xmm0
-	add r8,r11
-	loop VectorSubD_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short VectorSubD_SSE2_1
 	
 	ret
 	
@@ -4546,17 +4329,17 @@ VectorProdD_SSE2 proc public frame
 	.endprolog
 
 	mov r10,rcx
-	mov r11,16
 	mov ecx,r9d
 	
 VectorProdD_SSE2_1:	
 	movapd xmm0,XMMWORD ptr[r10]
-	add r10,r11
+	add r10,16
 	mulpd xmm0,XMMWORD ptr[rdx]
-	add rdx,r11
+	add rdx,16
 	movapd XMMWORD ptr[r8],xmm0
-	add r8,r11
-	loop VectorProdD_SSE2_1
+	add r8,16
+	dec ecx
+	jnz short VectorProdD_SSE2_1
 	
 	ret
 	
@@ -4573,17 +4356,16 @@ VectorAdd2D_SSE2 proc public frame
 	.endprolog
 
 	mov r9,rcx
-	mov r10,16
-	xor rcx,rcx
 	mov ecx,r8d
 	
 VectorAdd2D_SSE2_1:	
 	movapd xmm0,XMMWORD ptr[r9]
 	addpd xmm0,XMMWORD ptr[rdx]
-	add rdx,r10
+	add rdx,16
 	movapd XMMWORD ptr[r9],xmm0
-	add r9,r10
-	loop VectorAdd2D_SSE2_1
+	add r9,16
+	dec ecx
+	jnz short VectorAdd2D_SSE2_1
 	
 	ret
 	
@@ -4600,16 +4382,16 @@ VectorSub2D_SSE2 proc public frame
 	.endprolog
 
 	mov r9,rcx
-	mov r10,16
 	mov ecx,r8d
 	
 VectorSub2D_SSE2_1:	
 	movapd xmm0,XMMWORD ptr[r9]
 	subpd xmm0,XMMWORD ptr[rdx]
-	add rdx,r10
+	add rdx,16
 	movapd XMMWORD ptr[r9],xmm0
-	add r9,r10
-	loop VectorSub2D_SSE2_1
+	add r9,16
+	dec ecx
+	jnz short VectorSub2D_SSE2_1
 	
 	ret
 	
@@ -4626,16 +4408,16 @@ VectorInvSubD_SSE2 proc public frame
 	.endprolog
 
 	mov r9,rcx
-	mov r10,16
 	mov ecx,r8d
 	
 VectorInvSubD_SSE2_1:	
 	movapd xmm0,XMMWORD ptr[rdx]
 	subpd xmm0,XMMWORD ptr[r9]
-	add rdx,r10
+	add rdx,16
 	movapd XMMWORD ptr[r9],xmm0
-	add r9,r10
-	loop VectorInvSubD_SSE2_1
+	add r9,16
+	dec ecx
+	jnz short VectorInvSubD_SSE2_1
 	
 	ret
 	
@@ -4652,17 +4434,17 @@ VectorProd2D_SSE2 proc public frame
 	.endprolog
 
 	mov r9,rcx
-	mov r10,16
 	xor rcx,rcx
 	mov ecx,r8d
 	
 VectorProd2D_SSE2_1:	
 	movapd xmm0,XMMWORD ptr[r9]
 	mulpd xmm0,XMMWORD ptr[rdx]
-	add rdx,r10
+	add rdx,16
 	movapd XMMWORD ptr[r9],xmm0
-	add r9,r10
-	loop VectorProd2D_SSE2_1
+	add r9,16
+	dec ecx
+	jnz short VectorProd2D_SSE2_1
 	
 	ret
 	
@@ -4677,52 +4459,49 @@ VectorProd2D_SSE2 endp
 
 VectorAddD_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r10,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorAddD_AVX_1
 
 VectorAddD_AVX_loop_1:
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r10]
-	vmovapd ymm2,YMMWORD ptr[rsi+2*r10]
-	vmovapd ymm3,YMMWORD ptr[rsi+r11]
+	vmovapd ymm0,YMMWORD ptr[r10]
+	vmovapd ymm1,YMMWORD ptr[r10+32]
+	vmovapd ymm2,YMMWORD ptr[r10+64]
+	vmovapd ymm3,YMMWORD ptr[r10+96]
 
 	vaddpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vaddpd ymm1,ymm1,YMMWORD ptr[rdx+r10]
-	vaddpd ymm2,ymm2,YMMWORD ptr[rdx+2*r10]
-	vaddpd ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vaddpd ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vaddpd ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vaddpd ymm3,ymm3,YMMWORD ptr[rdx+96]
 
 	vmovapd YMMWORD ptr[r8],ymm0
-	vmovapd YMMWORD ptr[r8+r10],ymm1
-	vmovapd YMMWORD ptr[r8+2*r10],ymm2
-	vmovapd YMMWORD ptr[r8+r11],ymm3
+	vmovapd YMMWORD ptr[r8+32],ymm1
+	vmovapd YMMWORD ptr[r8+64],ymm2
+	vmovapd YMMWORD ptr[r8+96],ymm3
 
-	add rsi,rax
+	add r10,rax
 	add rdx,rax
 	add r8,rax
-	loop VectorAddD_AVX_loop_1
+	dec ecx
+	jnz short VectorAddD_AVX_loop_1
 
 VectorAddD_AVX_1:
 	test r9d,2
 	jz short VectorAddD_AVX_2
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r10]
+	vmovapd ymm0,YMMWORD ptr[r10]
+	vmovapd ymm1,YMMWORD ptr[r10+32]
 	vaddpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vaddpd ymm1,ymm1,YMMWORD ptr[rdx+r10]
+	vaddpd ymm1,ymm1,YMMWORD ptr[rdx+32]
 	vmovapd YMMWORD ptr[r8],ymm0
-	vmovapd YMMWORD ptr[r8+r10],ymm1
+	vmovapd YMMWORD ptr[r8+32],ymm1
 
-	add rsi,64
+	add r10,64
 	add rdx,64
 	add r8,64
 
@@ -4730,14 +4509,12 @@ VectorAddD_AVX_2:
 	test r9d,1
 	jz short VectorAddD_AVX_3
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
+	vmovapd ymm0,YMMWORD ptr[r10]
 	vaddpd ymm0,ymm0,YMMWORD ptr[rdx]
 	vmovapd YMMWORD ptr[r8],ymm0
 
 VectorAddD_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -4752,52 +4529,49 @@ VectorAddD_AVX endp
 
 VectorSubD_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r10,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorSubD_AVX_1
 
 VectorSubD_AVX_loop_1:
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r10]
-	vmovapd ymm2,YMMWORD ptr[rsi+2*r10]
-	vmovapd ymm3,YMMWORD ptr[rsi+r11]
+	vmovapd ymm0,YMMWORD ptr[r10]
+	vmovapd ymm1,YMMWORD ptr[r10+32]
+	vmovapd ymm2,YMMWORD ptr[r10+64]
+	vmovapd ymm3,YMMWORD ptr[r10+96]
 
 	vsubpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vsubpd ymm1,ymm1,YMMWORD ptr[rdx+r10]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+2*r10]
-	vsubpd ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vsubpd ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vsubpd ymm3,ymm3,YMMWORD ptr[rdx+96]
 
 	vmovapd YMMWORD ptr[r8],ymm0
-	vmovapd YMMWORD ptr[r8+r10],ymm1
-	vmovapd YMMWORD ptr[r8+2*r10],ymm2
-	vmovapd YMMWORD ptr[r8+r11],ymm3
+	vmovapd YMMWORD ptr[r8+32],ymm1
+	vmovapd YMMWORD ptr[r8+64],ymm2
+	vmovapd YMMWORD ptr[r8+96],ymm3
 
-	add rsi,rax
+	add r10,rax
 	add rdx,rax
 	add r8,rax
-	loop VectorSubD_AVX_loop_1
+	dec ecx
+	jnz short VectorSubD_AVX_loop_1
 
 VectorSubD_AVX_1:
 	test r9d,2
 	jz short VectorSubD_AVX_2
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r10]
+	vmovapd ymm0,YMMWORD ptr[r10]
+	vmovapd ymm1,YMMWORD ptr[r10+32]
 	vsubpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vsubpd ymm1,ymm1,YMMWORD ptr[rdx+r10]
+	vsubpd ymm1,ymm1,YMMWORD ptr[rdx+32]
 	vmovapd YMMWORD ptr[r8],ymm0
-	vmovapd YMMWORD ptr[r8+r10],ymm1
+	vmovapd YMMWORD ptr[r8+32],ymm1
 
-	add rsi,64
+	add r10,64
 	add rdx,64
 	add r8,64
 
@@ -4805,14 +4579,12 @@ VectorSubD_AVX_2:
 	test r9d,1
 	jz short VectorSubD_AVX_3
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
+	vmovapd ymm0,YMMWORD ptr[r10]
 	vsubpd ymm0,ymm0,YMMWORD ptr[rdx]
 	vmovapd YMMWORD ptr[r8],ymm0
 
 VectorSubD_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -4827,52 +4599,49 @@ VectorSubD_AVX endp
 
 VectorProdD_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r10,rcx
 	mov rax,128
 	mov ecx,r9d
-	mov r10,32
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorProdD_AVX_1
 
 VectorProdD_AVX_loop_1:
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r10]
-	vmovapd ymm2,YMMWORD ptr[rsi+2*r10]
-	vmovapd ymm3,YMMWORD ptr[rsi+r11]
+	vmovapd ymm0,YMMWORD ptr[r10]
+	vmovapd ymm1,YMMWORD ptr[r10+32]
+	vmovapd ymm2,YMMWORD ptr[r10+64]
+	vmovapd ymm3,YMMWORD ptr[r10+96]
 
 	vmulpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vmulpd ymm1,ymm1,YMMWORD ptr[rdx+r10]
-	vmulpd ymm2,ymm2,YMMWORD ptr[rdx+2*r10]
-	vmulpd ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vmulpd ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmulpd ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vmulpd ymm3,ymm3,YMMWORD ptr[rdx+96]
 
 	vmovapd YMMWORD ptr[r8],ymm0
-	vmovapd YMMWORD ptr[r8+r10],ymm1
-	vmovapd YMMWORD ptr[r8+2*r10],ymm2
-	vmovapd YMMWORD ptr[r8+r11],ymm3
+	vmovapd YMMWORD ptr[r8+32],ymm1
+	vmovapd YMMWORD ptr[r8+64],ymm2
+	vmovapd YMMWORD ptr[r8+96],ymm3
 
-	add rsi,rax
+	add r10,rax
 	add rdx,rax
 	add r8,rax
-	loop VectorProdD_AVX_loop_1
+	dec ecx
+	jnz short VectorProdD_AVX_loop_1
 
 VectorProdD_AVX_1:
 	test r9d,2
 	jz short VectorProdD_AVX_2
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r10]
+	vmovapd ymm0,YMMWORD ptr[r10]
+	vmovapd ymm1,YMMWORD ptr[r10+32]
 	vmulpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vmulpd ymm1,ymm1,YMMWORD ptr[rdx+r10]
+	vmulpd ymm1,ymm1,YMMWORD ptr[rdx+32]
 	vmovapd YMMWORD ptr[r8],ymm0
-	vmovapd YMMWORD ptr[r8+r10],ymm1
+	vmovapd YMMWORD ptr[r8+32],ymm1
 
-	add rsi,64
+	add r10,64
 	add rdx,64
 	add r8,64
 
@@ -4880,14 +4649,12 @@ VectorProdD_AVX_2:
 	test r9d,1
 	jz short VectorProdD_AVX_3
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
+	vmovapd ymm0,YMMWORD ptr[r10]
 	vmulpd ymm0,ymm0,YMMWORD ptr[rdx]
 	vmovapd YMMWORD ptr[r8],ymm0
 
 VectorProdD_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -4901,66 +4668,60 @@ VectorProdD_AVX endp
 
 VectorAdd2D_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r9,32
-	mov r10,64
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorAdd2D_AVX_1
 
 VectorAdd2D_AVX_loop_1:
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r9]
-	vmovapd ymm2,YMMWORD ptr[rsi+r10]
-	vmovapd ymm3,YMMWORD ptr[rsi+r11]
+	vmovapd ymm0,YMMWORD ptr[r9]
+	vmovapd ymm1,YMMWORD ptr[r9+32]
+	vmovapd ymm2,YMMWORD ptr[r9+64]
+	vmovapd ymm3,YMMWORD ptr[r9+96]
 
 	vaddpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vaddpd ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vaddpd ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vaddpd ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vaddpd ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vaddpd ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vaddpd ymm3,ymm3,YMMWORD ptr[rdx+96]
 
-	vmovapd YMMWORD ptr[rsi],ymm0
-	vmovapd YMMWORD ptr[rsi+r9],ymm1
-	vmovapd YMMWORD ptr[rsi+r10],ymm2
-	vmovapd YMMWORD ptr[rsi+r11],ymm3
+	vmovapd YMMWORD ptr[r9],ymm0
+	vmovapd YMMWORD ptr[r9+32],ymm1
+	vmovapd YMMWORD ptr[r9+64],ymm2
+	vmovapd YMMWORD ptr[r9+96],ymm3
 
 	add rdx,rax
-	add rsi,rax
-	loop VectorAdd2D_AVX_loop_1
+	add r9,rax
+	dec ecx
+	jnz short VectorAdd2D_AVX_loop_1
 
 VectorAdd2D_AVX_1:
 	test r8d,2
 	jz short VectorAdd2D_AVX_2
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r9]
+	vmovapd ymm0,YMMWORD ptr[r9]
+	vmovapd ymm1,YMMWORD ptr[r9+32]
 	vaddpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vaddpd ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vmovapd YMMWORD ptr[rsi],ymm0
-	vmovapd YMMWORD ptr[rsi+r9],ymm1
+	vaddpd ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmovapd YMMWORD ptr[r9],ymm0
+	vmovapd YMMWORD ptr[r9+32],ymm1
 
-	add rdx,r10
-	add rsi,r10
+	add rdx,64
+	add r9,64
 
 VectorAdd2D_AVX_2:
 	test r8d,1
 	jz short VectorAdd2D_AVX_3
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
+	vmovapd ymm0,YMMWORD ptr[r9]
 	vaddpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vmovapd YMMWORD ptr[rsi],ymm0
+	vmovapd YMMWORD ptr[r9],ymm0
 
 VectorAdd2D_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -4974,66 +4735,60 @@ VectorAdd2D_AVX endp
 
 VectorSub2D_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r9,32
-	mov r10,64
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorSub2D_AVX_1
 
 VectorSub2D_AVX_loop_1:
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r9]
-	vmovapd ymm2,YMMWORD ptr[rsi+r10]
-	vmovapd ymm3,YMMWORD ptr[rsi+r11]
+	vmovapd ymm0,YMMWORD ptr[r9]
+	vmovapd ymm1,YMMWORD ptr[r9+32]
+	vmovapd ymm2,YMMWORD ptr[r9+64]
+	vmovapd ymm3,YMMWORD ptr[r9+96]
 
 	vsubpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vsubpd ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vsubpd ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vsubpd ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vsubpd ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vsubpd ymm3,ymm3,YMMWORD ptr[rdx+96]
 
-	vmovapd YMMWORD ptr[rsi],ymm0
-	vmovapd YMMWORD ptr[rsi+r9],ymm1
-	vmovapd YMMWORD ptr[rsi+r10],ymm2
-	vmovapd YMMWORD ptr[rsi+r11],ymm3
+	vmovapd YMMWORD ptr[r9],ymm0
+	vmovapd YMMWORD ptr[r9+32],ymm1
+	vmovapd YMMWORD ptr[r9+64],ymm2
+	vmovapd YMMWORD ptr[r9+96],ymm3
 
 	add rdx,rax
-	add rsi,rax
-	loop VectorSub2D_AVX_loop_1
+	add r9,rax
+	dec ecx
+	jnz short VectorSub2D_AVX_loop_1
 
 VectorSub2D_AVX_1:
 	test r8d,2
 	jz short VectorSub2D_AVX_2
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r9]
+	vmovapd ymm0,YMMWORD ptr[r9]
+	vmovapd ymm1,YMMWORD ptr[r9+32]
 	vsubpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vsubpd ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vmovapd YMMWORD ptr[rsi],ymm0
-	vmovapd YMMWORD ptr[rsi+r9],ymm1
+	vsubpd ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmovapd YMMWORD ptr[r9],ymm0
+	vmovapd YMMWORD ptr[r9+32],ymm1
 
-	add rdx,r10
-	add rsi,r10
+	add rdx,64
+	add r9,64
 
 VectorSub2D_AVX_2:
 	test r8d,1
 	jz short VectorSub2D_AVX_3
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
+	vmovapd ymm0,YMMWORD ptr[r9]
 	vsubpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vmovapd YMMWORD ptr[rsi],ymm0
+	vmovapd YMMWORD ptr[r9],ymm0
 
 VectorSub2D_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -5047,66 +4802,60 @@ VectorSub2D_AVX endp
 
 VectorInvSubD_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r9,32
-	mov r10,64
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorInvSubD_AVX_1
 
 VectorInvSubD_AVX_loop_1:
 	vmovapd ymm0,YMMWORD ptr[rdx]
-	vmovapd ymm1,YMMWORD ptr[rdx+r9]
-	vmovapd ymm2,YMMWORD ptr[rdx+r10]
-	vmovapd ymm3,YMMWORD ptr[rdx+r11]
+	vmovapd ymm1,YMMWORD ptr[rdx+32]
+	vmovapd ymm2,YMMWORD ptr[rdx+64]
+	vmovapd ymm3,YMMWORD ptr[rdx+96]
 
-	vsubpd ymm0,ymm0,YMMWORD ptr[rsi]
-	vsubpd ymm1,ymm1,YMMWORD ptr[rsi+r9]
-	vsubpd ymm2,ymm2,YMMWORD ptr[rsi+r10]
-	vsubpd ymm3,ymm3,YMMWORD ptr[rsi+r11]
+	vsubpd ymm0,ymm0,YMMWORD ptr[r9]
+	vsubpd ymm1,ymm1,YMMWORD ptr[r9+32]
+	vsubpd ymm2,ymm2,YMMWORD ptr[r9+64]
+	vsubpd ymm3,ymm3,YMMWORD ptr[r9+96]
 
-	vmovapd YMMWORD ptr[rsi],ymm0
-	vmovapd YMMWORD ptr[rsi+r9],ymm1
-	vmovapd YMMWORD ptr[rsi+r10],ymm2
-	vmovapd YMMWORD ptr[rsi+r11],ymm3
+	vmovapd YMMWORD ptr[r9],ymm0
+	vmovapd YMMWORD ptr[r9+32],ymm1
+	vmovapd YMMWORD ptr[r9+64],ymm2
+	vmovapd YMMWORD ptr[r9+96],ymm3
 
 	add rdx,rax
-	add rsi,rax
-	loop VectorInvSubD_AVX_loop_1
+	add r9,rax
+	dec ecx
+	jnz short VectorInvSubD_AVX_loop_1
 
 VectorInvSubD_AVX_1:
 	test r8d,2
 	jz short VectorInvSubD_AVX_2
 
 	vmovapd ymm0,YMMWORD ptr[rdx]
-	vmovapd ymm1,YMMWORD ptr[rdx+r9]
-	vsubpd ymm0,ymm0,YMMWORD ptr[rsi]
-	vsubpd ymm1,ymm1,YMMWORD ptr[rsi+r9]
-	vmovapd YMMWORD ptr[rsi],ymm0
-	vmovapd YMMWORD ptr[rsi+r9],ymm1
+	vmovapd ymm1,YMMWORD ptr[rdx+32]
+	vsubpd ymm0,ymm0,YMMWORD ptr[r9]
+	vsubpd ymm1,ymm1,YMMWORD ptr[r9+32]
+	vmovapd YMMWORD ptr[r9],ymm0
+	vmovapd YMMWORD ptr[r9+32],ymm1
 
-	add rdx,r10
-	add rsi,r10
+	add rdx,64
+	add r9,64
 
 VectorInvSubD_AVX_2:
 	test r8d,1
 	jz short VectorInvSubD_AVX_3
 
 	vmovapd ymm0,YMMWORD ptr[rdx]
-	vsubpd ymm0,ymm0,YMMWORD ptr[rsi]
-	vmovapd YMMWORD ptr[rsi],ymm0
+	vsubpd ymm0,ymm0,YMMWORD ptr[r9]
+	vmovapd YMMWORD ptr[r9],ymm0
 
 VectorInvSubD_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 
@@ -5120,66 +4869,60 @@ VectorInvSubD_AVX endp
 
 VectorProd2D_AVX proc public frame
 
-	push rsi
-	.pushreg rsi
 	.endprolog
 
-	mov rsi,rcx
+	mov r9,rcx
 	mov rax,128
 	mov ecx,r8d
-	mov r9,32
-	mov r10,64
-	mov r11,96
 
 	shr ecx,2
 	jz short VectorProd2D_AVX_1
 	
 VectorProd2D_AVX_loop_1:
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r9]
-	vmovapd ymm2,YMMWORD ptr[rsi+r10]
-	vmovapd ymm3,YMMWORD ptr[rsi+r11]
+	vmovapd ymm0,YMMWORD ptr[r9]
+	vmovapd ymm1,YMMWORD ptr[r9+32]
+	vmovapd ymm2,YMMWORD ptr[r9+64]
+	vmovapd ymm3,YMMWORD ptr[r9+96]
 
 	vmulpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vmulpd ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vmulpd ymm2,ymm2,YMMWORD ptr[rdx+r10]
-	vmulpd ymm3,ymm3,YMMWORD ptr[rdx+r11]
+	vmulpd ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmulpd ymm2,ymm2,YMMWORD ptr[rdx+64]
+	vmulpd ymm3,ymm3,YMMWORD ptr[rdx+96]
 
-	vmovapd YMMWORD ptr[rsi],ymm0
-	vmovapd YMMWORD ptr[rsi+r9],ymm1
-	vmovapd YMMWORD ptr[rsi+r10],ymm2
-	vmovapd YMMWORD ptr[rsi+r11],ymm3
+	vmovapd YMMWORD ptr[r9],ymm0
+	vmovapd YMMWORD ptr[r9+32],ymm1
+	vmovapd YMMWORD ptr[r9+64],ymm2
+	vmovapd YMMWORD ptr[r9+96],ymm3
 
 	add rdx,rax
-	add rsi,rax
-	loop VectorProd2D_AVX_loop_1
+	add r9,rax
+	dec ecx
+	jnz short VectorProd2D_AVX_loop_1
 
 VectorProd2D_AVX_1:
 	test r8d,2
 	jz short VectorProd2D_AVX_2
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
-	vmovapd ymm1,YMMWORD ptr[rsi+r9]
+	vmovapd ymm0,YMMWORD ptr[r9]
+	vmovapd ymm1,YMMWORD ptr[r9+32]
 	vmulpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vmulpd ymm1,ymm1,YMMWORD ptr[rdx+r9]
-	vmovapd YMMWORD ptr[rsi],ymm0
-	vmovapd YMMWORD ptr[rsi+r9],ymm1
+	vmulpd ymm1,ymm1,YMMWORD ptr[rdx+32]
+	vmovapd YMMWORD ptr[r9],ymm0
+	vmovapd YMMWORD ptr[r9+32],ymm1
 
-	add rdx,r10
-	add rsi,r10
+	add rdx,64
+	add r9,64
 
 VectorProd2D_AVX_2:
 	test r8d,1
 	jz short VectorProd2D_AVX_3
 
-	vmovapd ymm0,YMMWORD ptr[rsi]
+	vmovapd ymm0,YMMWORD ptr[r9]
 	vmulpd ymm0,ymm0,YMMWORD ptr[rdx]
-	vmovapd YMMWORD ptr[rsi],ymm0
+	vmovapd YMMWORD ptr[r9],ymm0
 
 VectorProd2D_AVX_3:
 	vzeroupper
-
-	pop rsi
 
 	ret
 	

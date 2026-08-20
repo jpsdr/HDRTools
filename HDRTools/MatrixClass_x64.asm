@@ -1546,7 +1546,7 @@ CoeffSub2F_AVX_2:
 	vsubps ymm2,ymm0,YMMWORD ptr[rsi+32]
 	vmovaps YMMWORD ptr[rsi],ymm1
 	vmovaps YMMWORD ptr[rsi+32],ymm2
-	add rsi,32
+	add rsi,64
 
 CoeffSub2F_AVX_3:
 	test edx,1

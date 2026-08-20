@@ -36,37 +36,54 @@ sign_bits_f_64 qword 8 dup(7FFFFFFFFFFFFFFFh)
 
 CoeffProductF_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 	
 	vbroadcastss zmm0,dword ptr[rcx]
 
-	mov r10,rdx 	; coeff_b
+	mov rdi,rdx 	; coeff_b
+	mov rsi,r8		; coeff_c
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,512
-
+	
+	mov r8,128
+	mov r9,192
+	mov r10,256
+	
 	shr ecx,3
-	jz short CoeffProductF_AVX512_1
+	jz CoeffProductF_AVX512_1
+	
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffProductF_AVX512_loop_1:
-	vmulps zmm1,zmm0,ZMMWORD ptr[r10]
-	vmulps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmulps zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vmulps zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vmulps zmm5,zmm0,ZMMWORD ptr[r10+256]
-	vmulps zmm16,zmm0,ZMMWORD ptr[r10+320]
-	vmulps zmm17,zmm0,ZMMWORD ptr[r10+384]
-	vmulps zmm18,zmm0,ZMMWORD ptr[r10+448]
-	vmovaps ZMMWORD ptr[r8],zmm1
-	vmovaps ZMMWORD ptr[r8+64],zmm2
-	vmovaps ZMMWORD ptr[r8+128],zmm3
-	vmovaps ZMMWORD ptr[r8+192],zmm4
-	vmovaps ZMMWORD ptr[r8+256],zmm5
-	vmovaps ZMMWORD ptr[r8+320],zmm16
-	vmovaps ZMMWORD ptr[r8+384],zmm17
-	vmovaps ZMMWORD ptr[r8+448],zmm18
-	add r10,rax
-	add r8,rax
+	vmulps zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmulps zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vmulps zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vmulps zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vmulps zmm5,zmm0,ZMMWORD ptr[rdi+r10]
+	vmulps zmm16,zmm0,ZMMWORD ptr[rdi+r11]
+	vmulps zmm17,zmm0,ZMMWORD ptr[rdi+r12]
+	vmulps zmm18,zmm0,ZMMWORD ptr[rdi+r13]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	vmovaps ZMMWORD ptr[rsi+r10],zmm5
+	vmovaps ZMMWORD ptr[rsi+r11],zmm16
+	vmovaps ZMMWORD ptr[rsi+r12],zmm17
+	vmovaps ZMMWORD ptr[rsi+r13],zmm18
+	add rdi,rax
+	add rsi,rax
 	dec ecx
 	jnz short CoeffProductF_AVX512_loop_1
 
@@ -74,38 +91,43 @@ CoeffProductF_AVX512_1:
 	test edx,4
 	jz short CoeffProductF_AVX512_2
 
-	vmulps zmm1,zmm0,ZMMWORD ptr[r10]
-	vmulps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmulps zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vmulps zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vmovaps ZMMWORD ptr[r8],zmm1
-	vmovaps ZMMWORD ptr[r8+64],zmm2
-	vmovaps ZMMWORD ptr[r8+128],zmm3
-	vmovaps ZMMWORD ptr[r8+192],zmm4
-	add r10,256
-	add r8,256
+	vmulps zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmulps zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vmulps zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vmulps zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	add rdi,r10
+	add rsi,r10
 
 CoeffProductF_AVX512_2:
 	test edx,2
 	jz short CoeffProductF_AVX512_3
 
-	vmulps zmm1,zmm0,ZMMWORD ptr[r10]
-	vmulps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmovaps ZMMWORD ptr[r8],zmm1
-	vmovaps ZMMWORD ptr[r8+64],zmm2
-	add r10,128
-	add r8,128
+	vmulps zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmulps zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	add rdi,r8
+	add rsi,r8
 
 CoeffProductF_AVX512_3:
 	test edx,1
 	jz short CoeffProductF_AVX512_4
 
-	vmulps zmm1,zmm0,ZMMWORD ptr[r10]
-	vmovaps ZMMWORD ptr[r8],zmm1
+	vmulps zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmovaps ZMMWORD ptr[rsi],zmm1
 
 CoeffProductF_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
+	pop rdi
 
 	ret
 
@@ -119,36 +141,50 @@ CoeffProductF_AVX512 endp
 
 CoeffProduct2F_AVX512 proc public frame
 
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
 	vbroadcastss zmm0,dword ptr[rcx]
 
-	mov r9,rdx 		; coeff_b
+	mov rsi,rdx 		; coeff_b
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffProduct2F_AVX512_1
+	jz CoeffProduct2F_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffProduct2F_AVX512_loop_1:
-	vmulps zmm1,zmm0,ZMMWORD ptr[r9]
-	vmulps zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmulps zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vmulps zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vmulps zmm5,zmm0,ZMMWORD ptr[r9+256]
-	vmulps zmm16,zmm0,ZMMWORD ptr[r9+320]
-	vmulps zmm17,zmm0,ZMMWORD ptr[r9+384]
-	vmulps zmm18,zmm0,ZMMWORD ptr[r9+448]
-	vmovaps ZMMWORD ptr[r9],zmm1
-	vmovaps ZMMWORD ptr[r9+64],zmm2
-	vmovaps ZMMWORD ptr[r9+128],zmm3
-	vmovaps ZMMWORD ptr[r9+192],zmm4
-	vmovaps ZMMWORD ptr[r9+256],zmm5
-	vmovaps ZMMWORD ptr[r9+320],zmm16
-	vmovaps ZMMWORD ptr[r9+384],zmm17
-	vmovaps ZMMWORD ptr[r9+448],zmm18
-	add r9,rax
+	vmulps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmulps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmulps zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vmulps zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vmulps zmm5,zmm0,ZMMWORD ptr[rsi+r10]
+	vmulps zmm16,zmm0,ZMMWORD ptr[rsi+r11]
+	vmulps zmm17,zmm0,ZMMWORD ptr[rsi+r12]
+	vmulps zmm18,zmm0,ZMMWORD ptr[rsi+r13]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	vmovaps ZMMWORD ptr[rsi+r10],zmm5
+	vmovaps ZMMWORD ptr[rsi+r11],zmm16
+	vmovaps ZMMWORD ptr[rsi+r12],zmm17
+	vmovaps ZMMWORD ptr[rsi+r13],zmm18
+	add rsi,rax
 	dec ecx
 	jnz short CoeffProduct2F_AVX512_loop_1
 
@@ -156,36 +192,40 @@ CoeffProduct2F_AVX512_1:
 	test edx,4
 	jz short CoeffProduct2F_AVX512_2
 
-	vmulps zmm1,zmm0,ZMMWORD ptr[r9]
-	vmulps zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmulps zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vmulps zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vmovaps ZMMWORD ptr[r9],zmm1
-	vmovaps ZMMWORD ptr[r9+64],zmm2
-	vmovaps ZMMWORD ptr[r9+128],zmm3
-	vmovaps ZMMWORD ptr[r9+192],zmm4
-	add r9,256
+	vmulps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmulps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmulps zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vmulps zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	add rsi,r10
 
 CoeffProduct2F_AVX512_2:
 	test edx,2
 	jz short CoeffProduct2F_AVX512_3
 
-	vmulps zmm1,zmm0,ZMMWORD ptr[r9]
-	vmulps zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmovaps ZMMWORD ptr[r9],zmm1
-	vmovaps ZMMWORD ptr[r9+64],zmm2
-	add r9,128
+	vmulps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmulps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	add rsi,r8
 
 CoeffProduct2F_AVX512_3:
 	test edx,1
 	jz short CoeffProduct2F_AVX512_4
 
-	vmulps zmm1,zmm0,ZMMWORD ptr[r9]
-	vmovaps ZMMWORD ptr[r9],zmm1
+	vmulps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmovaps ZMMWORD ptr[rsi],zmm1
 
 CoeffProduct2F_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
 
 	ret
 	
@@ -200,37 +240,54 @@ CoeffProduct2F_AVX512 endp
 
 CoeffProductD_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 	
 	vbroadcastsd zmm0,qword ptr[rcx]
 
-	mov r10,rdx 	; coeff_b
+	mov rdi,rdx 	; coeff_b
+	mov rsi,r8 		; coeff_c
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffProductD_AVX512_1
-	
+	jz CoeffProductD_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
+
 CoeffProductD_AVX512_loop_1:
-	vmulpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vmulpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmulpd zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vmulpd zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vmulpd zmm5,zmm0,ZMMWORD ptr[r10+256]
-	vmulpd zmm16,zmm0,ZMMWORD ptr[r10+320]
-	vmulpd zmm17,zmm0,ZMMWORD ptr[r10+384]
-	vmulpd zmm18,zmm0,ZMMWORD ptr[r10+448]
-	vmovapd ZMMWORD ptr[r8],zmm1
-	vmovapd ZMMWORD ptr[r8+64],zmm2
-	vmovapd ZMMWORD ptr[r8+128],zmm3
-	vmovapd ZMMWORD ptr[r8+192],zmm4
-	vmovapd ZMMWORD ptr[r8+256],zmm5
-	vmovapd ZMMWORD ptr[r8+320],zmm16
-	vmovapd ZMMWORD ptr[r8+384],zmm17
-	vmovapd ZMMWORD ptr[r8+448],zmm18
-	add r10,rax
-	add r8,rax
+	vmulpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmulpd zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vmulpd zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vmulpd zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vmulpd zmm5,zmm0,ZMMWORD ptr[rdi+r10]
+	vmulpd zmm16,zmm0,ZMMWORD ptr[rdi+r11]
+	vmulpd zmm17,zmm0,ZMMWORD ptr[rdi+r12]
+	vmulpd zmm18,zmm0,ZMMWORD ptr[rdi+r13]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	vmovapd ZMMWORD ptr[rsi+r10],zmm5
+	vmovapd ZMMWORD ptr[rsi+r11],zmm16
+	vmovapd ZMMWORD ptr[rsi+r12],zmm17
+	vmovapd ZMMWORD ptr[rsi+r13],zmm18
+	add rdi,rax
+	add rsi,rax
 	dec ecx
 	jnz short CoeffProductD_AVX512_loop_1
 
@@ -238,38 +295,43 @@ CoeffProductD_AVX512_1:
 	test edx,4
 	jz short CoeffProductD_AVX512_2
 
-	vmulpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vmulpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmulpd zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vmulpd zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vmovapd ZMMWORD ptr[r8],zmm1
-	vmovapd ZMMWORD ptr[r8+64],zmm2
-	vmovapd ZMMWORD ptr[r8+128],zmm3
-	vmovapd ZMMWORD ptr[r8+192],zmm4
-	add r10,256
-	add r8,256
+	vmulpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmulpd zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vmulpd zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vmulpd zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	add rdi,r10
+	add rsi,r10
 
 CoeffProductD_AVX512_2:
 	test edx,2
 	jz short CoeffProductD_AVX512_3
 
-	vmulpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vmulpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmovapd ZMMWORD ptr[r8],zmm1
-	vmovapd ZMMWORD ptr[r8+64],zmm2
-	add r10,128
-	add r8,128
+	vmulpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmulpd zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	add rdi,r8
+	add rsi,r8
 
 CoeffProductD_AVX512_3:
 	test edx,1
 	jz short CoeffProductD_AVX512_4
 
-	vmulpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vmovapd ZMMWORD ptr[r8],zmm1
+	vmulpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmovapd ZMMWORD ptr[rsi],zmm1
 
 CoeffProductD_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
+	pop rdi
 
 	ret
 
@@ -283,36 +345,50 @@ CoeffProductD_AVX512 endp
 
 CoeffProduct2D_AVX512 proc public frame
 
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 	
 	vbroadcastsd zmm0,qword ptr[rcx]
 
-	mov r9,rdx	 	; coeff_b
-	mov ecx,r8d		; lgth
+	mov rsi,rdx	 	; coeff_b
+	mov ecx,r8d		; lgth r8 r8d
 	mov edx,r8d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffProduct2D_AVX512_1
+	jz CoeffProduct2D_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffProduct2D_AVX512_loop_1:
-	vmulpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vmulpd zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmulpd zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vmulpd zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vmulpd zmm5,zmm0,ZMMWORD ptr[r9+256]
-	vmulpd zmm16,zmm0,ZMMWORD ptr[r9+320]
-	vmulpd zmm17,zmm0,ZMMWORD ptr[r9+384]
-	vmulpd zmm18,zmm0,ZMMWORD ptr[r9+448]
-	vmovapd ZMMWORD ptr[r9],zmm1
-	vmovapd ZMMWORD ptr[r9+64],zmm2
-	vmovapd ZMMWORD ptr[r9+128],zmm3
-	vmovapd ZMMWORD ptr[r9+192],zmm4
-	vmovapd ZMMWORD ptr[r9+256],zmm5
-	vmovapd ZMMWORD ptr[r9+320],zmm16
-	vmovapd ZMMWORD ptr[r9+384],zmm17
-	vmovapd ZMMWORD ptr[r9+448],zmm18
-	add r9,rax
+	vmulpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmulpd zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmulpd zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vmulpd zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vmulpd zmm5,zmm0,ZMMWORD ptr[rsi+r10]
+	vmulpd zmm16,zmm0,ZMMWORD ptr[rsi+r11]
+	vmulpd zmm17,zmm0,ZMMWORD ptr[rsi+r12]
+	vmulpd zmm18,zmm0,ZMMWORD ptr[rsi+r13]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	vmovapd ZMMWORD ptr[rsi+r10],zmm5
+	vmovapd ZMMWORD ptr[rsi+r11],zmm16
+	vmovapd ZMMWORD ptr[rsi+r12],zmm17
+	vmovapd ZMMWORD ptr[rsi+r13],zmm18
+	add rsi,rax
 	dec ecx
 	jnz short CoeffProduct2D_AVX512_loop_1
 
@@ -320,36 +396,40 @@ CoeffProduct2D_AVX512_1:
 	test edx,4
 	jz short CoeffProduct2D_AVX512_2
 
-	vmulpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vmulpd zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmulpd zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vmulpd zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vmovapd ZMMWORD ptr[r9],zmm1
-	vmovapd ZMMWORD ptr[r9+64],zmm2
-	vmovapd ZMMWORD ptr[r9+128],zmm3
-	vmovapd ZMMWORD ptr[r9+192],zmm4
-	add r9,256
+	vmulpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmulpd zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmulpd zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vmulpd zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	add rsi,r10
 
 CoeffProduct2D_AVX512_2:
 	test edx,2
 	jz short CoeffProduct2D_AVX512_3
 
-	vmulpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vmulpd zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmovapd ZMMWORD ptr[r9],zmm1
-	vmovapd ZMMWORD ptr[r9+64],zmm2
-	add r9,128
+	vmulpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmulpd zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	add rsi,r8
 
 CoeffProduct2D_AVX512_3:
 	test edx,1
 	jz short CoeffProduct2D_AVX512_4
 
-	vmulpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vmovapd ZMMWORD ptr[r9],zmm1
+	vmulpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmovapd ZMMWORD ptr[rsi],zmm1
 
 CoeffProduct2D_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
 
 	ret
 
@@ -372,23 +452,27 @@ CoeffAddProductF_AVX512 proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
+	
+	mov r9,128
 
 	shr ecx,2
 	jz short CoeffAddProductF_AVX512_1
+	
+	mov r11,192
 
 CoeffAddProductF_AVX512_loop_1:
 	vmulps zmm1,zmm0,ZMMWORD ptr[r10]
 	vmulps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmulps zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vmulps zmm4,zmm0,ZMMWORD ptr[r10+192]
+	vmulps zmm3,zmm0,ZMMWORD ptr[r10+r9]
+	vmulps zmm4,zmm0,ZMMWORD ptr[r10+r11]
 	vaddps zmm1,zmm1,ZMMWORD ptr[r8]
 	vaddps zmm2,zmm2,ZMMWORD ptr[r8+64]
-	vaddps zmm3,zmm3,ZMMWORD ptr[r8+128]
-	vaddps zmm4,zmm4,ZMMWORD ptr[r8+192]
+	vaddps zmm3,zmm3,ZMMWORD ptr[r8+r9]
+	vaddps zmm4,zmm4,ZMMWORD ptr[r8+r11]
 	vmovaps ZMMWORD ptr[r8],zmm1
 	vmovaps ZMMWORD ptr[r8+64],zmm2
-	vmovaps ZMMWORD ptr[r8+128],zmm3
-	vmovaps ZMMWORD ptr[r8+192],zmm4
+	vmovaps ZMMWORD ptr[r8+r9],zmm3
+	vmovaps ZMMWORD ptr[r8+r11],zmm4
 	add r10,rax
 	add r8,rax
 	dec ecx
@@ -404,8 +488,8 @@ CoeffAddProductF_AVX512_1:
 	vaddps zmm2,zmm2,ZMMWORD ptr[r8+64]
 	vmovaps ZMMWORD ptr[r8],zmm1
 	vmovaps ZMMWORD ptr[r8+64],zmm2
-	add r10,128
-	add r8,128
+	add r10,r9
+	add r8,r9
 
 CoeffAddProductF_AVX512_2:
 	test edx,1
@@ -441,22 +525,26 @@ CoeffAddProductD_AVX512 proc public frame
 	mov ecx,r9d		; lgth
 	mov rax,256
 
+	mov r9,128
+
 	shr ecx,2
 	jz short CoeffAddProductD_AVX512_1
+
+	mov r11,192
 
 CoeffAddProductD_AVX512_loop_1:
 	vmulpd zmm1,zmm0,ZMMWORD ptr[r10]
 	vmulpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmulpd zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vmulpd zmm4,zmm0,ZMMWORD ptr[r10+192]
+	vmulpd zmm3,zmm0,ZMMWORD ptr[r10+r9]
+	vmulpd zmm4,zmm0,ZMMWORD ptr[r10+r11]
 	vaddpd zmm1,zmm1,ZMMWORD ptr[r8]
 	vaddpd zmm2,zmm2,ZMMWORD ptr[r8+64]
-	vaddpd zmm3,zmm3,ZMMWORD ptr[r8+128]
-	vaddpd zmm4,zmm4,ZMMWORD ptr[r8+192]
+	vaddpd zmm3,zmm3,ZMMWORD ptr[r8+r9]
+	vaddpd zmm4,zmm4,ZMMWORD ptr[r8+r11]
 	vmovapd ZMMWORD ptr[r8],zmm1
 	vmovapd ZMMWORD ptr[r8+64],zmm2
-	vmovapd ZMMWORD ptr[r8+128],zmm3
-	vmovapd ZMMWORD ptr[r8+192],zmm4
+	vmovapd ZMMWORD ptr[r8+r9],zmm3
+	vmovapd ZMMWORD ptr[r8+r11],zmm4
 	add r10,rax
 	add r8,rax
 	dec ecx
@@ -472,8 +560,8 @@ CoeffAddProductD_AVX512_1:
 	vaddpd zmm2,zmm2,ZMMWORD ptr[r8+64]
 	vmovapd ZMMWORD ptr[r8],zmm1
 	vmovapd ZMMWORD ptr[r8+64],zmm2
-	add r10,128
-	add r8,128
+	add r10,r9
+	add r8,r9
 
 CoeffAddProductD_AVX512_2:
 	test edx,1
@@ -500,37 +588,54 @@ CoeffAddProductD_AVX512 endp
 
 CoeffAddF_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
 	vbroadcastss zmm0,dword ptr[rcx]
 
-	mov r10,rdx 	; coeff_b
+	mov rsi,rdx 	; coeff_b
+	mov rdi,r8	 	; coeff_c
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffAddF_AVX512_1
+	jz CoeffAddF_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffAddF_AVX512_loop_1:
-	vaddps zmm1,zmm0,ZMMWORD ptr[r10]
-	vaddps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vaddps zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vaddps zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vaddps zmm5,zmm0,ZMMWORD ptr[r10+256]
-	vaddps zmm16,zmm0,ZMMWORD ptr[r10+320]
-	vaddps zmm17,zmm0,ZMMWORD ptr[r10+384]
-	vaddps zmm18,zmm0,ZMMWORD ptr[r10+448]
-	vmovaps ZMMWORD ptr[r8],zmm1
-	vmovaps ZMMWORD ptr[r8+64],zmm2
-	vmovaps ZMMWORD ptr[r8+128],zmm3
-	vmovaps ZMMWORD ptr[r8+192],zmm4
-	vmovaps ZMMWORD ptr[r8+256],zmm5
-	vmovaps ZMMWORD ptr[r8+320],zmm16
-	vmovaps ZMMWORD ptr[r8+384],zmm17
-	vmovaps ZMMWORD ptr[r8+448],zmm18
-	add r10,rax
-	add r8,rax
+	vaddps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vaddps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vaddps zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vaddps zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vaddps zmm5,zmm0,ZMMWORD ptr[rsi+r10]
+	vaddps zmm16,zmm0,ZMMWORD ptr[rsi+r11]
+	vaddps zmm17,zmm0,ZMMWORD ptr[rsi+r12]
+	vaddps zmm18,zmm0,ZMMWORD ptr[rsi+r13]
+	vmovaps ZMMWORD ptr[rdi],zmm1
+	vmovaps ZMMWORD ptr[rdi+64],zmm2
+	vmovaps ZMMWORD ptr[rdi+r8],zmm3
+	vmovaps ZMMWORD ptr[rdi+r9],zmm4
+	vmovaps ZMMWORD ptr[rdi+r10],zmm5
+	vmovaps ZMMWORD ptr[rdi+r11],zmm16
+	vmovaps ZMMWORD ptr[rdi+r12],zmm17
+	vmovaps ZMMWORD ptr[rdi+r13],zmm18
+	add rsi,rax
+	add rdi,rax
 	dec ecx
 	jnz short CoeffAddF_AVX512_loop_1
 
@@ -538,38 +643,43 @@ CoeffAddF_AVX512_1:
 	test edx,4
 	jz short CoeffAddF_AVX512_2
 
-	vaddps zmm1,zmm0,ZMMWORD ptr[r10]
-	vaddps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vaddps zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vaddps zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vmovaps ZMMWORD ptr[r8],zmm1
-	vmovaps ZMMWORD ptr[r8+64],zmm2
-	vmovaps ZMMWORD ptr[r8+128],zmm3
-	vmovaps ZMMWORD ptr[r8+192],zmm4
-	add r10,256
-	add r8,256
+	vaddps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vaddps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vaddps zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vaddps zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vmovaps ZMMWORD ptr[rdi],zmm1
+	vmovaps ZMMWORD ptr[rdi+64],zmm2
+	vmovaps ZMMWORD ptr[rdi+r8],zmm3
+	vmovaps ZMMWORD ptr[rdi+r9],zmm4
+	add rsi,r10
+	add rdi,r10
 
 CoeffAddF_AVX512_2:
 	test edx,2
 	jz short CoeffAddF_AVX512_3
 
-	vaddps zmm1,zmm0,ZMMWORD ptr[r10]
-	vaddps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmovaps ZMMWORD ptr[r8],zmm1
-	vmovaps ZMMWORD ptr[r8+64],zmm2
-	add r10,128
-	add r8,128
+	vaddps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vaddps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmovaps ZMMWORD ptr[rdi],zmm1
+	vmovaps ZMMWORD ptr[rdi+64],zmm2
+	add rsi,r8
+	add rdi,r8
 
 CoeffAddF_AVX512_3:
 	test edx,1
 	jz short CoeffAddF_AVX512_4
 
-	vaddps zmm1,zmm0,ZMMWORD ptr[r10]
-	vmovaps ZMMWORD ptr[r8],zmm1
+	vaddps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmovaps ZMMWORD ptr[rdi],zmm1
 
 CoeffAddF_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
+	pop rdi
 
 	ret
 
@@ -583,36 +693,50 @@ CoeffAddF_AVX512 endp
 
 CoeffAdd2F_AVX512 proc public frame
 
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
 	vbroadcastss zmm0,dword ptr[rcx]
 
-	mov r9,rdx 		; coeff_b
+	mov rsi,rdx 		; coeff_b
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffAdd2F_AVX512_1
+	jz CoeffAdd2F_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffAdd2F_AVX512_loop_1:
-	vaddps zmm1,zmm0,ZMMWORD ptr[r9]
-	vaddps zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vaddps zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vaddps zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vaddps zmm5,zmm0,ZMMWORD ptr[r9+256]
-	vaddps zmm16,zmm0,ZMMWORD ptr[r9+320]
-	vaddps zmm17,zmm0,ZMMWORD ptr[r9+384]
-	vaddps zmm18,zmm0,ZMMWORD ptr[r9+448]
-	vmovaps ZMMWORD ptr[r9],zmm1
-	vmovaps ZMMWORD ptr[r9+64],zmm2
-	vmovaps ZMMWORD ptr[r9+128],zmm3
-	vmovaps ZMMWORD ptr[r9+192],zmm4
-	vmovaps ZMMWORD ptr[r9+256],zmm5
-	vmovaps ZMMWORD ptr[r9+320],zmm16
-	vmovaps ZMMWORD ptr[r9+384],zmm17
-	vmovaps ZMMWORD ptr[r9+448],zmm18
-	add r9,rax
+	vaddps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vaddps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vaddps zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vaddps zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vaddps zmm5,zmm0,ZMMWORD ptr[rsi+r10]
+	vaddps zmm16,zmm0,ZMMWORD ptr[rsi+r11]
+	vaddps zmm17,zmm0,ZMMWORD ptr[rsi+r12]
+	vaddps zmm18,zmm0,ZMMWORD ptr[rsi+r13]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	vmovaps ZMMWORD ptr[rsi+r10],zmm5
+	vmovaps ZMMWORD ptr[rsi+r11],zmm16
+	vmovaps ZMMWORD ptr[rsi+r12],zmm17
+	vmovaps ZMMWORD ptr[rsi+r13],zmm18
+	add rsi,rax
 	dec ecx
 	jnz short CoeffAdd2F_AVX512_loop_1
 
@@ -620,36 +744,40 @@ CoeffAdd2F_AVX512_1:
 	test edx,4
 	jz short CoeffAdd2F_AVX512_2
 
-	vaddps zmm1,zmm0,ZMMWORD ptr[r9]
-	vaddps zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vaddps zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vaddps zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vmovaps ZMMWORD ptr[r9],zmm1
-	vmovaps ZMMWORD ptr[r9+64],zmm2
-	vmovaps ZMMWORD ptr[r9+128],zmm3
-	vmovaps ZMMWORD ptr[r9+192],zmm4
-	add r9,256
+	vaddps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vaddps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vaddps zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vaddps zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	add rsi,r10
 
 CoeffAdd2F_AVX512_2:
 	test edx,2
 	jz short CoeffAdd2F_AVX512_3
 
-	vaddps zmm1,zmm0,ZMMWORD ptr[r9]
-	vaddps zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmovaps ZMMWORD ptr[r9],zmm1
-	vmovaps ZMMWORD ptr[r9+64],zmm2
-	add r9,128
+	vaddps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vaddps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	add rsi,r8
 
 CoeffAdd2F_AVX512_3:
 	test edx,1
 	jz short CoeffAdd2F_AVX512_4
 
-	vaddps zmm1,zmm0,ZMMWORD ptr[r9]
-	vmovaps ZMMWORD ptr[r9],zmm1
+	vaddps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmovaps ZMMWORD ptr[rsi],zmm1
 
 CoeffAdd2F_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
 
 	ret
 
@@ -664,37 +792,54 @@ CoeffAdd2F_AVX512 endp
 
 CoeffAddD_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
 	vbroadcastsd zmm0,qword ptr[rcx]
 
-	mov r10,rdx 	; coeff_b
+	mov rdi,rdx 	; coeff_b
+	mov rsi,r8	 	; coeff_c
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffAddD_AVX512_1
+	jz CoeffAddD_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffAddD_AVX512_loop_1:
-	vaddpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vaddpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vaddpd zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vaddpd zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vaddpd zmm5,zmm0,ZMMWORD ptr[r10+256]
-	vaddpd zmm16,zmm0,ZMMWORD ptr[r10+320]
-	vaddpd zmm17,zmm0,ZMMWORD ptr[r10+384]
-	vaddpd zmm18,zmm0,ZMMWORD ptr[r10+448]
-	vmovapd ZMMWORD ptr[r8],zmm1
-	vmovapd ZMMWORD ptr[r8+64],zmm2
-	vmovapd ZMMWORD ptr[r8+128],zmm3
-	vmovapd ZMMWORD ptr[r8+192],zmm4
-	vmovapd ZMMWORD ptr[r8+256],zmm5
-	vmovapd ZMMWORD ptr[r8+320],zmm16
-	vmovapd ZMMWORD ptr[r8+384],zmm17
-	vmovapd ZMMWORD ptr[r8+448],zmm18
-	add r10,rax
-	add r8,rax
+	vaddpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vaddpd zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vaddpd zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vaddpd zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vaddpd zmm5,zmm0,ZMMWORD ptr[rdi+r10]
+	vaddpd zmm16,zmm0,ZMMWORD ptr[rdi+r11]
+	vaddpd zmm17,zmm0,ZMMWORD ptr[rdi+r12]
+	vaddpd zmm18,zmm0,ZMMWORD ptr[rdi+r13]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	vmovapd ZMMWORD ptr[rsi+r10],zmm5
+	vmovapd ZMMWORD ptr[rsi+r11],zmm16
+	vmovapd ZMMWORD ptr[rsi+r12],zmm17
+	vmovapd ZMMWORD ptr[rsi+r13],zmm18
+	add rdi,rax
+	add rsi,rax
 	dec ecx
 	jnz short CoeffAddD_AVX512_loop_1
 
@@ -702,38 +847,43 @@ CoeffAddD_AVX512_1:
 	test edx,4
 	jz short CoeffAddD_AVX512_2
 
-	vaddpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vaddpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vaddpd zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vaddpd zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vmovapd ZMMWORD ptr[r8],zmm1
-	vmovapd ZMMWORD ptr[r8+64],zmm2
-	vmovapd ZMMWORD ptr[r8+128],zmm3
-	vmovapd ZMMWORD ptr[r8+192],zmm4
-	add r10,256
-	add r8,256
+	vaddpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vaddpd zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vaddpd zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vaddpd zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	add rdi,r10
+	add rsi,r10
 
 CoeffAddD_AVX512_2:
 	test edx,2
 	jz short CoeffAddD_AVX512_3
 
-	vaddpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vaddpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmovapd ZMMWORD ptr[r8],zmm1
-	vmovapd ZMMWORD ptr[r8+64],zmm2
-	add r10,128
-	add r8,128
+	vaddpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vaddpd zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	add rdi,r8
+	add rsi,r8
 
 CoeffAddD_AVX512_3:
 	test edx,1
 	jz short CoeffAddD_AVX512_4
 
-	vaddpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vmovapd ZMMWORD ptr[r8],zmm1
+	vaddpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmovapd ZMMWORD ptr[rsi],zmm1
 
 CoeffAddD_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
+	pop rdi
 
 	ret
 
@@ -747,36 +897,50 @@ CoeffAddD_AVX512 endp
 
 CoeffAdd2D_AVX512 proc public frame
 
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
 	vbroadcastsd zmm0,qword ptr[rcx]
 
-	mov r9,rdx	 	; coeff_b
+	mov rsi,rdx	 	; coeff_b
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffAdd2D_AVX512_1
+	jz CoeffAdd2D_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffAdd2D_AVX512_loop_1:
-	vaddpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vaddpd zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vaddpd zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vaddpd zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vaddpd zmm5,zmm0,ZMMWORD ptr[r9+256]
-	vaddpd zmm16,zmm0,ZMMWORD ptr[r9+320]
-	vaddpd zmm17,zmm0,ZMMWORD ptr[r9+384]
-	vaddpd zmm18,zmm0,ZMMWORD ptr[r9+448]
-	vmovapd ZMMWORD ptr[r9],zmm1
-	vmovapd ZMMWORD ptr[r9+64],zmm2
-	vmovapd ZMMWORD ptr[r9+128],zmm3
-	vmovapd ZMMWORD ptr[r9+192],zmm4
-	vmovapd ZMMWORD ptr[r9+256],zmm5
-	vmovapd ZMMWORD ptr[r9+320],zmm16
-	vmovapd ZMMWORD ptr[r9+384],zmm17
-	vmovapd ZMMWORD ptr[r9+448],zmm18
-	add r9,rax
+	vaddpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vaddpd zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vaddpd zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vaddpd zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vaddpd zmm5,zmm0,ZMMWORD ptr[rsi+r10]
+	vaddpd zmm16,zmm0,ZMMWORD ptr[rsi+r11]
+	vaddpd zmm17,zmm0,ZMMWORD ptr[rsi+r12]
+	vaddpd zmm18,zmm0,ZMMWORD ptr[rsi+r13]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	vmovapd ZMMWORD ptr[rsi+r10],zmm5
+	vmovapd ZMMWORD ptr[rsi+r11],zmm16
+	vmovapd ZMMWORD ptr[rsi+r12],zmm17
+	vmovapd ZMMWORD ptr[rsi+r13],zmm18
+	add rsi,rax
 	dec ecx
 	jnz short CoeffAdd2D_AVX512_loop_1
 
@@ -784,36 +948,40 @@ CoeffAdd2D_AVX512_1:
 	test edx,4
 	jz short CoeffAdd2D_AVX512_2
 
-	vaddpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vaddpd zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vaddpd zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vaddpd zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vmovapd ZMMWORD ptr[r9],zmm1
-	vmovapd ZMMWORD ptr[r9+64],zmm2
-	vmovapd ZMMWORD ptr[r9+128],zmm3
-	vmovapd ZMMWORD ptr[r9+192],zmm4
-	add r9,256
+	vaddpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vaddpd zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vaddpd zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vaddpd zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	add rsi,r10
 
 CoeffAdd2D_AVX512_2:
 	test edx,2
 	jz short CoeffAdd2D_AVX512_3
 
-	vaddpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vaddpd zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmovapd ZMMWORD ptr[r9],zmm1
-	vmovapd ZMMWORD ptr[r9+64],zmm2
-	add r9,128
+	vaddpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vaddpd zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	add rsi,r8
 
 CoeffAdd2D_AVX512_3:
 	test edx,1
 	jz short CoeffAdd2D_AVX512_4
 
-	vaddpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vmovapd ZMMWORD ptr[r9],zmm1
+	vaddpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmovapd ZMMWORD ptr[rsi],zmm1
 
 CoeffAdd2D_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
 
 	ret
 
@@ -828,37 +996,54 @@ CoeffAdd2D_AVX512 endp
 
 CoeffSubF_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
 	vbroadcastss zmm0,dword ptr[rcx]
 
-	mov r10,rdx 	; coeff_b
+	mov rdi,rdx 	; coeff_b
+	mov rsi,r8	 	; coeff_c
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffSubF_AVX512_1
-	
+	jz CoeffSubF_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
+
 CoeffSubF_AVX512_loop_1:
-	vsubps zmm1,zmm0,ZMMWORD ptr[r10]
-	vsubps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vsubps zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vsubps zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vsubps zmm5,zmm0,ZMMWORD ptr[r10+256]
-	vsubps zmm16,zmm0,ZMMWORD ptr[r10+320]
-	vsubps zmm17,zmm0,ZMMWORD ptr[r10+384]
-	vsubps zmm18,zmm0,ZMMWORD ptr[r10+448]
-	vmovaps ZMMWORD ptr[r8],zmm1
-	vmovaps ZMMWORD ptr[r8+64],zmm2
-	vmovaps ZMMWORD ptr[r8+128],zmm3
-	vmovaps ZMMWORD ptr[r8+192],zmm4
-	vmovaps ZMMWORD ptr[r8+256],zmm5
-	vmovaps ZMMWORD ptr[r8+320],zmm16
-	vmovaps ZMMWORD ptr[r8+384],zmm17
-	vmovaps ZMMWORD ptr[r8+448],zmm18
-	add r10,rax
-	add r8,rax
+	vsubps zmm1,zmm0,ZMMWORD ptr[rdi]
+	vsubps zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vsubps zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vsubps zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vsubps zmm5,zmm0,ZMMWORD ptr[rdi+r10]
+	vsubps zmm16,zmm0,ZMMWORD ptr[rdi+r11]
+	vsubps zmm17,zmm0,ZMMWORD ptr[rdi+r12]
+	vsubps zmm18,zmm0,ZMMWORD ptr[rdi+r13]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	vmovaps ZMMWORD ptr[rsi+r10],zmm5
+	vmovaps ZMMWORD ptr[rsi+r11],zmm16
+	vmovaps ZMMWORD ptr[rsi+r12],zmm17
+	vmovaps ZMMWORD ptr[rsi+r13],zmm18
+	add rdi,rax
+	add rsi,rax
 	dec ecx
 	jnz short CoeffSubF_AVX512_loop_1
 
@@ -866,38 +1051,43 @@ CoeffSubF_AVX512_1:
 	test edx,4
 	jz short CoeffSubF_AVX512_2
 
-	vsubps zmm1,zmm0,ZMMWORD ptr[r10]
-	vsubps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vsubps zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vsubps zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vmovaps ZMMWORD ptr[r8],zmm1
-	vmovaps ZMMWORD ptr[r8+64],zmm2
-	vmovaps ZMMWORD ptr[r8+128],zmm3
-	vmovaps ZMMWORD ptr[r8+192],zmm4
-	add r10,256
-	add r8,256
+	vsubps zmm1,zmm0,ZMMWORD ptr[rdi]
+	vsubps zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vsubps zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vsubps zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	add rdi,r10
+	add rsi,r10
 
 CoeffSubF_AVX512_2:
 	test edx,2
 	jz short CoeffSubF_AVX512_3
 
-	vsubps zmm1,zmm0,ZMMWORD ptr[r10]
-	vsubps zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmovaps ZMMWORD ptr[r8],zmm1
-	vmovaps ZMMWORD ptr[r8+64],zmm2
-	add r10,128
-	add r8,128
+	vsubps zmm1,zmm0,ZMMWORD ptr[rdi]
+	vsubps zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	add rdi,r8
+	add rsi,r8
 
 CoeffSubF_AVX512_3:
 	test edx,1
 	jz short CoeffSubF_AVX512_4
 
-	vsubps zmm1,zmm0,ZMMWORD ptr[r10]
-	vmovaps ZMMWORD ptr[r8],zmm1
+	vsubps zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmovaps ZMMWORD ptr[rsi],zmm1
 
 CoeffSubF_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
+	pop rdi
 
 	ret
 
@@ -911,36 +1101,50 @@ CoeffSubF_AVX512 endp
 
 CoeffSub2F_AVX512 proc public frame
 
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
 	vbroadcastss zmm0,dword ptr[rcx]
 
-	mov r9,rdx 		; coeff_b
+	mov rsi,rdx 		; coeff_b
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffSub2F_AVX512_1
+	jz CoeffSub2F_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffSub2F_AVX512_loop_1:
-	vsubps zmm1,zmm0,ZMMWORD ptr[r9]
-	vsubps zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vsubps zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vsubps zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vsubps zmm5,zmm0,ZMMWORD ptr[r9+256]
-	vsubps zmm16,zmm0,ZMMWORD ptr[r9+320]
-	vsubps zmm17,zmm0,ZMMWORD ptr[r9+384]
-	vsubps zmm18,zmm0,ZMMWORD ptr[r9+448]
-	vmovaps ZMMWORD ptr[r9],zmm1
-	vmovaps ZMMWORD ptr[r9+64],zmm2
-	vmovaps ZMMWORD ptr[r9+128],zmm3
-	vmovaps ZMMWORD ptr[r9+192],zmm4
-	vmovaps ZMMWORD ptr[r9+256],zmm5
-	vmovaps ZMMWORD ptr[r9+320],zmm16
-	vmovaps ZMMWORD ptr[r9+384],zmm17
-	vmovaps ZMMWORD ptr[r9+448],zmm18
-	add r9,rax
+	vsubps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vsubps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vsubps zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vsubps zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vsubps zmm5,zmm0,ZMMWORD ptr[rsi+r10]
+	vsubps zmm16,zmm0,ZMMWORD ptr[rsi+r11]
+	vsubps zmm17,zmm0,ZMMWORD ptr[rsi+r12]
+	vsubps zmm18,zmm0,ZMMWORD ptr[rsi+r13]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	vmovaps ZMMWORD ptr[rsi+r10],zmm5
+	vmovaps ZMMWORD ptr[rsi+r11],zmm16
+	vmovaps ZMMWORD ptr[rsi+r12],zmm17
+	vmovaps ZMMWORD ptr[rsi+r13],zmm18
+	add rsi,rax
 	dec ecx
 	jnz short CoeffSub2F_AVX512_loop_1
 
@@ -948,36 +1152,40 @@ CoeffSub2F_AVX512_1:
 	test edx,4
 	jz short CoeffSub2F_AVX512_2
 
-	vsubps zmm1,zmm0,ZMMWORD ptr[r9]
-	vsubps zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vsubps zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vsubps zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vmovaps ZMMWORD ptr[r9],zmm1
-	vmovaps ZMMWORD ptr[r9+64],zmm2
-	vmovaps ZMMWORD ptr[r9+128],zmm3
-	vmovaps ZMMWORD ptr[r9+192],zmm4
-	add r9,256
+	vsubps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vsubps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vsubps zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vsubps zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	vmovaps ZMMWORD ptr[rsi+r8],zmm3
+	vmovaps ZMMWORD ptr[rsi+r9],zmm4
+	add rsi,r10
 
 CoeffSub2F_AVX512_2:
 	test edx,2
 	jz short CoeffSub2F_AVX512_3
 
-	vsubps zmm1,zmm0,ZMMWORD ptr[r9]
-	vsubps zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmovaps ZMMWORD ptr[r9],zmm1
-	vmovaps ZMMWORD ptr[r9+64],zmm2
-	add r9,128
+	vsubps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vsubps zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmovaps ZMMWORD ptr[rsi],zmm1
+	vmovaps ZMMWORD ptr[rsi+64],zmm2
+	add rsi,r8
 
 CoeffSub2F_AVX512_3:
 	test edx,1
 	jz short CoeffSub2F_AVX512_4
 
-	vsubps zmm1,zmm0,ZMMWORD ptr[r9]
-	vmovaps ZMMWORD ptr[r9],zmm1
+	vsubps zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmovaps ZMMWORD ptr[rsi],zmm1
 
 CoeffSub2F_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
 
 	ret
 
@@ -992,37 +1200,54 @@ CoeffSub2F_AVX512 endp
 
 CoeffSubD_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
 	vbroadcastsd zmm0,qword ptr[rcx]
 
-	mov r10,rdx 	; coeff_b
+	mov rdi,rdx 	; coeff_b
+	mov rsi,r8	 	; coeff_c
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffSubD_AVX512_1
+	jz CoeffSubD_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffSubD_AVX512_loop_1:
-	vsubpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vsubpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vsubpd zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vsubpd zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vsubpd zmm5,zmm0,ZMMWORD ptr[r10+256]
-	vsubpd zmm16,zmm0,ZMMWORD ptr[r10+320]
-	vsubpd zmm17,zmm0,ZMMWORD ptr[r10+384]
-	vsubpd zmm18,zmm0,ZMMWORD ptr[r10+448]
-	vmovapd ZMMWORD ptr[r8],zmm1
-	vmovapd ZMMWORD ptr[r8+64],zmm2
-	vmovapd ZMMWORD ptr[r8+128],zmm3
-	vmovapd ZMMWORD ptr[r8+192],zmm4
-	vmovapd ZMMWORD ptr[r8+256],zmm5
-	vmovapd ZMMWORD ptr[r8+320],zmm16
-	vmovapd ZMMWORD ptr[r8+384],zmm17
-	vmovapd ZMMWORD ptr[r8+448],zmm18
-	add r10,rax
-	add r8,rax
+	vsubpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vsubpd zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vsubpd zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vsubpd zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vsubpd zmm5,zmm0,ZMMWORD ptr[rdi+r10]
+	vsubpd zmm16,zmm0,ZMMWORD ptr[rdi+r11]
+	vsubpd zmm17,zmm0,ZMMWORD ptr[rdi+r12]
+	vsubpd zmm18,zmm0,ZMMWORD ptr[rdi+r13]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	vmovapd ZMMWORD ptr[rsi+r10],zmm5
+	vmovapd ZMMWORD ptr[rsi+r11],zmm16
+	vmovapd ZMMWORD ptr[rsi+r12],zmm17
+	vmovapd ZMMWORD ptr[rsi+r13],zmm18
+	add rdi,rax
+	add rsi,rax
 	dec ecx
 	jnz short CoeffSubD_AVX512_loop_1
 
@@ -1030,38 +1255,43 @@ CoeffSubD_AVX512_1:
 	test edx,4
 	jz short CoeffSubD_AVX512_2
 
-	vsubpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vsubpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vsubpd zmm3,zmm0,ZMMWORD ptr[r10+128]
-	vsubpd zmm4,zmm0,ZMMWORD ptr[r10+192]
-	vmovapd ZMMWORD ptr[r8],zmm1
-	vmovapd ZMMWORD ptr[r8+64],zmm2
-	vmovapd ZMMWORD ptr[r8+128],zmm3
-	vmovapd ZMMWORD ptr[r8+192],zmm4
-	add r10,256
-	add r8,256
+	vsubpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vsubpd zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vsubpd zmm3,zmm0,ZMMWORD ptr[rdi+r8]
+	vsubpd zmm4,zmm0,ZMMWORD ptr[rdi+r9]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	add rdi,r10
+	add rsi,r10
 
 CoeffSubD_AVX512_2:
 	test edx,2
 	jz short CoeffSubD_AVX512_3
 
-	vsubpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vsubpd zmm2,zmm0,ZMMWORD ptr[r10+64]
-	vmovapd ZMMWORD ptr[r8],zmm1
-	vmovapd ZMMWORD ptr[r8+64],zmm2
-	add r10,128
-	add r8,128
+	vsubpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vsubpd zmm2,zmm0,ZMMWORD ptr[rdi+64]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	add rdi,r8
+	add rsi,r8
 
 CoeffSubD_AVX512_3:
 	test edx,1
 	jz short CoeffSubD_AVX512_4
 
-	vsubpd zmm1,zmm0,ZMMWORD ptr[r10]
-	vmovapd ZMMWORD ptr[r8],zmm1
+	vsubpd zmm1,zmm0,ZMMWORD ptr[rdi]
+	vmovapd ZMMWORD ptr[rsi],zmm1
 
 CoeffSubD_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
+	pop rdi
 
 	ret
 
@@ -1075,36 +1305,50 @@ CoeffSubD_AVX512 endp
 
 CoeffSub2D_AVX512 proc public frame
 
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
 	vbroadcastsd zmm0,qword ptr[rcx]
 
-	mov r9,rdx	 	; coeff_b
+	mov rsi,rdx	 	; coeff_b
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,512
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
-	jz short CoeffSub2D_AVX512_1
+	jz CoeffSub2D_AVX512_1
+
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
 CoeffSub2D_AVX512_loop_1:
-	vsubpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vsubpd zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vsubpd zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vsubpd zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vsubpd zmm5,zmm0,ZMMWORD ptr[r9+256]
-	vsubpd zmm16,zmm0,ZMMWORD ptr[r9+320]
-	vsubpd zmm17,zmm0,ZMMWORD ptr[r9+384]
-	vsubpd zmm18,zmm0,ZMMWORD ptr[r9+448]
-	vmovapd ZMMWORD ptr[r9],zmm1
-	vmovapd ZMMWORD ptr[r9+64],zmm2
-	vmovapd ZMMWORD ptr[r9+128],zmm3
-	vmovapd ZMMWORD ptr[r9+192],zmm4
-	vmovapd ZMMWORD ptr[r9+256],zmm5
-	vmovapd ZMMWORD ptr[r9+320],zmm16
-	vmovapd ZMMWORD ptr[r9+384],zmm17
-	vmovapd ZMMWORD ptr[r9+448],zmm18
-	add r9,rax
+	vsubpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vsubpd zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vsubpd zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vsubpd zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vsubpd zmm5,zmm0,ZMMWORD ptr[rsi+r10]
+	vsubpd zmm16,zmm0,ZMMWORD ptr[rsi+r11]
+	vsubpd zmm17,zmm0,ZMMWORD ptr[rsi+r12]
+	vsubpd zmm18,zmm0,ZMMWORD ptr[rsi+r13]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	vmovapd ZMMWORD ptr[rsi+r10],zmm5
+	vmovapd ZMMWORD ptr[rsi+r11],zmm16
+	vmovapd ZMMWORD ptr[rsi+r12],zmm17
+	vmovapd ZMMWORD ptr[rsi+r13],zmm18
+	add rsi,rax
 	dec ecx
 	jnz short CoeffSub2D_AVX512_loop_1
 
@@ -1112,36 +1356,40 @@ CoeffSub2D_AVX512_1:
 	test edx,4
 	jz short CoeffSub2D_AVX512_2
 
-	vsubpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vsubpd zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vsubpd zmm3,zmm0,ZMMWORD ptr[r9+128]
-	vsubpd zmm4,zmm0,ZMMWORD ptr[r9+192]
-	vmovapd ZMMWORD ptr[r9],zmm1
-	vmovapd ZMMWORD ptr[r9+64],zmm2
-	vmovapd ZMMWORD ptr[r9+128],zmm3
-	vmovapd ZMMWORD ptr[r9+192],zmm4
-	add r9,256
+	vsubpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vsubpd zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vsubpd zmm3,zmm0,ZMMWORD ptr[rsi+r8]
+	vsubpd zmm4,zmm0,ZMMWORD ptr[rsi+r9]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	vmovapd ZMMWORD ptr[rsi+r8],zmm3
+	vmovapd ZMMWORD ptr[rsi+r9],zmm4
+	add rsi,r10
 
 CoeffSub2D_AVX512_2:
 	test edx,2
 	jz short CoeffSub2D_AVX512_3
 
-	vsubpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vsubpd zmm2,zmm0,ZMMWORD ptr[r9+64]
-	vmovapd ZMMWORD ptr[r9],zmm1
-	vmovapd ZMMWORD ptr[r9+64],zmm2
-	add r9,128
+	vsubpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vsubpd zmm2,zmm0,ZMMWORD ptr[rsi+64]
+	vmovapd ZMMWORD ptr[rsi],zmm1
+	vmovapd ZMMWORD ptr[rsi+64],zmm2
+	add rsi,r8
 
 CoeffSub2D_AVX512_3:
 	test edx,1
 	jz short CoeffSub2D_AVX512_4
 
-	vsubpd zmm1,zmm0,ZMMWORD ptr[r9]
-	vmovapd ZMMWORD ptr[r9],zmm1
+	vsubpd zmm1,zmm0,ZMMWORD ptr[rsi]
+	vmovapd ZMMWORD ptr[rsi],zmm1
 
 CoeffSub2D_AVX512_4:
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
 
 	ret
 
@@ -1160,17 +1408,21 @@ VectorNorme2F_AVX512 proc public frame
 	mov r9,rcx 		; coeff_x
 	mov rax,256
 	mov ecx,r8d		; lgth
+	
+	mov r10,128
 
 	vxorps zmm0,zmm0,zmm0
 
 	shr ecx,2
 	jz short VectorNorme2F_AVX512_1
+	
+	mov r11,192
 
 VectorNorme2F_AVX512_loop_1:
 	vmovaps zmm1,ZMMWORD ptr[r9]
 	vmovaps zmm2,ZMMWORD ptr[r9+64]
-	vmovaps zmm3,ZMMWORD ptr[r9+128]
-	vmovaps zmm4,ZMMWORD ptr[r9+192]
+	vmovaps zmm3,ZMMWORD ptr[r9+r10]
+	vmovaps zmm4,ZMMWORD ptr[r9+r11]
 
 	vmulps zmm1,zmm1,zmm1
 	vmulps zmm2,zmm2,zmm2
@@ -1194,7 +1446,7 @@ VectorNorme2F_AVX512_1:
 	vmulps zmm1,zmm1,zmm1
 	vmulps zmm2,zmm2,zmm2
 	vaddps zmm1,zmm1,zmm2
-	add r9,128
+	add r9,r10
 	vaddps zmm0,zmm0,zmm1
 
 VectorNorme2F_AVX512_2:
@@ -1251,15 +1503,19 @@ VectorNorme2D_AVX512 proc public frame
 	mov ecx,r8d		; lgth
 
 	vxorps zmm0,zmm0,zmm0
+	
+	mov r10,128
 
 	shr ecx,2
 	jz short VectorNorme2D_AVX512_1
+	
+	mov r11,192
 
 VectorNorme2D_AVX512_loop_1:
 	vmovapd zmm1,ZMMWORD ptr[r9]
 	vmovapd zmm2,ZMMWORD ptr[r9+64]
-	vmovapd zmm3,ZMMWORD ptr[r9+128]
-	vmovapd zmm4,ZMMWORD ptr[r9+192]
+	vmovapd zmm3,ZMMWORD ptr[r9+r10]
+	vmovapd zmm4,ZMMWORD ptr[r9+r11]
 
 	vmulpd zmm1,zmm1,zmm1
 	vmulpd zmm2,zmm2,zmm2
@@ -1283,7 +1539,7 @@ VectorNorme2D_AVX512_1:
 	vmulpd zmm1,zmm1,zmm1
 	vmulpd zmm2,zmm2,zmm2
 	vaddpd zmm1,zmm1,zmm2
-	add r9,128
+	add r9,r10
 	vaddpd zmm0,zmm0,zmm1
 
 VectorNorme2D_AVX512_2:
@@ -1328,37 +1584,56 @@ VectorNorme2D_AVX512 endp
 
 VectorDist2F_AVX512 proc public frame
 
+	push rbx
+	.pushreg rbx
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
-	mov r10,rcx 	; coeff_x
-	mov r11,rdx 	; coeff_y
+	mov rdi,rcx 	; coeff_x
+	mov rsi,rdx 	; coeff_y
+	mov rbx,r8	 	; result
 	mov ecx,r9d		; lgth
 	mov edx,r9d		; lgth
 	mov rax,512
+
+	mov r8,128
+	mov r9,192
+	mov r10,256
 
 	vxorps zmm0,zmm0,zmm0
 
 	shr ecx,3
 	jz VectorDist2F_AVX512_1
 
-VectorDist2F_AVX512_loop_1:
-	vmovaps zmm1,ZMMWORD ptr[r10]
-	vmovaps zmm2,ZMMWORD ptr[r10+64]
-	vmovaps zmm3,ZMMWORD ptr[r10+128]
-	vmovaps zmm4,ZMMWORD ptr[r10+192]
-	vmovaps zmm5,ZMMWORD ptr[r10+256]
-	vmovaps zmm16,ZMMWORD ptr[r10+320]
-	vmovaps zmm17,ZMMWORD ptr[r10+384]
-	vmovaps zmm18,ZMMWORD ptr[r10+448]
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
-	vsubps zmm1,zmm1,ZMMWORD ptr[r11]
-	vsubps zmm2,zmm2,ZMMWORD ptr[r11+64]
-	vsubps zmm3,zmm3,ZMMWORD ptr[r11+128]
-	vsubps zmm4,zmm4,ZMMWORD ptr[r11+192]
-	vsubps zmm5,zmm5,ZMMWORD ptr[r11+256]
-	vsubps zmm16,zmm16,ZMMWORD ptr[r11+320]
-	vsubps zmm17,zmm17,ZMMWORD ptr[r11+384]
-	vsubps zmm18,zmm18,ZMMWORD ptr[r11+448]
+VectorDist2F_AVX512_loop_1:
+	vmovaps zmm1,ZMMWORD ptr[rdi]
+	vmovaps zmm2,ZMMWORD ptr[rdi+64]
+	vmovaps zmm3,ZMMWORD ptr[rdi+r8]
+	vmovaps zmm4,ZMMWORD ptr[rdi+r9]
+	vmovaps zmm5,ZMMWORD ptr[rdi+r10]
+	vmovaps zmm16,ZMMWORD ptr[rdi+r11]
+	vmovaps zmm17,ZMMWORD ptr[rdi+r12]
+	vmovaps zmm18,ZMMWORD ptr[rdi+r13]
+
+	vsubps zmm1,zmm1,ZMMWORD ptr[rsi]
+	vsubps zmm2,zmm2,ZMMWORD ptr[rsi+64]
+	vsubps zmm3,zmm3,ZMMWORD ptr[rsi+r8]
+	vsubps zmm4,zmm4,ZMMWORD ptr[rsi+r9]
+	vsubps zmm5,zmm5,ZMMWORD ptr[rsi+r10]
+	vsubps zmm16,zmm16,ZMMWORD ptr[rsi+r11]
+	vsubps zmm17,zmm17,ZMMWORD ptr[rsi+r12]
+	vsubps zmm18,zmm18,ZMMWORD ptr[rsi+r13]
 
 	vmulps zmm1,zmm1,zmm1
 	vmulps zmm2,zmm2,zmm2
@@ -1375,9 +1650,9 @@ VectorDist2F_AVX512_loop_1:
 	vaddps zmm17,zmm17,zmm18
 	vaddps zmm1,zmm1,zmm3
 	vaddps zmm5,zmm5,zmm17
-	add r10,rax
+	add rdi,rax
 	vaddps zmm1,zmm1,zmm5
-	add r11,rax
+	add rsi,rax
 	vaddps zmm0,zmm0,zmm1
 
 	dec ecx
@@ -1387,15 +1662,15 @@ VectorDist2F_AVX512_1:
 	test edx,4
 	jz short VectorDist2F_AVX512_2
 
-	vmovaps zmm1,ZMMWORD ptr[r10]
-	vmovaps zmm2,ZMMWORD ptr[r10+64]
-	vmovaps zmm3,ZMMWORD ptr[r10+128]
-	vmovaps zmm4,ZMMWORD ptr[r10+192]
+	vmovaps zmm1,ZMMWORD ptr[rdi]
+	vmovaps zmm2,ZMMWORD ptr[rdi+64]
+	vmovaps zmm3,ZMMWORD ptr[rdi+r8]
+	vmovaps zmm4,ZMMWORD ptr[rdi+r9]
 
-	vsubps zmm1,zmm1,ZMMWORD ptr[r11]
-	vsubps zmm2,zmm2,ZMMWORD ptr[r11+64]
-	vsubps zmm3,zmm3,ZMMWORD ptr[r11+128]
-	vsubps zmm4,zmm4,ZMMWORD ptr[r11+192]
+	vsubps zmm1,zmm1,ZMMWORD ptr[rsi]
+	vsubps zmm2,zmm2,ZMMWORD ptr[rsi+64]
+	vsubps zmm3,zmm3,ZMMWORD ptr[rsi+r8]
+	vsubps zmm4,zmm4,ZMMWORD ptr[rsi+r9]
 
 	vmulps zmm1,zmm1,zmm1
 	vmulps zmm2,zmm2,zmm2
@@ -1404,33 +1679,33 @@ VectorDist2F_AVX512_1:
 
 	vaddps zmm1,zmm1,zmm2
 	vaddps zmm3,zmm3,zmm4
-	add r10,256
+	add rdi,r10
 	vaddps zmm1,zmm1,zmm3
-	add r11,256
+	add rsi,r10
 	vaddps zmm0,zmm0,zmm1
 
 VectorDist2F_AVX512_2:
 	test edx,2
 	jz short VectorDist2F_AVX512_3
 
-	vmovaps zmm1,ZMMWORD ptr[r10]
-	vmovaps zmm2,ZMMWORD ptr[r10+64]
-	vsubps zmm1,zmm1,ZMMWORD ptr[r11]
-	vsubps zmm2,zmm2,ZMMWORD ptr[r11+64]
+	vmovaps zmm1,ZMMWORD ptr[rdi]
+	vmovaps zmm2,ZMMWORD ptr[rdi+64]
+	vsubps zmm1,zmm1,ZMMWORD ptr[rsi]
+	vsubps zmm2,zmm2,ZMMWORD ptr[rsi+64]
 	vmulps zmm1,zmm1,zmm1
 	vmulps zmm2,zmm2,zmm2
 
-	add r10,128
+	add rdi,r8
 	vaddps zmm1,zmm1,zmm2
-	add r11,128
+	add rsi,r8
 	vaddps zmm0,zmm0,zmm1
 
 VectorDist2F_AVX512_3:
 	test edx,1
 	jz short VectorDist2F_AVX512_4
 
-	vmovaps zmm1,ZMMWORD ptr[r10]
-	vsubps zmm1,zmm1,ZMMWORD ptr[r11]
+	vmovaps zmm1,ZMMWORD ptr[rdi]
+	vsubps zmm1,zmm1,ZMMWORD ptr[rsi]
 	vmulps zmm1,zmm1,zmm1
 	vaddps zmm0,zmm0,zmm1
 
@@ -1457,9 +1732,15 @@ VectorDist2F_AVX512_4:
 
 	vaddps xmm0,xmm0,xmm2
 	vsqrtss xmm0,xmm0,xmm0
-	vmovss dword ptr[r8],xmm0
+	vmovss dword ptr[rbx],xmm0
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
+	pop rdi
+	pop rbx
 
 	ret
 
@@ -1474,37 +1755,56 @@ VectorDist2F_AVX512 endp
 
 VectorDist2D_AVX512 proc public frame
 
+	push rbx
+	.pushreg rbx
+	push rdi
+	.pushreg rdi
+	push rsi
+	.pushreg rsi
+	push r12
+	.pushreg r12
+	push r13
+	.pushreg r13
 	.endprolog
 
-	mov r10,rcx 	; coeff_x
-	mov r11,rdx 	; coeff_y
+	mov rdi,rcx 	; coeff_x
+	mov rsi,rdx 	; coeff_y
+	mov rbx,r8	 	; result
 	mov ecx,r9d		; lgth
 	mov edx,r9d		; lgth
 	mov rax,512
 
 	vxorpd zmm0,zmm0,zmm0
 
+	mov r8,128
+	mov r9,192
+	mov r10,256
+
 	shr ecx,3
 	jz VectorDist2D_AVX512_1
 
-VectorDist2D_AVX512_loop_1:
-	vmovapd zmm1,ZMMWORD ptr[r10]
-	vmovapd zmm2,ZMMWORD ptr[r10+64]
-	vmovapd zmm3,ZMMWORD ptr[r10+128]
-	vmovapd zmm4,ZMMWORD ptr[r10+192]
-	vmovapd zmm5,ZMMWORD ptr[r10+256]
-	vmovapd zmm16,ZMMWORD ptr[r10+320]
-	vmovapd zmm17,ZMMWORD ptr[r10+384]
-	vmovapd zmm18,ZMMWORD ptr[r10+448]
+	mov r11,320
+	mov r12,384
+	mov r13,448
 
-	vsubpd zmm1,zmm1,ZMMWORD ptr[r11]
-	vsubpd zmm2,zmm2,ZMMWORD ptr[r11+64]
-	vsubpd zmm3,zmm3,ZMMWORD ptr[r11+128]
-	vsubpd zmm4,zmm4,ZMMWORD ptr[r11+192]
-	vsubpd zmm5,zmm5,ZMMWORD ptr[r11+256]
-	vsubpd zmm16,zmm16,ZMMWORD ptr[r11+320]
-	vsubpd zmm17,zmm17,ZMMWORD ptr[r11+384]
-	vsubpd zmm18,zmm18,ZMMWORD ptr[r11+448]
+VectorDist2D_AVX512_loop_1:
+	vmovapd zmm1,ZMMWORD ptr[rdi]
+	vmovapd zmm2,ZMMWORD ptr[rdi+64]
+	vmovapd zmm3,ZMMWORD ptr[rdi+r8]
+	vmovapd zmm4,ZMMWORD ptr[rdi+r9]
+	vmovapd zmm5,ZMMWORD ptr[rdi+r10]
+	vmovapd zmm16,ZMMWORD ptr[rdi+r11]
+	vmovapd zmm17,ZMMWORD ptr[rdi+r12]
+	vmovapd zmm18,ZMMWORD ptr[rdi+r13]
+
+	vsubpd zmm1,zmm1,ZMMWORD ptr[rsi]
+	vsubpd zmm2,zmm2,ZMMWORD ptr[rsi+64]
+	vsubpd zmm3,zmm3,ZMMWORD ptr[rsi+r8]
+	vsubpd zmm4,zmm4,ZMMWORD ptr[rsi+r9]
+	vsubpd zmm5,zmm5,ZMMWORD ptr[rsi+r10]
+	vsubpd zmm16,zmm16,ZMMWORD ptr[rsi+r11]
+	vsubpd zmm17,zmm17,ZMMWORD ptr[rsi+r12]
+	vsubpd zmm18,zmm18,ZMMWORD ptr[rsi+r13]
 
 	vmulpd zmm1,zmm1,zmm1
 	vmulpd zmm2,zmm2,zmm2
@@ -1521,9 +1821,9 @@ VectorDist2D_AVX512_loop_1:
 	vaddpd zmm17,zmm17,zmm18
 	vaddpd zmm1,zmm1,zmm3
 	vaddpd zmm5,zmm5,zmm17
-	add r10,rax
+	add rdi,rax
 	vaddpd zmm1,zmm1,zmm5
-	add r11,rax
+	add rsi,rax
 	vaddpd zmm0,zmm0,zmm1
 	
 	dec ecx
@@ -1533,15 +1833,15 @@ VectorDist2D_AVX512_1:
 	test edx,4
 	jz short VectorDist2D_AVX512_2
 
-	vmovapd zmm1,ZMMWORD ptr[r10]
-	vmovapd zmm2,ZMMWORD ptr[r10+64]
-	vmovapd zmm3,ZMMWORD ptr[r10+128]
-	vmovapd zmm4,ZMMWORD ptr[r10+129]
+	vmovapd zmm1,ZMMWORD ptr[rdi]
+	vmovapd zmm2,ZMMWORD ptr[rdi+64]
+	vmovapd zmm3,ZMMWORD ptr[rdi+r8]
+	vmovapd zmm4,ZMMWORD ptr[rdi+r9]
 
-	vsubpd zmm1,zmm1,ZMMWORD ptr[r11]
-	vsubpd zmm2,zmm2,ZMMWORD ptr[r11+64]
-	vsubpd zmm3,zmm3,ZMMWORD ptr[r11+128]
-	vsubpd zmm4,zmm4,ZMMWORD ptr[r11+192]
+	vsubpd zmm1,zmm1,ZMMWORD ptr[rsi]
+	vsubpd zmm2,zmm2,ZMMWORD ptr[rsi+64]
+	vsubpd zmm3,zmm3,ZMMWORD ptr[rsi+r8]
+	vsubpd zmm4,zmm4,ZMMWORD ptr[rsi+r9]
 
 	vmulpd zmm1,zmm1,zmm1
 	vmulpd zmm2,zmm2,zmm2
@@ -1550,35 +1850,35 @@ VectorDist2D_AVX512_1:
 
 	vaddpd zmm1,zmm1,zmm2
 	vaddpd zmm3,zmm3,zmm4
-	add r10,256
+	add rdi,r10
 	vaddpd zmm1,zmm1,zmm3
-	add r11,256
+	add rsi,r10
 	vaddpd zmm0,zmm0,zmm1
 
 VectorDist2D_AVX512_2:
 	test edx,2
 	jz short VectorDist2D_AVX512_3
 
-	vmovapd zmm1,ZMMWORD ptr[r10]
-	vmovapd zmm2,ZMMWORD ptr[r10+64]
+	vmovapd zmm1,ZMMWORD ptr[rdi]
+	vmovapd zmm2,ZMMWORD ptr[rdi+64]
 
-	vsubpd zmm1,zmm1,ZMMWORD ptr[r11]
-	vsubpd zmm2,zmm2,ZMMWORD ptr[r11+64]
+	vsubpd zmm1,zmm1,ZMMWORD ptr[rsi]
+	vsubpd zmm2,zmm2,ZMMWORD ptr[rsi+64]
 
 	vmulpd zmm1,zmm1,zmm1
 	vmulpd zmm2,zmm2,zmm2
 
-	add r10,128
+	add rdi,r8
 	vaddpd zmm1,zmm1,zmm2
-	add r11,128
+	add rsi,r8
 	vaddpd zmm0,zmm0,zmm1
 
 VectorDist2D_AVX512_3:
 	test edx,1
 	jz short VectorDist2D_AVX512_4
 
-	vmovapd zmm1,ZMMWORD ptr[r10]
-	vsubpd zmm1,zmm1,ZMMWORD ptr[r11]
+	vmovapd zmm1,ZMMWORD ptr[rdi]
+	vsubpd zmm1,zmm1,ZMMWORD ptr[rsi]
 	vmulpd zmm1,zmm1,zmm1
 	vaddpd zmm0,zmm0,zmm1
 
@@ -1599,9 +1899,15 @@ VectorDist2D_AVX512_4:
 
 	vaddpd xmm0,xmm0,xmm2
 	vsqrtsd xmm0,xmm0,xmm0
-	vmovsd qword ptr[r8],xmm0
+	vmovsd qword ptr[rbx],xmm0
 
 	vzeroupper
+
+	pop r13
+	pop r12
+	pop rsi
+	pop rdi
+	pop rbx
 
 	ret
 
@@ -1623,14 +1929,18 @@ VectorNormeF_AVX512 proc public frame
 	
 	vxorps zmm0,zmm0,zmm0
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorNormeF_AVX512_1
+
+	mov r11,192
 
 VectorNormeF_AVX512_loop_1:
 	vmovaps zmm1,ZMMWORD ptr[r9]
 	vmovaps zmm2,ZMMWORD ptr[r9+64]
-	vmovaps zmm3,ZMMWORD ptr[r9+128]
-	vmovaps zmm4,ZMMWORD ptr[r9+192]
+	vmovaps zmm3,ZMMWORD ptr[r9+r10]
+	vmovaps zmm4,ZMMWORD ptr[r9+r11]
 
 	vmulps zmm1,zmm1,zmm1
 	vmulps zmm2,zmm2,zmm2
@@ -1655,7 +1965,7 @@ VectorNormeF_AVX512_1:
 	vmulps zmm1,zmm1,zmm1
 	vmulps zmm2,zmm2,zmm2
 	vaddps zmm1,zmm1,zmm2
-	add r9,128
+	add r9,r10
 	vaddps zmm0,zmm0,zmm1
 
 VectorNormeF_AVX512_2:
@@ -1712,14 +2022,18 @@ VectorNormeD_AVX512 proc public frame
 	
 	vxorpd zmm0,zmm0,zmm0
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorNormeD_AVX512_1
+
+	mov r11,192
 
 VectorNormeD_AVX512_loop_1:
 	vmovapd zmm1,ZMMWORD ptr[r9]
 	vmovapd zmm2,ZMMWORD ptr[r9+64]
-	vmovapd zmm3,ZMMWORD ptr[r9+128]
-	vmovapd zmm4,ZMMWORD ptr[r9+192]
+	vmovapd zmm3,ZMMWORD ptr[r9+r10]
+	vmovapd zmm4,ZMMWORD ptr[r9+r11]
 
 	vmulpd zmm1,zmm1,zmm1
 	vmulpd zmm2,zmm2,zmm2
@@ -1744,7 +2058,7 @@ VectorNormeD_AVX512_1:
 	vmulpd zmm1,zmm1,zmm1
 	vmulpd zmm2,zmm2,zmm2
 	vaddpd zmm1,zmm1,zmm2
-	add r9,128
+	add r9,r10
 	vaddpd zmm0,zmm0,zmm1
 
 VectorNormeD_AVX512_2:
@@ -1788,27 +2102,34 @@ VectorNormeD_AVX512 endp
 
 VectorDistF_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; result
 	mov rax,256
 	mov ecx,r9d
 
 	vxorps zmm0,zmm0,zmm0
 
+	mov r8,128
+
 	shr ecx,2
 	jz short VectorDistF_AVX512_1
+
+	mov r11,192
 
 VectorDistF_AVX512_loop_1:
 	vmovaps zmm1,ZMMWORD ptr[r10]
 	vmovaps zmm2,ZMMWORD ptr[r10+64]
-	vmovaps zmm3,ZMMWORD ptr[r10+128]
-	vmovaps zmm4,ZMMWORD ptr[r10+192]
+	vmovaps zmm3,ZMMWORD ptr[r10+r8]
+	vmovaps zmm4,ZMMWORD ptr[r10+r11]
 
 	vsubps zmm1,zmm1,ZMMWORD ptr[rdx]
 	vsubps zmm2,zmm2,ZMMWORD ptr[rdx+64]
-	vsubps zmm3,zmm3,ZMMWORD ptr[rdx+128]
-	vsubps zmm4,zmm4,ZMMWORD ptr[rdx+192]
+	vsubps zmm3,zmm3,ZMMWORD ptr[rdx+r8]
+	vsubps zmm4,zmm4,ZMMWORD ptr[rdx+r11]
 
 	vmulps zmm1,zmm1,zmm1
 	vmulps zmm2,zmm2,zmm2
@@ -1836,9 +2157,9 @@ VectorDistF_AVX512_1:
 	vmulps zmm1,zmm1,zmm1
 	vmulps zmm2,zmm2,zmm2
 
-	add r10,128
+	add r10,r8
 	vaddps zmm1,zmm1,zmm2
-	add rdx,128
+	add rdx,r8
 	vaddps zmm0,zmm0,zmm1
 
 VectorDistF_AVX512_2:
@@ -1872,9 +2193,11 @@ VectorDistF_AVX512_3:
 	vaddss xmm2,xmm2,xmm3
 
 	vaddps xmm0,xmm0,xmm2
-	vmovss dword ptr[r8],xmm0
+	vmovss dword ptr[rdi],xmm0
 
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -1889,27 +2212,34 @@ VectorDistF_AVX512 endp
 
 VectorDistD_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; result
 	mov rax,256
 	mov ecx,r9d
 
 	vxorpd zmm0,zmm0,zmm0
 
+	mov r8,128
+
 	shr ecx,2
 	jz short VectorDistD_AVX512_1
+
+	mov r11,192
 
 VectorDistD_AVX512_loop_1:
 	vmovapd zmm1,ZMMWORD ptr[r10]
 	vmovapd zmm2,ZMMWORD ptr[r10+64]
-	vmovapd zmm3,ZMMWORD ptr[r10+128]
-	vmovapd zmm4,ZMMWORD ptr[r10+192]
+	vmovapd zmm3,ZMMWORD ptr[r10+r8]
+	vmovapd zmm4,ZMMWORD ptr[r10+r11]
 
 	vsubpd zmm1,zmm1,ZMMWORD ptr[rdx]
 	vsubpd zmm2,zmm2,ZMMWORD ptr[rdx+64]
-	vsubpd zmm3,zmm3,ZMMWORD ptr[rdx+128]
-	vsubpd zmm4,zmm4,ZMMWORD ptr[rdx+192]
+	vsubpd zmm3,zmm3,ZMMWORD ptr[rdx+r8]
+	vsubpd zmm4,zmm4,ZMMWORD ptr[rdx+r11]
 
 	vmulpd zmm1,zmm1,zmm1
 	vmulpd zmm2,zmm2,zmm2
@@ -1937,9 +2267,9 @@ VectorDistD_AVX512_1:
 	vmulpd zmm1,zmm1,zmm1
 	vmulpd zmm2,zmm2,zmm2
 
-	add r10,128
+	add r10,r8
 	vaddpd zmm1,zmm1,zmm2
-	add rdx,128
+	add rdx,r8
 	vaddpd zmm0,zmm0,zmm1
 
 VectorDistD_AVX512_2:
@@ -1967,9 +2297,11 @@ VectorDistD_AVX512_3:
 	vaddsd xmm2,xmm2,xmm3
 
 	vaddpd xmm0,xmm0,xmm2
-	vmovsd qword ptr[r8],xmm0
+	vmovsd qword ptr[rdi],xmm0
 
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -1992,14 +2324,18 @@ VectorNorme1F_AVX512 proc public frame
 	vxorps zmm0,zmm0,zmm0
 	vmovaps zmm5,ZMMWORD ptr sign_bits_f_32
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorNorme1F_AVX512_1
+
+	mov r11,192
 
 VectorNorme1F_AVX512_loop_1:
 	vandps zmm1,zmm5,ZMMWORD ptr[r9]
 	vandps zmm2,zmm5,ZMMWORD ptr[r9+64]
-	vandps zmm3,zmm5,ZMMWORD ptr[r9+128]
-	vandps zmm4,zmm5,ZMMWORD ptr[r9+192]
+	vandps zmm3,zmm5,ZMMWORD ptr[r9+r10]
+	vandps zmm4,zmm5,ZMMWORD ptr[r9+r11]
 
 	vaddps zmm1,zmm1,zmm2
 	vaddps zmm3,zmm3,zmm4
@@ -2018,7 +2354,7 @@ VectorNorme1F_AVX512_1:
 	vandps zmm2,zmm5,ZMMWORD ptr[r9+64]
 
 	vaddps zmm1,zmm1,zmm2
-	add r9,128
+	add r9,r10
 	vaddps zmm0,zmm0,zmm1
 
 VectorNorme1F_AVX512_2:
@@ -2075,14 +2411,18 @@ VectorNorme1D_AVX512 proc public frame
 	vxorpd zmm0,zmm0,zmm0
 	vmovapd zmm5,ZMMWORD ptr sign_bits_f_64
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorNorme1D_AVX512_1
+
+	mov r11,192
 
 VectorNorme1D_AVX512_loop_1:
 	vandpd zmm1,zmm5,ZMMWORD ptr[r9]
 	vandpd zmm2,zmm5,ZMMWORD ptr[r9+64]
-	vandpd zmm3,zmm5,ZMMWORD ptr[r9+128]
-	vandpd zmm4,zmm5,ZMMWORD ptr[r9+192]
+	vandpd zmm3,zmm5,ZMMWORD ptr[r9+r10]
+	vandpd zmm4,zmm5,ZMMWORD ptr[r9+r11]
 
 	vaddpd zmm1,zmm1,zmm2
 	vaddpd zmm3,zmm3,zmm4
@@ -2101,7 +2441,7 @@ VectorNorme1D_AVX512_1:
 	vandpd zmm2,zmm5,ZMMWORD ptr[r9+64]
 
 	vaddpd zmm1,zmm1,zmm2
-	add r9,128
+	add r9,r10
 	vaddpd zmm0,zmm0,zmm1
 
 VectorNorme1D_AVX512_2:
@@ -2144,28 +2484,35 @@ VectorNorme1D_AVX512 endp
 
 VectorDist1F_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; result
 	mov rax,256
 	mov ecx,r9d
 
 	vxorps zmm0,zmm0,zmm0
 	vmovaps zmm5,ZMMWORD ptr sign_bits_f_32
 
+	mov r8,128
+
 	shr ecx,2
 	jz short VectorDist1F_AVX512_1
+
+	mov r11,192
 
 VectorDist1F_AVX512_loop_1:
 	vmovaps zmm1,ZMMWORD ptr[r10]
 	vmovaps zmm2,ZMMWORD ptr[r10+64]
-	vmovaps zmm3,ZMMWORD ptr[r10+128]
-	vmovaps zmm4,ZMMWORD ptr[r10+192]
+	vmovaps zmm3,ZMMWORD ptr[r10+r8]
+	vmovaps zmm4,ZMMWORD ptr[r10+r11]
 
 	vsubps zmm1,zmm1,ZMMWORD ptr[rdx]
 	vsubps zmm2,zmm2,ZMMWORD ptr[rdx+64]
-	vsubps zmm3,zmm3,ZMMWORD ptr[rdx+128]
-	vsubps zmm4,zmm4,ZMMWORD ptr[rdx+192]
+	vsubps zmm3,zmm3,ZMMWORD ptr[rdx+r8]
+	vsubps zmm4,zmm4,ZMMWORD ptr[rdx+r11]
 
 	vandps zmm1,zmm1,zmm5
 	vandps zmm2,zmm2,zmm5
@@ -2193,9 +2540,9 @@ VectorDist1F_AVX512_1:
 	vandps zmm1,zmm1,zmm5
 	vandps zmm2,zmm2,zmm5
 
-	add r10,128
+	add r10,r8
 	vaddps zmm1,zmm1,zmm2
-	add rdx,128
+	add rdx,r8
 	vaddps zmm0,zmm0,zmm1
 
 VectorDist1F_AVX512_2:
@@ -2229,9 +2576,11 @@ VectorDist1F_AVX512_3:
 	vaddss xmm2,xmm2,xmm3
 
 	vaddps xmm0,xmm0,xmm2
-	vmovss dword ptr[r8],xmm0
+	vmovss dword ptr[rdi],xmm0
 
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -2246,28 +2595,35 @@ VectorDist1F_AVX512 endp
 
 VectorDist1D_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; result
 	mov rax,256
 	mov ecx,r9d
 
 	vxorpd zmm0,zmm0,zmm0
 	vmovapd zmm5,ZMMWORD ptr sign_bits_f_64
 
+	mov r8,128
+
 	shr ecx,2
 	jz short VectorDist1D_AVX512_1
+
+	mov r11,192
 
 VectorDist1D_AVX512_loop_1:
 	vmovapd zmm1,ZMMWORD ptr[r10]
 	vmovapd zmm2,ZMMWORD ptr[r10+64]
-	vmovapd zmm3,ZMMWORD ptr[r10+128]
-	vmovapd zmm4,ZMMWORD ptr[r10+192]
+	vmovapd zmm3,ZMMWORD ptr[r10+r8]
+	vmovapd zmm4,ZMMWORD ptr[r10+r11]
 
 	vsubpd zmm1,zmm1,ZMMWORD ptr[rdx]
 	vsubpd zmm2,zmm2,ZMMWORD ptr[rdx+64]
-	vsubpd zmm3,zmm3,ZMMWORD ptr[rdx+128]
-	vsubpd zmm4,zmm4,ZMMWORD ptr[rdx+192]
+	vsubpd zmm3,zmm3,ZMMWORD ptr[rdx+r8]
+	vsubpd zmm4,zmm4,ZMMWORD ptr[rdx+r11]
 
 	vandpd zmm1,zmm1,zmm5
 	vandpd zmm2,zmm2,zmm5
@@ -2295,9 +2651,9 @@ VectorDist1D_AVX512_1:
 	vandpd zmm1,zmm1,zmm5
 	vandpd zmm2,zmm2,zmm5
 
-	add r10,128
+	add r10,r8
 	vaddpd zmm1,zmm1,zmm2
-	add rdx,128
+	add rdx,r8
 	vaddpd zmm0,zmm0,zmm1
 
 VectorDist1D_AVX512_2:
@@ -2325,9 +2681,11 @@ VectorDist1D_AVX512_3:
 	vaddsd xmm2,xmm2,xmm3
 
 	vaddpd xmm0,xmm0,xmm2
-	vmovsd qword ptr[r8],xmm0
+	vmovsd qword ptr[rdi],xmm0
 
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -2342,27 +2700,34 @@ VectorDist1D_AVX512 endp
 
 VectorProductF_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; result
 	mov rax,256
 	mov ecx,r9d
 
 	vxorps zmm0,zmm0,zmm0
 
+	mov r8,128
+
 	shr ecx,2
 	jz short VectorProductF_AVX512_1
+
+	mov r11,192
 
 VectorProductF_AVX512_loop_1:
 	vmovaps zmm1,ZMMWORD ptr[r10]
 	vmovaps zmm2,ZMMWORD ptr[r10+64]
-	vmovaps zmm3,ZMMWORD ptr[r10+128]
-	vmovaps zmm4,ZMMWORD ptr[r10+192]
+	vmovaps zmm3,ZMMWORD ptr[r10+r8]
+	vmovaps zmm4,ZMMWORD ptr[r10+r11]
 
 	vmulps zmm1,zmm1,ZMMWORD ptr[rdx]
 	vmulps zmm2,zmm2,ZMMWORD ptr[rdx+64]
-	vmulps zmm3,zmm3,ZMMWORD ptr[rdx+128]
-	vmulps zmm4,zmm4,ZMMWORD ptr[rdx+192]
+	vmulps zmm3,zmm3,ZMMWORD ptr[rdx+r8]
+	vmulps zmm4,zmm4,ZMMWORD ptr[rdx+r11]
 
 	vaddps zmm1,zmm1,zmm2
 	vaddps zmm3,zmm3,zmm4
@@ -2383,9 +2748,9 @@ VectorProductF_AVX512_1:
 	vmulps zmm1,zmm1,ZMMWORD ptr[rdx]
 	vmulps zmm2,zmm2,ZMMWORD ptr[rdx+64]
 
-	add r10,128
+	add r10,r8
 	vaddps zmm1,zmm1,zmm2
-	add rdx,128
+	add rdx,r8
 	vaddps zmm0,zmm0,zmm1
 
 
@@ -2419,9 +2784,11 @@ VectorProductF_AVX512_3:
 	vaddss xmm2,xmm2,xmm3
 
 	vaddps xmm0,xmm0,xmm2
-	vmovss dword ptr[r8],xmm0
+	vmovss dword ptr[rdi],xmm0
 
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -2436,27 +2803,34 @@ VectorProductF_AVX512 endp
 
 VectorProductD_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; result
 	mov rax,256
 	mov ecx,r9d
 
 	vxorpd zmm0,zmm0,zmm0
 
+	mov r8,128
+
 	shr ecx,2
 	jz short VectorProductD_AVX512_1
+
+	mov r11,192
 
 VectorProductD_AVX512_loop_1:
 	vmovapd zmm1,ZMMWORD ptr[r10]
 	vmovapd zmm2,ZMMWORD ptr[r10+64]
-	vmovapd zmm3,ZMMWORD ptr[r10+128]
-	vmovapd zmm4,ZMMWORD ptr[r10+192]
+	vmovapd zmm3,ZMMWORD ptr[r10+r8]
+	vmovapd zmm4,ZMMWORD ptr[r10+r11]
 
 	vmulpd zmm1,zmm1,ZMMWORD ptr[rdx]
 	vmulpd zmm2,zmm2,ZMMWORD ptr[rdx+64]
-	vmulpd zmm3,zmm3,ZMMWORD ptr[rdx+128]
-	vmulpd zmm4,zmm4,ZMMWORD ptr[rdx+192]
+	vmulpd zmm3,zmm3,ZMMWORD ptr[rdx+r8]
+	vmulpd zmm4,zmm4,ZMMWORD ptr[rdx+r11]
 
 	vaddpd zmm1,zmm1,zmm2
 	vaddpd zmm3,zmm3,zmm4
@@ -2477,9 +2851,9 @@ VectorProductD_AVX512_1:
 	vmulpd zmm1,zmm1,ZMMWORD ptr[rdx]
 	vmulpd zmm2,zmm2,ZMMWORD ptr[rdx+64]
 
-	add r10,128
+	add r10,r8
 	vaddpd zmm1,zmm1,zmm2
-	add rdx,128
+	add rdx,r8
 	vaddpd zmm0,zmm0,zmm1
 
 VectorProductD_AVX512_2:
@@ -2506,9 +2880,11 @@ VectorProductD_AVX512_3:
 	vaddsd xmm2,xmm2,xmm3
 
 	vaddpd xmm0,xmm0,xmm2
-	vmovsd qword ptr[r8],xmm0
+	vmovsd qword ptr[rdi],xmm0
 
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -2523,34 +2899,41 @@ VectorProductD_AVX512 endp
 
 VectorAddF_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; result
 	mov rax,256
 	mov ecx,r9d
+
+	mov r8,128
 
 	shr ecx,2
 	jz short VectorAddF_AVX512_1
 
+	mov r11,192
+
 VectorAddF_AVX512_loop_1:
 	vmovaps zmm0,ZMMWORD ptr[r10]
 	vmovaps zmm1,ZMMWORD ptr[r10+64]
-	vmovaps zmm2,ZMMWORD ptr[r10+128]
-	vmovaps zmm3,ZMMWORD ptr[r10+192]
+	vmovaps zmm2,ZMMWORD ptr[r10+r8]
+	vmovaps zmm3,ZMMWORD ptr[r10+r11]
 
 	vaddps zmm0,zmm0,ZMMWORD ptr[rdx]
 	vaddps zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vaddps zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vaddps zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vaddps zmm2,zmm2,ZMMWORD ptr[rdx+r8]
+	vaddps zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
-	vmovaps ZMMWORD ptr[r8],zmm0
-	vmovaps ZMMWORD ptr[r8+64],zmm1
-	vmovaps ZMMWORD ptr[r8+128],zmm2
-	vmovaps ZMMWORD ptr[r8+192],zmm3
+	vmovaps ZMMWORD ptr[rdi],zmm0
+	vmovaps ZMMWORD ptr[rdi+64],zmm1
+	vmovaps ZMMWORD ptr[rdi+r8],zmm2
+	vmovaps ZMMWORD ptr[rdi+r11],zmm3
 
 	add r10,rax
 	add rdx,rax
-	add r8,rax
+	add rdi,rax
 
 	dec ecx
 	jnz short VectorAddF_AVX512_loop_1
@@ -2563,12 +2946,12 @@ VectorAddF_AVX512_1:
 	vmovaps zmm1,ZMMWORD ptr[r10+64]
 	vaddps zmm0,zmm0,ZMMWORD ptr[rdx]
 	vaddps zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmovaps ZMMWORD ptr[r8],zmm0
-	vmovaps ZMMWORD ptr[r8+64],zmm1
+	vmovaps ZMMWORD ptr[rdi],zmm0
+	vmovaps ZMMWORD ptr[rdi+64],zmm1
 
-	add r10,128
-	add rdx,128
-	add r8,128
+	add r10,r8
+	add rdx,r8
+	add rdi,r8
 
 VectorAddF_AVX512_2:
 	test r9d,1
@@ -2576,10 +2959,12 @@ VectorAddF_AVX512_2:
 
 	vmovaps zmm0,ZMMWORD ptr[r10]
 	vaddps zmm0,zmm0,ZMMWORD ptr[rdx]
-	vmovaps ZMMWORD ptr[r8],zmm0
+	vmovaps ZMMWORD ptr[rdi],zmm0
 
 VectorAddF_AVX512_3:
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -2594,34 +2979,41 @@ VectorAddF_AVX512 endp
 
 VectorSubF_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; result
 	mov rax,256
 	mov ecx,r9d
+
+	mov r8,128
 
 	shr ecx,2
 	jz short VectorSubF_AVX512_1
 
+	mov r11,192
+
 VectorSubF_AVX512_loop_1:
 	vmovaps zmm0,ZMMWORD ptr[r10]
 	vmovaps zmm1,ZMMWORD ptr[r10+64]
-	vmovaps zmm2,ZMMWORD ptr[r10+128]
-	vmovaps zmm3,ZMMWORD ptr[r10+192]
+	vmovaps zmm2,ZMMWORD ptr[r10+r8]
+	vmovaps zmm3,ZMMWORD ptr[r10+r11]
 
 	vsubps zmm0,zmm0,ZMMWORD ptr[rdx]
 	vsubps zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vsubps zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vsubps zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vsubps zmm2,zmm2,ZMMWORD ptr[rdx+r8]
+	vsubps zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
-	vmovaps ZMMWORD ptr[r8],zmm0
-	vmovaps ZMMWORD ptr[r8+64],zmm1
-	vmovaps ZMMWORD ptr[r8+128],zmm2
-	vmovaps ZMMWORD ptr[r8+192],zmm3
+	vmovaps ZMMWORD ptr[rdi],zmm0
+	vmovaps ZMMWORD ptr[rdi+64],zmm1
+	vmovaps ZMMWORD ptr[rdi+r8],zmm2
+	vmovaps ZMMWORD ptr[rdi+r11],zmm3
 
 	add r10,rax
 	add rdx,rax
-	add r8,rax
+	add rdi,rax
 	
 	dec ecx
 	jnz short VectorSubF_AVX512_loop_1
@@ -2634,12 +3026,12 @@ VectorSubF_AVX512_1:
 	vmovaps zmm1,ZMMWORD ptr[r10+64]
 	vsubps zmm0,zmm0,ZMMWORD ptr[rdx]
 	vsubps zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmovaps ZMMWORD ptr[r8],zmm0
-	vmovaps ZMMWORD ptr[r8+64],zmm1
+	vmovaps ZMMWORD ptr[rdi],zmm0
+	vmovaps ZMMWORD ptr[rdi+64],zmm1
 
-	add r10,128
-	add rdx,128
-	add r8,128
+	add r10,r8
+	add rdx,r8
+	add rdi,r8
 
 VectorSubF_AVX512_2:
 	test r9d,1
@@ -2647,10 +3039,12 @@ VectorSubF_AVX512_2:
 
 	vmovaps zmm0,ZMMWORD ptr[r10]
 	vsubps zmm0,zmm0,ZMMWORD ptr[rdx]
-	vmovaps ZMMWORD ptr[r8],zmm0
+	vmovaps ZMMWORD ptr[rdi],zmm0
 
 VectorSubF_AVX512_3:
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -2665,34 +3059,41 @@ VectorSubF_AVX512 endp
 
 VectorProdF_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; result
 	mov rax,256
 	mov ecx,r9d
+
+	mov r8,128
 
 	shr ecx,2
 	jz short VectorProdF_AVX512_1
 
+	mov r11,192
+
 VectorProdF_AVX512_loop_1:
 	vmovaps zmm0,ZMMWORD ptr[r10]
 	vmovaps zmm1,ZMMWORD ptr[r10+64]
-	vmovaps zmm2,ZMMWORD ptr[r10+128]
-	vmovaps zmm3,ZMMWORD ptr[r10+192]
+	vmovaps zmm2,ZMMWORD ptr[r10+r8]
+	vmovaps zmm3,ZMMWORD ptr[r10+r11]
 
 	vmulps zmm0,zmm0,ZMMWORD ptr[rdx]
 	vmulps zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmulps zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vmulps zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vmulps zmm2,zmm2,ZMMWORD ptr[rdx+r8]
+	vmulps zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
-	vmovaps ZMMWORD ptr[r8],zmm0
-	vmovaps ZMMWORD ptr[r8+64],zmm1
-	vmovaps ZMMWORD ptr[r8+128],zmm2
-	vmovaps ZMMWORD ptr[r8+192],zmm3
+	vmovaps ZMMWORD ptr[rdi],zmm0
+	vmovaps ZMMWORD ptr[rdi+64],zmm1
+	vmovaps ZMMWORD ptr[rdi+r8],zmm2
+	vmovaps ZMMWORD ptr[rdi+r11],zmm3
 
 	add r10,rax
 	add rdx,rax
-	add r8,rax
+	add rdi,rax
 	
 	dec ecx
 	jnz short VectorProdF_AVX512_loop_1
@@ -2705,12 +3106,12 @@ VectorProdF_AVX512_1:
 	vmovaps zmm1,ZMMWORD ptr[r10+64]
 	vmulps zmm0,zmm0,ZMMWORD ptr[rdx]
 	vmulps zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmovaps ZMMWORD ptr[r8],zmm0
-	vmovaps ZMMWORD ptr[r8+64],zmm1
+	vmovaps ZMMWORD ptr[rdi],zmm0
+	vmovaps ZMMWORD ptr[rdi+64],zmm1
 
-	add r10,128
-	add rdx,128
-	add r8,128
+	add r10,r8
+	add rdx,r8
+	add rdi,r8
 
 VectorProdF_AVX512_2:
 	test r9d,1
@@ -2718,10 +3119,12 @@ VectorProdF_AVX512_2:
 
 	vmovaps zmm0,ZMMWORD ptr[r10]
 	vmulps zmm0,zmm0,ZMMWORD ptr[rdx]
-	vmovaps ZMMWORD ptr[r8],zmm0
+	vmovaps ZMMWORD ptr[rdi],zmm0
 
 VectorProdF_AVX512_3:
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -2741,24 +3144,28 @@ VectorAdd2F_AVX512 proc public frame
 	mov rax,256
 	mov ecx,r8d
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorAdd2F_AVX512_1
+
+	mov r11,192
 
 VectorAdd2F_AVX512_loop_1:
 	vmovaps zmm0,ZMMWORD ptr[r9]
 	vmovaps zmm1,ZMMWORD ptr[r9+64]
-	vmovaps zmm2,ZMMWORD ptr[r9+128]
-	vmovaps zmm3,ZMMWORD ptr[r9+192]
+	vmovaps zmm2,ZMMWORD ptr[r9+r10]
+	vmovaps zmm3,ZMMWORD ptr[r9+r11]
 
 	vaddps zmm0,zmm0,ZMMWORD ptr[rdx]
 	vaddps zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vaddps zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vaddps zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vaddps zmm2,zmm2,ZMMWORD ptr[rdx+r10]
+	vaddps zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
 	vmovaps ZMMWORD ptr[r9],zmm0
 	vmovaps ZMMWORD ptr[r9+64],zmm1
-	vmovaps ZMMWORD ptr[r9+128],zmm2
-	vmovaps ZMMWORD ptr[r9+192],zmm3
+	vmovaps ZMMWORD ptr[r9+r10],zmm2
+	vmovaps ZMMWORD ptr[r9+r11],zmm3
 
 	add rdx,rax
 	add r9,rax
@@ -2777,8 +3184,8 @@ VectorAdd2F_AVX512_1:
 	vmovaps ZMMWORD ptr[r9],zmm0
 	vmovaps ZMMWORD ptr[r9+64],zmm1
 
-	add rdx,128
-	add r9,128
+	add rdx,r10
+	add r9,r10
 
 VectorAdd2F_AVX512_2:
 	test r8d,1
@@ -2809,24 +3216,28 @@ VectorSub2F_AVX512 proc public frame
 	mov rax,256
 	mov ecx,r8d
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorSub2F_AVX512_1
+
+	mov r11,192
 
 VectorSub2F_AVX512_loop_1:
 	vmovaps zmm0,ZMMWORD ptr[r9]
 	vmovaps zmm1,ZMMWORD ptr[r9+64]
-	vmovaps zmm2,ZMMWORD ptr[r9+128]
-	vmovaps zmm3,ZMMWORD ptr[r9+192]
+	vmovaps zmm2,ZMMWORD ptr[r9+r10]
+	vmovaps zmm3,ZMMWORD ptr[r9+r11]
 
 	vsubps zmm0,zmm0,ZMMWORD ptr[rdx]
 	vsubps zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vsubps zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vsubps zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vsubps zmm2,zmm2,ZMMWORD ptr[rdx+r10]
+	vsubps zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
 	vmovaps ZMMWORD ptr[r9],zmm0
 	vmovaps ZMMWORD ptr[r9+64],zmm1
-	vmovaps ZMMWORD ptr[r9+128],zmm2
-	vmovaps ZMMWORD ptr[r9+192],zmm3
+	vmovaps ZMMWORD ptr[r9+r10],zmm2
+	vmovaps ZMMWORD ptr[r9+r11],zmm3
 
 	add rdx,rax
 	add r9,rax
@@ -2845,8 +3256,8 @@ VectorSub2F_AVX512_1:
 	vmovaps ZMMWORD ptr[r9],zmm0
 	vmovaps ZMMWORD ptr[r9+64],zmm1
 
-	add rdx,128
-	add r9,128
+	add rdx,r10
+	add r9,r10
 
 VectorSub2F_AVX512_2:
 	test r8d,1
@@ -2877,24 +3288,28 @@ VectorInvSubF_AVX512 proc public frame
 	mov rax,256
 	mov ecx,r8d
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorInvSubF_AVX512_1
+
+	mov r11,192
 
 VectorInvSubF_AVX512_loop_1:
 	vmovaps zmm0,ZMMWORD ptr[rdx]
 	vmovaps zmm1,ZMMWORD ptr[rdx+64]
-	vmovaps zmm2,ZMMWORD ptr[rdx+128]
-	vmovaps zmm3,ZMMWORD ptr[rdx+192]
+	vmovaps zmm2,ZMMWORD ptr[rdx+r10]
+	vmovaps zmm3,ZMMWORD ptr[rdx+r11]
 
 	vsubps zmm0,zmm0,ZMMWORD ptr[r9]
 	vsubps zmm1,zmm1,ZMMWORD ptr[r9+64]
-	vsubps zmm2,zmm2,ZMMWORD ptr[r9+128]
-	vsubps zmm3,zmm3,ZMMWORD ptr[r9+192]
+	vsubps zmm2,zmm2,ZMMWORD ptr[r9+r10]
+	vsubps zmm3,zmm3,ZMMWORD ptr[r9+r11]
 
 	vmovaps ZMMWORD ptr[r9],zmm0
 	vmovaps ZMMWORD ptr[r9+64],zmm1
-	vmovaps ZMMWORD ptr[r9+128],zmm2
-	vmovaps ZMMWORD ptr[r9+192],zmm3
+	vmovaps ZMMWORD ptr[r9+r10],zmm2
+	vmovaps ZMMWORD ptr[r9+r11],zmm3
 
 	add rdx,rax
 	add r9,rax
@@ -2913,8 +3328,8 @@ VectorInvSubF_AVX512_1:
 	vmovaps ZMMWORD ptr[r9],zmm0
 	vmovaps ZMMWORD ptr[r9+64],zmm1
 
-	add rdx,128
-	add r9,128
+	add rdx,r10
+	add r9,r10
 
 VectorInvSubF_AVX512_2:
 	test r8d,1
@@ -2945,24 +3360,28 @@ VectorProd2F_AVX512 proc public frame
 	mov rax,256
 	mov ecx,r8d
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorProd2F_AVX512_1
+
+	mov r11,192
 
 VectorProd2F_AVX512_loop_1:
 	vmovaps zmm0,ZMMWORD ptr[r9]
 	vmovaps zmm1,ZMMWORD ptr[r9+64]
-	vmovaps zmm2,ZMMWORD ptr[r9+128]
-	vmovaps zmm3,ZMMWORD ptr[r9+192]
+	vmovaps zmm2,ZMMWORD ptr[r9+r10]
+	vmovaps zmm3,ZMMWORD ptr[r9+r11]
 
 	vmulps zmm0,zmm0,ZMMWORD ptr[rdx]
 	vmulps zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmulps zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vmulps zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vmulps zmm2,zmm2,ZMMWORD ptr[rdx+r10]
+	vmulps zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
 	vmovaps ZMMWORD ptr[r9],zmm0
 	vmovaps ZMMWORD ptr[r9+64],zmm1
-	vmovaps ZMMWORD ptr[r9+128],zmm2
-	vmovaps ZMMWORD ptr[r9+192],zmm3
+	vmovaps ZMMWORD ptr[r9+r10],zmm2
+	vmovaps ZMMWORD ptr[r9+r11],zmm3
 
 	add rdx,rax
 	add r9,rax
@@ -2981,8 +3400,8 @@ VectorProd2F_AVX512_1:
 	vmovaps ZMMWORD ptr[r9],zmm0
 	vmovaps ZMMWORD ptr[r9+64],zmm1
 
-	add rdx,128
-	add r9,128
+	add rdx,r10
+	add r9,r10
 
 VectorProd2F_AVX512_2:
 	test r8d,1
@@ -3008,34 +3427,41 @@ VectorProd2F_AVX512 endp
 
 VectorAddD_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; coeff_c
 	mov rax,256
 	mov ecx,r9d
+
+	mov r8,128
 
 	shr ecx,2
 	jz short VectorAddD_AVX512_1
 
+	mov r11,192
+
 VectorAddD_AVX512_loop_1:
 	vmovapd zmm0,ZMMWORD ptr[r10]
 	vmovapd zmm1,ZMMWORD ptr[r10+64]
-	vmovapd zmm2,ZMMWORD ptr[r10+128]
-	vmovapd zmm3,ZMMWORD ptr[r10+192]
+	vmovapd zmm2,ZMMWORD ptr[r10+r8]
+	vmovapd zmm3,ZMMWORD ptr[r10+r11]
 
 	vaddpd zmm0,zmm0,ZMMWORD ptr[rdx]
 	vaddpd zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vaddpd zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vaddpd zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vaddpd zmm2,zmm2,ZMMWORD ptr[rdx+r8]
+	vaddpd zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
-	vmovapd ZMMWORD ptr[r8],zmm0
-	vmovapd ZMMWORD ptr[r8+64],zmm1
-	vmovapd ZMMWORD ptr[r8+128],zmm2
-	vmovapd ZMMWORD ptr[r8+192],zmm3
+	vmovapd ZMMWORD ptr[rdi],zmm0
+	vmovapd ZMMWORD ptr[rdi+64],zmm1
+	vmovapd ZMMWORD ptr[rdi+r8],zmm2
+	vmovapd ZMMWORD ptr[rdi+r11],zmm3
 
 	add r10,rax
 	add rdx,rax
-	add r8,rax
+	add rdi,rax
 
 	dec ecx
 	jnz short VectorAddD_AVX512_loop_1
@@ -3048,12 +3474,12 @@ VectorAddD_AVX512_1:
 	vmovapd zmm1,ZMMWORD ptr[r10+64]
 	vaddpd zmm0,zmm0,ZMMWORD ptr[rdx]
 	vaddpd zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmovapd ZMMWORD ptr[r8],zmm0
-	vmovapd ZMMWORD ptr[r8+64],zmm1
+	vmovapd ZMMWORD ptr[rdi],zmm0
+	vmovapd ZMMWORD ptr[rdi+64],zmm1
 
-	add r10,128
-	add rdx,128
-	add r8,128
+	add r10,r8
+	add rdx,r8
+	add rdi,r8
 
 VectorAddD_AVX512_2:
 	test r9d,1
@@ -3061,10 +3487,12 @@ VectorAddD_AVX512_2:
 
 	vmovapd zmm0,ZMMWORD ptr[r10]
 	vaddpd zmm0,zmm0,ZMMWORD ptr[rdx]
-	vmovapd ZMMWORD ptr[r8],zmm0
+	vmovapd ZMMWORD ptr[rdi],zmm0
 
 VectorAddD_AVX512_3:
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -3079,34 +3507,41 @@ VectorAddD_AVX512 endp
 
 VectorSubD_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; coeff_c
 	mov rax,256
 	mov ecx,r9d
+
+	mov r8,128
 
 	shr ecx,2
 	jz short VectorSubD_AVX512_1
 
+	mov r11,192
+
 VectorSubD_AVX512_loop_1:
 	vmovapd zmm0,ZMMWORD ptr[r10]
 	vmovapd zmm1,ZMMWORD ptr[r10+64]
-	vmovapd zmm2,ZMMWORD ptr[r10+128]
-	vmovapd zmm3,ZMMWORD ptr[r10+192]
+	vmovapd zmm2,ZMMWORD ptr[r10+r8]
+	vmovapd zmm3,ZMMWORD ptr[r10+r11]
 
 	vsubpd zmm0,zmm0,ZMMWORD ptr[rdx]
 	vsubpd zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vsubpd zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vsubpd zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vsubpd zmm2,zmm2,ZMMWORD ptr[rdx+r8]
+	vsubpd zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
-	vmovapd ZMMWORD ptr[r8],zmm0
-	vmovapd ZMMWORD ptr[r8+64],zmm1
-	vmovapd ZMMWORD ptr[r8+128],zmm2
-	vmovapd ZMMWORD ptr[r8+192],zmm3
+	vmovapd ZMMWORD ptr[rdi],zmm0
+	vmovapd ZMMWORD ptr[rdi+64],zmm1
+	vmovapd ZMMWORD ptr[rdi+r8],zmm2
+	vmovapd ZMMWORD ptr[rdi+r11],zmm3
 
 	add r10,rax
 	add rdx,rax
-	add r8,rax
+	add rdi,rax
 	
 	dec ecx
 	jnz short VectorSubD_AVX512_loop_1
@@ -3119,12 +3554,12 @@ VectorSubD_AVX512_1:
 	vmovapd zmm1,ZMMWORD ptr[r10+64]
 	vsubpd zmm0,zmm0,ZMMWORD ptr[rdx]
 	vsubpd zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmovapd ZMMWORD ptr[r8],zmm0
-	vmovapd ZMMWORD ptr[r8+64],zmm1
+	vmovapd ZMMWORD ptr[rdi],zmm0
+	vmovapd ZMMWORD ptr[rdi+64],zmm1
 
-	add r10,128
-	add rdx,128
-	add r8,128
+	add r10,r8
+	add rdx,r8
+	add rdi,r8
 
 VectorSubD_AVX512_2:
 	test r9d,1
@@ -3132,10 +3567,12 @@ VectorSubD_AVX512_2:
 
 	vmovapd zmm0,ZMMWORD ptr[r10]
 	vsubpd zmm0,zmm0,ZMMWORD ptr[rdx]
-	vmovapd ZMMWORD ptr[r8],zmm0
+	vmovapd ZMMWORD ptr[rdi],zmm0
 
 VectorSubD_AVX512_3:
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -3150,34 +3587,41 @@ VectorSubD_AVX512 endp
 
 VectorProdD_AVX512 proc public frame
 
+	push rdi
+	.pushreg rdi
 	.endprolog
 
 	mov r10,rcx
+	mov rdi,r8		; coeff_c
 	mov rax,256
 	mov ecx,r9d
+
+	mov r8,128
 
 	shr ecx,2
 	jz short VectorProdD_AVX512_1
 
+	mov r11,192
+
 VectorProdD_AVX512_loop_1:
 	vmovapd zmm0,ZMMWORD ptr[r10]
 	vmovapd zmm1,ZMMWORD ptr[r10+64]
-	vmovapd zmm2,ZMMWORD ptr[r10+128]
-	vmovapd zmm3,ZMMWORD ptr[r10+192]
+	vmovapd zmm2,ZMMWORD ptr[r10+r8]
+	vmovapd zmm3,ZMMWORD ptr[r10+r11]
 
 	vmulpd zmm0,zmm0,ZMMWORD ptr[rdx]
 	vmulpd zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmulpd zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vmulpd zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vmulpd zmm2,zmm2,ZMMWORD ptr[rdx+r8]
+	vmulpd zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
-	vmovapd ZMMWORD ptr[r8],zmm0
-	vmovapd ZMMWORD ptr[r8+64],zmm1
-	vmovapd ZMMWORD ptr[r8+128],zmm2
-	vmovapd ZMMWORD ptr[r8+192],zmm3
+	vmovapd ZMMWORD ptr[rdi],zmm0
+	vmovapd ZMMWORD ptr[rdi+64],zmm1
+	vmovapd ZMMWORD ptr[rdi+r8],zmm2
+	vmovapd ZMMWORD ptr[rdi+r11],zmm3
 
 	add r10,rax
 	add rdx,rax
-	add r8,rax
+	add rdi,rax
 	
 	dec ecx
 	jnz short VectorProdD_AVX512_loop_1
@@ -3190,12 +3634,12 @@ VectorProdD_AVX512_1:
 	vmovapd zmm1,ZMMWORD ptr[r10+64]
 	vmulpd zmm0,zmm0,ZMMWORD ptr[rdx]
 	vmulpd zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmovapd ZMMWORD ptr[r8],zmm0
-	vmovapd ZMMWORD ptr[r8+64],zmm1
+	vmovapd ZMMWORD ptr[rdi],zmm0
+	vmovapd ZMMWORD ptr[rdi+64],zmm1
 
-	add r10,128
-	add rdx,128
-	add r8,128
+	add r10,r8
+	add rdx,r8
+	add rdi,r8
 
 VectorProdD_AVX512_2:
 	test r9d,1
@@ -3203,10 +3647,12 @@ VectorProdD_AVX512_2:
 
 	vmovapd zmm0,ZMMWORD ptr[r10]
 	vmulpd zmm0,zmm0,ZMMWORD ptr[rdx]
-	vmovapd ZMMWORD ptr[r8],zmm0
+	vmovapd ZMMWORD ptr[rdi],zmm0
 
 VectorProdD_AVX512_3:
 	vzeroupper
+
+	pop rdi
 
 	ret
 
@@ -3226,24 +3672,28 @@ VectorAdd2D_AVX512 proc public frame
 	mov rax,256
 	mov ecx,r8d
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorAdd2D_AVX512_1
+
+	mov r11,192
 
 VectorAdd2D_AVX512_loop_1:
 	vmovapd zmm0,ZMMWORD ptr[r9]
 	vmovapd zmm1,ZMMWORD ptr[r9+64]
-	vmovapd zmm2,ZMMWORD ptr[r9+128]
-	vmovapd zmm3,ZMMWORD ptr[r9+192]
+	vmovapd zmm2,ZMMWORD ptr[r9+r10]
+	vmovapd zmm3,ZMMWORD ptr[r9+r11]
 
 	vaddpd zmm0,zmm0,ZMMWORD ptr[rdx]
 	vaddpd zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vaddpd zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vaddpd zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vaddpd zmm2,zmm2,ZMMWORD ptr[rdx+r10]
+	vaddpd zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
 	vmovapd ZMMWORD ptr[r9],zmm0
 	vmovapd ZMMWORD ptr[r9+64],zmm1
-	vmovapd ZMMWORD ptr[r9+128],zmm2
-	vmovapd ZMMWORD ptr[r9+192],zmm3
+	vmovapd ZMMWORD ptr[r9+r10],zmm2
+	vmovapd ZMMWORD ptr[r9+r11],zmm3
 
 	add rdx,rax
 	add r9,rax
@@ -3262,8 +3712,8 @@ VectorAdd2D_AVX512_1:
 	vmovapd ZMMWORD ptr[r9],zmm0
 	vmovapd ZMMWORD ptr[r9+64],zmm1
 
-	add rdx,128
-	add r9,128
+	add rdx,r10
+	add r9,r10
 
 VectorAdd2D_AVX512_2:
 	test r8d,1
@@ -3294,24 +3744,28 @@ VectorSub2D_AVX512 proc public frame
 	mov rax,256
 	mov ecx,r8d
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorSub2D_AVX512_1
+
+	mov r11,192
 
 VectorSub2D_AVX512_loop_1:
 	vmovapd zmm0,ZMMWORD ptr[r9]
 	vmovapd zmm1,ZMMWORD ptr[r9+64]
-	vmovapd zmm2,ZMMWORD ptr[r9+128]
-	vmovapd zmm3,ZMMWORD ptr[r9+192]
+	vmovapd zmm2,ZMMWORD ptr[r9+r10]
+	vmovapd zmm3,ZMMWORD ptr[r9+r11]
 
 	vsubpd zmm0,zmm0,ZMMWORD ptr[rdx]
 	vsubpd zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vsubpd zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vsubpd zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vsubpd zmm2,zmm2,ZMMWORD ptr[rdx+r10]
+	vsubpd zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
 	vmovapd ZMMWORD ptr[r9],zmm0
 	vmovapd ZMMWORD ptr[r9+64],zmm1
-	vmovapd ZMMWORD ptr[r9+128],zmm2
-	vmovapd ZMMWORD ptr[r9+192],zmm3
+	vmovapd ZMMWORD ptr[r9+r10],zmm2
+	vmovapd ZMMWORD ptr[r9+r11],zmm3
 
 	add rdx,rax
 	add r9,rax
@@ -3330,8 +3784,8 @@ VectorSub2D_AVX512_1:
 	vmovapd ZMMWORD ptr[r9],zmm0
 	vmovapd ZMMWORD ptr[r9+64],zmm1
 
-	add rdx,128
-	add r9,128
+	add rdx,r10
+	add r9,r10
 
 VectorSub2D_AVX512_2:
 	test r8d,1
@@ -3362,24 +3816,28 @@ VectorInvSubD_AVX512 proc public frame
 	mov rax,256
 	mov ecx,r8d
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorInvSubD_AVX512_1
+
+	mov r11,192
 
 VectorInvSubD_AVX512_loop_1:
 	vmovapd zmm0,ZMMWORD ptr[rdx]
 	vmovapd zmm1,ZMMWORD ptr[rdx+64]
-	vmovapd zmm2,ZMMWORD ptr[rdx+128]
-	vmovapd zmm3,ZMMWORD ptr[rdx+192]
+	vmovapd zmm2,ZMMWORD ptr[rdx+r10]
+	vmovapd zmm3,ZMMWORD ptr[rdx+r11]
 
 	vsubpd zmm0,zmm0,ZMMWORD ptr[r9]
 	vsubpd zmm1,zmm1,ZMMWORD ptr[r9+64]
-	vsubpd zmm2,zmm2,ZMMWORD ptr[r9+128]
-	vsubpd zmm3,zmm3,ZMMWORD ptr[r9+192]
+	vsubpd zmm2,zmm2,ZMMWORD ptr[r9+r10]
+	vsubpd zmm3,zmm3,ZMMWORD ptr[r9+r11]
 
 	vmovapd ZMMWORD ptr[r9],zmm0
 	vmovapd ZMMWORD ptr[r9+64],zmm1
-	vmovapd ZMMWORD ptr[r9+128],zmm2
-	vmovapd ZMMWORD ptr[r9+192],zmm3
+	vmovapd ZMMWORD ptr[r9+r10],zmm2
+	vmovapd ZMMWORD ptr[r9+r11],zmm3
 
 	add rdx,rax
 	add r9,rax
@@ -3398,8 +3856,8 @@ VectorInvSubD_AVX512_1:
 	vmovapd ZMMWORD ptr[r9],zmm0
 	vmovapd ZMMWORD ptr[r9+64],zmm1
 
-	add rdx,128
-	add r9,128
+	add rdx,r10
+	add r9,r10
 
 VectorInvSubD_AVX512_2:
 	test r8d,1
@@ -3430,24 +3888,28 @@ VectorProd2D_AVX512 proc public frame
 	mov rax,256
 	mov ecx,r8d
 
+	mov r10,128
+
 	shr ecx,2
 	jz short VectorProd2D_AVX512_1
+
+	mov r11,192
 
 VectorProd2D_AVX512_loop_1:
 	vmovapd zmm0,ZMMWORD ptr[r9]
 	vmovapd zmm1,ZMMWORD ptr[r9+64]
-	vmovapd zmm2,ZMMWORD ptr[r9+128]
-	vmovapd zmm3,ZMMWORD ptr[r9+192]
+	vmovapd zmm2,ZMMWORD ptr[r9+r10]
+	vmovapd zmm3,ZMMWORD ptr[r9+r11]
 
 	vmulpd zmm0,zmm0,ZMMWORD ptr[rdx]
 	vmulpd zmm1,zmm1,ZMMWORD ptr[rdx+64]
-	vmulpd zmm2,zmm2,ZMMWORD ptr[rdx+128]
-	vmulpd zmm3,zmm3,ZMMWORD ptr[rdx+192]
+	vmulpd zmm2,zmm2,ZMMWORD ptr[rdx+r10]
+	vmulpd zmm3,zmm3,ZMMWORD ptr[rdx+r11]
 
 	vmovapd ZMMWORD ptr[r9],zmm0
 	vmovapd ZMMWORD ptr[r9+64],zmm1
-	vmovapd ZMMWORD ptr[r9+128],zmm2
-	vmovapd ZMMWORD ptr[r9+192],zmm3
+	vmovapd ZMMWORD ptr[r9+r10],zmm2
+	vmovapd ZMMWORD ptr[r9+r11],zmm3
 
 	add rdx,rax
 	add r9,rax
@@ -3466,8 +3928,8 @@ VectorProd2D_AVX512_1:
 	vmovapd ZMMWORD ptr[r9],zmm0
 	vmovapd ZMMWORD ptr[r9+64],zmm1
 
-	add rdx,128
-	add r9,128
+	add rdx,r10
+	add r9,r10
 
 VectorProd2D_AVX512_2:
 	test r8d,1

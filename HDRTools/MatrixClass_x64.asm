@@ -113,13 +113,15 @@ CoeffProductF_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffProductF_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffProductF_AVX_loop_1:
 	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
@@ -217,13 +219,15 @@ CoeffProduct2F_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffProduct2F_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffProduct2F_AVX_loop_1:
 	vmulps ymm1,ymm0,YMMWORD ptr[rsi]
@@ -377,13 +381,15 @@ CoeffProductD_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffProductD_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 	
 CoeffProductD_AVX_loop_1:
 	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
@@ -481,13 +487,15 @@ CoeffProduct2D_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffProduct2D_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffProduct2D_AVX_loop_1:
 	vmulpd ymm1,ymm0,YMMWORD ptr[rsi]
@@ -863,13 +871,15 @@ CoeffAddF_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffAddF_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffAddF_AVX_loop_1:
 	vaddps ymm1,ymm0,YMMWORD ptr[rsi]
@@ -967,13 +977,15 @@ CoeffAdd2F_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffAdd2F_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffAdd2F_AVX_loop_1:
 	vaddps ymm1,ymm0,YMMWORD ptr[rsi]
@@ -1127,13 +1139,15 @@ CoeffAddD_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffAddD_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffAddD_AVX_loop_1:
 	vaddpd ymm1,ymm0,YMMWORD ptr[rsi]
@@ -1231,13 +1245,15 @@ CoeffAdd2D_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffAdd2D_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffAdd2D_AVX_loop_1:
 	vaddpd ymm1,ymm0,YMMWORD ptr[rsi]
@@ -1391,13 +1407,15 @@ CoeffSubF_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffSubF_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffSubF_AVX_loop_1:
 	vsubps ymm1,ymm0,YMMWORD ptr[rsi]
@@ -1495,13 +1513,15 @@ CoeffSub2F_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffSub2F_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffSub2F_AVX_loop_1:
 	vsubps ymm1,ymm0,YMMWORD ptr[rsi]
@@ -1655,13 +1675,15 @@ CoeffSubD_AVX proc public frame
 	mov edx,r9d		; lgth
 	mov ecx,r9d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffSubD_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffSubD_AVX_loop_1:
 	vsubpd ymm1,ymm0,YMMWORD ptr[rsi]
@@ -1759,13 +1781,15 @@ CoeffSub2D_AVX proc public frame
 	mov ecx,r8d		; lgth
 	mov edx,r8d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	shr ecx,3
 	jz short CoeffSub2D_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 CoeffSub2D_AVX_loop_1:
 	vsubpd ymm1,ymm0,YMMWORD ptr[rsi]
@@ -2116,15 +2140,17 @@ VectorDist2F_AVX proc public frame
 	mov ecx,r9d		; lgth
 	mov edx,r9d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	vxorps ymm0,ymm0,ymm0
 
 	shr ecx,3
 	jz VectorDist2F_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 VectorDist2F_AVX_loop_1:
 	vmovaps ymm1,YMMWORD ptr[rsi]
@@ -2310,15 +2336,17 @@ VectorDist2D_AVX proc public frame
 	mov ecx,r9d		; lgth
 	mov edx,r9d		; lgth
 	mov rax,256
+
 	mov r11,128
-	mov r8,160
-	mov r9,192
-	mov r10,224
 
 	vxorpd ymm0,ymm0,ymm0
 
 	shr ecx,3
 	jz VectorDist2D_AVX_1
+
+	mov r8,160
+	mov r9,192
+	mov r10,224
 
 VectorDist2D_AVX_loop_1:
 	vmovapd ymm1,YMMWORD ptr[rsi]

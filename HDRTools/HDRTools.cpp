@@ -28740,7 +28740,8 @@ ConverXYZ_BT2446_C_HDRtoSDR::ConverXYZ_BT2446_C_HDRtoSDR(PClip _child,bool _Chro
 	lookup2Z_32=(float *)malloc(1048576*sizeof(float));
 
 	if ((lookupY_16==nullptr) || (lookupX_16==nullptr) || (lookupiY_16==nullptr) || (lookupZ_16==nullptr)
-		|| (lookupY_32==nullptr) || (lookupiY_32==nullptr) || (lookup2Y_16==nullptr)
+		|| (lookupY_32==nullptr) || (lookupiY_32==nullptr)
+		|| (lookup2X_16==nullptr) || (lookup2Y_16==nullptr) || (lookup2Z_16==nullptr)
 		|| (lookup2X_32==nullptr) || (lookup2Y_32==nullptr) || (lookup2Z_32==nullptr))
 	{
 		FreeData();
@@ -31368,6 +31369,9 @@ AVSValue __cdecl Create_ConvertXYZ_Scale_HDRtoSDR(AVSValue args, void* user_data
 	int prefetch=args[9].AsInt(0);
 	int thread_level=args[10].AsInt(6);
 
+	if ((Coeff_X<=0.0f) || (Coeff_Y<=0.0f) || (Coeff_Z<=0.0f))
+		env->ThrowError("ConvertXYZ_Scale_HDRtoSDR: Wrong parameter value!");
+
 	const bool avsp=env->FunctionExists("ConvertBits");
 	const bool negativePrefetch=(prefetch<0)?true:false;
 	prefetch=abs(prefetch);
@@ -31456,7 +31460,7 @@ AVSValue __cdecl Create_ConvertXYZ_Scale_SDRtoHDR(AVSValue args, void* user_data
 	int prefetch=args[9].AsInt(0);
 	int thread_level=args[10].AsInt(6);
 
-	if ((Coeff_X==0.0f) || (Coeff_Y==0.0f) || (Coeff_Z==0.0f))
+	if ((Coeff_X<=0.0f) || (Coeff_Y<=0.0f) || (Coeff_Z<=0.0f))
 		env->ThrowError("ConvertXYZ_Scale_SDRtoHDR: Wrong parameter value!");
 
 	const bool avsp=env->FunctionExists("ConvertBits");

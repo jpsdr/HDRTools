@@ -32,20 +32,22 @@
 #ifndef AVSCORE_MINMAX_H
 #define AVSCORE_MINMAX_H
 
+#include "config.h"
+
 template<typename T>
-T min(T v1, T v2)
+AVS_FORCEINLINE T min(T v1, T v2)
 {
   return v1 < v2 ? v1 : v2;
 }
 
 template<typename T>
-T max(T v1, T v2)
+AVS_FORCEINLINE T max(T v1, T v2)
 {
   return v1 > v2 ? v1 : v2;
 }
 
 template<typename T>
-T clamp(T n, T min, T max)
+AVS_FORCEINLINE T clamp(T n, T min, T max)
 {
     n = n > max ? max : n;
     return n < min ? min : n;

@@ -488,7 +488,7 @@ struct AVS_Linkage {
 
   /**********************************************************************/
   // Reserve pointer space for Avisynth+
-  void          (VideoInfo::* reserved2[64 - 31])();
+  void          (VideoInfo::* reserved2[64 - 35])();
   /**********************************************************************/
 
   // AviSynth Neo additions
@@ -521,17 +521,22 @@ extern const AVS_Linkage* AVS_linkage;
 # endif
 
 # define AVS_BakedCode(arg) { arg ; }
-# define AVS_LinkCall(arg)  !AVS_linkage || offsetof(AVS_Linkage, arg) >= (size_t)AVS_linkage->Size ?     0 : (this->*(AVS_linkage->arg))
-# define AVS_LinkCall_Void(arg)  !AVS_linkage || offsetof(AVS_Linkage, arg) >= (size_t)AVS_linkage->Size ?     (void)0 : (this->*(AVS_linkage->arg))
-# define AVS_LinkCallV(arg) !AVS_linkage || offsetof(AVS_Linkage, arg) >= (size_t)AVS_linkage->Size ? *this : (this->*(AVS_linkage->arg))
+// Linkage entry validity check:
+// - AVS_linkage exists
+// - the entry fits within the runtime's AVS_Linkage (Size)
+// - the entry is not null: new entries fill up the reserved area, which older runtimes have zero-filled
+# define AVS_LinkIsMissing(arg) (!AVS_linkage || offsetof(AVS_Linkage, arg) >= (size_t)AVS_linkage->Size || !AVS_linkage->arg)
+# define AVS_LinkCall(arg)  AVS_LinkIsMissing(arg) ?     0 : (this->*(AVS_linkage->arg))
+# define AVS_LinkCall_Void(arg)  AVS_LinkIsMissing(arg) ?     (void)0 : (this->*(AVS_linkage->arg))
+# define AVS_LinkCallV(arg) AVS_LinkIsMissing(arg) ? *this : (this->*(AVS_linkage->arg))
 // Helper macros for fallback option when a function does not exists
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object)->*(ptrToMember))
 #define AVS_LinkCallOpt(arg, argOpt)  !AVS_linkage ? 0 : \
-                                      ( offsetof(AVS_Linkage, arg) >= (size_t)AVS_linkage->Size ? \
-                                        (offsetof(AVS_Linkage, argOpt) >= (size_t)AVS_linkage->Size ? 0 : CALL_MEMBER_FN(this, AVS_linkage->argOpt)() ) : \
+                                      ( AVS_LinkIsMissing(arg) ? \
+                                        (AVS_LinkIsMissing(argOpt) ? 0 : CALL_MEMBER_FN(this, AVS_linkage->argOpt)() ) : \
                                         CALL_MEMBER_FN(this, AVS_linkage->arg)() )
 // AVS_LinkCallOptDefault puts automatically () only after arg
-# define AVS_LinkCallOptDefault(arg, argDefaultValue)  !AVS_linkage || offsetof(AVS_Linkage, arg) >= (size_t)AVS_linkage->Size ? (argDefaultValue) : ((this->*(AVS_linkage->arg))())
+# define AVS_LinkCallOptDefault(arg, argDefaultValue)  AVS_LinkIsMissing(arg) ? (argDefaultValue) : ((this->*(AVS_linkage->arg))())
 
 #endif
 
@@ -2082,7 +2087,7 @@ struct PNeoEnv {
 #if defined(BUILDING_AVSCORE) || defined(AVS_STATIC_LIB)
     ;
 #else
-  : p(!AVS_linkage || offsetof(AVS_Linkage, GetNeoEnv) >= (size_t)AVS_linkage->Size ? 0 : AVS_linkage->GetNeoEnv(env)) { }
+  : p(AVS_LinkIsMissing(GetNeoEnv) ? 0 : AVS_linkage->GetNeoEnv(env)) { }
 #endif
 
   int operator!() const { return !p; }
@@ -2120,7 +2125,6 @@ AVSC_API(IScriptEnvironment*, CreateScriptEnvironment)(int version = AVISYNTH_IN
 // C exports
 #include "avs/capi.h"
 AVSC_API(IScriptEnvironment2*, CreateScriptEnvironment2)(int version = AVISYNTH_INTERFACE_VERSION);
-
 
 #pragma pack(pop)
 

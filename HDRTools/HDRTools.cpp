@@ -28688,7 +28688,7 @@ bool ConverXYZ_BT2446_C_HDRtoSDR::dicotomie(double k1,double &k3)
 	}
 	while((x1-x0)>1e-8);
 
-	if (fabs(fdico(a,b,k1,x0))>fdico(a,b,k1,x1)) x0=x1;
+	if (fabs(fdico(a,b,k1,x0))>fabs(fdico(a,b,k1,x1))) x0=x1;
 	if (fabs(fdico(a,b,k1,x0))>fabs(fdico(a,b,k1,xm))) x0=xm;
 
 	k3=x0;

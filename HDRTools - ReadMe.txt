@@ -452,9 +452,17 @@ The others parameters are identical to ConvertYUVtoLinearRGB.
 **       ConvertXYZ_Hable_HDRtoSDR        **
 ********************************************
 
-ConvertXYZ_Hable_HDRtoSDR(float exposure_X,float whitescale_X,float a_X,float b_X,float c_X,
-     float d_X,float e_X,float f_X,float exposure_Y,float whitescale_Y,float a_Y,float b_Y,float c_Y,
-     float d_Y,float e_Y,float f_Y,float exposure_Z,float whitescale_Z,float a_Z,float b_Z,float c_Z,
+Note : There is a change since the 1.3.0 version.
+whitescale wasn't proper, and not properly used or initialised.
+For now, it will be the WhitePoint, with output = H(x*exposure)/H(WhitePoint).
+Two possible basic sttings from what i read, before eventualy tuning a,b,c,d,e,f.
+1 - exposure is Peaklevel/100, adjust WhitePoint to have the output at 1 for your peaklevel.
+2 - Keep WhitePoint at default value (11.2), and adjust exposure = WhitePoint/xMax.
+The method 2 seems to produce better results with max at 0.1 (1000 nits), at 0.4, similar.
+
+ConvertXYZ_Hable_HDRtoSDR(float exposure_X,float WhitePoint_X,float a_X,float b_X,float c_X,
+     float d_X,float e_X,float f_X,float exposure_Y,float WhitePoint_Y,float a_Y,float b_Y,float c_Y,
+     float d_Y,float e_Y,float f_Y,float exposure_Z,float WhitePoint_Z,float a_Z,float b_Z,float c_Z,
      float d_Z,float e_Z,float f_Z,int pColor,float pRx,float pRy,float pGx,float pGy,
      float pBx,float pBy,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
@@ -469,8 +477,8 @@ Hable tonemap, you can have different parameters for each plane, if you want.
       
        Default: 2.0 (float)
 
-   whitescale_X -
-      White scale value used on X plane.
+   WhitePoint_X -
+      White point value used on X plane.
       
        Default: 11.2 (float)
 
@@ -504,12 +512,12 @@ Hable tonemap, you can have different parameters for each plane, if you want.
       
        Default: 0.3 (float)
 
-   exposure_Y,whitescale_Y,a_Y,b_Y,c_Y,d_Y,e_Y,f_Y
+   exposure_Y,WhitePoint_Y,a_Y,b_Y,c_Y,d_Y,e_Y,f_Y
       Values used on Y plane.
 
        Default: exposure_X,whitescale_X,a_X,b_X,c_X,d_X,e_X,f_X (float)
 
-   exposure_Z,whitescale_Z,a_Z,b_Z,c_Z,d_Z,e_Z,f_Z
+   exposure_Z,WhitePoint_Z,a_Z,b_Z,c_Z,d_Z,e_Z,f_Z
       Values used on Z plane.
 
        Default: exposure_X,whitescale_X,a_X,b_X,c_X,d_X,e_X,f_X (float)
@@ -521,9 +529,11 @@ The others parameters are identical to ConvertXYZtoRGB.
 **       ConvertRGB_Hable_HDRtoSDR        **
 ********************************************
 
-ConvertRGB_Hable_HDRtoSDR(float exposure_R,float whitescale_R,float a_R,float b_R,float c_R,
-     float d_R,float e_R,float f_R,float exposure_G,float whitescale_G,float a_G,float b_G,float c_G,
-     float d_G,float e_G,float f_G,float exposure_B,float whitescale_B,float a_B,float b_B,float c_B,
+Same note that XYZ.
+
+ConvertRGB_Hable_HDRtoSDR(float exposure_R,float WhitePoint_R,float a_R,float b_R,float c_R,
+     float d_R,float e_R,float f_R,float exposure_G,float WhitePoint_G,float a_G,float b_G,float c_G,
+     float d_G,float e_G,float f_G,float exposure_B,float WhitePoint_B,float a_B,float b_B,float c_B,
      float d_B,float e_B,float f_B,bool fastmode,
      int threads,bool logicalCores,bool MaxPhysCore,bool SetAffinity,bool sleep,
      int prefetch,int ThreadLevel)
@@ -537,7 +547,7 @@ Hable tonemap, you can have different parameters for each plane, if you want.
       
        Default: 2.0 (float)
 
-   whitescale_R -
+   WhitePoint_R -
       White scale value used on R plane.
       
        Default: 11.2 (float)
@@ -572,12 +582,12 @@ Hable tonemap, you can have different parameters for each plane, if you want.
       
        Default: 0.3 (float)
 
-   exposure_G,whitescale_G,a_G,b_G,c_G,d_G,e_G,f_G
+   exposure_G,WhitePoint_G,a_G,b_G,c_G,d_G,e_G,f_G
       Values used on G plane.
 
        Default: exposure_R,whitescale_R,a_R,b_R,c_R,d_R,e_R,f_R (float)
 
-   exposure_B,whitescale_B,a_B,b_B,c_B,d_B,e_B,f_B
+   exposure_B,WhitePoint_B,a_B,b_B,c_B,d_B,e_B,f_B
       Values used on B plane.
 
        Default: exposure_R,whitescale_R,a_R,b_R,c_R,d_R,e_R,f_R (float)

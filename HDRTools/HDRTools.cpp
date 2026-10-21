@@ -31542,7 +31542,7 @@ AVSValue __cdecl Create_ConvertXYZ_Hable_HDRtoSDR(AVSValue args, void* user_data
 
 
 	const double exp_X=args[1].AsFloat(2.0f);
-	const double w_X=args[2].AsFloat(11.2f);
+	const double wp_X=args[2].AsFloat(11.2f);
 	const double a_X=args[3].AsFloat(0.15f);
 	const double b_X=args[4].AsFloat(0.5f);
 	const double c_X=args[5].AsFloat(0.1f);
@@ -31551,7 +31551,7 @@ AVSValue __cdecl Create_ConvertXYZ_Hable_HDRtoSDR(AVSValue args, void* user_data
 	const double f_X=args[8].AsFloat(0.3f);
 
 	const double exp_Y=args[9].AsFloat((float)exp_X);
-	const double w_Y=args[10].AsFloat((float)w_X);
+	const double wp_Y=args[10].AsFloat((float)wp_X);
 	const double a_Y=args[11].AsFloat((float)a_X);
 	const double b_Y=args[12].AsFloat((float)b_X);
 	const double c_Y=args[13].AsFloat((float)c_X);
@@ -31560,7 +31560,7 @@ AVSValue __cdecl Create_ConvertXYZ_Hable_HDRtoSDR(AVSValue args, void* user_data
 	const double f_Y=args[16].AsFloat((float)f_X);
 
 	const double exp_Z=args[17].AsFloat((float)exp_X);
-	const double w_Z=args[18].AsFloat((float)w_X);
+	const double wp_Z=args[18].AsFloat((float)wp_X);
 	const double a_Z=args[19].AsFloat((float)a_X);
 	const double b_Z=args[20].AsFloat((float)b_X);
 	const double c_Z=args[21].AsFloat((float)c_X);
@@ -31710,6 +31710,10 @@ AVSValue __cdecl Create_ConvertXYZ_Hable_HDRtoSDR(AVSValue args, void* user_data
 			}
 		}
 	}
+	
+	const double w_X=1.0/((wp_X*(wp_X*a_X+b_X*c_X)+d_X*e_X)/(wp_X*(wp_X*a_X+b_X)+d_X*f_X) - e_X/f_X);
+	const double w_Y=1.0/((wp_Y*(wp_Y*a_Y+b_Y*c_Y)+d_Y*e_Y)/(wp_Y*(wp_Y*a_Y+b_Y)+d_Y*f_Y) - e_Y/f_Y);
+	const double w_Z=1.0/((wp_Z*(wp_Z*a_Z+b_Z*c_Z)+d_Z*e_Z)/(wp_Z*(wp_Z*a_Z+b_Z)+d_Z*f_Z) - e_Z/f_Z);
 
 	return new ConvertXYZ_Hable_HDRtoSDR(args[0].AsClip(),exp_X,w_X,a_X,b_X,c_X,d_X,e_X,f_X,exp_Y,w_Y,a_Y,b_Y,c_Y,d_Y,e_Y,f_Y,
 		exp_Z,w_Z,a_Z,b_Z,c_Z,d_Z,e_Z,f_Z,pRx,pRy,pGx,pGy,pBx,pBy,pWx,pWy,fastmode,threads_number,sleep,negativePrefetch,env);
@@ -31727,7 +31731,7 @@ AVSValue __cdecl Create_ConvertRGB_Hable_HDRtoSDR(AVSValue args, void* user_data
 
 
 	const double exp_R=args[1].AsFloat(2.0f);
-	const double w_R=args[2].AsFloat(11.2f);
+	const double wp_R=args[2].AsFloat(11.2f);
 	const double a_R=args[3].AsFloat(0.15f);
 	const double b_R=args[4].AsFloat(0.5f);
 	const double c_R=args[5].AsFloat(0.1f);
@@ -31736,7 +31740,7 @@ AVSValue __cdecl Create_ConvertRGB_Hable_HDRtoSDR(AVSValue args, void* user_data
 	const double f_R=args[8].AsFloat(0.3f);
 
 	const double exp_G=args[9].AsFloat((float)exp_R);
-	const double w_G=args[10].AsFloat((float)w_R);
+	const double wp_G=args[10].AsFloat((float)wp_R);
 	const double a_G=args[11].AsFloat((float)a_R);
 	const double b_G=args[12].AsFloat((float)b_R);
 	const double c_G=args[13].AsFloat((float)c_R);
@@ -31745,7 +31749,7 @@ AVSValue __cdecl Create_ConvertRGB_Hable_HDRtoSDR(AVSValue args, void* user_data
 	const double f_G=args[16].AsFloat((float)f_R);
 
 	const double exp_B=args[17].AsFloat((float)exp_R);
-	const double w_B=args[18].AsFloat((float)w_R);
+	const double wp_B=args[18].AsFloat((float)wp_R);
 	const double a_B=args[19].AsFloat((float)a_R);
 	const double b_B=args[20].AsFloat((float)b_R);
 	const double c_B=args[21].AsFloat((float)c_R);
@@ -31829,6 +31833,10 @@ AVSValue __cdecl Create_ConvertRGB_Hable_HDRtoSDR(AVSValue args, void* user_data
 			}
 		}
 	}
+
+	const double w_R=1.0/((wp_R*(wp_R*a_R+b_R*c_R)+d_R*e_R)/(wp_R*(wp_R*a_R+b_R)+d_R*f_R) - e_R/f_R);
+	const double w_G=1.0/((wp_G*(wp_G*a_G+b_G*c_G)+d_G*e_G)/(wp_G*(wp_G*a_G+b_G)+d_G*f_G) - e_G/f_G);
+	const double w_B=1.0/((wp_B*(wp_B*a_B+b_B*c_B)+d_B*e_B)/(wp_B*(wp_B*a_B+b_B)+d_B*f_B) - e_B/f_B);
 
 	return new ConvertRGB_Hable_HDRtoSDR(args[0].AsClip(),exp_R,w_R,a_R,b_R,c_R,d_R,e_R,f_R,exp_G,w_G,a_G,b_G,c_G,d_G,e_G,f_G,
 		exp_B,w_B,a_B,b_B,c_B,d_B,e_B,f_B,fastmode,threads_number,sleep,negativePrefetch,env);
@@ -32981,16 +32989,16 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 		"[prefetch]i[ThreadLevel]i",Create_ConvertXYZ_Scale_SDRtoHDR, 0);
 
     env->AddFunction("ConvertXYZ_Hable_HDRtoSDR",
-		"c[exposure_X]f[whitescale_X]f[a_X]f[b_X]f[c_X]f[d_X]f[e_X]f[f_X]f" \
-		"[exposure_Y]f[whitescale_Y]f[a_Y]f[b_Y]f[c_Y]f[d_Y]f[e_Y]f[f_Y]f" \
-		"[exposure_Z]f[whitescale_Z]f[a_Z]f[b_Z]f[c_Z]f[d_Z]f[e_Z]f[f_Z]f" \
+		"c[exposure_X]f[WhitePoint_X]f[a_X]f[b_X]f[c_X]f[d_X]f[e_X]f[f_X]f" \
+		"[exposure_Y]f[WhitePoint_Y]f[a_Y]f[b_Y]f[c_Y]f[d_Y]f[e_Y]f[f_Y]f" \
+		"[exposure_Z]f[WhitePoint_Z]f[a_Z]f[b_Z]f[c_Z]f[d_Z]f[e_Z]f[f_Z]f" \
 		"[pColor]i[pRx]f[pRy]f[pGx]f[pGy]f[pBx]f[pBy]f[pWx]f[pWy]f[fastmode]b" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i[ThreadLevel]i",
 		Create_ConvertXYZ_Hable_HDRtoSDR, 0);
     env->AddFunction("ConvertRGB_Hable_HDRtoSDR",
-		"c[exposure_R]f[whitescale_R]f[a_R]f[b_R]f[c_R]f[d_R]f[e_R]f[f_R]f" \
-		"[exposure_G]f[whitescale_G]f[a_G]f[b_G]f[c_G]f[d_G]f[e_G]f[f_G]f" \
-		"[exposure_B]f[whitescale_B]f[a_B]f[b_B]f[c_B]f[d_B]f[e_B]f[f_B]f[fastmode]b" \
+		"c[exposure_R]f[WhitePoint_R]f[a_R]f[b_R]f[c_R]f[d_R]f[e_R]f[f_R]f" \
+		"[exposure_G]f[WhitePoint_G]f[a_G]f[b_G]f[c_G]f[d_G]f[e_G]f[f_G]f" \
+		"[exposure_B]f[WhitePoint_B]f[a_B]f[b_B]f[c_B]f[d_B]f[e_B]f[f_B]f[fastmode]b" \
 		"[threads]i[logicalCores]b[MaxPhysCore]b[SetAffinity]b[sleep]b[prefetch]i[ThreadLevel]i",
 		Create_ConvertRGB_Hable_HDRtoSDR, 0);
 

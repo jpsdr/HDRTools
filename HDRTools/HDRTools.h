@@ -23,7 +23,7 @@
 #include "./avisynth.h"
 #include "./ThreadPoolInterface.h"
 
-#define HDRTOOLS_VERSION "HDRTools 1.2.6 JPSDR"
+#define HDRTOOLS_VERSION "HDRTools 1.3.0 JPSDR"
 
 
 typedef struct _dataLookUp
